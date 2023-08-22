@@ -177,6 +177,11 @@ def ParseInputs():
                         dest="WeatherOpt",
                         type=str,
                         default="rows")
+    parser.add_argument("--sim",
+                        help="Simulator version: currently S (Scott & Burgan) and K (Kitral)",
+                        dest="Simulator",
+                        type=str,
+                        default="S")
     parser.add_argument("--spreadPlots",
                         help="Generate spread plots",
                         dest="spreadPlots",
