@@ -35,7 +35,7 @@ Installation may require some familiarity with C++, make, and Python.
 # Usage
 In order to run the simulator and process the results, the following command can be used:
 ```
-$ python main.py --input-instance-folder /data/Hom_Fuel_101_40x40/ --output-folder results/Hom_Fuel --ignitions --sim-years 1 --nsims 100 --grids --finalGrid --weather rows --nweathers 1 --Fire-Period-Length 1.0 --output-messages --ROS-CV 0.8 --seed 123 --stats --allPlots --IgnitionRad 1
+$ python main.py --input-instance-folder /data/Vilopriu_2013/ --output-folder results/test --sim-years 1 --nsims 10 --grids --weather rows --nweathers 1 --Fire-Period-Length 1.0 --output-messages --ROS-CV 0.8 --seed 123 --stats --allPlots
 ```
 For the full list of arguments and their explanation use:
 ```
