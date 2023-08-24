@@ -1,6 +1,6 @@
 # C2F-W
 ##  Beta version by David Palacios M.
-C2F-W is an open-source wildfire simulator based on Cell2Fire simulator developed by Jaime Carrasco, Cristobal Pais and David Woodroof. Currently supports Kitral and Scott & Burgan fuel models
+C2F-W is a joint version of the open-source wildfire simulator Cell2Fire developed by Jaime Carrasco, Cristobal Pais and David Woodroof. Currently supports Kitral and Scott & Burgan fuel models
 
 # Disclaimer
 This software is for research use only. There is no warranty of any kind; there is not even the implied warranty of fitness for use.
