@@ -1,20 +1,18 @@
-# C2F+S&B
-## Jaime Carrasco, Cristóbal Pais, José Ramón González, Jordi Garcia, David Palacios, Rodrigo Mahaluf, and Andrés Weintraub
-C2F+S&B is an open-source wildfire simulator based on Cell2Fire and the Scott And Burgan Fuel Models
+# C2F-W
+##  Beta version by David Palacios M.
+C2F-W is a joint version of the open-source wildfire simulator Cell2Fire developed by Jaime Carrasco, Cristobal Pais and David Woodroof. Currently supports Kitral and Scott & Burgan fuel models
 
 # Disclaimer
 This software is for research use only. There is no warranty of any kind; there is not even the implied warranty of fitness for use.
 
 # Introduction
-C2F+S&B is a version of the fire spread simulator [Cell2Fire](https://github.com/cell2fire/Cell2Fire) for Scott and Burgan fuel system. As Cell2Fire, i) the landscape is characterized as a grid, in which every cell has the same size, and the necessary information to simulate fire spread, i.e. fuel type, elevation and ignition probability, among others; ii) exploits parallel computation methods which allows users to run large-scale simulations in short periods of time; iii) the fires spread within each cell is assumed to be elliptical; and iv) it includes powerful statistical, graphical output, and spatial analysis features to facilitate the display and analysis of projected fire growth.
+C2F-W is a joint version of the fire spread simulators [C2F+K](https://github.com/fire2a/C2FK) and [C2F+S&B](https://github.com/fire2a/C2FSB), both based upon [Cell2Fire](https://github.com/cell2fire/Cell2Fire). As Cell2Fire, i) the landscape is characterized as a grid, in which every cell has the same size, and the necessary information to simulate fire spread, i.e. fuel type, elevation and ignition probability, among others; ii) exploits parallel computation methods which allows users to run large-scale simulations in short periods of time; iii) the fires spread within each cell is assumed to be elliptical; and iv) it includes powerful statistical, graphical output, and spatial analysis features to facilitate the display and analysis of projected fire growth.
 
-Unlike Cell2Fire, the fire spread is governed by spread rates predicted by the Scott and Burgan fuel system, and uses its weathers scenarios to take into account the moisture of fine and dead particles. 
-
-Work in progress documentation is available at [readthedocs](https://cell2fire.readthedocs.io/en/latest/) and there is an original draft of a paper on [frontiers](https://www.frontiersin.org/articles/10.3389/ffgc.2023.1071484/full).
+Work in progress documentation is available at [readthedocs](https://fdobad.github.io/docs/).
 
 # Installation
 Installation may require some familiarity with C++, make, and Python.
-* cd C2FSB/Cell2FireC
+* cd C2F-W/Cell2FireC
 * (edit Makefile to have the correct path to Eigen)
 * make
 * cd .. 
@@ -35,20 +33,21 @@ Installation may require some familiarity with C++, make, and Python.
 # Usage
 In order to run the simulator and process the results, the following command can be used:
 ```
-$ python main.py --input-instance-folder /data/Hom_Fuel_101_40x40/ --output-folder results/Hom_Fuel --ignitions --sim-years 1 --nsims 100 --grids --finalGrid --weather rows --nweathers 1 --Fire-Period-Length 1.0 --output-messages --ROS-CV 0.8 --seed 123 --stats --allPlots --IgnitionRad 1
+$ python main.py --input-instance-folder /data/Vilopriu_2013/ --output-folder results/test --sim-years 1 --nsims 10 --grids --weather rows --nweathers 1 --Fire-Period-Length 1.0 --output-messages --ROS-CV 0.8 --seed 123 --stats --allPlots --sim S
 ```
 For the full list of arguments and their explanation use:
 ```
 $ python main.py -h
 ```
-A tutorial can be found at [C2F+S&B Tutorial](https://github.com/fire2a/C2FSB/blob/main/C2FS%26B_Tutorial.pdf)
+A tutorial made for the S&B version can be found at [C2F+S&B Tutorial](https://github.com/fire2a/C2FSB/blob/main/C2FS%26B_Tutorial.pdf)
+Important: some arguments could be deprecated, always check full list of arguments if an argument is not accepted
 
-# Console usage (on development)
-To use the simulator with a console (via python), the following command can be used:
+# Simulator option
+To use the correspondant version of the simulator, choice version with the following instruction:
 ```
-$ python window.py
+$ --sim XXX
 ```
-Important: not all arguments are implemented on the console
+Where XXX can be *S*, for Scott and Burgan Fuel Model, or *K*, for Kitral Fuel Model
 
 # Output examples
 ## Previncat's Zone 60 (Catalonian Instance): forest and a simulated fire spread with its corresponding scar and growth propagation tree. 
