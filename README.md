@@ -57,6 +57,6 @@ Installation may require some familiarity with C++, make, and Python.
 
 # Output examples
 ## Previncat's Zone 60 (Catalonian Instance): forest and a simulated fire spread with its corresponding scar and growth propagation tree. 
-![Example-Instance_Scar](Output/example-scar.png)
+![Example-Instance_Scar](output/example-scar.png)
 ## Risk metrics: Burn Probability (BP), Betweenness Centrality (BC), Downstream Protection Value (DPV), and Growth Propagation Tree (GPT). 
-![Example-Risk_Metrics](Output/example-metrics.png)
+![Example-Risk_Metrics](output/example-metrics.png)
