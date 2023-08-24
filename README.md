@@ -40,6 +40,7 @@ For the full list of arguments and their explanation use:
 $ python main.py -h
 ```
 A tutorial made for the S&B version can be found at [C2F+S&B Tutorial](https://github.com/fire2a/C2FSB/blob/main/C2FS%26B_Tutorial.pdf)
+
 Important: some arguments could be deprecated, always check full list of arguments if an argument is not accepted
 
 # Simulator option
