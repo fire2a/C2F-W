@@ -29,11 +29,10 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
-        name: linux
+        name: Cell2Fire.linux
         path: Cell2FireC/Cell2Fire.linux
 
   macos_build:
-    needs: ubuntu_build
     runs-on: macos-latest
     steps:
     - name: Checkout
@@ -59,7 +58,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
-        name: macos_arm
+        name: Cell2Fire.macos_arm
         path: Cell2FireC/Cell2Fire.macos_arm
 
   release:
