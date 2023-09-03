@@ -21,7 +21,8 @@ jobs:
         make clean
         make -f makefile.ubuntu-latest
         # echo "fin make"
-        mv Cell2Fire Cell2Fire.linux_x64
+        mv Cell2Fire Cell2Fire.Linux.x86_64
+        python3 -c "import platform; print(platform.uname())" 
         # ls Cell2*
         # echo "fin"
         # cd ..
@@ -30,7 +31,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2FireC/Cell2Fire.linux_x64
+        path: Cell2FireC/Cell2Fire.Linux.x86_64
 
   macos_build:
     runs-on: macos-latest
@@ -40,7 +41,6 @@ jobs:
 
     - name: Doit
       run: |
-        # which brew
         # which gcc-12
         brew install boost eigen llvm libopenmpt
         # find /usr/local -name "Eigen" 2>/dev/null
@@ -50,7 +50,9 @@ jobs:
         make clean
         make -f makefile.macos-latest
         # echo "fin make"
-        mv Cell2Fire Cell2Fire.macos_x64
+        mv Cell2Fire Cell2Fire.Darwin.x86_64
+        python3 -c "import platform; print(platform.uname())" 
+        # which brew
         # ls Cell2*
         # echo "fin"
         # cd ..
@@ -59,7 +61,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2FireC/Cell2Fire.macos_x64
+        path: Cell2FireC/Cell2Fire.Darwin.x86_64
 
   release:
     needs: [ubuntu_build, macos_build]
@@ -75,10 +77,11 @@ jobs:
 
     - name: Doit
       run: |
+        mv Cell2FireC/binaries/* Cell2FireC/.
         ls Cell2FireC/Cell*
         git archive --prefix=C2F/ \
-          --add-file=Cell2FireC/Cell2Fire.linux_x64 \
-          --add-file=Cell2FireC/Cell2Fire.macos_x64 \
+          --add-file=Cell2FireC/Cell2Fire.Linux.x86_64 \
+          --add-file=Cell2FireC/Cell2Fire.Darwin.x86_64 \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
     - name: Create Release
