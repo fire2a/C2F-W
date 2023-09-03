@@ -11,37 +11,32 @@ jobs:
   ubuntu_build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-      with:
-        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - uses: actions/checkout@v3
+
     - name: Doit
       run: |
         sudo apt install g++-12 libboost-all-dev libeigen3-dev
         cd Cell2FireC
         make clean
         make -f makefile.ubuntu-latest
-        mv Cell2Fire Cell2Fire.ubuntu-latest
-        echo "ls $(ls Cell2*)"
-        git diff --name-only --staged
-        git add Cell2Fire.ubuntu-latest
-        git diff --name-only --staged
-        echo "ok"
-        cd ..
-    - name: Commit & Push changes
-      uses: actions-js/push@master
+        echo "fin make"
+        mv Cell2Fire Cell2Fire.linux
+        ls Cell2*
+        echo "fin"
+        # cd ..
+
+    - name: Upload
+    - uses: actions/upload-artifact@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: buildrelease
+        name: linux
+        path: Cell2FireC/Cell2Fire.linux
 
   macos_build:
     needs: ubuntu_build
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@master
-      with:
-        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - uses: actions/checkout@v3
+
     - name: Doit
       run: |
         # which brew
@@ -53,13 +48,32 @@ jobs:
         cd Cell2FireC
         make clean
         make -f makefile.macos-latest
-        mv Cell2Fire Cell2Fire.macos-latest
-        echo "ls $(ls Cell2*)"
-        git diff --name-only --staged
-        git add Cell2Fire.macos-latest
-        git diff --name-only --staged
-        echo "ok"
-        cd ..
+        echo "fin make"
+        mv Cell2Fire Cell2Fire.macos_arm
+        ls Cell2*
+        echo "fin"
+        # cd ..
+
+    - name: Upload
+    - uses: actions/upload-artifact@v3
+      with:
+        name: linux
+        path: Cell2FireC/Cell2Fire.linux
+
+  release:
+    needs: [ubuntu_build, macos_build]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/download-artifact@v3
+      with:
+        path: Cell2FireC
+
+    - name: Doit
+      run: |
+        ls Cell2FireC
+        git add Cell2FireC/Cell2Fire.linux Cell2FireC/Cell2Fire.macos_arm
         git archive --prefix=C2F/ --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
     - name: Create Release
