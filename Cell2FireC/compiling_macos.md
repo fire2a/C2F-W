@@ -70,3 +70,6 @@ If you need to have llvm first in your PATH, run:
 For compilers to find llvm you may need to set:
   export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
   export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+
+# TODO
+https://github.com/manojkarthick/macos-universal-binary-action

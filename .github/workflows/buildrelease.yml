@@ -77,11 +77,12 @@ jobs:
 
     - name: Doit
       run: |
+        chmod u+x Cell2FireC/binaries/*
         mv Cell2FireC/binaries/* Cell2FireC/.
-        ls Cell2FireC/Cell*
-        git archive --prefix=C2F/ \
+        git archive --prefix=C2F/Cell2FireC/ \
           --add-file=Cell2FireC/Cell2Fire.Linux.x86_64 \
           --add-file=Cell2FireC/Cell2Fire.Darwin.x86_64 \
+          --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
     - name: Create Release
