@@ -33,6 +33,7 @@ Depending if homebrew was installed for one or all users, adjust include directo
 ```
 # 1. install dependencies (maybe missing boost-mpi boost-build)
 $ brew install boost eigen gcc libopenmpt
+$ cd Cell2FireC
 $ make clean
 $ make -f makefile.macos
 ```

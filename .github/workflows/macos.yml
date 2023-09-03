@@ -6,6 +6,9 @@ on:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
+permissions:
+  contents: write
+
 jobs:
   macos_build:
     runs-on: macos-latest
@@ -24,10 +27,10 @@ jobs:
         # find /usr/local -name "llvm" 2>/dev/null
         cd Cell2FireC
         make clean
-        make
-        git archive --prefix=c2fp/ --output "c2f.zip" HEAD
-
-    - name: Create Release
+        make -f makefile
+        git add Cell2FireC/Cell2Fire
+        git archive --prefix=C2F/ --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
+- name: Create Release
       uses: ncipollo/release-action@v1.12.0
       with:
         artifacts: "c2f.zip"
