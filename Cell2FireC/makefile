@@ -1,10 +1,10 @@
-﻿# EIGENDIR=/opt/homebrew/include/eigen3
-CC=g++-12
-MPCC=g++-12
-OPENMP=-fopenmp
-CFLAGS=-std=c++11 -O3 -fopenmp
+﻿EIGENDIR=/opt/homebrew/include/eigen3
+CC = g++-12
+MPCC = g++-12
+OPENMP = -fopenmp
+CFLAGS = -std=c++11 -O3 -fopenmp
 # CFLAGS=-std=c++11 -O3 -I/opt/homebrew/include/eigen3 -I/opt/homebrew/include -fopenmp
-LIBS=-m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
+LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
 TARGETS = Cell2Fire
 all:	$(TARGETS)
 Cell2Fire: Cell2Fire.o CellsFBP.o FuelModelSpain.o FuelModelKitral.o SpottingFBP.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o
