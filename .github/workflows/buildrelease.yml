@@ -20,17 +20,17 @@ jobs:
         cd Cell2FireC
         make clean
         make -f makefile.ubuntu-latest
-        echo "fin make"
-        mv Cell2Fire Cell2Fire.linux
-        ls Cell2*
-        echo "fin"
+        # echo "fin make"
+        mv Cell2Fire Cell2Fire.linux_x64
+        # ls Cell2*
+        # echo "fin"
         # cd ..
 
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
-        name: Cell2Fire.linux
-        path: Cell2FireC/Cell2Fire.linux
+        name: binaries
+        path: Cell2FireC/Cell2Fire.linux_x64
 
   macos_build:
     runs-on: macos-latest
@@ -49,17 +49,17 @@ jobs:
         cd Cell2FireC
         make clean
         make -f makefile.macos-latest
-        echo "fin make"
-        mv Cell2Fire Cell2Fire.macos_arm
-        ls Cell2*
-        echo "fin"
+        # echo "fin make"
+        mv Cell2Fire Cell2Fire.macos_x64
+        # ls Cell2*
+        # echo "fin"
         # cd ..
 
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
-        name: Cell2Fire.macos_arm
-        path: Cell2FireC/Cell2Fire.macos_arm
+        name: binaries
+        path: Cell2FireC/Cell2Fire.macos_x64
 
   release:
     needs: [ubuntu_build, macos_build]
@@ -75,9 +75,11 @@ jobs:
 
     - name: Doit
       run: |
-        ls Cell2FireC
-        git add Cell2FireC/Cell2Fire.linux Cell2FireC/Cell2Fire.macos_arm
-        git archive --prefix=C2F/ --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
+        ls Cell2FireC/Cell*
+        git archive --prefix=C2F/ \
+          --add-file=Cell2FireC/Cell2Fire.linux_x64 \
+          --add-file=Cell2FireC/Cell2Fire.macos_x64 \
+          --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
     - name: Create Release
       uses: ncipollo/release-action@v1.13.0
