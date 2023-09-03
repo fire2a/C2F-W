@@ -1,9 +1,8 @@
-﻿EIGENDIR=/opt/homebrew/include/eigen3
+﻿EIGENDIR=/usr/local/Cellar/eigen/3.4.0_1/
 CC = g++-12
 MPCC = g++-12
 OPENMP = -fopenmp
-CFLAGS = -std=c++11 -O3 -fopenmp
-# CFLAGS=-std=c++11 -O3 -I/opt/homebrew/include/eigen3 -I/opt/homebrew/include -fopenmp
+CFLAGS = -std=c++11 -O3 -I$(EIGENDIR) -fopenmp
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
 TARGETS = Cell2Fire
 all:	$(TARGETS)
