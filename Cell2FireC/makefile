@@ -1,8 +1,9 @@
-﻿EIGENDIR=/usr/local/Cellar/eigen/3.4.0_1/
+﻿LDFLAGS="-L/user/local/llvm/lib"
+CPPFLAGS="-I/user/local/llvm/include"
 CC = g++-12
 MPCC = g++-12
 OPENMP = -fopenmp
-CFLAGS = -std=c++11 -O3 -I/usr/local/Cellar/eigen/3.4.0_1/include/eigen3/ -fopenmp
+CFLAGS = -std=c++11 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fopenmp
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
 TARGETS = Cell2Fire
 all:	$(TARGETS)

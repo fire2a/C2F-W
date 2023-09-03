@@ -14,10 +14,11 @@ jobs:
 
     - name: Doit
       run: |
-        brew install boost eigen
         # which brew
         # which gcc-12
+        brew install boost eigen llvm openmpt
         find /usr/local -name "Eigen" 2>/dev/null
+        find /usr/local -name "boost" 2>/dev/null
         cd Cell2FireC
         make clean
         make
