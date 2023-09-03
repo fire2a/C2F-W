@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-    - uses: actions/checkout@v3
+      uses: actions/checkout@v3
 
     - name: Doit
       run: |
@@ -27,7 +27,7 @@ jobs:
         # cd ..
 
     - name: Upload
-    - uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3
       with:
         name: linux
         path: Cell2FireC/Cell2Fire.linux
@@ -37,7 +37,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout
-    - uses: actions/checkout@v3
+      uses: actions/checkout@v3
 
     - name: Doit
       run: |
@@ -57,20 +57,20 @@ jobs:
         # cd ..
 
     - name: Upload
-    - uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3
       with:
-        name: linux
-        path: Cell2FireC/Cell2Fire.linux
+        name: macos_arm
+        path: Cell2FireC/Cell2Fire.macos_arm
 
   release:
     needs: [ubuntu_build, macos_build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-    - uses: actions/checkout@v3
+      uses: actions/checkout@v3
 
     - name: Download
-    - uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v3
       with:
         path: Cell2FireC
 
