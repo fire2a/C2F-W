@@ -33,5 +33,5 @@ jobs:
     - name: Create Release
       uses: ncipollo/release-action@v1.13.0
       with:
-        artifacts: "c2f.zip"
+        artifacts: "Cell2FireW_${{ github.ref_name }}.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
