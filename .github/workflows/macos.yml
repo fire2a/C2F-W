@@ -7,20 +7,21 @@ on:
 jobs:
   macos_build:
     runs-on: macos-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Setup brew
-      	run: |
-          brew install gcc boost eigen
-	  cd Cell2FireC
-	  make clean
-          make
-	  git archive --prefix=c2fp/ --output "c2f.zip" HEAD
+    - name: Setup brew
+      run: |
+        brew install gcc boost eigen
+	cd Cell2FireC
+	make clean
+        make
+	git archive --prefix=c2fp/ --output "c2f.zip" HEAD
 
-      - name: Create Release
-        uses: ncipollo/release-action@v1.12.0
-        with:
-          artifacts: "c2f.zip"
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Release
+      uses: ncipollo/release-action@v1.12.0
+      with:
+        artifacts: "c2f.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
