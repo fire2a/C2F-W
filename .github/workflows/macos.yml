@@ -27,8 +27,9 @@ jobs:
         # find /usr/local -name "llvm" 2>/dev/null
         cd Cell2FireC
         make clean
-        make -f makefile
-        git add Cell2FireC/Cell2Fire
+        make -f makefile.macos-latest
+        git add Cell2Fire
+        cd ..
         git archive --prefix=C2F/ --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
     - name: Create Release

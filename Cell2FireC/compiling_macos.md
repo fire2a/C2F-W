@@ -1,4 +1,5 @@
 # Compiling
+Releases are bundled with pre-compiled binaries, normal users probably don't need this guide.
 
 ```bash
 make clean
@@ -22,24 +23,25 @@ export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}";
 ```
 4. open new terminal
 ### compile
-Depending if homebrew was installed for one or all users, adjust include directory in `makefile` accordingly:
 ```
-# user (default)
-/opt/homebrew/include
-# all (github runner)
-/usr/local/include
-```
-
-```
-# 1. install dependencies (maybe missing boost-mpi boost-build)
+# Install dependencies (maybe missing boost-mpi boost-build?)
 $ brew install boost eigen gcc libopenmpt
 $ cd Cell2FireC
 $ make clean
 $ make -f makefile.macos
 ```
+Something failed? If homebrew was installed for all users (instead of the default), choose your `makefile`: 
+```
+# makefile.macos:
+/opt/homebrew/include
+
+# makefile.macos-latest:
+/usr/local/include
+```
+Further adjustments probably start at editing directories in `makefile`
 
 # DAVID
-Resulta que usar variables globalaes como fls en Kitral.cpp estaba colisionando con el system `strings.h`
+Resulta que usar variables globales como `fls` en Kitral.cpp estaba colisionando con system `strings.h:fls`
 
 ```
 # from /Library/Developer/CommandLineTools/SDKs/MacOSX12.sdk/usr/include/strings.h:78
