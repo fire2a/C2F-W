@@ -22,7 +22,11 @@ jobs:
         make clean
         make -f makefile.ubuntu-latest
         mv Cell2Fire Cell2Fire.ubuntu-latest
+        echo "ls $(ls Cell2*)"
+        git diff --name-only --staged
         git add Cell2Fire.ubuntu-latest
+        git diff --name-only --staged
+        echo "ok"
         cd ..
     - name: Commit & Push changes
       uses: actions-js/push@master
@@ -31,6 +35,7 @@ jobs:
         branch: buildrelease
 
   macos_build:
+    needs: ubuntu_build
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@master
@@ -49,7 +54,11 @@ jobs:
         make clean
         make -f makefile.macos-latest
         mv Cell2Fire Cell2Fire.macos-latest
+        echo "ls $(ls Cell2*)"
+        git diff --name-only --staged
         git add Cell2Fire.macos-latest
+        git diff --name-only --staged
+        echo "ok"
         cd ..
         git archive --prefix=C2F/ --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
