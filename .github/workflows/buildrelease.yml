@@ -1,0 +1,60 @@
+name: build and release
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  ubuntu_build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - name: Doit
+      run: |
+        sudo apt install g++-12 libboost-all-dev libeigen3-dev
+        cd Cell2FireC
+        make clean
+        make -f makefile.ubuntu-latest
+        mv Cell2Fire Cell2Fire.ubuntu-latest
+        git add Cell2Fire.ubuntu-latest
+        cd ..
+    - name: Commit & Push changes
+      uses: actions-js/push@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: buildrelease
+
+  macos_build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - name: Doit
+      run: |
+        # which brew
+        # which gcc-12
+        brew install boost eigen llvm libopenmpt
+        # find /usr/local -name "Eigen" 2>/dev/null
+        # find /usr/local -name "boost" 2>/dev/null
+        # find /usr/local -name "llvm" 2>/dev/null
+        cd Cell2FireC
+        make clean
+        make -f makefile.macos-latest
+        mv Cell2Fire Cell2Fire.macos-latest
+        git add Cell2Fire.macos-latest
+        cd ..
+        git archive --prefix=C2F/ --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
+
+    - name: Create Release
+      uses: ncipollo/release-action@v1.13.0
+      with:
+        artifacts: "Cell2FireW_${{ github.ref_name }}.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
