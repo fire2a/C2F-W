@@ -6,8 +6,9 @@ make clean
 make [-f custom_makefile]
 ```
 
-## macos (M1)
-### setup
+## macos
+0. check your architecture executing `arch` on the terminal app
+### setup (tested on M1 arch)
 1. app store > install xcode
 2. https://github.com/Homebrew/brew/releases/latest > install homebrew
 3. install xcode essentials?
