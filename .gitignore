@@ -1,3 +1,7 @@
+# vim
+*.sw[pon]
+*~
+
 # Prerequisites
 *.d
 
