@@ -12,13 +12,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Setup brew
       run: |
         brew install gcc boost eigen
-	cd Cell2FireC
-	make clean
+        cd Cell2FireC
+        make clean
         make
-	git archive --prefix=c2fp/ --output "c2f.zip" HEAD
+        git archive --prefix=c2fp/ --output "c2f.zip" HEAD
 
     - name: Create Release
       uses: ncipollo/release-action@v1.12.0
