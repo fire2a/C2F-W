@@ -30,6 +30,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
+        name: Cell2Fire.Linux.x86_64
         path: Cell2FireC/Cell2Fire.Linux.x86_64
 
   macos_build:
@@ -59,6 +60,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
+        name: Cell2Fire.Darwin.x86_64
         path: Cell2FireC/Cell2Fire.Darwin.x86_64
 
   release:
@@ -76,6 +78,7 @@ jobs:
     - name: Doit
       run: |
         ls
+        echo "=== !@#$"
         ls Cell2FireC
         git archive --prefix=C2F/Cell2FireC/ \
           --add-file=Cell2FireC/Cell2Fire.Linux.x86_64 \
