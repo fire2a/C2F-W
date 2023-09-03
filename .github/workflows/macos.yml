@@ -16,7 +16,8 @@ jobs:
       run: |
         brew install gcc boost eigen
         which brew
-        which gcc
+        which gcc-12
+        brew config
         cd Cell2FireC
         make clean
         make
