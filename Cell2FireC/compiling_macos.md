@@ -73,3 +73,4 @@ For compilers to find llvm you may need to set:
 
 # TODO
 https://github.com/manojkarthick/macos-universal-binary-action
+https://github.com/kryptokrona/njord/actions/runs/3602943270/workflow
