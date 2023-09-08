@@ -11,7 +11,7 @@ jobs:
       fail-fast: true
       matrix:
         config:
-          - { arch: 'arm64'}
+          - { arch: 'ARM64'}
           - { arch: 'x86_64'}
     steps:
       - name: Checkout
