@@ -69,7 +69,7 @@ jobs:
           make clean
           make -f makefile.macos-latest
           # echo "fin make"
-          # mv Cell2Fire Cell2Fire.Darwin
+          mv Cell2Fire Cell2Fire.Darwin.${{ matrix.config.arch }}
           # python3 -c "import platform; print(platform.uname())" 
           # which brew
           # ls Cell2*
@@ -77,18 +77,10 @@ jobs:
           # cd ..
 
       - name: Upload
-        if: matrix.config.name == 'macOS-11 Clang / x64'
         uses: actions/upload-artifact@v3
         with:
-          name: binaries/Cell2Fire.Darwin.x86_64
-          path: Cell2FireC/Cell2Fire
-
-      - name: Upload
-        if: matrix.config.name == 'macOS Latest Clang / arm64'
-        uses: actions/upload-artifact@v3
-        with:
-          name: binaries/Cell2Fire.Darwin.arm64
-          path: Cell2FireC/Cell2Fire
+          name: binaries
+          path: Cell2FireC/Cell2Fire.Darwin.${{ matrix.config.arch }}
 
   release:
     needs: [ubuntu_build, macos_build]
