@@ -18,5 +18,6 @@ jobs:
         run: |
           echo "${{ matrix.config.arch }}"
           echo $(arch)
-          echo $(uname -v) $(uname -m)
-          echo $(arch -$(uname -m) pwd)
+          arch -"${{ matrix.config.arch }}" echo $(uname -v) $(uname -m)
+          arch -"${{ matrix.config.arch }}" g++ -o hello hello.cpp
+          file -b hello
