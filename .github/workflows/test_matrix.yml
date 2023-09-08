@@ -19,3 +19,4 @@ jobs:
           echo "${{ matrix.config.arch }}"
           echo $(arch)
           echo $(uname -v) $(uname -m)
+          echo $(arch -$(uname -m) pwd)
