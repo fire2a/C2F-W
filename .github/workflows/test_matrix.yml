@@ -14,10 +14,13 @@ jobs:
           - { arch: 'arm64'}
           - { arch: 'x86_64'}
     steps:
-      - name: Get color
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run
         run: |
           echo "${{ matrix.config.arch }}"
           echo $(arch)
           arch -"${{ matrix.config.arch }}" echo $(uname -v) $(uname -m)
           arch -"${{ matrix.config.arch }}" g++ -o hello hello.cpp
-          file -b hello
+          file -b hello 
