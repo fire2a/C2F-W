@@ -8,30 +8,30 @@ permissions:
   contents: write
 
 jobs:
-  ubuntu_build:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+  #ubuntu_build:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #  - name: Checkout
+  #    uses: actions/checkout@v3
 
-    - name: Doit
-      run: |
-        sudo apt install g++-12 libboost-all-dev libeigen3-dev
-        cd Cell2FireC
-        make clean
-        make -f makefile.ubuntu-latest
-        # echo "fin make"
-        mv Cell2Fire Cell2Fire.Linux.x86_64
-        # python3 -c "import platform; print(platform.uname())" 
-        # ls Cell2*
-        # echo "fin"
-        # cd ..
+  #  - name: Doit
+  #    run: |
+  #      sudo apt install g++-12 libboost-all-dev libeigen3-dev
+  #      cd Cell2FireC
+  #      make clean
+  #      make -f makefile.ubuntu-latest
+  #      # echo "fin make"
+  #      mv Cell2Fire Cell2Fire.Linux.x86_64
+  #      # python3 -c "import platform; print(platform.uname())" 
+  #      # ls Cell2*
+  #      # echo "fin"
+  #      # cd ..
 
-    - name: Upload
-      uses: actions/upload-artifact@v3
-      with:
-        name: binaries
-        path: Cell2FireC/Cell2Fire.Linux.x86_64
+  #  - name: Upload
+  #    uses: actions/upload-artifact@v3
+  #    with:
+  #      name: binaries
+  #      path: Cell2FireC/Cell2Fire.Linux.x86_64
 
   macos_build:
     name: "Build: ${{ matrix.config.name }}"
@@ -60,49 +60,50 @@ jobs:
 
       - name: Doit
         run: |
+          echo ${{ matrix.config.architecture }}
           # which gcc-12
-          brew install boost eigen llvm libopenmpt
+          # brew install boost eigen llvm libopenmpt
           # find /usr/local -name "Eigen" 2>/dev/null
           # find /usr/local -name "boost" 2>/dev/null
           # find /usr/local -name "llvm" 2>/dev/null
-          cd Cell2FireC
-          make clean
-          make -f makefile.macos-latest
+          # cd Cell2FireC
+          # make clean
+          # make -f makefile.macos-latest
           # echo "fin make"
-          mv Cell2Fire Cell2Fire.Darwin.${{ matrix.config.arch }}
+          # mv Cell2Fire Cell2Fire.Darwin.${{ matrix.config.arch }}
           # python3 -c "import platform; print(platform.uname())" 
           # which brew
           # ls Cell2*
           # echo "fin"
           # cd ..
 
-      - name: Upload
-        uses: actions/upload-artifact@v3
-        with:
-          name: binaries
-          path: Cell2FireC/Cell2Fire.Darwin.${{ matrix.config.arch }}
+          # - name: Upload
+          #   uses: actions/upload-artifact@v3
+          #   with:
+          #     name: binaries
+          #     path: Cell2FireC/Cell2Fire.Darwin.${{ matrix.config.arch }}
 
-  release:
-    needs: [ubuntu_build, macos_build]
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+          #release:
+          #  needs: [ubuntu_build, macos_build]
+          #  runs-on: ubuntu-latest
+          #  steps:
+          #  - name: Checkout
+          #    uses: actions/checkout@v3
 
-    - name: Download
-      uses: actions/download-artifact@v3
+          #  - name: Download
+          #    uses: actions/download-artifact@v3
 
-    - name: Doit
-      run: |
-        git archive --prefix=C2F/Cell2FireC/ \
-          --add-file=binaries/Cell2Fire.Linux.x86_64 \
-          --add-file=binaries/Cell2Fire.Darwin.x86_64 \
-          --add-file=binaries/Cell2Fire.Darwin.arm64 \
-          --prefix=C2F/ \
-          --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
+          #  - name: Doit
+          #    run: |
+          #      git archive --prefix=C2F/Cell2FireC/ \
+          #        --add-file=binaries/Cell2Fire.Linux.x86_64 \
+          #        --add-file=binaries/Cell2Fire.Darwin.x86_64 \
+          #        --add-file=binaries/Cell2Fire.Darwin.arm64 \
+          #        --prefix=C2F/ \
+          #        --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
-    - name: Create Release
-      uses: ncipollo/release-action@v1.13.0
-      with:
-        artifacts: "Cell2FireW_${{ github.ref_name }}.zip"
-        token: ${{ secrets.GITHUB_TOKEN }}
+          #  - name: Create Release
+          #    uses: ncipollo/release-action@v1.13.0
+          #    with:
+          #      artifacts: "Cell2FireW_${{ github.ref_name }}.zip"
+          #      token: ${{ secrets.GITHUB_TOKEN }}
