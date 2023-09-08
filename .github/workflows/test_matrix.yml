@@ -1,6 +1,6 @@
-
 name: test matrix
 on:
+  push:
   workflow_dispatch:
 
 jobs:
