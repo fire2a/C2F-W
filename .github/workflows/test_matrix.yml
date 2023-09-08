@@ -5,16 +5,17 @@ on:
 
 jobs:
   matrix:
-    name: "Build: ${{ matrix.config.name }}"
-    runs-on: ${{ matrix.config.os }}
+    name: "Build: ${{ matrix.config.arch }}"
+    runs-on: macos-latest
     strategy:
       fail-fast: true
       matrix:
-        os: macos-latest
-        arch: ['arm64', 'x86_64']
+        config:
+          - { arch: 'arm64'}
+          - { arch: 'x86_64'}
     steps:
       - name: Get color
         run: |
-          echo "${{ matrix.os }} - ${{ matrix.arch }}"
+          echo "${{ matrix.config.arch }}"
           echo $(arch)
-          echo $(uname -v)
+          echo $(uname -v) $(uname -m)
