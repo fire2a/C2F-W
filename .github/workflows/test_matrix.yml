@@ -15,5 +15,6 @@ jobs:
           - {os: macos-latest, architecture: arm64}
     steps:
       - name: Get color
-        run: echo "${{ matrix.os }} - ${{ matrix.python-version }} - ${{ matrix.toxenv }}"
-        run: echo  $(arch)
+        run: |
+          echo "${{ matrix.os }} - ${{ matrix.python-version }} - ${{ matrix.toxenv }}"
+          echo  $(arch)
