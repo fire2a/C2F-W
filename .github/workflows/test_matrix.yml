@@ -17,4 +17,5 @@ jobs:
       - name: Get color
         run: |
           echo "${{ matrix.os }} - ${{ matrix.python-version }} - ${{ matrix.toxenv }}"
-          echo  $(arch)
+          echo $(arch)
+          echo $(uname -v)
