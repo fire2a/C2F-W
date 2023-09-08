@@ -34,34 +34,61 @@ jobs:
         path: Cell2FireC/Cell2Fire.Linux.x86_64
 
   macos_build:
-    runs-on: macos-latest
+    name: "Build: ${{ matrix.config.name }}"
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        config:
+          - {
+            name: "macOS-11 Clang / x64",
+            artifact: "macOS-x64",
+            os: macos-11,
+            cc: "clang",
+            architecture: x64
+          }
+          - {
+            name: "macOS Latest Clang / arm64",
+            artifact: "macOS-arm64",
+            os: macos-12,
+            cc: "clang", # it chooses xcode instead?
+            architecture: ARM64
+          }
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Doit
-      run: |
-        # which gcc-12
-        brew install boost eigen llvm libopenmpt
-        # find /usr/local -name "Eigen" 2>/dev/null
-        # find /usr/local -name "boost" 2>/dev/null
-        # find /usr/local -name "llvm" 2>/dev/null
-        cd Cell2FireC
-        make clean
-        make -f makefile.macos-latest
-        # echo "fin make"
-        mv Cell2Fire Cell2Fire.Darwin.x86_64
-        # python3 -c "import platform; print(platform.uname())" 
-        # which brew
-        # ls Cell2*
-        # echo "fin"
-        # cd ..
+      - name: Doit
+        run: |
+          # which gcc-12
+          brew install boost eigen llvm libopenmpt
+          # find /usr/local -name "Eigen" 2>/dev/null
+          # find /usr/local -name "boost" 2>/dev/null
+          # find /usr/local -name "llvm" 2>/dev/null
+          cd Cell2FireC
+          make clean
+          make -f makefile.macos-latest
+          # echo "fin make"
+          # mv Cell2Fire Cell2Fire.Darwin
+          # python3 -c "import platform; print(platform.uname())" 
+          # which brew
+          # ls Cell2*
+          # echo "fin"
+          # cd ..
 
-    - name: Upload
-      uses: actions/upload-artifact@v3
-      with:
-        name: binaries
-        path: Cell2FireC/Cell2Fire.Darwin.x86_64
+      - name: Upload
+        if: matrix.config.name == 'macOS-11 Clang / x64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: binaries/Cell2Fire.Darwin.x86_64
+          path: Cell2FireC/Cell2Fire
+
+      - name: Upload
+        if: matrix.config.name == 'macOS Latest Clang / arm64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: binaries/Cell2Fire.Darwin.arm64
+          path: Cell2FireC/Cell2Fire
 
   release:
     needs: [ubuntu_build, macos_build]
@@ -78,6 +105,7 @@ jobs:
         git archive --prefix=C2F/Cell2FireC/ \
           --add-file=binaries/Cell2Fire.Linux.x86_64 \
           --add-file=binaries/Cell2Fire.Darwin.x86_64 \
+          --add-file=binaries/Cell2Fire.Darwin.arm64 \
           --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
