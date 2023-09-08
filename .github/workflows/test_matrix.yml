@@ -1,0 +1,18 @@
+
+name: test matrix
+on:
+  workflow_dispatch:
+
+jobs:
+  matrix:
+    name: "Build: ${{ matrix.config.name }}"
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        config:
+          - {os: macos-latest, architecture: x64}
+          - {os: macos-latest, architecture: arm64}
+    steps:
+      - name: Get color
+        run: echo "${{ matrix.os }} - ${{ matrix.python-version }} - ${{ matrix.toxenv }} $arch"
