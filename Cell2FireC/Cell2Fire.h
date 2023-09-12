@@ -75,6 +75,7 @@ class Cell2Fire {
 		 string rosFolder;
 		 string crownFolder;
 		 string intensityFolder;
+		 string sfbFolder;
 		 string cfbFolder;
 		 string flFolder;
 		 string historyFolder;
@@ -98,6 +99,7 @@ class Cell2Fire {
 		 std::vector<int>crownState;
 		 std::vector<float>Intensities;
 		 std::vector<float>crownFraction;
+		 std::vector<float>surfFraction;
 		 std::vector<float>RateOfSpreads;
 		 std::vector<float>FlameLengths;
 		 std::vector<std::vector<int>> IgnitionSets;

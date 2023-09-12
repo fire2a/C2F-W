@@ -85,6 +85,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	bool out_ros=false;
 	bool out_crown = false;
 	bool out_crown_consumption=false;
+	bool out_surf_consumption=false;
 	bool out_finalgrid = false;
 	bool prom_tuned = false;
 	bool out_stats = false;
@@ -121,6 +122,11 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	if (cmdOptionExists(argv, argv + argc, "--out-cfb")) {
 		out_crown_consumption = true;
 		printf("OutCrownConsumption: %d \n", out_crown_consumption);
+	}
+
+	if (cmdOptionExists(argv, argv + argc, "--out-sfb")) {
+		out_surf_consumption = true;
+		printf("OutSurfaceConsumption: %d \n", out_surf_consumption);
 	}
 	
 
@@ -236,7 +242,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	char * simulator_option = getCmdOption(argv, argv + argc, "--sim");
     if (simulator_option){
 		std::string s=simulator_option;
-		if (s!="S" && s!="K"){
+		if (s!="S" && s!="K" && s!="C"){
 			printf("%s Simulator Option not recognized or not developed, using S&B as default!!! \n", simulator_option);
 			args_ptr->Simulator=simulator_option;
 		}
@@ -468,6 +474,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	args_ptr->OutRos = out_ros;
 	args_ptr->OutCrown = out_crown;
 	args_ptr->OutCrownConsumption = out_crown_consumption;
+	args_ptr->OutSurfConsumption = out_surf_consumption;
 	args_ptr->Trajectories = out_trajectories; 
 	args_ptr->NoOutput = no_output;
 	args_ptr->verbose = verbose_input; 

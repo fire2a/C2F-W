@@ -93,10 +93,10 @@ void CSVReader::parseDF(inputs * df_ptr, std::vector<std::vector<std::string>> &
 	int i;
 	
 	// Floats 
-	float cur, elev, ws, waz, saz, cbd, cbh, ccf, ps;
+	float cur, elev, ws, waz, saz, cbd, cbh, ccf, ps, lat,lon,ffmc,bui,gfl;
 	
 	// Integers 
-	int nftype,FMC;
+	int nftype,FMC, jd,jd_min,pc,pdf,time,pattern;
 	
 	// CChar
 	const char * faux;
@@ -105,14 +105,15 @@ void CSVReader::parseDF(inputs * df_ptr, std::vector<std::vector<std::string>> &
 	// Loop over cells (populating per row)
 	for (i=1; i <= NCells; i++){
 		//printf("Populating DF for cell %d\n", i);
+
 		faux = DF[i][0].append(" ").c_str();
 		
 		if (DF[i][3].compare("") == 0) elev = 0;
 		else elev = std::stof (DF[i][3] ,&sz);
-		
+
 		if (DF[i][4].compare("") == 0) ws = 0;
 		else ws = std::stof (DF[i][4], &sz);
-		
+
 		if (DF[i][5].compare("") == 0) waz = 0;
 		else waz = std::stoi (DF[i][5] ,&sz) + 180.;// + 2*90;  // CHECK!!!!
 		if (waz >= 360) waz = waz - 360;
@@ -140,13 +141,52 @@ void CSVReader::parseDF(inputs * df_ptr, std::vector<std::vector<std::string>> &
 		
 		if (DF[i][13].compare("") == 0) FMC = args_ptr->FMC;
 		else FMC = std::stoi (DF[i][13], &sz);
+
+		//DF[i][14] stores probability
+
+		if (DF[i][15].compare("") == 0) jd = 0;
+		else jd = std::stoi (DF[i][15] ,&sz);
+
+		if (DF[i][16].compare("") == 0) jd_min = 0;
+		else jd_min = std::stoi (DF[i][16] ,&sz);
+		
+		if (DF[i][17].compare("") == 0) pc = 0;
+		else pc = std::stoi (DF[i][17] ,&sz);
+
+		if (DF[i][18].compare("") == 0) pdf = 0;
+		else pdf = std::stoi (DF[i][18] ,&sz);
+
+		if (DF[i][19].compare("") == 0) time = 0;
+		else time = std::stoi (DF[i][19] ,&sz); 
+		
+		if (DF[i][1].compare("") == 0) lat = 0;
+		else lat = std::stof (DF[i][1], &sz);
+
+		if (DF[i][2].compare("") == 0) lon = 0;
+		else lon = std::stof (DF[i][2], &sz);
+
+		if (DF[i][20].compare("") == 0) ffmc = 0;
+		else ffmc = std::stof (DF[i][20], &sz);
+
+		if (DF[i][21].compare("") == 0) bui = 0;
+		else bui = std::stof (DF[i][21], &sz);
+
+		if (DF[i][22].compare("") == 0) gfl = 0;
+		else gfl = std::stof (DF[i][22], &sz);
+
+		if (DF[i][23].compare("") == 0) pattern = 0;
+		else pattern = 1;// std::stoi (DF[i][18], &sz);
 		
 		// Set values
 		strncpy(df_ptr->fueltype, faux, 4);
 		df_ptr->elev=elev; df_ptr->ws=ws; df_ptr->waz=waz;  
 		df_ptr->ps=ps; df_ptr->saz=saz; df_ptr->cur=cur; 
 		df_ptr->cbd=cbd;df_ptr->cbh=cbh; df_ptr->ccf=ccf;
-		df_ptr->nftype=nftype;df_ptr->FMC=FMC;
+		df_ptr->nftype=nftype;df_ptr->FMC=FMC;df_ptr->jd=jd;
+		df_ptr->jd_min=jd_min;df_ptr->pc=pc;df_ptr->pdf=pdf;
+		df_ptr->time=time;df_ptr->lat=lat;df_ptr->lon=lon;
+		df_ptr->ffmc=ffmc;df_ptr->bui=bui;df_ptr->gfl=gfl;
+		df_ptr->pattern=pattern;
 			
 		// Next pointer
 		df_ptr++;
@@ -220,6 +260,8 @@ void CSVReader::parseWeatherDF(weatherDF * wdf_ptr,arguments* args_ptr, std::vec
 	
 	//Floats 
 	float ws, waz, tmp=27, rh=40;
+	float apcp=0,ffmc=0,dmc=0,dc=0,isi=0,bui=0,fwi=0;
+
 	
 	
 	// Loop over cells (populating per row)
@@ -233,6 +275,7 @@ void CSVReader::parseWeatherDF(weatherDF * wdf_ptr,arguments* args_ptr, std::vec
 
 		if (DF[i][2].compare("") == 0) ws = 0;
 		else ws = std::stof (DF[i][2], &sz);
+
 		if (args_ptr->Simulator=="K"){
 			if (DF[i][4].compare("") == 0) tmp = 0;
 			else tmp = std::stof(DF[i][4], &sz);
@@ -241,12 +284,54 @@ void CSVReader::parseWeatherDF(weatherDF * wdf_ptr,arguments* args_ptr, std::vec
 			else rh = std::stof(DF[i][5], &sz);
 
 		}
+		else if (args_ptr->Simulator=="C"){
+
+			if (DF[i][6].compare("") == 0) waz = 0;
+			else {waz = std::stoi (DF[i][6] ,&sz); //+ 180/2;   // DEBUGGING THE ANGLE 
+				if (waz >= 360){
+					waz = waz - 360;
+				}
+			}
+			if (DF[i][2].compare("") == 0) apcp = 0;
+			else apcp = std::stof (DF[i][2], &sz);
+		
+			if (DF[i][3].compare("") == 0) tmp = 0;
+			else tmp = std::stof (DF[i][3], &sz);
+		
+			if (DF[i][4].compare("") == 0) rh = 0;
+			else rh = std::stof (DF[i][4], &sz);
+		
+			if (DF[i][5].compare("") == 0) ws = 0;
+			else ws = std::stof (DF[i][5], &sz);
+		
+			if (DF[i][7].compare("") == 0) ffmc = 0;
+			else ffmc = std::stof (DF[i][7], &sz);
+		
+			if (DF[i][8].compare("") == 0) dmc = 0;
+			else dmc = std::stof (DF[i][8], &sz);
+		
+			if (DF[i][9].compare("") == 0) dc = 0;
+			else dc = std::stof (DF[i][9], &sz);
+				
+			if (DF[i][10].compare("") == 0) isi = 0;
+			else isi = std::stof (DF[i][10], &sz);
+		
+			if (DF[i][11].compare("") == 0) bui = 0;
+			else bui = std::stof (DF[i][11], &sz);
+		
+			if (DF[i][12].compare("") == 0) fwi = 0;
+			else fwi = std::stof (DF[i][12], &sz);
+		}
 
 
 		
 		// Set values
 		wdf_ptr->ws=ws; wdf_ptr->waz=waz; 
 		wdf_ptr->tmp = tmp; wdf_ptr->rh = rh;
+		wdf_ptr->apcp=apcp; wdf_ptr->ffmc=ffmc;
+		wdf_ptr->dmc=dmc; wdf_ptr->dc=dc; 
+		wdf_ptr->isi=isi;wdf_ptr->bui=bui;
+		wdf_ptr->fwi=fwi;
 		// Next pointer
 		wdf_ptr++;
 	}

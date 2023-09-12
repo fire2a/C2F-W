@@ -645,7 +645,7 @@ float flame_length(inputs *data, main_outs *at) //REVISAR ESTA ECUACI�N
    {
        float ib, fl ;
 
-       ib = at->byram ;
+       ib = at->sfi ;
 
        fl = 0.0775*pow(ib, 0.46) ;
        return fl; 
@@ -685,7 +685,7 @@ bool fire_type(inputs *data, main_outs* at,int FMC)
   {
       float intensity, critical_intensity, cbh;
       bool crownFire = false;
-      intensity = at->byram;
+      intensity = at->sfi;
       cbh = cbhs[data->nftype][0];
       //cbh = data->cbh;
       critical_intensity = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
@@ -830,7 +830,7 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
     at->c = (hptr->rss - bptr->rss) / 2. ; 
     
     // Step 6: Byram Intensity
-    at->byram = byram_intensity(data,at);
+    at->sfi = byram_intensity(data,at);
     
 
     // Step 7: Flame Length
@@ -971,7 +971,7 @@ void determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr,arguments *args ,
     //ptr->q3 = q_coeff[data->nftype][2];
     ptr->nftype = data->nftype;
     // Step 6: Byram Intensity
-    metrics->byram = byram_intensity(data,metrics);
+    metrics->sfi = byram_intensity(data,metrics);
     // Step 7: Flame Length
     metrics->fl = flame_length(data, metrics);
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
