@@ -6,8 +6,8 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 //Unified version by David Palacios
 // Include classes
 #include "Cell2Fire.h"
-#include "CellsFBP.h"
-#include "SpottingFBP.h"
+#include "Cells.h"
+#include "Spotting.h"
 #include "FuelModelSpain.h"
 #include "FuelModelKitral.h"
 #include "ReadCSV.h"
@@ -449,10 +449,10 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 // Init Cells
 void Cell2Fire::InitCell(int id){
 	// Declare an iterator to unordered_map
-	std::unordered_map<int, CellsFBP>::iterator it2;
+	std::unordered_map<int, Cells>::iterator it2;
 	
 	// Initialize cell, insert it inside the unordered map
-	CellsFBP Cell(id-1, this->areaCells,  this->coordCells[id-1],  this->fTypeCells[id-1],  this->fTypeCells2[id-1], 
+	Cells Cell(id-1, this->areaCells,  this->coordCells[id-1],  this->fTypeCells[id-1],  this->fTypeCells2[id-1], 
 						this->perimeterCells, this->statusCells[id-1], id);
 	this->Cells_Obj.insert(std::make_pair(id, Cell));							 
 									
@@ -695,7 +695,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->Cells_Obj.clear(); 
 	
 	// Declare an iterator to unordered_map
-	std::unordered_map<int, CellsFBP>::iterator it;
+	std::unordered_map<int, Cells>::iterator it;
 	   
 	// Reset status 
 	this->fTypeCells = std::vector<int> (this->nCells, 1); 
@@ -772,7 +772,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	int microloops = 0;
 	this->noIgnition = false;
 	std::default_random_engine generator2(args.seed * ep*this->nCells);// * time(NULL)); //creates a different generator solving cases when parallel running creates simulations at same time
-	std::unordered_map<int, CellsFBP>::iterator it;
+	std::unordered_map<int, Cells>::iterator it;
 	std::uniform_int_distribution<int> distribution(1, this->nCells);
 
 	// No Ignitions provided
@@ -967,7 +967,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 // Send messages 
 std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 	// Iterator
-	std::unordered_map<int, CellsFBP>::iterator it;
+	std::unordered_map<int, Cells>::iterator it;
 	
 	// Clean list 
 	this->burnedOutList.clear();
@@ -1084,7 +1084,7 @@ std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 // Get messages
 void Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList){
 	// Iterator 
-	std::unordered_map<int, CellsFBP>::iterator it;
+	std::unordered_map<int, Cells>::iterator it;
 
 	// Information of the current step 
 	if (this->args.verbose){
@@ -1269,7 +1269,7 @@ void Cell2Fire::Results(){
 	******************************************************************************/
 	// Iterator
 	// Declare an iterator to unordered_map
-	std::unordered_map<int, CellsFBP>::iterator it; 
+	std::unordered_map<int, Cells>::iterator it; 
 	int i;
 	
 	for (auto & br : this->burntCells) {
@@ -1481,7 +1481,7 @@ void Cell2Fire::updateWeather(){
 void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	// Iterator
 	// Declare an iterator to unordered_map
-	std::unordered_map<int, CellsFBP>::iterator it;	
+	std::unordered_map<int, Cells>::iterator it;	
 	bool auxC = false;
 	this->noMessages = false;
 	

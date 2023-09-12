@@ -1,7 +1,7 @@
-#ifndef SPOTTINGFBP
-#define SPOTTINGFBP
+#ifndef SPOTTING
+#define SPOTTING
 
-#include "CellsFBP.h" 
+#include "Cells.h" 
 
 // Include libraries
 #include <stdio.h>
@@ -16,7 +16,7 @@
 
 using namespace std;
 
-std::vector<int> SpottingFBP(std::unordered_map<int, CellsFBP> & Cells_Obj, 
+std::vector<int> Spotting(std::unordered_map<int, Cells> & Cells_Obj, 
 											std::vector<std::vector<int>> & coordCells, 
 											std::unordered_set<int> & AvailSet, double WSD, double WSC, 
 											std::unordered_map<std::string, double> spottingParams, bool verbose);

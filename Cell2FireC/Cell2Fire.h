@@ -2,8 +2,8 @@
 #define CELL2FIRE
 
 // Headers
-#include "CellsFBP.h"
-#include "SpottingFBP.h"
+#include "Cells.h"
+#include "Spotting.h"
 #include "FuelModelSpain.h"
 #include "FuelModelKitral.h"
 #include "ReadCSV.h"
@@ -112,7 +112,7 @@ class Cell2Fire {
 		 std::unordered_set<int> harvestCells;
 		 
 		 // Cells Dictionary
-		 std::unordered_map<int, CellsFBP> Cells_Obj;
+		 std::unordered_map<int, Cells> Cells_Obj;
 		 
 		 // Constructor
         Cell2Fire(arguments args);

@@ -1,6 +1,6 @@
 #include "FuelModelSpain.h"
 #include "ReadArgs.h"
-#include "CellsFBP.h"
+#include "Cells.h"
 #include <iostream>
 #include <math.h>
 #include <cmath>

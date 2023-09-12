@@ -1,6 +1,6 @@
 // Class inclusions
-#include "SpottingFBP.h"
-#include "CellsFBP.h" 
+#include "Spotting.h"
+#include "Cells.h" 
 // Include libraries
 #include <stdio.h>
 #include <string>
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-std::vector<int> SpottingFBP(std::unordered_map<int, CellsFBP> &  Cells_Obj, std::vector<std::vector<int>> & coordCells, 
+std::vector<int> Spotting(std::unordered_map<int, Cells> &  Cells_Obj, std::vector<std::vector<int>> & coordCells, 
 											std::unordered_set<int> & AvailSet, double WSD, double WSC, 
 											std::unordered_map<std::string, double> spottingParams, bool verbose) {
     

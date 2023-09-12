@@ -1,12 +1,9 @@
-#ifndef CELLSFBP
-#define CELLSFBP
+#ifndef CELLS
+#define CELLS
 
 // include stuff
-//#include "FuelModelSpain.h"
-//#include "ReadCSV.h"
 #include "ReadArgs.h"
 #include "Ellipse.h"
-//#include "FuelModelKitral.h"
 
 #include <stdio.h>
 #include <math.h>
@@ -61,7 +58,7 @@ typedef struct
   } snd_outs;
 
 
-class CellsFBP {
+class Cells {
     // TODO: find where to put the enums
     public:
         // immutable
@@ -99,7 +96,7 @@ class CellsFBP {
         // TODO: reference to shared object
 
         // constructor and methods here
-        CellsFBP(int _id, double _area, std::vector<int> _coord, 
+        Cells(int _id, double _area, std::vector<int> _coord, 
 					 int _fType, std::string _fType2, double _perimeter, 
 					 int _status,  int _realId);
         
@@ -111,13 +108,13 @@ class CellsFBP {
 		
         std::vector<int> manageFire(int period, std::unordered_set<int> & AvailSet,      
                                                           inputs df[], fuel_coefs * coef, 
-							  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
+							  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, Cells> & Cells_Obj, 
 							  arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float> * crownMetrics,
 							  bool & activeCrown,double randomROS,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction,std::vector<float> & surfFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths);
 		
 		std::vector<int> manageFireBBO(int period, std::unordered_set<int> & AvailSet,      
 						inputs * df_ptr, fuel_coefs * coef, 
-						std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
+						std::vector<std::vector<int>> & coordCells, std::unordered_map<int, Cells> & Cells_Obj, 
 						arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float> * crownMetrics,
 						bool & activeCrown,double randomROS,int perimeterCells, std::vector<float> & EllipseFactors,std::vector<int> & crownState, std::vector<float> & crownFraction,std::vector<float> & surfFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths);
 		

@@ -75,7 +75,7 @@ Originally  Written at P.N.F.I.  December 91, by Mike Wotton
             - forgot to change the encoded version number to 5.0.  now 5.0001
             - updated header to FBP5.h
 */
-#include "CellsFBP.h"
+#include "Cells.h"
 #include "FuelModelFBP.h"
 #include <math.h>
 #include <stdlib.h>
