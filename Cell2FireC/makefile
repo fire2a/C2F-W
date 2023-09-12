@@ -11,7 +11,7 @@ Cell2Fire: Cell2Fire.o CellsFBP.o FuelModelSpain.o FuelModelKitral.o FuelModelFB
 Cell2Fire.o: Cell2Fire.cpp CellsFBP.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o SpottingFBP.o ReadCSV.o ReadArgs.o WriteCSV.o
 	$(CC) -c $(CFLAGS) Cell2Fire.cpp
 SpottingFBP.o: SpottingFBP.cpp SpottingFBP.h CellsFBP.h
-	$(CC) -c $(CFLAGS) SpottingFBP.cpp CellsFBP.h
+	$(CC) -c $(CFLAGS) SpottingFBP.cpp
 CellsFBP.o: CellsFBP.cpp CellsFBP.h FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o
 	$(CC) -c $(CFLAGS) CellsFBP.cpp
 ReadCSV.o: ReadCSV.cpp ReadCSV.h 
