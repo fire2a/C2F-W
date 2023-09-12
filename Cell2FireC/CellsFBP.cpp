@@ -3,6 +3,7 @@
 #include "SpottingFBP.h"
 #include "FuelModelSpain.h"
 #include "FuelModelKitral.h"
+#include "FuelModelFBP.h"
 #include "ReadCSV.h"
 #include "ReadArgs.h"
 #include "Ellipse.h"
@@ -324,7 +325,7 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
                                                           inputs df_ptr[], fuel_coefs * coef, 
 														  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
 														  arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float>* crownMetrics,
-														  bool & activeCrown,double randomROS,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths) 
+														  bool & activeCrown,double randomROS,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction,std::vector<float> & surfFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths) 
 	{
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
@@ -339,13 +340,15 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 	df_ptr[this->realId-1].ws = wdf_ptr->ws;
 	df_ptr[this->realId-1].tmp=wdf_ptr->tmp;
 	df_ptr[this->realId-1].rh=wdf_ptr->rh;
+	df_ptr[this->realId-1].bui=wdf_ptr->bui;
+	df_ptr[this->realId-1].ffmc=wdf_ptr->ffmc;
 
 	int head_cell=angleToNb[wdf_ptr->waz];//head cell for slope calculation
 
 	// Compute main angle and ROSs: forward, flanks and back
     main_outs mainstruct, metrics;
     snd_outs sndstruct;
-    fire_struc headstruct, backstruct, flankstruct;
+    fire_struc headstruct, backstruct, flankstruct,metrics2;
 
 	// Calculate parameters
 	if(args->Simulator=="K"){
@@ -354,6 +357,11 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 	else if (args->Simulator=="S")
 	{
 		calculate_s(&df_ptr[this->realId-1], coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
+
+	}
+		else if (args->Simulator=="C")
+	{
+		calculate_fbp(&df_ptr[this->realId-1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 
 	}
 	
@@ -479,7 +487,7 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
             if (args->verbose) {
                 std::cout << "     (angle, realized ros in m/min): (" << angle << ", " << ros << ")" << std::endl;
             }
-			if (args->Simulator!="K"){
+			if (args->Simulator=="S"){
 							// Slope effect 
 				float se = slope_effect(df_ptr[this->realId - 1].elev, df_ptr[nb-1].elev,  this->perimeter / 4.);
 				if (args->verbose) { 
@@ -502,6 +510,8 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				df_ptr[nb-1].ws = wdf_ptr->ws;
 				df_ptr[nb-1].tmp = wdf_ptr->tmp;
 				df_ptr[nb-1].rh = wdf_ptr->rh;
+				df_ptr[nb-1].bui=wdf_ptr->bui;
+				df_ptr[nb-1].ffmc=wdf_ptr->ffmc;
 				if(args->Simulator=="K"){
 					determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef,args, &metrics);
 				}
@@ -509,14 +519,20 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				{
 					determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef,args, &metrics);
 				}
+				else if(args->Simulator=="C")
+				{
+					determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef,&metrics,&metrics2);
+				}
 				crownState[this->realId-1]=mainstruct.crown;
 				crownState[nb-1]=metrics.crown;
 				RateOfSpreads[this->realId-1]=double(std::ceil(ros * 100.0) / 100.0);
 				RateOfSpreads[nb-1]=double(std::ceil(ros * 100.0) / 100.0);
-				Intensities[this->realId-1]=mainstruct.byram;
-				Intensities[nb-1]=metrics.byram;
+				Intensities[this->realId-1]=mainstruct.sfi;
+				Intensities[nb-1]=metrics.sfi;
 				crownFraction[this->realId-1]=mainstruct.cfb;
 				crownFraction[nb-1]=metrics.cfb;
+				surfFraction[this->realId]=mainstruct.sfc;
+				surfFraction[nb]=metrics.sfc;
 		    	FlameLengths[this->realId-1]=mainstruct.fl;
 			    FlameLengths[nb-1]=metrics.fl;
 
@@ -578,7 +594,7 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 																  inputs * df_ptr, fuel_coefs * coef, 
 																  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
 																  arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float>* crownMetrics,
-																  bool & activeCrown,double randomROS,int perimeterCells, std::vector<float> & EllipseFactors,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads, std::vector<float> & FlameLengths) 
+																  bool & activeCrown,double randomROS,int perimeterCells, std::vector<float> & EllipseFactors,std::vector<int> & crownState, std::vector<float> & crownFraction,std::vector<float> & surfFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads, std::vector<float> & FlameLengths) 
 	{
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
@@ -591,11 +607,15 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 	// Compute main angle and ROSs: forward, flanks and back
     main_outs mainstruct, metrics;
     snd_outs sndstruct;
-    fire_struc headstruct, backstruct, flankstruct;
+    fire_struc headstruct, backstruct, flankstruct,metrics2;
 
 	// Populate inputs 
 	df_ptr->waz = wdf_ptr->waz;
 	df_ptr->ws = wdf_ptr->ws;
+	df_ptr->bui=wdf_ptr->bui;
+	df_ptr->ffmc=wdf_ptr->ffmc;
+	df_ptr->tmp=wdf_ptr->tmp;
+	df_ptr->rh=wdf_ptr->rh;
 	int head_cell=angleToNb[wdf_ptr->waz];//head cell for slope calculation
 
 	
@@ -609,6 +629,13 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 		calculate_s(&df_ptr[this->realId-1], coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
 
 	}
+
+	else if (args->Simulator=="C")
+	{
+		calculate_fbp(&df_ptr[this->realId-1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+
+	}
+	
 	
 	/*  ROSs DEBUG!   */
 	if(args->verbose){
@@ -741,14 +768,20 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 				{
 					determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef,args, &metrics);
 				}
+				else if(args->Simulator=="C")
+				{
+					determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef,&metrics,&metrics2);
+				}
 				crownState[this->realId-1]=mainstruct.crown;
 				crownState[nb-1]=metrics.crown;
 				RateOfSpreads[this->realId-1]=double(std::ceil(ros * 100.0) / 100.0);
 				RateOfSpreads[nb-1]=double(std::ceil(ros * 100.0) / 100.0);
-				Intensities[this->realId-1]=mainstruct.byram;
-				Intensities[nb-1]=metrics.byram;
+				Intensities[this->realId-1]=mainstruct.sfi;
+				Intensities[nb-1]=metrics.sfi;
 				crownFraction[this->realId-1]=mainstruct.cfb;
 				crownFraction[nb-1]=metrics.cfb;
+				surfFraction[this->realId]=mainstruct.sfc;
+				surfFraction[nb]=metrics.sfc;
 		    		FlameLengths[this->realId-1]=mainstruct.fl;
 			    	FlameLengths[nb-1]=metrics.fl;
                 // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
@@ -840,6 +873,12 @@ bool CellsFBP::get_burned(int period, int season, int NMsg, inputs df[],  fuel_c
 	else if (args->Simulator=="S")
 	{
 		calculate_s(&(df[this->id]), coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
+
+	}
+
+		else if (args->Simulator=="C")
+	{
+		calculate_fbp(&df[this->id], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 
 	}
 	
@@ -934,6 +973,8 @@ bool CellsFBP::ignition(int period, int year, std::vector<int> & ignitionPoints,
 		// Populate inputs 
 		df_ptr->waz = wdf_ptr->waz;
 		df_ptr->ws = wdf_ptr->ws;
+		df_ptr->bui=wdf_ptr->bui;
+		df_ptr->ffmc=wdf_ptr->ffmc;
 		int head_cell=angleToNb[wdf_ptr->waz];//head cell for slope calculation
 
 		// Calculate parameters
@@ -944,6 +985,10 @@ bool CellsFBP::ignition(int period, int year, std::vector<int> & ignitionPoints,
 		{
 			calculate_s(&df_ptr[this->realId-1], coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
 
+		}
+		else if (args->Simulator=="C")
+		{
+			calculate_fbp(&df_ptr[this->realId-1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 		}
 
         if (args->verbose) {

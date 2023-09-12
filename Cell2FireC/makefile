@@ -6,13 +6,13 @@ CFLAGS = -std=c++11 -O3 -I$(EIGENDIR) -fopenmp
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
 TARGETS = Cell2Fire
 all:	$(TARGETS)
-Cell2Fire: Cell2Fire.o CellsFBP.o FuelModelSpain.o FuelModelKitral.o SpottingFBP.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o
-	$(CC) -o $@ $(LIBS) Cell2Fire.o CellsFBP.o FuelModelSpain.o FuelModelKitral.o SpottingFBP.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o
-Cell2Fire.o: Cell2Fire.cpp CellsFBP.o FuelModelSpain.o FuelModelKitral.o SpottingFBP.o ReadCSV.o ReadArgs.o WriteCSV.o
+Cell2Fire: Cell2Fire.o CellsFBP.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o SpottingFBP.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o
+	$(CC) -o $@ $(LIBS) Cell2Fire.o CellsFBP.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o SpottingFBP.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o
+Cell2Fire.o: Cell2Fire.cpp CellsFBP.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o SpottingFBP.o ReadCSV.o ReadArgs.o WriteCSV.o
 	$(CC) -c $(CFLAGS) Cell2Fire.cpp
 SpottingFBP.o: SpottingFBP.cpp SpottingFBP.h CellsFBP.h
 	$(CC) -c $(CFLAGS) SpottingFBP.cpp CellsFBP.h
-CellsFBP.o: CellsFBP.cpp CellsFBP.h FuelModelSpain.o FuelModelKitral.o
+CellsFBP.o: CellsFBP.cpp CellsFBP.h FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o
 	$(CC) -c $(CFLAGS) CellsFBP.cpp
 ReadCSV.o: ReadCSV.cpp ReadCSV.h 
 	$(CC) -c $(CFLAGS) ReadCSV.cpp
@@ -30,5 +30,7 @@ FuelModelSpain.o: FuelModelSpain.cpp FuelModelSpain.h CellsFBP.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelSpain.cpp 
 FuelModelKitral.o: FuelModelKitral.cpp FuelModelKitral.h CellsFBP.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelKitral.cpp 
+FuelModelFBP.o: FuelModelFBP.cpp FuelModelFBP.h CellsFBP.h
+	$(CC) -c $(LIBS) $(CFLAGS) FuelModelFBP.cpp 
 clean:
-	rm Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o CellsFBP.o Cell2Fire SpottingFBP.o WriteCSV.o Ellipse.o FuelModelSpain.o *.gch
+	rm Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o CellsFBP.o Cell2Fire SpottingFBP.o WriteCSV.o Ellipse.o FuelModelFBP.o FuelModelKitral.o FuelModelSpain.o *.gch

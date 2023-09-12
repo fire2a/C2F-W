@@ -22,15 +22,14 @@ std::vector<int> adjacentCells(int cell, int nrows, int ncols);
 *   Weather structure
 */
 typedef struct
-   { float ws, waz,rh,tmp; //David: some variables only used on C2FK and not on C2FSB and viceversa
+   { float ws, waz,rh,tmp,apcp,ffmc,dmc,dc,isi,bui,fwi; //David: some variables only used on C2FK and not on C2FSB and viceversa
    } weatherDF; //David: Moved here to simplify inclusion
 
-   
 
 typedef struct
    { char fueltype[4];
-     float ws, saz, cur, ps, cbh, ccf, cbd, elev, tmp, rh; //David: some variables only used on C2FK and not on C2FSB and viceversa
-     int waz, nftype,FMC;
+     float ws, saz, cur, ps, cbh, ccf, cbd, elev, tmp, rh,lat,lon,ffmc,bui,gfl; //David: some variables only used on C2FK and not on C2FSB and viceversa
+     int waz, nftype,FMC,time,pattern,mon, jd,jd_min,pc,pdf;
    } inputs; //David: Moved here to simplify inclusion
 
 
@@ -38,26 +37,28 @@ typedef struct
   { char fueltype[4] ;
     float p1, p2, p3 ;    // hros coef
     float q1, q2, q3 ; // flame length coef
-	float fmc,cbh,fl,h;
-    int nftype; 
+    float q, bui0,cfl ; // fbp params
+	  float cbh,fmc,fl,h;
+    int nftype;
   } fuel_coefs;
-  
+
   typedef struct
-  { float fl, fh, a, b, c, rss, angle, byram,ros_active,cfb,se;
+  { float hffmc,sfc,csi,fl, fh, a, b, c, rss, angle,
+  ros_active,cfb,se,rso,fmc,sfi,isi,be,sf,raz,wsv,ff;
      char covertype;
-     int crown;
+     int crown,jd_min,jd;
   } main_outs;
 
 typedef struct
-  { float ros, rss;
+  { float ros,dist,rost,cfb,fc,cfc,time,rss,isi;
+    char fd;
     double fi;
   } fire_struc;
+
 
   typedef struct
   { float lb, area, perm, pgr, lbt;
   } snd_outs;
-
-
 
 
 class CellsFBP {
@@ -112,13 +113,13 @@ class CellsFBP {
                                                           inputs df[], fuel_coefs * coef, 
 							  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
 							  arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float> * crownMetrics,
-							  bool & activeCrown,double randomROS,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths);
+							  bool & activeCrown,double randomROS,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction,std::vector<float> & surfFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths);
 		
 		std::vector<int> manageFireBBO(int period, std::unordered_set<int> & AvailSet,      
 						inputs * df_ptr, fuel_coefs * coef, 
 						std::vector<std::vector<int>> & coordCells, std::unordered_map<int, CellsFBP> & Cells_Obj, 
 						arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float> * crownMetrics,
-						bool & activeCrown,double randomROS,int perimeterCells, std::vector<float> & EllipseFactors,std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths);
+						bool & activeCrown,double randomROS,int perimeterCells, std::vector<float> & EllipseFactors,std::vector<int> & crownState, std::vector<float> & crownFraction,std::vector<float> & surfFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths);
 		
 		bool get_burned(int period, int season, int NMsg, inputs df[],  fuel_coefs * coef, arguments * args, weatherDF * wdf_ptr,bool & activeCrown,int perimeterCells) ;
 								
