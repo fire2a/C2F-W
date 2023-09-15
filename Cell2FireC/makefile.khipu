@@ -1,7 +1,8 @@
-﻿CC = g++-12
-MPCC = g++-12
+﻿EIGENDIR     = /home/cursos/dci106/dci10607/source/eigen3/
+CC = /opt/gcc/gcc-12.1.0/bin/g++
+MPCC = /opt/gcc/gcc-12.1.0/bin/g++
 OPENMP = -fopenmp
-CFLAGS = -std=c++11 -O3 -I /usr/include -I /usr/include/eigen3 -fopenmp
+CFLAGS = -std=c++11 -O3 -I$(EIGENDIR) -fopenmp
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
 TARGETS = Cell2Fire
 all:	$(TARGETS)
@@ -30,4 +31,4 @@ FuelModelSpain.o: FuelModelSpain.cpp FuelModelSpain.h CellsFBP.h
 FuelModelKitral.o: FuelModelKitral.cpp FuelModelKitral.h CellsFBP.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelKitral.cpp 
 clean:
-	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o CellsFBP.o Cell2Fire SpottingFBP.o WriteCSV.o Ellipse.o FuelModelSpain.o FuelModelKitral.o *.gch
+	rm Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o CellsFBP.o Cell2Fire SpottingFBP.o WriteCSV.o Ellipse.o FuelModelSpain.o *.gch
