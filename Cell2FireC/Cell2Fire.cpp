@@ -6,8 +6,8 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 //Unified version by David Palacios
 // Include classes
 #include "Cell2Fire.h"
-#include "CellsFBP.h"
-#include "SpottingFBP.h"
+#include "Cells.h"
+#include "Spotting.h"
 #include "FuelModelSpain.h"
 #include "FuelModelKitral.h"
 #include "ReadCSV.h"
@@ -194,6 +194,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	//Outputs
 	this->crownState = std::vector<int> (this->nCells, 0);
 	this->crownFraction = std::vector<float> (this->nCells, 0);
+	this->surfFraction = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
 	this->FlameLengths = std::vector<float> (this->nCells, 0);
@@ -448,10 +449,10 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 // Init Cells
 void Cell2Fire::InitCell(int id){
 	// Declare an iterator to unordered_map
-	std::unordered_map<int, CellsFBP>::iterator it2;
+	std::unordered_map<int, Cells>::iterator it2;
 	
 	// Initialize cell, insert it inside the unordered map
-	CellsFBP Cell(id-1, this->areaCells,  this->coordCells[id-1],  this->fTypeCells[id-1],  this->fTypeCells2[id-1], 
+	Cells Cell(id-1, this->areaCells,  this->coordCells[id-1],  this->fTypeCells[id-1],  this->fTypeCells2[id-1], 
 						this->perimeterCells, this->statusCells[id-1], id);
 	this->Cells_Obj.insert(std::make_pair(id, Cell));							 
 									
@@ -547,6 +548,13 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		this->cfbFolder = this->args.OutFolder + "CrownFractionBurn" ;
 		CSVFolder.MakeDir(this->cfbFolder);
 		this->cfbFolder = this->args.OutFolder + separator() +"CrownFractionBurn" + separator();
+	}
+			//Crown Fraction Burn Folder
+	if (this->args.OutSurfConsumption && this->args.Simulator=="C") {
+		CSVWriter CSVFolder("", "");
+		this->sfbFolder = this->args.OutFolder + "SurfFractionBurn" ;
+		CSVFolder.MakeDir(this->cfbFolder);
+		this->sfbFolder = this->args.OutFolder + separator() +"SurfFractionBurn" + separator();
 	}
 		
 	// Random Weather 
@@ -687,7 +695,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->Cells_Obj.clear(); 
 	
 	// Declare an iterator to unordered_map
-	std::unordered_map<int, CellsFBP>::iterator it;
+	std::unordered_map<int, Cells>::iterator it;
 	   
 	// Reset status 
 	this->fTypeCells = std::vector<int> (this->nCells, 1); 
@@ -695,6 +703,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->statusCells = std::vector<int> (this->nCells, 0);
 	this->crownState = std::vector<int> (this->nCells, 0);
 	this->crownFraction = std::vector<float> (this->nCells, 0);
+	this->surfFraction = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
 	this->FlameLengths = std::vector<float> (this->nCells, 0);
@@ -763,7 +772,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	int microloops = 0;
 	this->noIgnition = false;
 	std::default_random_engine generator2(args.seed * ep*this->nCells);// * time(NULL)); //creates a different generator solving cases when parallel running creates simulations at same time
-	std::unordered_map<int, CellsFBP>::iterator it;
+	std::unordered_map<int, Cells>::iterator it;
 	std::uniform_int_distribution<int> distribution(1, this->nCells);
 
 	// No Ignitions provided
@@ -958,7 +967,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 // Send messages 
 std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 	// Iterator
-	std::unordered_map<int, CellsFBP>::iterator it;
+	std::unordered_map<int, Cells>::iterator it;
 	
 	// Clean list 
 	this->burnedOutList.clear();
@@ -1007,7 +1016,7 @@ std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 			if (!this->args.BBOTuning){  //&df[cell-1] replaced by full df for getting the slopes
 				aux_list = it->second.manageFire(this->fire_period[this->year-1], this->availCells,  df, this->coef_ptr, 
 															   this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod],
-															   &this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells,this->crownState, this->crownFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
+															   &this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells,this->crownState, this->crownFraction,this->surfFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
 			}
 												
 			
@@ -1016,7 +1025,7 @@ std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 				auto factors = BBOFactors.find(NFTypesCells[cell-1]);
 				aux_list = it->second.manageFireBBO(this->fire_period[this->year-1], this->availCells,  & df[cell-1], this->coef_ptr, 
 																		this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod],
-																		&this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells, factors->second,this->crownState, this->crownFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
+																		&this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells, factors->second,this->crownState, this->crownFraction,this->surfFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
 			}
 			//std::cout << "Sale de Manage Fire" << std::endl;
 		} 
@@ -1075,7 +1084,7 @@ std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 // Get messages
 void Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList){
 	// Iterator 
-	std::unordered_map<int, CellsFBP>::iterator it;
+	std::unordered_map<int, Cells>::iterator it;
 
 	// Information of the current step 
 	if (this->args.verbose){
@@ -1260,7 +1269,7 @@ void Cell2Fire::Results(){
 	******************************************************************************/
 	// Iterator
 	// Declare an iterator to unordered_map
-	std::unordered_map<int, CellsFBP>::iterator it; 
+	std::unordered_map<int, Cells>::iterator it; 
 	int i;
 	
 	for (auto & br : this->burntCells) {
@@ -1388,6 +1397,21 @@ void Cell2Fire::Results(){
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFraction);
 	}
 
+			// Intensity
+	if ((this->args.OutSurfConsumption) && (this->args.Simulator=="C")) {
+		this->sfbFolder = this->args.OutFolder + "SurfFractionBurn"+separator();
+		std::string sfbName;
+		std::ostringstream oss;
+		oss.str("");
+		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+		sfbName= this->sfbFolder+"Sfb"+oss.str()+".asc";
+		if (this->args.verbose) {
+			std::cout << "We are generating the Surface Fraction Burn to a asc file " << sfbName << std::endl;
+		}
+		CSVWriter CSVPloter(sfbName, " ");
+		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfFraction);
+	}
+
 	// Crown
 	if ((this->args.OutCrown) && (this->args.AllowCROS)) {
 		this->crownFolder = this->args.OutFolder + "CrownFire"+separator();
@@ -1457,7 +1481,7 @@ void Cell2Fire::updateWeather(){
 void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	// Iterator
 	// Declare an iterator to unordered_map
-	std::unordered_map<int, CellsFBP>::iterator it;	
+	std::unordered_map<int, Cells>::iterator it;	
 	bool auxC = false;
 	this->noMessages = false;
 	

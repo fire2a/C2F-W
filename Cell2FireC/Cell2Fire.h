@@ -2,8 +2,8 @@
 #define CELL2FIRE
 
 // Headers
-#include "CellsFBP.h"
-#include "SpottingFBP.h"
+#include "Cells.h"
+#include "Spotting.h"
 #include "FuelModelSpain.h"
 #include "FuelModelKitral.h"
 #include "ReadCSV.h"
@@ -75,6 +75,7 @@ class Cell2Fire {
 		 string rosFolder;
 		 string crownFolder;
 		 string intensityFolder;
+		 string sfbFolder;
 		 string cfbFolder;
 		 string flFolder;
 		 string historyFolder;
@@ -98,6 +99,7 @@ class Cell2Fire {
 		 std::vector<int>crownState;
 		 std::vector<float>Intensities;
 		 std::vector<float>crownFraction;
+		 std::vector<float>surfFraction;
 		 std::vector<float>RateOfSpreads;
 		 std::vector<float>FlameLengths;
 		 std::vector<std::vector<int>> IgnitionSets;
@@ -110,7 +112,7 @@ class Cell2Fire {
 		 std::unordered_set<int> harvestCells;
 		 
 		 // Cells Dictionary
-		 std::unordered_map<int, CellsFBP> Cells_Obj;
+		 std::unordered_map<int, Cells> Cells_Obj;
 		 
 		 // Constructor
         Cell2Fire(arguments args);

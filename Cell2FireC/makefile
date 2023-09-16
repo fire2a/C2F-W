@@ -7,14 +7,14 @@ CFLAGS = -std=c++11 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fope
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
 TARGETS = Cell2Fire
 all:	$(TARGETS)
-Cell2Fire: Cell2Fire.o CellsFBP.o FuelModelSpain.o FuelModelKitral.o SpottingFBP.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o
-	$(CC) -o $@ $(LIBS) Cell2Fire.o CellsFBP.o FuelModelSpain.o FuelModelKitral.o SpottingFBP.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o
-Cell2Fire.o: Cell2Fire.cpp CellsFBP.o FuelModelSpain.o FuelModelKitral.o SpottingFBP.o ReadCSV.o ReadArgs.o WriteCSV.o
+Cell2Fire: Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o
+	$(CC) -o $@ $(LIBS) Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o
+Cell2Fire.o: Cell2Fire.cpp Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o WriteCSV.o
 	$(CC) -c $(CFLAGS) Cell2Fire.cpp
-SpottingFBP.o: SpottingFBP.cpp SpottingFBP.h CellsFBP.h
-	$(CC) -c $(CFLAGS) SpottingFBP.cpp CellsFBP.h
-CellsFBP.o: CellsFBP.cpp CellsFBP.h FuelModelSpain.o FuelModelKitral.o
-	$(CC) -c $(CFLAGS) CellsFBP.cpp
+Spotting.o: Spotting.cpp Spotting.h Cells.h
+	$(CC) -c $(CFLAGS) Spotting.cpp
+Cells.o: Cells.cpp Cells.h FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o
+	$(CC) -c $(CFLAGS) Cells.cpp
 ReadCSV.o: ReadCSV.cpp ReadCSV.h 
 	$(CC) -c $(CFLAGS) ReadCSV.cpp
 ReadArgs.o: ReadArgs.cpp ReadArgs.h
@@ -27,9 +27,11 @@ WriteCSV.o: WriteCSV.cpp WriteCSV.h
 	$(CC) -c $(CFLAGS) WriteCSV.cpp
 Ellipse.o: Ellipse.cpp Ellipse.h 
 	$(CC) -c $(LIBS) $(CFLAGS) Ellipse.cpp 
-FuelModelSpain.o: FuelModelSpain.cpp FuelModelSpain.h CellsFBP.h
+FuelModelSpain.o: FuelModelSpain.cpp FuelModelSpain.h Cells.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelSpain.cpp 
-FuelModelKitral.o: FuelModelKitral.cpp FuelModelKitral.h CellsFBP.h
+FuelModelKitral.o: FuelModelKitral.cpp FuelModelKitral.h Cells.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelKitral.cpp 
+FuelModelFBP.o: FuelModelFBP.cpp FuelModelFBP.h Cells.h
+	$(CC) -c $(LIBS) $(CFLAGS) FuelModelFBP.cpp 
 clean:
-	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o CellsFBP.o Cell2Fire SpottingFBP.o WriteCSV.o Ellipse.o FuelModelSpain.o FuelModelKitral.o *.gch
+	rm Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o Cells.o Cell2Fire Spotting.o WriteCSV.o Ellipse.o FuelModelFBP.o FuelModelKitral.o FuelModelSpain.o *.gch

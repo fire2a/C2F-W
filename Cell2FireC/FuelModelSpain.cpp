@@ -1,6 +1,6 @@
 #include "FuelModelSpain.h"
 #include "ReadArgs.h"
-#include "CellsFBP.h"
+#include "Cells.h"
 #include <iostream>
 #include <math.h>
 #include <cmath>
@@ -2295,7 +2295,7 @@ bool fire_type(inputs* data, main_outs* at)
 	int fmc;
 	bool crownFire = false;
 
-	intensity = at->byram;
+	intensity = at->sfi;
 	cbh = data->cbh;
 	fmc = fmc_scen(data);
 	critical_intensity = pow((0.01 * cbh * (460 + 25.9 * fmc)), 1.5);
@@ -2438,7 +2438,7 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
     at->fh = flame_height(data, ptr) ;
     
 	// Step 9: Byram Intensity
-	at->byram = byram_intensity(at, ptr);
+	at->sfi = byram_intensity(at, ptr);
 
 	// Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
 	if (args->AllowCROS && data->cbh!=0 && data->cbd!=0) {
@@ -2569,7 +2569,7 @@ void determine_destiny_metrics_s(inputs* data, fuel_coefs* ptr,arguments *args, 
 	// Step 6: Flame Length
 	metrics->fl = flame_length(data, ptr);
 	// Step 9: Byram Intensity
-	metrics->byram = byram_intensity(metrics, ptr);
+	metrics->sfi = byram_intensity(metrics, ptr);
 	//Set cfb value for no crown fire scenario
 	metrics->cfb =0;
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
