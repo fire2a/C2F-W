@@ -18,7 +18,7 @@ jobs:
       run: |
         sudo apt install g++-12 libboost-all-dev libeigen3-dev
         cd Cell2FireC
-        make clean
+        make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
         # echo "fin make"
         mv Cell2Fire Cell2Fire.Linux.x86_64
@@ -47,7 +47,7 @@ jobs:
         # find /usr/local -name "boost" 2>/dev/null
         # find /usr/local -name "llvm" 2>/dev/null
         cd Cell2FireC
-        make clean
+        make clean -f makefile.macos-latest
         make -f makefile.macos-latest
         # echo "fin make"
         mv Cell2Fire Cell2Fire.Darwin.x86_64
