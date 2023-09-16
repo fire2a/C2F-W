@@ -1,8 +1,9 @@
-﻿EIGENDIR     = /usr/include/eigen3/
-CC = g++
-MPCC = g++
+﻿LDFLAGS="-L/user/local/llvm/lib"
+CPPFLAGS="-I/user/local/llvm/include"
+CC = g++-12
+MPCC = g++-12
 OPENMP = -fopenmp
-CFLAGS = -std=c++11 -O3 -I$(EIGENDIR) -fopenmp
+CFLAGS = -std=c++11 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fopenmp
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
 TARGETS = Cell2Fire
 all:	$(TARGETS)

@@ -19,7 +19,7 @@ using namespace std;
 */  
 std::unordered_map<int, std::vector<float>> fmcs;
 std::unordered_map<int, std::vector<float>> cbhs;
-std::unordered_map<int, std::vector<float>> fls;
+std::unordered_map<int, std::vector<float>> fls_david;
 std::unordered_map<int, std::vector<float>> hs;
 std::unordered_map<int, std::vector<float>> cbds;
 
@@ -46,7 +46,7 @@ void setup_const()
     cbd_pch1.push_back(0);
     fmcs.insert(std::make_pair(PCH1, fmc_pch1));
     cbhs.insert(std::make_pair(PCH1, cbh_pch1));
-    fls.insert(std::make_pair(PCH1, fl_pch1));
+    fls_david.insert(std::make_pair(PCH1, fl_pch1));
     hs.insert(std::make_pair(PCH1, h_pch1));
     cbds.insert(std::make_pair(PCH1, cbd_pch1));
 
@@ -63,7 +63,7 @@ void setup_const()
     cbd_pch2.push_back(0);
     fmcs.insert(std::make_pair(PCH2, fmc_pch2));
     cbhs.insert(std::make_pair(PCH2, cbh_pch2));
-    fls.insert(std::make_pair(PCH2, fl_pch2));
+    fls_david.insert(std::make_pair(PCH2, fl_pch2));
     hs.insert(std::make_pair(PCH2, h_pch2));
     cbds.insert(std::make_pair(PCH2, cbd_pch2));
 
@@ -81,7 +81,7 @@ void setup_const()
     cbd_pch3.push_back(0);
     fmcs.insert(std::make_pair(PCH3, fmc_pch3));
     cbhs.insert(std::make_pair(PCH3, cbh_pch3));
-    fls.insert(std::make_pair(PCH3, fl_pch3));
+    fls_david.insert(std::make_pair(PCH3, fl_pch3));
     hs.insert(std::make_pair(PCH3, h_pch3));
     cbds.insert(std::make_pair(PCH3, cbd_pch3));
 
@@ -99,7 +99,7 @@ void setup_const()
     cbd_pch4.push_back(0);
     fmcs.insert(std::make_pair(PCH4, fmc_pch4));
     cbhs.insert(std::make_pair(PCH4, cbh_pch4));
-    fls.insert(std::make_pair(PCH4, fl_pch4));
+    fls_david.insert(std::make_pair(PCH4, fl_pch4));
     hs.insert(std::make_pair(PCH4, h_pch4));
     cbds.insert(std::make_pair(PCH4, cbd_pch4));
 
@@ -117,7 +117,7 @@ void setup_const()
     cbd_pch5.push_back(0);
     fmcs.insert(std::make_pair(PCH5, fmc_pch5));
     cbhs.insert(std::make_pair(PCH5, cbh_pch5));
-    fls.insert(std::make_pair(PCH5, fl_pch5));
+    fls_david.insert(std::make_pair(PCH5, fl_pch5));
     hs.insert(std::make_pair(PCH5, h_pch5));
     cbds.insert(std::make_pair(PCH5, cbd_pch5));
 
@@ -134,7 +134,7 @@ void setup_const()
     cbd_mt01.push_back(0);
     fmcs.insert(std::make_pair(MT01, fmc_mt01));
     cbhs.insert(std::make_pair(MT01, cbh_mt01));
-    fls.insert(std::make_pair(MT01, fl_mt01));
+    fls_david.insert(std::make_pair(MT01, fl_mt01));
     hs.insert(std::make_pair(MT01, h_mt01));
     cbds.insert(std::make_pair(MT01, cbd_mt01));
 
@@ -151,7 +151,7 @@ void setup_const()
     cbd_mt02.push_back(0);
     fmcs.insert(std::make_pair(MT02, fmc_mt02));
     cbhs.insert(std::make_pair(MT02, cbh_mt02));
-    fls.insert(std::make_pair(MT02, fl_mt02));
+    fls_david.insert(std::make_pair(MT02, fl_mt02));
     hs.insert(std::make_pair(MT02, h_mt02));
     cbds.insert(std::make_pair(MT02, cbd_mt02));
 
@@ -168,7 +168,7 @@ void setup_const()
     cbd_mt03.push_back(0);
     fmcs.insert(std::make_pair(MT03, fmc_mt03));
     cbhs.insert(std::make_pair(MT03, cbh_mt03));
-    fls.insert(std::make_pair(MT03, fl_mt03));
+    fls_david.insert(std::make_pair(MT03, fl_mt03));
     hs.insert(std::make_pair(MT03, h_mt03));
     cbds.insert(std::make_pair(MT03, cbd_mt03));
 
@@ -186,7 +186,7 @@ void setup_const()
     cbd_mt04.push_back(0);
     fmcs.insert(std::make_pair(MT04, fmc_mt04));
     cbhs.insert(std::make_pair(MT04, cbh_mt04));
-    fls.insert(std::make_pair(MT04, fl_mt04));
+    fls_david.insert(std::make_pair(MT04, fl_mt04));
     hs.insert(std::make_pair(MT04, h_mt04));
     cbds.insert(std::make_pair(MT04, cbd_mt04));
 
@@ -203,7 +203,7 @@ void setup_const()
     cbd_mt05.push_back(0);
     fmcs.insert(std::make_pair(MT05, fmc_mt05));
     cbhs.insert(std::make_pair(MT05, cbh_mt05));
-    fls.insert(std::make_pair(MT05, fl_mt05));
+    fls_david.insert(std::make_pair(MT05, fl_mt05));
     hs.insert(std::make_pair(MT05, h_mt05));
     cbds.insert(std::make_pair(MT05, cbd_mt05));
     
@@ -220,7 +220,7 @@ void setup_const()
     cbd_mt06.push_back(0);
     fmcs.insert(std::make_pair(MT06, fmc_mt06));
     cbhs.insert(std::make_pair(MT06, cbh_mt06));
-    fls.insert(std::make_pair(MT06, fl_mt06));
+    fls_david.insert(std::make_pair(MT06, fl_mt06));
     hs.insert(std::make_pair(MT06, h_mt06));
     cbds.insert(std::make_pair(MT06, cbd_mt06));
 
@@ -238,7 +238,7 @@ void setup_const()
     cbd_mt07.push_back(0);
     fmcs.insert(std::make_pair(MT07, fmc_mt07));
     cbhs.insert(std::make_pair(MT07, cbh_mt07));
-    fls.insert(std::make_pair(MT07, fl_mt07));
+    fls_david.insert(std::make_pair(MT07, fl_mt07));
     hs.insert(std::make_pair(MT07, h_mt07));
     cbds.insert(std::make_pair(MT07, cbd_mt07));
 
@@ -255,7 +255,7 @@ void setup_const()
     cbd_mt08.push_back(0);
     fmcs.insert(std::make_pair(MT08, fmc_mt08));
     cbhs.insert(std::make_pair(MT08, cbh_mt08));
-    fls.insert(std::make_pair(MT08, fl_mt08));
+    fls_david.insert(std::make_pair(MT08, fl_mt08));
     hs.insert(std::make_pair(MT08, h_mt08));
     cbds.insert(std::make_pair(MT08, cbd_mt08));
 
@@ -272,7 +272,7 @@ void setup_const()
     cbd_bn01.push_back(0);
     fmcs.insert(std::make_pair(BN01, fmc_bn01));
     cbhs.insert(std::make_pair(BN01, cbh_bn01));
-    fls.insert(std::make_pair(BN01, fl_bn01));
+    fls_david.insert(std::make_pair(BN01, fl_bn01));
     hs.insert(std::make_pair(BN01, h_bn01));
     cbds.insert(std::make_pair(BN01, cbd_bn01));
 
@@ -289,7 +289,7 @@ void setup_const()
     cbd_bn02.push_back(0);
     fmcs.insert(std::make_pair(BN02, fmc_bn02));
     cbhs.insert(std::make_pair(BN02, cbh_bn02));
-    fls.insert(std::make_pair(BN02, fl_bn02));
+    fls_david.insert(std::make_pair(BN02, fl_bn02));
     hs.insert(std::make_pair(BN02, h_bn02));
     cbds.insert(std::make_pair(BN02, cbd_bn02));
 
@@ -306,7 +306,7 @@ void setup_const()
     cbd_bn03.push_back(0);
     fmcs.insert(std::make_pair(BN03, fmc_bn03));
     cbhs.insert(std::make_pair(BN03, cbh_bn03));
-    fls.insert(std::make_pair(BN03, fl_bn03));
+    fls_david.insert(std::make_pair(BN03, fl_bn03));
     hs.insert(std::make_pair(BN03, h_bn03));
     cbds.insert(std::make_pair(BN03, cbd_bn03));
     
@@ -323,7 +323,7 @@ void setup_const()
     cbd_bn04.push_back(0);
     fmcs.insert(std::make_pair(BN04, fmc_bn04));
     cbhs.insert(std::make_pair(BN04, cbh_bn04));
-    fls.insert(std::make_pair(BN04, fl_bn04));
+    fls_david.insert(std::make_pair(BN04, fl_bn04));
     hs.insert(std::make_pair(BN04, h_bn04));
     cbds.insert(std::make_pair(BN04, cbd_bn04));
 
@@ -340,7 +340,7 @@ void setup_const()
     cbd_bn05.push_back(0);
     fmcs.insert(std::make_pair(BN05, fmc_bn05));
     cbhs.insert(std::make_pair(BN05, cbh_bn05));
-    fls.insert(std::make_pair(BN05, fl_bn05));
+    fls_david.insert(std::make_pair(BN05, fl_bn05));
     hs.insert(std::make_pair(BN05, h_bn05));
     cbds.insert(std::make_pair(BN05, cbd_bn05));
 
@@ -357,7 +357,7 @@ void setup_const()
     cbd_pl01.push_back(0.03);
     fmcs.insert(std::make_pair(PL01, fmc_pl01));
     cbhs.insert(std::make_pair(PL01, cbh_pl01));
-    fls.insert(std::make_pair(PL01, fl_pl01));
+    fls_david.insert(std::make_pair(PL01, fl_pl01));
     hs.insert(std::make_pair(PL01, h_pl01));
     cbds.insert(std::make_pair(PL01, cbd_pl01));
 
@@ -374,7 +374,7 @@ void setup_const()
     cbd_pl02.push_back(0.125);
     fmcs.insert(std::make_pair(PL02, fmc_pl02));
     cbhs.insert(std::make_pair(PL02, cbh_pl02));
-    fls.insert(std::make_pair(PL02, fl_pl02));
+    fls_david.insert(std::make_pair(PL02, fl_pl02));
     hs.insert(std::make_pair(PL02, h_pl02));
     cbds.insert(std::make_pair(PL02, cbd_pl02));
 
@@ -392,7 +392,7 @@ void setup_const()
     cbd_pl03.push_back(0.218);
     fmcs.insert(std::make_pair(PL03, fmc_pl03));
     cbhs.insert(std::make_pair(PL03, cbh_pl03));
-    fls.insert(std::make_pair(PL03, fl_pl03));
+    fls_david.insert(std::make_pair(PL03, fl_pl03));
     hs.insert(std::make_pair(PL03, h_pl03));
     cbds.insert(std::make_pair(PL03, cbd_pl03));
 
@@ -409,7 +409,7 @@ void setup_const()
     cbd_pl04.push_back(0.274);
     fmcs.insert(std::make_pair(PL04, fmc_pl04));
     cbhs.insert(std::make_pair(PL04, cbh_pl04));
-    fls.insert(std::make_pair(PL04, fl_pl04));
+    fls_david.insert(std::make_pair(PL04, fl_pl04));
     hs.insert(std::make_pair(PL04, h_pl04));
     cbds.insert(std::make_pair(PL04, cbd_pl04));
 
@@ -427,7 +427,7 @@ void setup_const()
     cbd_pl05.push_back(0);
     fmcs.insert(std::make_pair(PL05, fmc_pl05));
     cbhs.insert(std::make_pair(PL05, cbh_pl05));
-    fls.insert(std::make_pair(PL05, fl_pl05));
+    fls_david.insert(std::make_pair(PL05, fl_pl05));
     hs.insert(std::make_pair(PL05, h_pl05));
     cbds.insert(std::make_pair(PL05, cbd_pl05));
 
@@ -445,7 +445,7 @@ void setup_const()
     cbd_pl06.push_back(0);
     fmcs.insert(std::make_pair(PL06, fmc_pl06));
     cbhs.insert(std::make_pair(PL06, cbh_pl06));
-    fls.insert(std::make_pair(PL06, fl_pl06));
+    fls_david.insert(std::make_pair(PL06, fl_pl06));
     hs.insert(std::make_pair(PL06, h_pl06));
     cbds.insert(std::make_pair(PL06, cbd_pl06));
 
@@ -462,7 +462,7 @@ void setup_const()
     cbd_pl07.push_back(0);
     fmcs.insert(std::make_pair(PL07, fmc_pl07));
     cbhs.insert(std::make_pair(PL07, cbh_pl07));
-    fls.insert(std::make_pair(PL07, fl_pl07));
+    fls_david.insert(std::make_pair(PL07, fl_pl07));
     hs.insert(std::make_pair(PL07, h_pl07));
     cbds.insert(std::make_pair(PL07, cbd_pl07));
 
@@ -479,7 +479,7 @@ void setup_const()
     cbd_pl08.push_back(0);
     fmcs.insert(std::make_pair(PL08, fmc_pl08));
     cbhs.insert(std::make_pair(PL08, cbh_pl08));
-    fls.insert(std::make_pair(PL08, fl_pl08));
+    fls_david.insert(std::make_pair(PL08, fl_pl08));
     hs.insert(std::make_pair(PL08, h_pl08));
     cbds.insert(std::make_pair(PL08, cbd_pl08));
 
@@ -496,7 +496,7 @@ void setup_const()
     cbd_pl09.push_back(0);
     fmcs.insert(std::make_pair(PL09, fmc_pl09));
     cbhs.insert(std::make_pair(PL09, cbh_pl09));
-    fls.insert(std::make_pair(PL09, fl_pl09));
+    fls_david.insert(std::make_pair(PL09, fl_pl09));
     hs.insert(std::make_pair(PL09, h_pl09));
     cbds.insert(std::make_pair(PL09, cbd_pl09));
 
@@ -513,7 +513,7 @@ void setup_const()
     cbd_pl10.push_back(0);
     fmcs.insert(std::make_pair(PL10, fmc_pl10));
     cbhs.insert(std::make_pair(PL10, cbh_pl10));
-    fls.insert(std::make_pair(PL10, fl_pl10));
+    fls_david.insert(std::make_pair(PL10, fl_pl10));
     hs.insert(std::make_pair(PL10, h_pl10));
     cbds.insert(std::make_pair(PL10, cbd_pl10));
 
@@ -531,7 +531,7 @@ void setup_const()
     cbd_pl11.push_back(0);
     fmcs.insert(std::make_pair(PL11, fmc_pl11));
     cbhs.insert(std::make_pair(PL11, cbh_pl11));
-    fls.insert(std::make_pair(PL11, fl_pl11));
+    fls_david.insert(std::make_pair(PL11, fl_pl11));
     hs.insert(std::make_pair(PL11, h_pl11));
     cbds.insert(std::make_pair(PL11, cbd_pl11));
 
@@ -548,7 +548,7 @@ void setup_const()
     cbd_dx01.push_back(0);
     fmcs.insert(std::make_pair(DX01, fmc_dx01));
     cbhs.insert(std::make_pair(DX01, cbh_dx01));
-    fls.insert(std::make_pair(DX01, fl_dx01));
+    fls_david.insert(std::make_pair(DX01, fl_dx01));
     hs.insert(std::make_pair(DX01, h_dx01));
     cbds.insert(std::make_pair(DX01, cbd_dx01));
 
@@ -565,7 +565,7 @@ void setup_const()
     cbd_dx02.push_back(0);
     fmcs.insert(std::make_pair(DX02, fmc_dx02));
     cbhs.insert(std::make_pair(DX02, cbh_dx02));
-    fls.insert(std::make_pair(DX02, fl_dx02));
+    fls_david.insert(std::make_pair(DX02, fl_dx02));
     hs.insert(std::make_pair(DX02, h_dx02));
     cbds.insert(std::make_pair(DX02, cbd_dx02));
 
@@ -674,7 +674,7 @@ float byram_intensity(inputs* data, main_outs* at) {
     float ros,H,wa, ib;
     ros = at->rss;
     H = hs[data->nftype][0];
-    wa = fls[data->nftype][0];
+    wa = fls_david[data->nftype][0];
     ib = H*wa*ros/60;
     ib = std::ceil(ib * 100.0) / 100.0;
     return ib; //unidad de medida
@@ -699,7 +699,7 @@ float crownfractionburn(inputs* data, main_outs* at,int FMC) { //generar output 
     cbh = cbhs[data->nftype][0];
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
-    wa = fls[data->nftype][0];
+    wa = fls_david[data->nftype][0];
     cbd = cbds[data->nftype][0];
     ros0 = 60 * i0 / (H * wa);
     ros = at->rss;
@@ -760,7 +760,7 @@ bool checkActive(inputs * data,main_outs* at, int FMC) //En KITRAL SE USA PL04
     cbh = cbhs[data->nftype][0];
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
-    wa = fls[data->nftype][0];
+    wa = fls_david[data->nftype][0];
     cbd = cbds[data->nftype][0];
     rac = 60 * i0 / (H * wa);
 
@@ -804,7 +804,7 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
     ptr->cbh = cbhs[data->nftype][0];
     //cout << "   cbh " << ptr->cbh << "\n";
 
-    ptr->fl = fls[data->nftype][0];
+    ptr->fl = fls_david[data->nftype][0];
     //cout << "   fl " << ptr->fl << "\n";
 
     ptr->h = hs[data->nftype][0];

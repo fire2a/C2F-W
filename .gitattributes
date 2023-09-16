@@ -1,0 +1,2 @@
+*.py export-subst
+*.git* export-ignore
