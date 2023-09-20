@@ -1,4 +1,4 @@
-#  Beta version by David Palacios M.
+#  Beta version
 C2F-W novelty is supporting multiple fuel and weather models, currently [Kitral](https://github.com/fire2a/C2FK) and [Scott & Burgan](https://github.com/github.com/fire2a/C2FSB) models are implemented.
 
 Originally this is a fork of the wildfire simulator [Cell2Fire](https://github.com/cell2fire/Cell2Fire/) developed by Jaime Carrasco, Cristobal Pais and David Woodroof.
