@@ -15,23 +15,21 @@
 using namespace std;
 
 /*
-	Global coefficients
-*/  
+    Global coefficients
+*/
 std::unordered_map<int, std::vector<float>> fmcs;
 std::unordered_map<int, std::vector<float>> cbhs;
 std::unordered_map<int, std::vector<float>> fls_david;
 std::unordered_map<int, std::vector<float>> hs;
 std::unordered_map<int, std::vector<float>> cbds;
 
-
- 
 /*
-	Functions
+    Functions
 */
 
 void setup_const()
 {
-    //printf("dlw debug, enter fuel_coefs\n");
+    // printf("dlw debug, enter fuel_coefs\n");
     /*   fuel type 1 */
     int PCH1 = 1;
     std::vector<float> fmc_pch1;
@@ -67,7 +65,6 @@ void setup_const()
     hs.insert(std::make_pair(PCH2, h_pch2));
     cbds.insert(std::make_pair(PCH2, cbd_pch2));
 
-
     int PCH3 = 3;
     std::vector<float> fmc_pch3;
     std::vector<float> cbh_pch3;
@@ -85,7 +82,6 @@ void setup_const()
     hs.insert(std::make_pair(PCH3, h_pch3));
     cbds.insert(std::make_pair(PCH3, cbd_pch3));
 
-
     int PCH4 = 4;
     std::vector<float> fmc_pch4;
     std::vector<float> cbh_pch4;
@@ -102,7 +98,6 @@ void setup_const()
     fls_david.insert(std::make_pair(PCH4, fl_pch4));
     hs.insert(std::make_pair(PCH4, h_pch4));
     cbds.insert(std::make_pair(PCH4, cbd_pch4));
-
 
     int PCH5 = 5;
     std::vector<float> fmc_pch5;
@@ -172,7 +167,6 @@ void setup_const()
     hs.insert(std::make_pair(MT03, h_mt03));
     cbds.insert(std::make_pair(MT03, cbd_mt03));
 
-
     int MT04 = 9;
     std::vector<float> fmc_mt04;
     std::vector<float> cbh_mt04;
@@ -206,7 +200,7 @@ void setup_const()
     fls_david.insert(std::make_pair(MT05, fl_mt05));
     hs.insert(std::make_pair(MT05, h_mt05));
     cbds.insert(std::make_pair(MT05, cbd_mt05));
-    
+
     int MT06 = 11;
     std::vector<float> fmc_mt06;
     std::vector<float> cbh_mt06;
@@ -223,7 +217,6 @@ void setup_const()
     fls_david.insert(std::make_pair(MT06, fl_mt06));
     hs.insert(std::make_pair(MT06, h_mt06));
     cbds.insert(std::make_pair(MT06, cbd_mt06));
-
 
     int MT07 = 12;
     std::vector<float> fmc_mt07;
@@ -309,7 +302,7 @@ void setup_const()
     fls_david.insert(std::make_pair(BN03, fl_bn03));
     hs.insert(std::make_pair(BN03, h_bn03));
     cbds.insert(std::make_pair(BN03, cbd_bn03));
-    
+
     int BN04 = 17;
     std::vector<float> fmc_bn04;
     std::vector<float> cbh_bn04;
@@ -378,7 +371,6 @@ void setup_const()
     hs.insert(std::make_pair(PL02, h_pl02));
     cbds.insert(std::make_pair(PL02, cbd_pl02));
 
-
     int PL03 = 21;
     std::vector<float> fmc_pl03;
     std::vector<float> cbh_pl03;
@@ -413,7 +405,6 @@ void setup_const()
     hs.insert(std::make_pair(PL04, h_pl04));
     cbds.insert(std::make_pair(PL04, cbd_pl04));
 
-
     int PL05 = 23;
     std::vector<float> fmc_pl05;
     std::vector<float> cbh_pl05;
@@ -430,7 +421,6 @@ void setup_const()
     fls_david.insert(std::make_pair(PL05, fl_pl05));
     hs.insert(std::make_pair(PL05, h_pl05));
     cbds.insert(std::make_pair(PL05, cbd_pl05));
-
 
     int PL06 = 24;
     std::vector<float> fmc_pl06;
@@ -517,7 +507,6 @@ void setup_const()
     hs.insert(std::make_pair(PL10, h_pl10));
     cbds.insert(std::make_pair(PL10, cbd_pl10));
 
-
     int PL11 = 29;
     std::vector<float> fmc_pl11;
     std::vector<float> cbh_pl11;
@@ -568,133 +557,130 @@ void setup_const()
     fls_david.insert(std::make_pair(DX02, fl_dx02));
     hs.insert(std::make_pair(DX02, h_dx02));
     cbds.insert(std::make_pair(DX02, cbd_dx02));
-
-
-
 }
 
+float rate_of_spread_k(inputs *data, fuel_coefs *ptr, main_outs *at) // incluir efecto pendiente aqui y no afuera
+{
+    float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps, fp;
 
-float rate_of_spread_k(inputs *data, fuel_coefs *ptr, main_outs *at) //incluir efecto pendiente aqui y no afuera
-   {
-    float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps,fp;
-   
-   //se = slope_effect(inp) ;
-   ws = data->ws;
-   tmp = data->tmp;
-   rh = data->rh;
-   ps = at->se; //hacerlo con elevaciones
-   p1 = -12.86;
-   p2 = 0.04316;
-   p3 = 13.8;
-   ch = (-2.97374 + 0.262 * rh - 0.00982 * tmp);
-   fmc = fmcs[data->nftype][0]*60; //factor de propagacion en m/min
-   fch = (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0)) / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0)); //es -14.3 segun el libro
-   fv = p1 * exp(-p2 * ws) + p3;
-   if (ps==0){
-        at->rss = fmc*fch*(fv);
-   }
-   else{
-    at->rss = fmc*fch*(fv+ps);
-   }
+    // se = slope_effect(inp) ;
+    ws = data->ws;
+    tmp = data->tmp;
+    rh = data->rh;
+    ps = at->se; // hacerlo con elevaciones
+    p1 = -12.86;
+    p2 = 0.04316;
+    p3 = 13.8;
+    ch = (-2.97374 + 0.262 * rh - 0.00982 * tmp);
+    fmc = fmcs[data->nftype][0] * 60;                                                                    // factor de propagacion en m/min
+    fch = (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0)) / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0)); // es -14.3 segun el libro
+    fv = p1 * exp(-p2 * ws) + p3;
+    if (ps == 0)
+    {
+        at->rss = fmc * fch * (fv);
+    }
+    else
+    {
+        at->rss = fmc * fch * (fv + ps);
+    }
 
-   //fp = 1.0 + 0.023322 * data->ps + 0.00013585 * pow(data->ps, 2.0);
-   //at->rss = fmc*fch*(fv);
-   return at->rss * (at->rss >= 0) ;
+    // fp = 1.0 + 0.023322 * data->ps + 0.00013585 * pow(data->ps, 2.0);
+    // at->rss = fmc*fch*(fv);
+    return at->rss * (at->rss >= 0);
+}
 
-   }
-
-float flankfire_ros_k(float ros,float bros,float lb)
-   {
-      return  ((ros + bros) / ( lb * 2.0)) ;
-   }
+float flankfire_ros_k(float ros, float bros, float lb)
+{
+    return ((ros + bros) / (lb * 2.0));
+}
 
 /* ----------------- Length-to-Breadth --------------------------*/
 float l_to_b(float ws, fuel_coefs *ptr)
-  {
-    float l1, l2, lb ;
-    l1 = 2.233;//1.411; // ptr->l1 ;
-    l2 = -0.01031; //0.01745; // ptr->l2 ;
-	lb = 1.0 + pow(l1 * exp(-l2 * ws) - l1, 2.0) ;
+{
+    float l1, l2, lb;
+    l1 = 2.233;    // 1.411; // ptr->l1 ;
+    l2 = -0.01031; // 0.01745; // ptr->l2 ;
+    lb = 1.0 + pow(l1 * exp(-l2 * ws) - l1, 2.0);
     return lb;
-  }
+}
 
 /* ----------------- Back Rate of Spread --------------------------*/
 float backfire_ros_k(main_outs *at, snd_outs *sec)
-  {
-    float hb, bros, lb ;
-    //lb = l_to_b(data->fueltype,at->wsv) ;
-    lb = sec->lb ;
-    hb = (lb + sqrt(pow(lb,2) - 1.0)) /  (lb - sqrt(pow(lb, 2) - 1.0)) ;
+{
+    float hb, bros, lb;
+    // lb = l_to_b(data->fueltype,at->wsv) ;
+    lb = sec->lb;
+    hb = (lb + sqrt(pow(lb, 2) - 1.0)) / (lb - sqrt(pow(lb, 2) - 1.0));
 
-    bros = at->rss / hb ;
-    
+    bros = at->rss / hb;
+
     return bros * (bros >= 0);
-  }
+}
 
 float slope_effect(float elev_i, float elev_j, int cellsize)
-  {
-	float ps_ij = (elev_j - elev_i) / (cellsize/4.);  //cellsize corresponds to the perimeter of the cell
+{
+    float ps_ij = (elev_j - elev_i) / (cellsize / 4.); // cellsize corresponds to the perimeter of the cell
     float se;
-    se = 1. + 0.023322 * ps_ij + 0.00013585 * std::pow(ps_ij, 2) ;
-    
+    se = 1. + 0.023322 * ps_ij + 0.00013585 * std::pow(ps_ij, 2);
+
     return se;
-  }
+}
 
+float flame_length(inputs *data, main_outs *at) // REVISAR ESTA ECUACI�N
+{
+    float ib, fl;
 
-float flame_length(inputs *data, main_outs *at) //REVISAR ESTA ECUACI�N
-   {
-       float ib, fl ;
+    ib = at->sfi;
 
-       ib = at->sfi ;
-
-       fl = 0.0775*pow(ib, 0.46) ;
-       return fl; 
-   }
+    fl = 0.0775 * pow(ib, 0.46);
+    return fl;
+}
 
 float angleFL(inputs *data, main_outs *at)
-   {
-       float angle, fl, y, ws ;
-       ws = data->ws ;
-       fl = at->fl;
-       y = 10.0 / 36.0 * ws ;
+{
+    float angle, fl, y, ws;
+    ws = data->ws;
+    fl = at->fl;
+    y = 10.0 / 36.0 * ws;
 
-       angle = atan(2.24 * sqrt(fl / pow(y, 2)))  ;
-       return angle;
-   }
+    angle = atan(2.24 * sqrt(fl / pow(y, 2)));
+    return angle;
+}
 
-float flame_height(inputs *data,  main_outs *at)
-  {
-      float fh, phi ;
-      phi = angleFL(data, at) ;
-      fh = at->fl * sin(phi) ;
-      return fh ;
-  }
+float flame_height(inputs *data, main_outs *at)
+{
+    float fh, phi;
+    phi = angleFL(data, at);
+    fh = at->fl * sin(phi);
+    return fh;
+}
 
-float byram_intensity(inputs* data, main_outs* at) {
-    float ros,H,wa, ib;
+float byram_intensity(inputs *data, main_outs *at)
+{
+    float ros, H, wa, ib;
     ros = at->rss;
     H = hs[data->nftype][0];
     wa = fls_david[data->nftype][0];
-    ib = H*wa*ros/60;
+    ib = H * wa * ros / 60;
     ib = std::ceil(ib * 100.0) / 100.0;
-    return ib; //unidad de medida
+    return ib; // unidad de medida
 }
 
+bool fire_type(inputs *data, main_outs *at, int FMC)
+{
+    float intensity, critical_intensity, cbh;
+    bool crownFire = false;
+    intensity = at->sfi;
+    cbh = cbhs[data->nftype][0];
+    // cbh = data->cbh;
+    critical_intensity = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
+    if ((intensity > critical_intensity) && cbh != 0)
+        crownFire = true;
+    return crownFire;
+}
 
-bool fire_type(inputs *data, main_outs* at,int FMC)
-  {
-      float intensity, critical_intensity, cbh;
-      bool crownFire = false;
-      intensity = at->sfi;
-      cbh = cbhs[data->nftype][0];
-      //cbh = data->cbh;
-      critical_intensity = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
-      if ((intensity > critical_intensity) && cbh != 0) crownFire = true;
-      return crownFire ;
-  }
-
-
-float crownfractionburn(inputs* data, main_outs* at,int FMC) { //generar output de cfb
+float crownfractionburn(inputs *data, main_outs *at, int FMC)
+{ // generar output de cfb
     float a, cbd, ros, ros0, H, wa, i0, cbh, cfb;
     cbh = cbhs[data->nftype][0];
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
@@ -703,24 +689,24 @@ float crownfractionburn(inputs* data, main_outs* at,int FMC) { //generar output 
     cbd = cbds[data->nftype][0];
     ros0 = 60 * i0 / (H * wa);
     ros = at->rss;
-    if (cbd != 0) {
+    if (cbd != 0)
+    {
         a = -log(0.1) / (0.9 * (3.0 / cbd - ros0));
     }
-    else {
-        a=0.23;
+    else
+    {
+        a = 0.23;
     }
-    cfb=1 - exp(-a * (ros - ros0));
+    cfb = 1 - exp(-a * (ros - ros0));
 
     return cfb;
 }
 
-
-
-float active_rate_of_spreadFM10(inputs* data, main_outs *at) //En KITRAL SE USA PL04
+float active_rate_of_spreadFM10(inputs *data, main_outs *at) // En KITRAL SE USA PL04
 {
     float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps, ros_active, rospl04, fp, ros_final, ros;
 
-    //se = slope_effect(inp) ;
+    // se = slope_effect(inp) ;
     ws = data->ws;
     tmp = data->tmp;
     rh = data->rh;
@@ -730,32 +716,34 @@ float active_rate_of_spreadFM10(inputs* data, main_outs *at) //En KITRAL SE USA 
     p3 = 13.8;
 
     ch = (-2.97374 + 0.262 * rh - 0.00982 * tmp);
-    fmc = 0.002712 * 60; //factor de propagacion en m/min de PL04
-    fch = (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0)) / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0)); //es -14.3 segun el libro
+    fmc = 0.002712 * 60;                                                                                 // factor de propagacion en m/min de PL04
+    fch = (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0)) / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0)); // es -14.3 segun el libro
     fv = p1 * exp(-p2 * ws * 0.4) + p3;
-    //fp = 1.0 + 0.023322 * data->ps + 0.00013585 * pow(data->ps, 2.0);
-    if (ps==0){
-        rospl04 = fmc*fch*(fv);
+    // fp = 1.0 + 0.023322 * data->ps + 0.00013585 * pow(data->ps, 2.0);
+    if (ps == 0)
+    {
+        rospl04 = fmc * fch * (fv);
     }
-    else{
-    rospl04 = fmc*fch*(fv+ps);
+    else
+    {
+        rospl04 = fmc * fch * (fv + ps);
     }
-    ros_active = 3.34 * rospl04; //if rac*cbd>3.0, aplicar ros_final=3.34*rospl04
+    ros_active = 3.34 * rospl04; // if rac*cbd>3.0, aplicar ros_final=3.34*rospl04
     return ros_active;
 }
 
-float final_rate_of_spreadFM10(main_outs* at) //En KITRAL SE USA PL04
+float final_rate_of_spreadFM10(main_outs *at) // En KITRAL SE USA PL04
 {
-    float  ros_active, ros_final, ros;
+    float ros_active, ros_final, ros;
     ros = at->rss;
-    ros_active=at->ros_active;
+    ros_active = at->ros_active;
     ros_final = ros + at->cfb * (ros_active - ros);
     return ros_final;
 }
 
-bool checkActive(inputs * data,main_outs* at, int FMC) //En KITRAL SE USA PL04
+bool checkActive(inputs *data, main_outs *at, int FMC) // En KITRAL SE USA PL04
 {
-    float  rac, cbd,H,wa,i0,cbh;
+    float rac, cbd, H, wa, i0, cbh;
     bool active;
     cbh = cbhs[data->nftype][0];
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
@@ -766,229 +754,236 @@ bool checkActive(inputs * data,main_outs* at, int FMC) //En KITRAL SE USA PL04
 
     cbd = cbds[data->nftype][0];
 
-    active=cbd*rac>=3;
+    active = cbd * rac >= 3;
     return active;
 }
 
-
- 
 float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
-  {
-    float hb, bros, lb ;
-    lb = sec->lb ;
-    hb = (lb + sqrt(pow(lb, 2) - 1.0)) /  (lb - sqrt(pow(lb, 2) - 1.0)) ;
-
-    bros = hptr->ros / hb ;
-    
-    return bros;
-  }
-  
- void calculate_k(inputs *data, inputs *head,int cellsize, fuel_coefs * ptr,arguments *args, main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr,fire_struc *bptr, bool & activeCrown)
 {
-    // Hack: Initialize coefficients 
-    setup_const();
+    float hb, bros, lb;
+    lb = sec->lb;
+    hb = (lb + sqrt(pow(lb, 2) - 1.0)) / (lb - sqrt(pow(lb, 2) - 1.0));
 
-	// Aux
-	float  ros, bros, lb, fros;
-    int FMC;
-	bool crownFire=false;
-    at->cfb=0;
-    // Populate fuel coefs struct
-	if (args->verbose){
-		std::cout  << "Populate fuel types " <<  std::endl;
-		std::cout  << "NfTypes:"  << data->nftype <<  std::endl;
-	}
-    FMC=args->FMC;
-	ptr->nftype = data->nftype;
-    ptr->fmc = fmcs[data->nftype][0];
-    ptr->cbh = cbhs[data->nftype][0];
-    //cout << "   cbh " << ptr->cbh << "\n";
+    bros = hptr->ros / hb;
 
-    ptr->fl = fls_david[data->nftype][0];
-    //cout << "   fl " << ptr->fl << "\n";
-
-    ptr->h = hs[data->nftype][0];
-    //cout << "   h " << ptr->h << "\n";
-    float elevation_origin=data->elev;
-    float elevation_destiny=head->elev;
-    at->se=slope_effect(elevation_origin,elevation_destiny,cellsize);
-    // Step 1: Calculate HROS (surface)
-    at->rss = rate_of_spread_k(data, ptr, at);
-    hptr->rss = at->rss ;
-    // Step 2: Calculate Length-to-breadth
-    sec->lb = l_to_b(data->ws, ptr) ;
-    
-    // Step 3: Calculate BROS (surface)
-    bptr->rss = backfire_ros_k(at, sec) ;
-    
-    // Step 4: Calculate central FROS (surface)
-    fptr->rss = flankfire_ros_k(hptr->rss, bptr->rss, sec->lb);
-    
-    // Step 5: Ellipse components
-    at->a = (hptr->rss + bptr->rss) / 2. ;
-    at->b = (hptr->rss + bptr->rss) / (2. * sec->lb) ; 
-    at->c = (hptr->rss - bptr->rss) / 2. ; 
-    
-    // Step 6: Byram Intensity
-    at->sfi = byram_intensity(data,at);
-    
-
-    // Step 7: Flame Length
-    at->fl = flame_length(data, at);
-    
-    // Step 8: Flame angle
-    at->angle = angleFL(data, at) ;
-    
-	// Step 9: Flame Height
-    at->fh = flame_height(data, at) ;
-
-
-	// Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
-    if (args->AllowCROS && cbhs[data->nftype][0]!=0) {
-        if (activeCrown){ //si el fuego esta activo en copas chequeamos condiciones
-           at->ros_active=active_rate_of_spreadFM10(data,at);
-           if (!checkActive(data,at,FMC)){
-                activeCrown=false;
-
-           }
-        }
-        else{
-            crownFire = fire_type(data, at, FMC);
-            if (args->verbose) {
-                cout << "Checking crown Fire conditions " << crownFire << "\n";
-        }
-        }
-
-    }
-    else {
-        crownFire = false;
-        activeCrown=false;
-
-    }
-
-
-
-	// If we have Crown fire, update the ROSs
-    if (crownFire){
-            at->ros_active=active_rate_of_spreadFM10(data,at);
-            at->cfb = crownfractionburn(data, at,FMC);
-
-            hptr->ros = final_rate_of_spreadFM10(at) ;
-            at->rss=hptr->ros;
-            bptr->ros = backfire_ros10_k(hptr,sec) ;
-            fptr->ros = flankfire_ros_k(hptr->ros, bptr->ros, sec->lb) ;
-
-			if (args->verbose){
-				cout << "hptr->ros = " << hptr->ros << "\n" ;
-				cout << "bptr->ros = " << bptr->ros << "\n" ;
-				cout << "fptr->ros = " << fptr->ros << "\n" ;
-			}
-
-            at->a = (hptr->ros + bptr->ros) / 2. ;
-            at->b = (hptr->ros + bptr->ros) / (2. * sec->lb) ; 
-            at->c = (hptr->ros - bptr->rss) / 2 ; 
-			at->crown = 1;
-            activeCrown=true;
-
-    }
-    else if (activeCrown){
-            at->cfb = crownfractionburn(data, at,FMC); //lo calculamos igual porque lo necesitamos para el output
-            hptr->ros = at->ros_active ;
-            at->rss=hptr->ros;
-            bptr->ros = backfire_ros10_k(hptr,sec) ;
-            fptr->ros = flankfire_ros_k(hptr->ros, bptr->ros, sec->lb) ;
-            
-			if (args->verbose){
-				cout << "hptr->ros = " << hptr->ros << "\n" ;
-				cout << "bptr->ros = " << bptr->ros << "\n" ;
-				cout << "fptr->ros = " << fptr->ros << "\n" ;
-			}
-
-            at->a = (hptr->ros + bptr->ros) / 2. ;
-            at->b = (hptr->ros + bptr->ros) / (2. * sec->lb) ; 
-            at->c = (hptr->ros - bptr->rss) / 2 ; 
-			at->crown = 1;
-            //std::cout  << "ros_activo: "  <<hptr->ros <<  std::endl;
-
-
-
-    }
-	
-	// Otherwise, use the surface alues
-    else{
-        at->crown=0;
-        hptr->ros = hptr->rss ;
-        bptr->ros = bptr->rss ; 
-        fptr->ros = fptr->rss ;
-		if (args->verbose){
-			cout << "hptr->ros = " << hptr->ros << "\n" ;
-			cout << "bptr->ros = " << bptr->ros << "\n" ;
-			cout << "fptr->ros = " << fptr->ros << "\n" ;
-		}
-
-    }
-
-	if (args->verbose){
-		cout << "--------------- Inputs --------------- \n" ;
-		cout << "ws = " << data->ws << "\n" ;
-		cout << "coef data->cbh = " << data->cbh << "\n" ;
-		cout << "coef ptr->fmc = " << ptr->fmc << "\n" ;
-		cout << "coef ptr->cbh = " << ptr->cbh << "\n" ;
-		cout << "coef ptr->fl = " << ptr->fl << "\n" ;
-		cout << "coef ptr->h = " << ptr->h << "\n" ;
-		//cout << "coef ptr->q2 = " << ptr->q2 << "\n" ;
-		//cout << "coef ptr->q3 = " << ptr->q3 << "\n" ;
-		cout << "\n" ;
-
-		cout << "---------------- Outputs --------------- \n" ;
-		cout << "at->rss = " << at->rss << "\n" ;
-		cout << "hptr->rss = " << hptr->rss << "\n" ;
-		cout << "lb = " << sec->lb << "\n" ;
-		cout << "bptr->rss = " << bptr->rss << "\n" ;
-		cout << "fptr->rss = " << fptr->rss << "\n" ;
-		cout << "axis a = " << at->a << "\n" ;
-		cout << "axis b = " << at->b << "\n" ;
-		cout << "axis c = " << at->c << "\n" ;
-		cout << "fl = " << at->fl << "\n";
-		cout << "angle = " << at->angle << "\n";
-		cout << "fh = " << at->fh << "\n";
-		cout << "Crown Fire = " << crownFire << "\n";
-	}
-
+    return bros;
 }
 
-void determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr,arguments *args ,main_outs* metrics) {
-    // Hack: Initialize coefficients 
+void calculate_k(inputs *data, inputs *head, int cellsize, fuel_coefs *ptr, arguments *args, main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr, fire_struc *bptr, bool &activeCrown)
+{
+    // Hack: Initialize coefficients
     setup_const();
 
     // Aux
-    float  ros=0, bros=0, lb=0, fros=0;
-    int FMC=args->FMC;
+    float ros, bros, lb, fros;
+    int FMC;
     bool crownFire = false;
-    metrics->cfb=0;
-    //ptr->q1 = q_coeff[data->nftype][0];
-    //ptr->q2 = q_coeff[data->nftype][1];
-    //ptr->q3 = q_coeff[data->nftype][2];
+    at->cfb = 0;
+    // Populate fuel coefs struct
+    if (args->verbose)
+    {
+        std::cout << "Populate fuel types " << std::endl;
+        std::cout << "NfTypes:" << data->nftype << std::endl;
+    }
+    FMC = args->FMC;
+    ptr->nftype = data->nftype;
+    ptr->fmc = fmcs[data->nftype][0];
+    ptr->cbh = cbhs[data->nftype][0];
+    // cout << "   cbh " << ptr->cbh << "\n";
+
+    ptr->fl = fls_david[data->nftype][0];
+    // cout << "   fl " << ptr->fl << "\n";
+
+    ptr->h = hs[data->nftype][0];
+    // cout << "   h " << ptr->h << "\n";
+
+    float elevation_origin = data->elev;
+
+    float elevation_destiny = head->elev;
+
+    at->se = slope_effect(elevation_origin, elevation_destiny, cellsize);
+
+    // Step 1: Calculate HROS (surface)
+
+    at->rss = rate_of_spread_k(data, ptr, at);
+    hptr->rss = at->rss;
+    // Step 2: Calculate Length-to-breadth
+    sec->lb = l_to_b(data->ws, ptr);
+
+    // Step 3: Calculate BROS (surface)
+    bptr->rss = backfire_ros_k(at, sec);
+
+    // Step 4: Calculate central FROS (surface)
+    fptr->rss = flankfire_ros_k(hptr->rss, bptr->rss, sec->lb);
+
+    // Step 5: Ellipse components
+    at->a = (hptr->rss + bptr->rss) / 2.;
+    at->b = (hptr->rss + bptr->rss) / (2. * sec->lb);
+    at->c = (hptr->rss - bptr->rss) / 2.;
+
+    // Step 6: Byram Intensity
+    at->sfi = byram_intensity(data, at);
+
+    // Step 7: Flame Length
+    at->fl = flame_length(data, at);
+
+    // Step 8: Flame angle
+    at->angle = angleFL(data, at);
+
+    // Step 9: Flame Height
+    at->fh = flame_height(data, at);
+
+    // Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
+    if (args->AllowCROS && cbhs[data->nftype][0] != 0)
+    {
+        if (activeCrown)
+        { // si el fuego esta activo en copas chequeamos condiciones
+            at->ros_active = active_rate_of_spreadFM10(data, at);
+            if (!checkActive(data, at, FMC))
+            {
+                activeCrown = false;
+            }
+        }
+        else
+        {
+            crownFire = fire_type(data, at, FMC);
+            if (args->verbose)
+            {
+                cout << "Checking crown Fire conditions " << crownFire << "\n";
+            }
+        }
+    }
+    else
+    {
+        crownFire = false;
+        activeCrown = false;
+    }
+
+    // If we have Crown fire, update the ROSs
+    if (crownFire)
+    {
+        at->ros_active = active_rate_of_spreadFM10(data, at);
+        at->cfb = crownfractionburn(data, at, FMC);
+
+        hptr->ros = final_rate_of_spreadFM10(at);
+        at->rss = hptr->ros;
+        bptr->ros = backfire_ros10_k(hptr, sec);
+        fptr->ros = flankfire_ros_k(hptr->ros, bptr->ros, sec->lb);
+
+        if (args->verbose)
+        {
+            cout << "hptr->ros = " << hptr->ros << "\n";
+            cout << "bptr->ros = " << bptr->ros << "\n";
+            cout << "fptr->ros = " << fptr->ros << "\n";
+        }
+
+        at->a = (hptr->ros + bptr->ros) / 2.;
+        at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
+        at->c = (hptr->ros - bptr->rss) / 2;
+        at->crown = 1;
+        activeCrown = true;
+    }
+    else if (activeCrown)
+    {
+        at->cfb = crownfractionburn(data, at, FMC); // lo calculamos igual porque lo necesitamos para el output
+        hptr->ros = at->ros_active;
+        at->rss = hptr->ros;
+        bptr->ros = backfire_ros10_k(hptr, sec);
+        fptr->ros = flankfire_ros_k(hptr->ros, bptr->ros, sec->lb);
+
+        if (args->verbose)
+        {
+            cout << "hptr->ros = " << hptr->ros << "\n";
+            cout << "bptr->ros = " << bptr->ros << "\n";
+            cout << "fptr->ros = " << fptr->ros << "\n";
+        }
+
+        at->a = (hptr->ros + bptr->ros) / 2.;
+        at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
+        at->c = (hptr->ros - bptr->rss) / 2;
+        at->crown = 1;
+        // std::cout  << "ros_activo: "  <<hptr->ros <<  std::endl;
+    }
+
+    // Otherwise, use the surface alues
+    else
+    {
+        at->crown = 0;
+        hptr->ros = hptr->rss;
+        bptr->ros = bptr->rss;
+        fptr->ros = fptr->rss;
+        if (args->verbose)
+        {
+            cout << "hptr->ros = " << hptr->ros << "\n";
+            cout << "bptr->ros = " << bptr->ros << "\n";
+            cout << "fptr->ros = " << fptr->ros << "\n";
+        }
+    }
+
+    if (args->verbose)
+    {
+        cout << "--------------- Inputs --------------- \n";
+        cout << "ws = " << data->ws << "\n";
+        cout << "coef data->cbh = " << data->cbh << "\n";
+        cout << "coef ptr->fmc = " << ptr->fmc << "\n";
+        cout << "coef ptr->cbh = " << ptr->cbh << "\n";
+        cout << "coef ptr->fl = " << ptr->fl << "\n";
+        cout << "coef ptr->h = " << ptr->h << "\n";
+        // cout << "coef ptr->q2 = " << ptr->q2 << "\n" ;
+        // cout << "coef ptr->q3 = " << ptr->q3 << "\n" ;
+        cout << "\n";
+
+        cout << "---------------- Outputs --------------- \n";
+        cout << "at->rss = " << at->rss << "\n";
+        cout << "hptr->rss = " << hptr->rss << "\n";
+        cout << "lb = " << sec->lb << "\n";
+        cout << "bptr->rss = " << bptr->rss << "\n";
+        cout << "fptr->rss = " << fptr->rss << "\n";
+        cout << "axis a = " << at->a << "\n";
+        cout << "axis b = " << at->b << "\n";
+        cout << "axis c = " << at->c << "\n";
+        cout << "fl = " << at->fl << "\n";
+        cout << "angle = " << at->angle << "\n";
+        cout << "fh = " << at->fh << "\n";
+        cout << "Crown Fire = " << crownFire << "\n";
+    }
+}
+
+void determine_destiny_metrics_k(inputs *data, fuel_coefs *ptr, arguments *args, main_outs *metrics)
+{
+    // Hack: Initialize coefficients
+    setup_const();
+
+    // Aux
+    float ros = 0, bros = 0, lb = 0, fros = 0;
+    int FMC = args->FMC;
+    bool crownFire = false;
+    metrics->cfb = 0;
+    // ptr->q1 = q_coeff[data->nftype][0];
+    // ptr->q2 = q_coeff[data->nftype][1];
+    // ptr->q3 = q_coeff[data->nftype][2];
     ptr->nftype = data->nftype;
     // Step 6: Byram Intensity
-    metrics->sfi = byram_intensity(data,metrics);
+    metrics->sfi = byram_intensity(data, metrics);
     // Step 7: Flame Length
     metrics->fl = flame_length(data, metrics);
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
-    if (args->AllowCROS) {
+    if (args->AllowCROS)
+    {
         crownFire = fire_type(data, metrics, FMC);
-        if (crownFire){
-            metrics->cfb = crownfractionburn(data, metrics,FMC);
-
+        if (crownFire)
+        {
+            metrics->cfb = crownfractionburn(data, metrics, FMC);
         }
-        if (args->verbose) {
+        if (args->verbose)
+        {
             cout << "Checking crown Fire conditions " << crownFire << "\n";
         }
     }
-    else {
+    else
+    {
         crownFire = false;
     }
 
     metrics->crown = int(crownFire);
-
 }
