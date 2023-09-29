@@ -23,6 +23,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include <vector>
 #include <math.h>
 #include <cmath>
+#include <tuple>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -154,22 +155,25 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	// DEBUG
 	std::cout << "------------------Forest Data ----------------------\n"
 			  << std::endl;
-	std::vector<std::vector<std::string>> FDF = this->CSVForest.getData();
-	// DEBUGthis->CSVForest.printData(FDF);
-	this->CSVForest.parseForestDF(&frdf, FDF);
-
+	std::tuple<const char *, const char *, int, int, float, float, float> tif_landscape = this->CSVForest.readTifMetadata(this->args_ptr);
 	// DEBUGstd::cout << "------------------Detailed Data ----------------------\n" << std::endl;
-	this->rows = frdf.rows;
-	this->cols = frdf.cols;
-	this->widthSims = std::to_string(this->args.TotalSims).length();
+
+	const char *metadata = get<0>(tif_landscape);
+	const char *projection = get<1>(tif_landscape);
+	this->rows = get<2>(tif_landscape);
+	this->cols = get<3>(tif_landscape);
+	this->xllcorner = get<4>(tif_landscape);
+	this->yllcorner = get<5>(tif_landscape);
+	this->cellSide = get<6>(tif_landscape);
+	if (cellSide == 0)
+	{
+		cellSide = 100;
+	}
 	this->nCells = rows * cols;
-	this->cellSide = frdf.cellside;
 	this->areaCells = cellSide * cellSide;
 	this->perimeterCells = 4 * cellSide;
-	this->xllcorner = frdf.xllcorner;
-	this->yllcorner = frdf.yllcorner;
+	this->widthSims = std::to_string(this->args.TotalSims).length();
 
-	this->coordCells = frdf.coordCells;
 	// this->adjCells = frdf.adjCells;
 
 	/********************************************************************
@@ -177,23 +181,38 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	********************************************************************/
 	// DEBUGstd::cout << "\n------ Read DataFrames: Forest and Weather ------\n";
 
-	/* Forest DataFrame */
-	std::string filename = this->args.InFolder + "Data.csv";
-	std::string sep = ",";
-	CSVReader CSVParser(filename, sep);
-
 	// Populate DF
-	std::vector<std::vector<std::string>> DF = CSVParser.getData();
-	std::cout << "Forest DataFrame from instance " << filename << std::endl;
-	// DEBUGCSVParser.printData(DF);
+	std::cout << "Forest DataFrame from instance " << _args.InFolder + "fuels.asc" << std::endl;
 	std::cout << "Number of cells: " << this->nCells << std::endl;
-	df = new inputs[this->nCells];
-
 	// Create empty df with size of NCells
-	df_ptr = &df[0]; // access reference for the first element of df
 
+	df = new inputs[this->nCells];
+	int number_of_members = df[0].nargs; // IMPORTANT: THIS CORRESPONDS TO THE NUMBER OF MEMBERS INSIDE INPUT STRUCTURE, IF ONE MORE IS INCLUDED, THIS SHOULD BE CHANGED. A WARNING WILL BE INCLUDED FOR CONSIDERING THIS
 	// Populate the df [nCells] objects
-	CSVParser.parseDF(df_ptr, DF, this->args_ptr, this->nCells); // iterates from the first element of df, using DF, args_ptr and the number of cells
+	this->CSVForest.readTifArgs(df, this->args_ptr, number_of_members, 1);
+	std::cout << "Input layers populated" << std::endl;
+
+	df_ptr = &df[0];
+	this->CSVForest.parseForestDF(&frdf, df_ptr, rows, cols, cellSide, xllcorner, yllcorner); // creates coordCells and assigns latitude and longitude
+	this->coordCells = frdf.coordCells;
+	if (args.verbose)
+	{
+		this->CSVForest.printDataTif(df, nCells);
+	}
+
+	// defining lookuptable, could be improved by receiving the name of the lookup as an argument
+	CSVReader LookUpTable(_args.InFolder + "spain_lookup_table.csv", ","); // use S&B as default
+	if (this->args.Simulator == "C")
+	{
+		LookUpTable.fileName = _args.InFolder + "fbp_lookup_table.csv";
+	}
+	else if (this->args.Simulator == "K")
+	{
+		LookUpTable.fileName = _args.InFolder + "kitral_lookup_table.csv";
+	}
+	df_ptr = &df[0];
+	// assigns fuel name by lookuptable code
+	LookUpTable.readLookUpTable(df_ptr, nCells);
 
 	// Initialize and populate relevant vectors
 	this->fTypeCells = std::vector<int>(this->nCells, 1);
@@ -208,11 +227,19 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->FlameLengths = std::vector<float>(this->nCells, 0);
 
 	this->ignProb = std::vector<float>(this->nCells, 1);
-	CSVParser.parsePROB(this->ignProb, DF, this->nCells);
+	std::cout << "Trying to populate ignition probability layer" << std::endl;
+	if (args.probIgnitionFilename != "")
+	{
+		this->CSVForest.parsePROB2(this->ignProb, this->args.probIgnitionFilename);
+	}
+	else
+	{
+		std::cout << "No probability layer provided, assigning equal probability" << std::endl;
+	}
 
 	// Non burnable types: populate relevant fields such as status and ftype
-	std::string NoFuel = "NF ";
-	std::string NoData = "ND ";
+	std::string NoFuel = "NF";
+	std::string NoData = "ND";
 	std::string Empty = "";
 	const char *NF = NoFuel.c_str();
 	const char *ND = NoData.c_str();
@@ -220,6 +247,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 
 	for (int l = 0; l < this->nCells; l++)
 	{
+
 		if (strcmp(df[l].fueltype, NF) == 0 || strcmp(df[l].fueltype, ND) == 0)
 		{
 			this->fTypeCells[l] = 0;
@@ -427,7 +455,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	if (this->args.BBOTuning)
 	{
 		// Get fuel types numbers
-		CSVParser.parseNDF(NFTypesCells, DF, this->nCells);
+		this->CSVForest.parseNDF(NFTypesCells, DF, this->nCells);
 
 		// BBO File
 		std::string BBOFile = args.InFolder + "BBOFuels.csv";
@@ -766,8 +794,8 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
 	this->crownMetrics.clear(); // intensity and crown
 
 	// Non burnable types: populate relevant fields such as status and ftype
-	std::string NoFuel = "NF ";
-	std::string NoData = "ND ";
+	std::string NoFuel = "NF";
+	std::string NoData = "ND";
 	const char *NF = NoFuel.c_str();
 	const char *ND = NoData.c_str();
 

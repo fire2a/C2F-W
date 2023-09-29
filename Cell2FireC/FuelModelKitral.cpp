@@ -619,6 +619,7 @@ float backfire_ros_k(main_outs *at, snd_outs *sec)
 
 float slope_effect(float elev_i, float elev_j, int cellsize)
 {
+
     float ps_ij = (elev_j - elev_i) / (cellsize / 4.); // cellsize corresponds to the perimeter of the cell
     float se;
     se = 1. + 0.023322 * ps_ij + 0.00013585 * std::pow(ps_ij, 2);

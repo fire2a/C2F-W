@@ -316,7 +316,7 @@ double Cells::allocate(double offset, double base, double ros1, double ros2)
 
 float Cells::slope_effect(float elev_i, float elev_j, int cellsize)
 {
-	float ps_ij = (elev_j - elev_i) / cellsize;
+	float ps_ij = (elev_j - elev_i) / cellsize; // considerar celdas en diagonales, se divide en raiz(2)*cellsize
 	float se;
 	se = 1. + 0.023322 * ps_ij + 0.00013585 * std::pow(ps_ij, 2);
 
