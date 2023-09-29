@@ -613,7 +613,7 @@ void CSVReader::parseBBODF(std::unordered_map<int, std::vector<float>> &bbo, std
 	}
 }
 
-void CSVReader::parseForestDF(forestDF *frt_ptr, inputs *df_ptr, int rows, int cols, int cellside, double xllcorner, double yllcorner)
+void CSVReader::parseForestDF(forestDF *frt_ptr, inputs *df_ptr, int rows, int cols, float cellside, float xllcorner, float yllcorner)
 {
 
 	std::vector<int> Aux;

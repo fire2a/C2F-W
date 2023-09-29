@@ -72,8 +72,8 @@ public:
   int fType;
   int realId;
   double _ctr2ctrdist;
-  double area;
-  double perimeter;
+  float area;
+  float perimeter;
 
   std::string fType2;
   std::vector<int> coord; // maybe change this into a tuple or class	CP: 2-tuple (int)
@@ -102,8 +102,8 @@ public:
   // TODO: reference to shared object
 
   // constructor and methods here
-  Cells(int _id, double _area, std::vector<int> _coord,
-        int _fType, std::string _fType2, double _perimeter,
+  Cells(int _id, float _area, std::vector<int> _coord,
+        int _fType, std::string _fType2, float _perimeter,
         int _status, int _realId);
 
   void initializeFireFields(std::vector<std::vector<int>> &coordCells, std::unordered_set<int> &availSet, int cols, int rows); // TODO: need TYPE
@@ -116,15 +116,15 @@ public:
                               inputs df[], fuel_coefs *coef,
                               std::vector<std::vector<int>> &coordCells, std::unordered_map<int, Cells> &Cells_Obj,
                               arguments *args, weatherDF *wdf_ptr, std::vector<double> *FSCell, std::vector<float> *crownMetrics,
-                              bool &activeCrown, double randomROS, int perimeterCells, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths);
+                              bool &activeCrown, double randomROS, float perimeterCells, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths);
 
   std::vector<int> manageFireBBO(int period, std::unordered_set<int> &AvailSet,
                                  inputs *df_ptr, fuel_coefs *coef,
                                  std::vector<std::vector<int>> &coordCells, std::unordered_map<int, Cells> &Cells_Obj,
                                  arguments *args, weatherDF *wdf_ptr, std::vector<double> *FSCell, std::vector<float> *crownMetrics,
-                                 bool &activeCrown, double randomROS, int perimeterCells, std::vector<float> &EllipseFactors, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths);
+                                 bool &activeCrown, double randomROS, float perimeterCells, std::vector<float> &EllipseFactors, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths);
 
-  bool get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, int perimeterCells);
+  bool get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, float perimeterCells);
 
   // void set_Adj(std::unordered_map<std::string, int> & adjacentCells);
 
@@ -133,7 +133,7 @@ public:
   std::string getStatus();
 
   bool ignition(int period, int year, std::vector<int> &ignitionPoints, inputs *df_ptr, // WORKING CHECK OK
-                fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, int perimeterCells);
+                fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, float perimeterCells);
 
   void harvested(int id, int period);
 
@@ -141,7 +141,7 @@ public:
 
 private:
   double allocate(double offset, double base, double ros1, double ros2);
-  float slope_effect(float elev_i, float elev_j, int cellsize);
+  float slope_effect(float elev_i, float elev_j, float cellsize);
 };
 
 #endif

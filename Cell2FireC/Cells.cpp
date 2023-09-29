@@ -27,8 +27,8 @@ using namespace std;
 /*
 	Constructor   // WORKING CHECK OK
 */
-Cells::Cells(int _id, double _area, std::vector<int> _coord,
-			 int _fType, std::string _fType2, double _perimeter,
+Cells::Cells(int _id, float _area, std::vector<int> _coord,
+			 int _fType, std::string _fType2, float _perimeter,
 			 int _status, int _realId)
 {
 	// Global "dictionaries" (vectors) for status and types
@@ -314,7 +314,7 @@ double Cells::allocate(double offset, double base, double ros1, double ros2)
 		cellsize: side of a cell
 */
 
-float Cells::slope_effect(float elev_i, float elev_j, int cellsize)
+float Cells::slope_effect(float elev_i, float elev_j, float cellsize)
 {
 	float ps_ij = (elev_j - elev_i) / cellsize; // considerar celdas en diagonales, se divide en raiz(2)*cellsize
 	float se;
@@ -342,7 +342,7 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 								   inputs df_ptr[], fuel_coefs *coef,
 								   std::vector<std::vector<int>> &coordCells, std::unordered_map<int, Cells> &Cells_Obj,
 								   arguments *args, weatherDF *wdf_ptr, std::vector<double> *FSCell, std::vector<float> *crownMetrics,
-								   bool &activeCrown, double randomROS, int perimeterCells, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths)
+								   bool &activeCrown, double randomROS, float perimeterCells, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths)
 {
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
@@ -632,7 +632,7 @@ std::vector<int> Cells::manageFireBBO(int period, std::unordered_set<int> &Avail
 									  inputs *df_ptr, fuel_coefs *coef,
 									  std::vector<std::vector<int>> &coordCells, std::unordered_map<int, Cells> &Cells_Obj,
 									  arguments *args, weatherDF *wdf_ptr, std::vector<double> *FSCell, std::vector<float> *crownMetrics,
-									  bool &activeCrown, double randomROS, int perimeterCells, std::vector<float> &EllipseFactors, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths)
+									  bool &activeCrown, double randomROS, float perimeterCells, std::vector<float> &EllipseFactors, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths)
 {
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
@@ -901,7 +901,7 @@ std::vector<int> Cells::manageFireBBO(int period, std::unordered_set<int> &Avail
 	ROSThresh   double
  */
 
-bool Cells::get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, int perimeterCells)
+bool Cells::get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, float perimeterCells)
 {
 	if (args->verbose)
 	{
@@ -1006,7 +1006,7 @@ std::string Cells::getStatus()
 	HFIThreshold      double
  */
 bool Cells::ignition(int period, int year, std::vector<int> &ignitionPoints, inputs *df_ptr, // WORKING CHECK OK
-					 fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, int perimeterCells)
+					 fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, float perimeterCells)
 {
 
 	// If we have ignition points, update
