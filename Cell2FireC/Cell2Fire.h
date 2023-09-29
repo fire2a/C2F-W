@@ -56,11 +56,11 @@ public:
 	int nIgnitions = 0;
 
 	// floats
-	float cellSide;
-	float xllcorner;
-	float yllcorner;
-	float areaCells;
-	float perimeterCells;
+	double cellSide;
+	double xllcorner;
+	double yllcorner;
+	double areaCells;
+	double perimeterCells;
 
 	// Booleans
 	bool noIgnition = true; //  None = -1

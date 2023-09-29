@@ -37,9 +37,9 @@ public:
 	void printCSV(int rows, int cols, std::vector<int> statusCells);
 	void printCSVDouble(int rows, int cols, std::vector<double> network);
 	void printCSVDouble_V2(int rows, int cols, std::vector<double> network);
-	void printASCII(int rows, int cols, float xllcorner, float yllcorner, float cellside, std::vector<float> statusCells);
-	void printASCIIInt(int rows, int cols, float xllcorner, float yllcorner, float cellside, std::vector<int> statusCells);
-	void asciiHeader(int rows, int cols, float xllcorner, float yllcorner, float cellside);
+	void printASCII(int rows, int cols, double xllcorner, double yllcorner, double cellside, std::vector<float> statusCells);
+	void printASCIIInt(int rows, int cols, double xllcorner, double yllcorner, double cellside, std::vector<int> statusCells);
+	void asciiHeader(int rows, int cols, double xllcorner, double yllcorner, double cellside);
 	void printWeather(std::vector<std::string> weatherHistory);
 	void printCSV_V2(int rows, int cols, std::vector<int> statusCells);
 	// Function to create a directory

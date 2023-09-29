@@ -34,6 +34,11 @@ void getTifData(std::string df_member, inputs *df_ptr, const char *pszFilename, 
 	poBand = poDataset->GetRasterBand(raster_band);
 	int nXSize = poBand->GetXSize();
 	int nYSize = poBand->GetYSize();
+	printf("Type=%s\n",
+		   GDALGetDataTypeName(GDALGetRasterDataType(poBand)));
+	std::cout << "nxsie " << nXSize << std::endl;
+
+	std::cout << "nysie " << nYSize << std::endl;
 	if (number_of_arguments != 27)
 	{
 		std::cout << "number of struct inputs members: " << number_of_arguments << std::endl;
@@ -42,103 +47,103 @@ void getTifData(std::string df_member, inputs *df_ptr, const char *pszFilename, 
 	if (df_member == "fuelType")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->nftype, number_of_arguments * nXSize, nYSize, GDT_Int32, // care with the GDT_Int32
+									  &df_ptr->nftype, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 	else if (df_member == "elevation")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->elev, number_of_arguments * nXSize, nYSize, GDT_Float32, // care with the GDT_Int32
+									  &df_ptr->elev, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 
 	else if (df_member == "windSpeed")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->ws, number_of_arguments * nXSize, nYSize, GDT_Float32, // care with the GDT_Int32
+									  &df_ptr->ws, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 
 	else if (df_member == "windDirection")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->waz, number_of_arguments * nXSize, nYSize, GDT_Int32, // care with the GDT_Int32
+									  &df_ptr->waz, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 	else if (df_member == "slope")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->ps, number_of_arguments * nXSize, nYSize, GDT_Float32, // care with the GDT_Int32
+									  &df_ptr->ps, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 
 	else if (df_member == "aspect")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->saz, number_of_arguments * nXSize, nYSize, GDT_Float32, // care with the GDT_Int32
+									  &df_ptr->saz, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 
 	else if (df_member == "curing")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->cur, number_of_arguments * nXSize, nYSize, GDT_Float32, // care with the GDT_Int32
-									  0, 0);
+									  &df_ptr->cur, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
+									  1, 0);
 	}
 
 	else if (df_member == "cbd")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->cbd, number_of_arguments * nXSize, nYSize, GDT_Float32, // care with the GDT_Int32
+									  &df_ptr->cbd, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 	else if (df_member == "cbh")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->cbh, number_of_arguments * nXSize, nYSize, GDT_Float32, // care with the GDT_Int32
+									  &df_ptr->cbh, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 	else if (df_member == "ccf")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->ccf, number_of_arguments * nXSize, nYSize, GDT_Float32, // care with the GDT_Int32
+									  &df_ptr->ccf, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 	else if (df_member == "fmc")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->FMC, number_of_arguments * nXSize, nYSize, GDT_Int32, // care with the GDT_Int32
+									  &df_ptr->FMC, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 
 	else if (df_member == "jd")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->jd, number_of_arguments * nXSize, nYSize, GDT_Int32, // care with the GDT_Int32
+									  &df_ptr->jd, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 	else if (df_member == "jd_min")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->jd_min, number_of_arguments * nXSize, nYSize, GDT_Int32, // care with the GDT_Int32
+									  &df_ptr->jd_min, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 	else if (df_member == "bui")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->bui, number_of_arguments * nXSize, nYSize, GDT_Float32, // care with the GDT_Int32
+									  &df_ptr->bui, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 	else if (df_member == "ffmc")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->ffmc, number_of_arguments * nXSize, nYSize, GDT_Float32, // care with the GDT_Int32
+									  &df_ptr->ffmc, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 	else if (df_member == "pattern")
 	{
 		CPLErr Err = poBand->RasterIO(GF_Read, 0, 0, nXSize, nYSize,
-									  &df_ptr->pattern, number_of_arguments * nXSize, nYSize, GDT_Int32, // care with the GDT_Int32
+									  &df_ptr->pattern, number_of_arguments * nXSize, nYSize, GDALGetRasterDataType(poBand), // care with the GDT_Int32
 									  0, 0);
 	}
 }
@@ -247,17 +252,28 @@ std::tuple<const char *, const char *, int, int, float, float, float> CSVReader:
 	double adfGeoTransform[6];
 	const char *description, *metadata, *projection, *data_type_name, *color_intepretation;
 	int ncols, nrows, nlayers, nBlockXSize, nBlockYSize, bGotMin, bGotMax;
-	float origin_x, origin_y, cellsize;
+	double origin_x, origin_y, cellsize;
 	double adfMinMax[2];
 	description = poDataset->GetDriver()->GetDescription();
 	metadata = poDataset->GetDriver()->GetMetadataItem(GDAL_DMD_LONGNAME);
 	projection = poDataset->GetProjectionRef();
-	nrows = poDataset->GetRasterXSize();
-	ncols = poDataset->GetRasterYSize();
+	nrows = poDataset->GetRasterYSize();
+	ncols = poDataset->GetRasterXSize();
 	nlayers = poDataset->GetRasterCount();
-	origin_x = adfGeoTransform[0];
-	origin_y = adfGeoTransform[3];
-	cellsize = adfGeoTransform[1];
+	if (poDataset->GetGeoTransform(adfGeoTransform) == CE_None)
+	{
+		origin_x = adfGeoTransform[0];
+		origin_y = adfGeoTransform[3];
+		cellsize = adfGeoTransform[1];
+	}
+	else
+	{ // default value in case anything fails
+		printf("Warning, not able to transform pixel/line (P,L) raster space, check tif file... setting default coordinates and pixel size to 100");
+		origin_x = 335976.350900000019;
+		origin_y = 6142452.671400000341;
+		cellsize = 100;
+	}
+
 	GDALRasterBand *poBand;
 	poBand = poDataset->GetRasterBand(1);
 	poBand->GetBlockSize(&nBlockXSize, &nBlockYSize);
@@ -348,9 +364,9 @@ void CSVReader::printData(std::vector<std::vector<std::string>> &DF)
 void CSVReader::printDataTif(inputs *df, int Ncells)
 {
 
-	for (int i = 0; i < Ncells; i++)
+	for (int i = 0; i < 100; i++)
 	{
-		std::cout << "cell: " << i << " code of fuel: " << df[i].nftype << std::endl;
+		std::cout << "cell: " << i << " code of fuel: " << df[i].cur << std::endl;
 	}
 }
 
@@ -613,7 +629,7 @@ void CSVReader::parseBBODF(std::unordered_map<int, std::vector<float>> &bbo, std
 	}
 }
 
-void CSVReader::parseForestDF(forestDF *frt_ptr, inputs *df_ptr, int rows, int cols, float cellside, float xllcorner, float yllcorner)
+void CSVReader::parseForestDF(forestDF *frt_ptr, inputs *df_ptr, int rows, int cols, double cellside, double xllcorner, double yllcorner)
 {
 
 	std::vector<int> Aux;

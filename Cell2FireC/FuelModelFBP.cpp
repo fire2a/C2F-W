@@ -507,6 +507,10 @@ float grass(fuel_coefs *ptr, float cur, float isi, float *mult)
   if (mu < 0.001)
     mu = 0.001; /* to have some value here*/
   *mult = mu;
+  if (cur > 1)
+  {
+    std::cout << "grass " << cur << std::endl;
+  }
   return (ros);
 }
 

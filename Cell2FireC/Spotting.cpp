@@ -124,7 +124,7 @@ std::vector<int> Spotting(std::unordered_map<int, Cells> &Cells_Obj, std::vector
     }
 
     // TODO: fix these later
-    float cellsize = Cells_Obj.begin()->second.perimeter / 4.0;
+    double cellsize = Cells_Obj.begin()->second.perimeter / 4.0;
     double beta = spottingParams["SPOT0PROB"];
     double tilde_d = spottingParams["SPOT10TIME"] * WSC / cellsize;
     double alpha = std::log(.1) / tilde_d + std::log(beta) / tilde_d;

@@ -617,7 +617,7 @@ float backfire_ros_k(main_outs *at, snd_outs *sec)
     return bros * (bros >= 0);
 }
 
-float slope_effect(float elev_i, float elev_j, float cellsize)
+float slope_effect(float elev_i, float elev_j, double cellsize)
 {
 
     float ps_ij = (elev_j - elev_i) / (cellsize / 4.); // cellsize corresponds to the perimeter of the cell
@@ -770,7 +770,7 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
     return bros;
 }
 
-void calculate_k(inputs *data, inputs *head, float cellsize, fuel_coefs *ptr, arguments *args, main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr, fire_struc *bptr, bool &activeCrown)
+void calculate_k(inputs *data, inputs *head, double cellsize, fuel_coefs *ptr, arguments *args, main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr, fire_struc *bptr, bool &activeCrown)
 {
     // Hack: Initialize coefficients
     setup_const();

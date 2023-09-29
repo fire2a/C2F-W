@@ -115,7 +115,7 @@ void CSVGrid(int rows, int cols, int gridNumber, std::string gridFolder, std::ve
 															Constructor
 *******************************************************************************/
 Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv", ","),
-										CSVForest(_args.InFolder + "fuels.asc", " ")
+										CSVForest(_args.landscapeFilename, " ")
 {
 	// Aux
 	int i;
@@ -182,7 +182,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	// DEBUGstd::cout << "\n------ Read DataFrames: Forest and Weather ------\n";
 
 	// Populate DF
-	std::cout << "Forest DataFrame from instance " << _args.InFolder + "fuels.asc" << std::endl;
+	std::cout << "Forest DataFrame from instance " << _args.landscapeFilename << std::endl;
 	std::cout << "Number of cells: " << this->nCells << std::endl;
 	// Create empty df with size of NCells
 
@@ -195,7 +195,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	df_ptr = &df[0];
 	this->CSVForest.parseForestDF(&frdf, df_ptr, rows, cols, cellSide, xllcorner, yllcorner); // creates coordCells and assigns latitude and longitude
 	this->coordCells = frdf.coordCells;
-	if (args.verbose)
+	if (!args.verbose)
 	{
 		this->CSVForest.printDataTif(df, nCells);
 	}

@@ -53,7 +53,7 @@ void CSVWriter::addDatainRow(T first, T last)
 	file.close();
 }
 
-void CSVWriter::asciiHeader(int rows, int cols, float xllcorner, float yllcorner, float cellside)
+void CSVWriter::asciiHeader(int rows, int cols, double xllcorner, double yllcorner, double cellside)
 {
 	std::fstream file;
 	// Open the file in truncate mode if first line else in Append Mode
@@ -187,7 +187,7 @@ void CSVWriter::printCSVDouble_V2(int rows, int cols, std::vector<double> networ
 	ofs.close();
 }
 
-void CSVWriter::printASCII(int rows, int cols, float xllcorner, float yllcorner, float cellside, std::vector<float> statusCells)
+void CSVWriter::printASCII(int rows, int cols, double xllcorner, double yllcorner, double cellside, std::vector<float> statusCells)
 {
 	// Create a rowVector for printing
 	std::vector<float> rowVector;
@@ -214,7 +214,7 @@ void CSVWriter::printASCII(int rows, int cols, float xllcorner, float yllcorner,
 	}
 }
 
-void CSVWriter::printASCIIInt(int rows, int cols, float xllcorner, float yllcorner, float cellside, std::vector<int> statusCells)
+void CSVWriter::printASCIIInt(int rows, int cols, double xllcorner, double yllcorner, double cellside, std::vector<int> statusCells)
 {
 	// Create a rowVector for printing
 	std::vector<int> rowVector;

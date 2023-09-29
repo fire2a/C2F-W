@@ -65,7 +65,7 @@ public:
 	void parseIgnitionDF(std::vector<int> &ig, std::vector<std::vector<std::string>> &DF, int IgPeriods);
 
 	// Populates ForestDF
-	void parseForestDF(forestDF *frt_ptr, inputs *df_ptr, int rows, int cols, float cellside, float xllcorner, float yllcorner);
+	void parseForestDF(forestDF *frt_ptr, inputs *df_ptr, int rows, int cols, double cellside, double xllcorner, double yllcorner);
 
 	// Populate Harvested Cells
 	void parseHarvestedDF(std::unordered_map<int, std::vector<int>> &hc, std::vector<std::vector<std::string>> &DF, int HPeriods);
