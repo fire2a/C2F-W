@@ -167,7 +167,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->cellSide = get<6>(tif_landscape);
 	if (cellSide == 0)
 	{
-		cellSide = 100;
+		cellSide = 100; // default cellsize if not given
 	}
 	this->nCells = rows * cols;
 	this->areaCells = cellSide * cellSide;
@@ -202,11 +202,11 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 
 	// defining lookuptable, could be improved by receiving the name of the lookup as an argument
 	CSVReader LookUpTable(_args.InFolder + "spain_lookup_table.csv", ","); // use S&B as default
-	if (this->args.Simulator == "C")
+	if (this->args.Simulator == "FBP")
 	{
 		LookUpTable.fileName = _args.InFolder + "fbp_lookup_table.csv";
 	}
-	else if (this->args.Simulator == "K")
+	else if (this->args.Simulator == "KITRAL")
 	{
 		LookUpTable.fileName = _args.InFolder + "kitral_lookup_table.csv";
 	}
@@ -230,7 +230,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	std::cout << "Trying to populate ignition probability layer" << std::endl;
 	if (args.probIgnitionFilename != "")
 	{
-		this->CSVForest.parsePROB2(this->ignProb, this->args.probIgnitionFilename);
+		this->CSVForest.parsePROB(this->ignProb, this->args.probIgnitionFilename);
 	}
 	else
 	{
@@ -620,7 +620,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
 		this->cfbFolder = this->args.OutFolder + separator() + "CrownFractionBurn" + separator();
 	}
 	// Crown Fraction Burn Folder
-	if (this->args.OutSurfConsumption && this->args.Simulator == "C")
+	if (this->args.OutSurfConsumption && this->args.Simulator == "FBP")
 	{
 		CSVWriter CSVFolder("", "");
 		this->sfbFolder = this->args.OutFolder + "SurfFractionBurn";
@@ -1572,7 +1572,7 @@ void Cell2Fire::Results()
 	}
 
 	// Intensity
-	if ((this->args.OutSurfConsumption) && (this->args.Simulator == "C"))
+	if ((this->args.OutSurfConsumption) && (this->args.Simulator == "FBP"))
 	{
 		this->sfbFolder = this->args.OutFolder + "SurfFractionBurn" + separator();
 		std::string sfbName;

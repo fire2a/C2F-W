@@ -360,7 +360,7 @@ void parseArgs(int argc, char *argv[], arguments *args_ptr)
 	}
 
 	//--cros
-	if (cmdOptionExists(argv, argv + argc, "--cros"))
+	if (cmdOptionExists(argv, argv + argc, "--crown-fire"))
 	{
 		allow_cros = true;
 		printf("CrownROS: %d \n", allow_cros);
@@ -417,11 +417,11 @@ void parseArgs(int argc, char *argv[], arguments *args_ptr)
 		args_ptr->TotalSims = dnsims;
 
 	//--nsims
-	char *simulator_option = getCmdOption(argv, argv + argc, "--sim"); // fire-behavior
+	char *simulator_option = getCmdOption(argv, argv + argc, "--fire-behavior"); // fire-behavior
 	if (simulator_option)
 	{
 		std::string s = simulator_option;
-		if (s != "S" && s != "K" && s != "C") // SB KITRAL FBP
+		if (s != "SB" && s != "KITRAL" && s != "FBP") // SB KITRAL FBP
 		{
 			printf("%s Simulator Option not recognized or not developed, using S&B as default!!! \n", simulator_option);
 			args_ptr->Simulator = simulator_option;
@@ -435,7 +435,7 @@ void parseArgs(int argc, char *argv[], arguments *args_ptr)
 	else
 	{
 		printf("No Simulator Option Selected, using S&B as default!!! \n");
-		args_ptr->Simulator = "S";
+		args_ptr->Simulator = "SB";
 	}
 
 	//--Weather-Period-Length

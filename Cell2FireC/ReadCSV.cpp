@@ -36,8 +36,8 @@ void getTifData(std::string df_member, inputs *df_ptr, const char *pszFilename, 
 	int nYSize = poBand->GetYSize();
 	if (number_of_arguments != 27)
 	{
-		std::cout << "nars: " << number_of_arguments << std::endl;
-		printf("WARNING, change number of arguments in READCSV.cpp (getTifdataFunction) and Cells.h(inputs struct definition), ReadTifData function \n");
+		std::cout << "number of struct inputs members: " << number_of_arguments << std::endl;
+		printf("WARNING, change number of members in struct inputs in READCSV.cpp (getTifdataFunction) and Cells.h(inputs struct definition), ReadTifData function \n");
 	}
 	if (df_member == "fuelType")
 	{
@@ -215,43 +215,12 @@ std::vector<std::vector<std::string>> CSVReader::getData()
 	std::vector<std::vector<std::string>> dataList;
 	std::string line = "";
 	// Iterate through each line and split the content using delimeter
-	if (this->fileName.substr(this->fileName.find_last_of(".") + 1) == "asc")
+	while (getline(file, line))
 	{
-		int header = 0;
-		while (getline(file, line))
-		{
-			if (header < 5)
-			{
-				std::vector<std::string> vec;
-				int start = 0;
-				int end = 0;
-				while ((start = line.find_first_not_of(this->delimeter, end)) != std::string::npos)
-				{
-					end = line.find(this->delimeter, start);
-					vec.push_back(line.substr(start, end - start));
-				}
-				dataList.push_back(vec);
-				header++;
-			}
-			else
-			{
-				std::vector<std::string> vec;
-				boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
-				dataList.push_back(vec);
-			}
-		}
+		std::vector<std::string> vec;
+		boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
+		dataList.push_back(vec);
 	}
-
-	else
-	{
-		while (getline(file, line))
-		{
-			std::vector<std::string> vec;
-			boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
-			dataList.push_back(vec);
-		}
-	}
-
 	// Close the File
 	file.close();
 
@@ -355,12 +324,6 @@ void CSVReader::readTifArgs(inputs *df_ptr, arguments *args_ptr, int number_of_m
 	}
 }
 
-void CSVReader::readTifFile(inputs *df_ptr, const char *file, int raster_band = 1)
-{
-	std::cout << "deprecated" << std::endl;
-	// getTifData(df_ptr, file, raster_band);
-}
-
 /*
  * Prints data to screen inside the DF obtained from the CSV file
  */
@@ -388,174 +351,6 @@ void CSVReader::printDataTif(inputs *df, int Ncells)
 	for (int i = 0; i < Ncells; i++)
 	{
 		std::cout << "cell: " << i << " code of fuel: " << df[i].nftype << std::endl;
-	}
-}
-
-/*
- * Populates the df input objects based on the DF csv file for each row/cell (spanish version)
- */
-void CSVReader::parseDF(inputs *df_ptr, std::vector<std::vector<std::string>> &DF, arguments *args_ptr, int NCells)
-{
-	int i;
-
-	// Floats
-	float cur, elev, ws, waz, saz, cbd, cbh, ccf, ps, lat, lon, ffmc, bui, gfl;
-
-	// Integers
-	int nftype, FMC, jd, jd_min, pc, pdf, time, pattern;
-
-	// CChar
-	const char *faux;
-	std::string::size_type sz; // alias of size_t
-
-	// Loop over cells (populating per row)
-	for (i = 1; i <= NCells; i++)
-	{
-		// printf("Populating DF for cell %d\n", i);
-
-		faux = DF[i][0].append(" ").c_str();
-
-		if (DF[i][3].compare("") == 0)
-			elev = 0;
-		else
-			elev = std::stof(DF[i][3], &sz);
-
-		if (DF[i][4].compare("") == 0)
-			ws = 0;
-		else
-			ws = std::stof(DF[i][4], &sz);
-
-		if (DF[i][5].compare("") == 0)
-			waz = 0;
-		else
-			waz = std::stoi(DF[i][5], &sz) + 180.; // + 2*90;  // CHECK!!!!
-		if (waz >= 360)
-			waz = waz - 360;
-
-		if (DF[i][6].compare("") == 0)
-			ps = 0;
-		else
-			ps = std::stof(DF[i][6], &sz);
-
-		if (DF[i][7].compare("") == 0)
-			saz = 0;
-		else
-			saz = std::stof(DF[i][7], &sz);
-
-		if (DF[i][8].compare("") == 0)
-			cur = 0; // if no curing given,  DF["cur"][DF.fueltype == "O1a"] = 60.0 DF["cur"][DF.fueltype == "O1b"] = 60.0
-		else
-			cur = std::stof(DF[i][8], &sz);
-
-		if (DF[i][9].compare("") == 0)
-			cbd = 0;
-		else
-			cbd = std::stof(DF[i][9], &sz);
-
-		if (DF[i][10].compare("") == 0)
-			cbh = 0;
-		else
-			cbh = std::stof(DF[i][10], &sz);
-
-		if (DF[i][11].compare("") == 0)
-			ccf = 0;
-		else
-			ccf = std::stof(DF[i][11], &sz);
-
-		if (DF[i][12].compare("") == 0)
-			nftype = 0;
-		else
-			nftype = std::stoi(DF[i][12], &sz);
-
-		if (DF[i][13].compare("") == 0)
-			FMC = args_ptr->FMC;
-		else
-			FMC = std::stoi(DF[i][13], &sz);
-
-		// DF[i][14] stores probability
-
-		if (DF[i][15].compare("") == 0)
-			jd = 0;
-		else
-			jd = std::stoi(DF[i][15], &sz);
-
-		if (DF[i][16].compare("") == 0)
-			jd_min = 0;
-		else
-			jd_min = std::stoi(DF[i][16], &sz);
-
-		if (DF[i][17].compare("") == 0)
-			pc = 0;
-		else
-			pc = std::stoi(DF[i][17], &sz);
-
-		if (DF[i][18].compare("") == 0)
-			pdf = 0;
-		else
-			pdf = std::stoi(DF[i][18], &sz);
-
-		if (DF[i][19].compare("") == 0)
-			time = 0;
-		else
-			time = std::stoi(DF[i][19], &sz);
-
-		if (DF[i][1].compare("") == 0)
-			lat = 0;
-		else
-			lat = std::stof(DF[i][1], &sz);
-
-		if (DF[i][2].compare("") == 0)
-			lon = 0;
-		else
-			lon = std::stof(DF[i][2], &sz);
-
-		if (DF[i][20].compare("") == 0)
-			ffmc = 0;
-		else
-			ffmc = std::stof(DF[i][20], &sz);
-
-		if (DF[i][21].compare("") == 0)
-			bui = 0;
-		else
-			bui = std::stof(DF[i][21], &sz);
-
-		if (DF[i][22].compare("") == 0)
-			gfl = 0;
-		else
-			gfl = std::stof(DF[i][22], &sz);
-
-		if (DF[i][23].compare("") == 0)
-			pattern = 0;
-		else
-			pattern = 1; // std::stoi (DF[i][18], &sz);
-
-		// Set values
-		strncpy(df_ptr->fueltype, faux, 4);
-		df_ptr->elev = elev;
-		df_ptr->ws = ws;
-		df_ptr->waz = waz;
-		df_ptr->ps = ps;
-		df_ptr->saz = saz;
-		df_ptr->cur = cur;
-		df_ptr->cbd = cbd;
-		df_ptr->cbh = cbh;
-		df_ptr->ccf = ccf;
-		df_ptr->nftype = nftype;
-		df_ptr->FMC = FMC;
-		df_ptr->jd = jd;
-		df_ptr->jd_min = jd_min;
-		df_ptr->pc = pc;
-		df_ptr->pdf = pdf;
-		df_ptr->time = time;
-		df_ptr->lat = lat;
-		df_ptr->lon = lon;
-		df_ptr->ffmc = ffmc;
-		df_ptr->bui = bui;
-		df_ptr->gfl = gfl;
-		df_ptr->pattern = pattern;
-
-		// Next pointer
-		df_ptr++;
 	}
 }
 
@@ -590,36 +385,7 @@ void CSVReader::parseNDF(std::vector<int> &NFTypes, std::vector<std::vector<std:
 /*
  * Populates vector of size NCells with type number based on lookup table (Spain version)
  */
-void CSVReader::parsePROB(std::vector<float> &probabilities, std::vector<std::vector<std::string>> &DF, int NCells)
-{
-	int i;
-
-	// Ints
-	float Prob;
-
-	// CChar
-	const char *faux;
-	std::string::size_type sz; // alias of size_t
-
-	// Loop over cells (populating per row)
-	for (i = 1; i <= NCells; i++)
-	{
-		// printf("Populating DF for cell %d\n", i);
-		if (DF[i][14].compare("") == 0)
-			Prob = 1;
-		else
-			Prob = std::stof(DF[i][14], &sz);
-
-		// Set values
-		probabilities[i - 1] = Prob;
-		// probabilities.push_back(Prob);
-	}
-}
-
-/*
- * Populates vector of size NCells with type number based on lookup table (Spain version)
- */
-void CSVReader::parsePROB2(std::vector<float> &probabilities, std::string ignition_prob)
+void CSVReader::parsePROB(std::vector<float> &probabilities, std::string ignition_prob)
 {
 	GDALDatasetUniquePtr poDataset;
 	GDALAllRegister();
@@ -671,7 +437,7 @@ void CSVReader::parseWeatherDF(weatherDF *wdf_ptr, arguments *args_ptr, std::vec
 		else
 			ws = std::stof(DF[i][2], &sz);
 
-		if (args_ptr->Simulator == "K")
+		if (args_ptr->Simulator == "KITRAL")
 		{
 			if (DF[i][4].compare("") == 0)
 				tmp = 0;
@@ -683,7 +449,7 @@ void CSVReader::parseWeatherDF(weatherDF *wdf_ptr, arguments *args_ptr, std::vec
 			else
 				rh = std::stof(DF[i][5], &sz);
 		}
-		else if (args_ptr->Simulator == "C")
+		else if (args_ptr->Simulator == "FBP")
 		{
 
 			if (DF[i][6].compare("") == 0)

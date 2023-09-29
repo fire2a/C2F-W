@@ -371,15 +371,15 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 	fire_struc headstruct, backstruct, flankstruct, metrics2;
 
 	// Calculate parameters
-	if (args->Simulator == "K")
+	if (args->Simulator == "KITRAL")
 	{
 		calculate_k(&df_ptr[this->realId - 1], &df_ptr[head_cell - 1], perimeterCells, coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 	}
-	else if (args->Simulator == "S")
+	else if (args->Simulator == "SB")
 	{
 		calculate_s(&df_ptr[this->realId - 1], coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 	}
-	else if (args->Simulator == "C")
+	else if (args->Simulator == "FBP")
 	{
 		calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 	}
@@ -516,7 +516,7 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 			{
 				std::cout << "     (angle, realized ros in m/min): (" << angle << ", " << ros << ")" << std::endl;
 			}
-			if (args->Simulator == "S")
+			if (args->Simulator == "SB")
 			{
 				// Slope effect
 				float se = slope_effect(df_ptr[this->realId - 1].elev, df_ptr[nb - 1].elev, this->perimeter / 4.);
@@ -545,15 +545,15 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 				df_ptr[nb - 1].rh = wdf_ptr->rh;
 				df_ptr[nb - 1].bui = wdf_ptr->bui;
 				df_ptr[nb - 1].ffmc = wdf_ptr->ffmc;
-				if (args->Simulator == "K")
+				if (args->Simulator == "KITRAL")
 				{
 					determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
 				}
-				else if (args->Simulator == "S")
+				else if (args->Simulator == "SB")
 				{
 					determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics);
 				}
-				else if (args->Simulator == "C")
+				else if (args->Simulator == "FBP")
 				{
 					determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2);
 				}
@@ -661,16 +661,16 @@ std::vector<int> Cells::manageFireBBO(int period, std::unordered_set<int> &Avail
 	}
 	// Calculate parameters
 
-	if (args->Simulator == "K")
+	if (args->Simulator == "KITRAL")
 	{
 		calculate_k(&df_ptr[this->realId - 1], &df_ptr[head_cell - 1], perimeterCells, coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 	}
-	else if (args->Simulator == "S")
+	else if (args->Simulator == "SB")
 	{
 		calculate_s(&df_ptr[this->realId - 1], coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 	}
 
-	else if (args->Simulator == "C")
+	else if (args->Simulator == "FBP")
 	{
 		calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 	}
@@ -810,15 +810,15 @@ std::vector<int> Cells::manageFireBBO(int period, std::unordered_set<int> &Avail
 				FSCell->push_back(double(nb));
 				FSCell->push_back(double(period));
 				FSCell->push_back(ros);
-				if (args->Simulator == "K")
+				if (args->Simulator == "KITRAL")
 				{
 					determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
 				}
-				else if (args->Simulator == "S")
+				else if (args->Simulator == "SB")
 				{
 					determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics);
 				}
-				else if (args->Simulator == "C")
+				else if (args->Simulator == "FBP")
 				{
 					determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2);
 				}
@@ -925,16 +925,16 @@ bool Cells::get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs
 		head_cell = this->realId; // as it is used only for slope calculation, if it is a boundary cell, it uses the same cell, so it uses a no slope scenario
 	}
 	//  Calculate parameters
-	if (args->Simulator == "K")
+	if (args->Simulator == "KITRAL")
 	{
 		calculate_k(&(df[this->id]), &(df[head_cell - 1]), perimeterCells, coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 	}
-	else if (args->Simulator == "S")
+	else if (args->Simulator == "SB")
 	{
 		calculate_s(&(df[this->id]), coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 	}
 
-	else if (args->Simulator == "C")
+	else if (args->Simulator == "FBP")
 	{
 		calculate_fbp(&df[this->id], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 	}
@@ -1041,15 +1041,15 @@ bool Cells::ignition(int period, int year, std::vector<int> &ignitionPoints, inp
 			head_cell = this->realId; // as it is used only for slope calculation, if it is a boundary cell, it uses the same cell, so it uses a no slope scenario
 		}
 		// Calculate parameters
-		if (args->Simulator == "K")
+		if (args->Simulator == "KITRAL")
 		{
 			calculate_k(&df_ptr[this->realId - 1], &df_ptr[head_cell - 1], perimeterCells, coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 		}
-		else if (args->Simulator == "S")
+		else if (args->Simulator == "SB")
 		{
 			calculate_s(&df_ptr[this->realId - 1], coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 		}
-		else if (args->Simulator == "C")
+		else if (args->Simulator == "FBP")
 		{
 			calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 		}

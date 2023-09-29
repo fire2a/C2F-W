@@ -51,17 +51,12 @@ public:
 	void printData(std::vector<std::vector<std::string>> &DF);
 
 	void readTifArgs(inputs *df_ptr, arguments *args_ptr, int nargs, int raster_band);
-	void readTifFile(inputs *df_ptr, const char *file, int raster_band);
-
-	// Populate DF (Spanish version)
-	void parseDF(inputs *df_ptr, std::vector<std::vector<std::string>> &DF, arguments *args_ptr, int NCells);
 
 	// Populate NFtypes (Spanish version)
 	void parseNDF(std::vector<int> &NFTypes, std::vector<std::vector<std::string>> &DF, int NCells);
 
 	// Populate Probabilities
-	void parsePROB(std::vector<float> &probabilities, std::vector<std::vector<std::string>> &DF, int NCells);
-	void parsePROB2(std::vector<float> &probabilities, std::string ignition_prob);
+	void parsePROB(std::vector<float> &probabilities, std::string ignition_prob);
 
 	// Populate Weather DF (Spanish version)
 	void parseWeatherDF(weatherDF *wt_ptr, arguments *args_ptr, std::vector<std::vector<std::string>> &DF, int WPeriods);
