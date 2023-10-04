@@ -4,4 +4,8 @@
     <LocalDebuggerCommandArguments>.\Cell2Fire.exe --input-instance-folder ..\data\Hom_Fuel_101_40x40\ --sim S</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommandArguments>.\Cell2Fire.exe --input-instance-folder C:\Users\ferna\source\repos\fire2a\C2F-W\Hom_Fuel_101_40x40\ --output-folder C:\Users\ferna\source\repos\fire2a\C2F-W\Hom_Fuel_101_40x40\results</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>

@@ -70,7 +70,7 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)</OutDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -103,7 +103,16 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\dev\dirent-1.23.2\include;C:\dev\boost_1_81_0\;C:\dev\eigen-3.4.0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ferna\source\lib\dirent-1.23.2\include;C:\Users\ferna\source\lib\boost_1_81_0\;C:\Users\ferna\source\lib\eigen-3.4.0</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\ferna\source\lib\dirent-1.23.2\include;C:\Users\ferna\source\lib\boost_1_81_0\;C:\Users\ferna\source\lib\eigen-3.4.0</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -112,7 +121,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Cell2Fire.cpp" />
-    <ClCompile Include="CellsFBP.cpp" />
+    <ClCompile Include="Cells.cpp" />
     <ClCompile Include="Ellipse.cpp" />
     <ClCompile Include="Forest.cpp" />
     <ClCompile Include="FuelModelFBP.cpp" />
@@ -121,12 +130,12 @@
     <ClCompile Include="Lightning.cpp" />
     <ClCompile Include="ReadArgs.cpp" />
     <ClCompile Include="ReadCSV.cpp" />
-    <ClCompile Include="SpottingFBP.cpp" />
+    <ClCompile Include="Spotting.cpp" />
     <ClCompile Include="WriteCSV.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cell2Fire.h" />
-    <ClInclude Include="CellsFBP.h" />
+    <ClInclude Include="Cells.h" />
     <ClInclude Include="Ellipse.h" />
     <ClInclude Include="Forest.h" />
     <ClInclude Include="FuelModelFBP.h" />
@@ -135,7 +144,7 @@
     <ClInclude Include="Lightning.h" />
     <ClInclude Include="ReadArgs.h" />
     <ClInclude Include="ReadCSV.h" />
-    <ClInclude Include="SpottingFBP.h" />
+    <ClInclude Include="Spotting.h" />
     <ClInclude Include="WriteCSV.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
