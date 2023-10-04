@@ -31,7 +31,7 @@
 *.lib
 
 # Executables
-*.exe
+#*.exe
 *.out
 *.app
 # Byte-compiled / optimized / DLL files
