@@ -3,13 +3,16 @@ __version__ = "2.0"
 __author__ = "Cristobal Pais"
 __authors__ = ["Cristobal Pais", "David Palacios", "Fernando Badilla"]
 
-import sys
 import os
 import subprocess
+import sys
 from argparse import ArgumentParser
+from pathlib import Path
+from platform import system as platform_system
+
 # from fire2a.managedata import GenDataFile
 import DataGeneratorC as DataGenerator
-from pathlib import Path
+
 
 def parser():
     parser = ArgumentParser()
@@ -330,13 +333,14 @@ def generateDataC(args):
     if os.path.isfile(dataName) is False:
         print("Generating Data.csv File...", flush=True)
         # GenDataFile(args.InFolder, args.Simulator)
-        DataGenerator.GenDataFile(args.InFolder,args.Simulator)
+        DataGenerator.GenDataFile(args.InFolder, args.Simulator)
 
 
 def run(args):
     # Parse args for calling C++ via subprocess
+    ext = ".exe" if platform_system() == "Windows" else ""
     execArray = [
-        str(Path('Cell2Fire').absolute()),
+        str(Path("Cell2Fire" + ext).absolute()),
         "--input-instance-folder",
         args.InFolder,
         "--output-folder",
@@ -405,7 +409,7 @@ def run(args):
 
     # Perform the call
     print("Calling Cell2Fire simulator...", flush=True)
-    with open(LogName, 'w') as output:
+    with open(LogName, "w") as output:
         proc = subprocess.Popen(execArray, stdout=output)
         proc.communicate()
     proc.wait()
@@ -434,6 +438,7 @@ def main(argv=None):
 
     # C++ init and run
     run(args)
+
 
 if __name__ == "__main__":
     sys.exit(main())
