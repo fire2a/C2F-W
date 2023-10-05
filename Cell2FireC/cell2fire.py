@@ -7,7 +7,8 @@ import sys
 import os
 import subprocess
 from argparse import ArgumentParser
-from fire2a.managedata import GenDataFile
+# from fire2a.managedata import GenDataFile
+import DataGeneratorC as DataGenerator
 from pathlib import Path
 
 def parser():
@@ -328,8 +329,8 @@ def generateDataC(args):
     dataName = os.path.join(args.InFolder, "Data.csv")
     if os.path.isfile(dataName) is False:
         print("Generating Data.csv File...", flush=True)
-        # DataGenerator.GenDataFile(args.InFolder,args.Simulator)
-        GenDataFile(args.InFolder, args.Simulator)
+        # GenDataFile(args.InFolder, args.Simulator)
+        DataGenerator.GenDataFile(args.InFolder,args.Simulator)
 
 
 def run(args):
