@@ -397,7 +397,7 @@ def run(args):
         "--EFactor",
         str(args.EFactor),
     ]
-    print("execArray:", execArray)
+    print("C2Fcmd:", ' '.join(execArray))
 
     # Output log
     if args.OutFolder is not None:
