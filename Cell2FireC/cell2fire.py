@@ -347,10 +347,12 @@ def get_ext() -> str:
     if platform_system() == "Windows":
         ext = ".exe"
     else:
-        ext = f"_{platform_system()}_{platform_machine()}"
+        ext = f".{platform_system()}.{platform_machine()}"
 
-    if ext not in [".exe", "_Linux_x86_64", "_Darwin_x86_64"]:
+    if ext not in [".exe", ".Linux.x86_64", ".Darwin.arm64", ".Darwin.x86_64"]:
         print(f"Untested platform:", ext, file=sys.stderr)
+    if ext not in [".exe", ".Darwin.arm64"]:
+        print(f"Build not automated, may be using old binary: {ext}", ext, file=sys.stderr)
 
     return ext
 
