@@ -21,7 +21,9 @@ jobs:
         make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
         # echo "fin make"
-        mv Cell2Fire Cell2Fire.Linux.x86_64
+        ext=`python -c "import platform;print(f'.{platform.system()}_{platform.machine()}')"`
+        mv Cell2Fire Cell2Fire$ext
+        # mv Cell2Fire Cell2Fire$ext.Linux.x86_64
         # python3 -c "import platform; print(platform.uname())" 
         # ls Cell2*
         # echo "fin"
@@ -31,7 +33,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2FireC/Cell2Fire.Linux.x86_64
+        path: Cell2FireC/Cell2Fire.Linux_x86_64
 
   macos_build:
     runs-on: macos-latest
@@ -50,7 +52,9 @@ jobs:
         make clean -f makefile.macos-latest
         make -f makefile.macos-latest
         # echo "fin make"
-        mv Cell2Fire Cell2Fire.Darwin.x86_64
+        ext=`python -c "import platform;print(f'.{platform.system()}_{platform.machine()}')"`
+        mv Cell2Fire Cell2Fire$ext
+        # mv Cell2Fire Cell2Fire.Darwin_x86_64
         # python3 -c "import platform; print(platform.uname())" 
         # which brew
         # ls Cell2*
@@ -61,7 +65,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2FireC/Cell2Fire.Darwin.x86_64
+        path: Cell2FireC/Cell2Fire.Darwin_x86_64
 
   release:
     needs: [ubuntu_build, macos_build]
@@ -76,8 +80,8 @@ jobs:
     - name: Doit
       run: |
         git archive --prefix=C2F/Cell2FireC/ \
-          --add-file=binaries/Cell2Fire.Linux.x86_64 \
-          --add-file=binaries/Cell2Fire.Darwin.x86_64 \
+          --add-file=binaries/Cell2Fire.Linux_x86_64 \
+          --add-file=binaries/Cell2Fire.Darwin_x86_64 \
           --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 

@@ -8,6 +8,7 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+from platform import machine as platform_machine
 from platform import system as platform_system
 
 # from fire2a.managedata import GenDataFile
@@ -33,7 +34,11 @@ def parser():
     )
     # Integers
     parser.add_argument(
-        "--sim-years", help="Number of years per simulation (default 1)", dest="sim_years", type=int, default=1
+        "--sim-years",
+        help="Number of years per simulation (default 1)",
+        dest="sim_years",
+        type=int,
+        default=1,
     )
     parser.add_argument("--nsims", help="Total number of simulations (replications)", dest="nsims", type=int, default=1)
     parser.add_argument("--seed", help="Seed for random numbers (default is 123)", dest="seed", type=int, default=123)
@@ -336,11 +341,25 @@ def generateDataC(args):
         DataGenerator.GenDataFile(args.InFolder, args.Simulator)
 
 
+def get_ext() -> str:
+    """Get the extension for the executable file based on the platform system and machine"""
+    ext = ""
+    if platform_system() == "Windows":
+        ext = ".exe"
+    else:
+        ext = f"_{platform_system()}_{platform_machine()}"
+
+    if ext not in [".exe", "_Linux_x86_64", "_Darwin_x86_64"]:
+        print(f"Untested platform:", ext, file=sys.stderr)
+
+    return ext
+
+
 def run(args):
     # Parse args for calling C++ via subprocess
-    ext = ".exe" if platform_system() == "Windows" else ""
+
     execArray = [
-        str(Path("Cell2Fire" + ext).absolute()),
+        str(Path("Cell2Fire" + get_ext()).absolute()),
         "--input-instance-folder",
         args.InFolder,
         "--output-folder",
@@ -397,7 +416,7 @@ def run(args):
         "--EFactor",
         str(args.EFactor),
     ]
-    print("C2Fcmd:", ' '.join(execArray))
+    print("C2Fcmd:", " ".join(execArray))
 
     # Output log
     if args.OutFolder is not None:
