@@ -8,13 +8,29 @@ Originally this is a fork of the wildfire simulator [Cell2Fire](https://github.c
 [python requirements](https://raw.githubusercontent.com/fdobad/C2FK/test/requirements.txt)
 
 # Usage
-In order to run the simulator and process the results, the following command can be used:
+- Easy: Use through QGIS GUI
+- Moderate: Download a release
+- Hard: Clone & compile.
+
+## Graphical User Interface Release
+Check the [fire2a/fire-analytics-qgis-processing-toolbox-plugin](https://github.com/fire2a/fire-analytics-qgis-processing-toolbox-plugin) repo
+
+## Python CLI 
+### new (no dependencies)
 ```
-$ python main.py --input-instance-folder data/Vilopriu_2013/ --output-folder results/test --sim-years 1 --nsims 10 --grids --weather rows --nweathers 1 --Fire-Period-Length 1.0 --output-messages --ROS-CV 0.8 --seed 123 --stats --allPlots --sim S
+cd Cell2FireC/
+python cell2fire.py --input-instance-folder --sim ...
+python cell2fire.py -h
+```
+### old (unmaintained)
+Chained with many post processors python scripts: for plotting, firebreak heuristics, additional statistics and many more unmaintained features in the `Cell2Fire/` directory.
+```
+pip install -r requirements.txt
+python main.py --input-instance-folder data/Vilopriu_2013/ --output-folder results/test --sim-years 1 --nsims 10 --grids --weather rows --nweathers 1 --Fire-Period-Length 1.0 --output-messages --ROS-CV 0.8 --seed 123 --stats --allPlots --sim S
 ```
 For the full list of arguments and their explanation use:
 ```
-$ python main.py -h
+python main.py -h
 ```
 __BEWARE Beta__ version, some arguments could be deprecated, always check full list of arguments if an argument is not accepted
 
