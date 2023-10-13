@@ -21,7 +21,7 @@ jobs:
         make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
         # echo "fin make"
-        ext=`python -c "import platform;print(f'.{platform.system()}_{platform.machine()}')"`
+        ext=`python3 -c "import platform;print(f'.{platform.system()}_{platform.machine()}')"`
         mv Cell2Fire Cell2Fire$ext
         # mv Cell2Fire Cell2Fire$ext.Linux.x86_64
         # python3 -c "import platform; print(platform.uname())" 
@@ -52,7 +52,7 @@ jobs:
         make clean -f makefile.macos-latest
         make -f makefile.macos-latest
         # echo "fin make"
-        ext=`python -c "import platform;print(f'.{platform.system()}_{platform.machine()}')"`
+        ext=`python3 -c "import platform;print(f'.{platform.system()}_{platform.machine()}')"`
         mv Cell2Fire Cell2Fire$ext
         # mv Cell2Fire Cell2Fire.Darwin_x86_64
         # python3 -c "import platform; print(platform.uname())" 
