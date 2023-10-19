@@ -351,7 +351,7 @@ def get_ext() -> str:
 
     if ext not in [".exe", ".Linux.x86_64", ".Darwin.arm64", ".Darwin.x86_64"]:
         print(f"Untested platform:", ext, file=sys.stderr)
-    if ext not in [".exe", ".Darwin.arm64"]:
+    if ext in [".exe", ".Darwin.arm64"]:
         print(f"Build not automated, may be using old binary: {ext}", ext, file=sys.stderr)
 
     return ext
