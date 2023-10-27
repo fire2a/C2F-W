@@ -3,27 +3,26 @@ C2F-W novelty is supporting multiple fuel and weather models, currently [Kitral]
 
 Originally this is a fork of the wildfire simulator [Cell2Fire](https://github.com/cell2fire/Cell2Fire/) developed by Jaime Carrasco, Cristobal Pais and David Woodroof.
 
-[c++ installation & docs](https://fdobad.github.io/docs/docs/Cell2Fire/README.html)
-
-[python requirements](https://raw.githubusercontent.com/fdobad/C2FK/test/requirements.txt)
-
 # Usage
 - Easy: Use through QGIS GUI
 - Moderate: Download a release
-- Hard: Clone & compile.
+- Hard: Clone & [compile](https://fire2a.github.io/docs/docs/Cell2Fire/README.html)
 
-## Graphical User Interface Release
-Check the [fire2a/fire-analytics-qgis-processing-toolbox-plugin](https://github.com/fire2a/fire-analytics-qgis-processing-toolbox-plugin) repo
+## Easy: Graphical User Interface for QGIS
+- Add [this](https://fire2a.github.io/fire-analytics-qgis-processing-toolbox-plugin/plugins.xml) as plugin server repo in QGIS
+- How to [fire2a.io/docs](https://fire2a.github.io/docs/)
+- Src [fire2a/fire-analytics-qgis-processing-toolbox-plugin](https://github.com/fire2a/fire-analytics-qgis-processing-toolbox-plugin) repo
 
-## Python CLI 
-### new (no dependencies)
+## Moderate: Python CLI 
+1. Download a release from the right vertical tab bar, unzip
+2. A: new (no dependencies)
 ```
 cd Cell2FireC/
 python cell2fire.py --input-instance-folder --sim ...
 python cell2fire.py -h
 ```
-### old (unmaintained)
-Chained with many post processors python scripts: for plotting, firebreak heuristics, additional statistics and many more unmaintained features in the `Cell2Fire/` directory.
+2. B: old (unmaintained)  
+Chained with many post processors python scripts: for plotting, firebreak heuristics, additional statistics and many more __unmaintained__ features in the `Cell2Fire/` directory.
 ```
 pip install -r requirements.txt
 python main.py --input-instance-folder data/Vilopriu_2013/ --output-folder results/test --sim-years 1 --nsims 10 --grids --weather rows --nweathers 1 --Fire-Period-Length 1.0 --output-messages --ROS-CV 0.8 --seed 123 --stats --allPlots --sim S
@@ -32,7 +31,6 @@ For the full list of arguments and their explanation use:
 ```
 python main.py -h
 ```
-__BEWARE Beta__ version, some arguments could be deprecated, always check full list of arguments if an argument is not accepted
 
 # New simulator option
 To use the correspondent version of the simulator, choose version with the following cli option:
