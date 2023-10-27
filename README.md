@@ -21,6 +21,14 @@ cd Cell2FireC/
 python cell2fire.py --input-instance-folder --sim ...
 python cell2fire.py -h
 ```
+Info about compiled binaries: Main platforms are included in the release, and named with the extension:
+```
+... make
+ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
+mv Cell2Fire Cell2Fire$ext
+```
+
+
 2. B: old (unmaintained)  
 Chained with many post processors python scripts: for plotting, firebreak heuristics, additional statistics and many more __unmaintained__ features in the `Cell2Fire/` directory.
 ```
