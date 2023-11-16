@@ -3,7 +3,7 @@ CPPFLAGS="-I/user/local/llvm/include"
 CC = g++-12
 MPCC = g++-12
 OPENMP = -fopenmp
-CFLAGS = -std=c++11 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fopenmp
+CFLAGS = -std=c++17 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fopenmp
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
 TARGETS = Cell2Fire
 all:	$(TARGETS)
@@ -34,4 +34,4 @@ FuelModelKitral.o: FuelModelKitral.cpp FuelModelKitral.h Cells.h
 FuelModelFBP.o: FuelModelFBP.cpp FuelModelFBP.h Cells.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelFBP.cpp 
 clean:
-	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o Cells.o Cell2Fire Spotting.o WriteCSV.o Ellipse.o FuelModelFBP.o FuelModelKitral.o FuelModelSpain.o *.gch
+	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o Cells.o Cell2Fire Spotting.o WriteCSV.o Ellipse.o FuelModelFBP.o FuelModelKitral.o FuelModelSpain.o*.gch

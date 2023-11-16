@@ -597,7 +597,6 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		}
 		reverse(weather_name.begin(), weather_name.end());
 		WeatherHistory.push_back(weather_name);
-
 		// Populate the wdf objects
 		this->CSVWeather.parseWeatherDF(wdf_ptr,this->args_ptr, this->WeatherDF, WPeriods);
 		//DEBUGthis->CSVWeather.printData(this->WeatherDF);
@@ -609,7 +608,6 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		//DEBUGstd::cout << "MinutesPerWP: " << this->args.MinutesPerWP << std::endl;
 		//DEBUGstd::cout << "FirePeriodLen: " << this->args.FirePeriodLen << std::endl;
 		//DEBUGstd::cout << "MaxfirePeriods: " << this->args.MaxFirePeriods << std::endl;
-
 		if (this->args.MaxFirePeriods > maxFP) {
 			this->args.MaxFirePeriods = maxFP;
 			if (this->args.verbose) {
@@ -1672,7 +1670,7 @@ int main(int argc, char* argv[]) {
 	arguments args;
 	arguments* args_ptr = &args;
 	parseArgs(argc, argv, args_ptr);
-	//printArgs(args);
+	printArgs(args);
 
 	// Random generator and distributions
 	//std::default_random_engine generator (args.seed);
@@ -1726,6 +1724,7 @@ int main(int argc, char* argv[]) {
 		std::default_random_engine& generator = generators[TID]; //generators[args.nthreads]
 
 		// Random generator and distributions
+		printf("\n N weathers: %d \n", args.NWeatherFiles);
 		std::uniform_int_distribution<int> udistribution(1, args.NWeatherFiles);		// Get random weather
 		std::normal_distribution<double> ndistribution(0.0, 1.0);  							// ROSRV
 		// Random numbers (weather file and ROS-CV)

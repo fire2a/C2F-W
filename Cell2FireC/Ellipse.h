@@ -8,7 +8,7 @@
 #include <unordered_set>
 #include <string>
 #include <vector>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 using namespace Eigen;
 using namespace std;

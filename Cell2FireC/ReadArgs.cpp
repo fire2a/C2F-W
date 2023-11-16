@@ -1,12 +1,15 @@
 // Inclusions
 #include "ReadArgs.h"
-
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <iterator>
 #include <string>
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <initializer_list>
+
 
 inline char separator()
 {
@@ -196,7 +199,8 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	int dsim_years = 1;
 	int dnsims = 1;
 	int dweather_period_len = 60;
-	int dweather_files = 1;
+	std::string input_string = input_folder;
+	int dweather_files = countWeathers(input_string + "/Weathers");
 	int dmax_fire_periods = 10000000;
 	int dseed = 123;
 	int diradius = 0;
@@ -267,10 +271,12 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	//--nweathers
 	char * nweathers = getCmdOption(argv, argv + argc, "--nweathers");
     if (nweathers){
-        printf("NWeatherFiles: %s \n", nweathers);
+        printf("NWeatherFiles: %s Hola\n", nweathers);
 		args_ptr->NWeatherFiles = std::stoi (nweathers ,&sz); 
     }
-	else args_ptr->NWeatherFiles = dweather_files;
+	else{
+		args_ptr->NWeatherFiles = dweather_files;
+	} 
 	
 	//--Fire-Period-Length
 	char * input_PeriodLen = getCmdOption(argv, argv + argc, "--Fire-Period-Length");
@@ -520,4 +526,28 @@ void printArgs(arguments args){
 
 	
 	
+}
+
+int countWeathers(std::string directory_path){
+    /*
+    Input:
+    std:string directory_path -> path to directory where weathers are stored. 
+
+    Output:
+    int fileCount -> number of files counted
+    */
+    // A directory iterator is created from the path
+    auto dirIter{std::filesystem::directory_iterator(directory_path)};
+    // File counter set to 0
+    int fileCount = 0;
+    // Complete directory is checked
+    for (auto& entry : dirIter)
+    {
+        if (entry.is_regular_file())
+        {
+            ++fileCount;
+        }
+    }
+    // Number of files is returned
+    return fileCount;
 }
