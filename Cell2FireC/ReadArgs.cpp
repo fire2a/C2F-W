@@ -535,7 +535,7 @@ void printArgs(arguments args){
 }
 
 
-#if defined TARGET_OS_X
+#if defined __APPLE__
 std::string get_stem(const std::__fs::filesystem::path& p) { return p.stem().string().substr(0,7); }
 std::string get_suffix(const std::__fs::filesystem::path& p) { return p.extension().string(); }
 #else
@@ -551,7 +551,7 @@ int countWeathers(std::string directory_path){
     int fileCount -> number of files counted
     */
     // A directory iterator is created from the path
-#if defined TARGET_OS_X
+#if defined __APPLE__
     auto dirIter{std::__fs::filesystem::directory_iterator(directory_path)};
 #else
     auto dirIter{std::filesystem::directory_iterator(directory_path)};
