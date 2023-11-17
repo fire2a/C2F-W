@@ -547,7 +547,7 @@ int countWeathers(std::string directory_path){
     {
 	// std::cout << get_stem(entry.path()) << '\n';
 	// std::cout << get_suffix(entry.path()) << '\n';
-        if (entry.is_regular_file() and get_stem(entry.path()) == "Weather" and get_suffix(entry.path()) == ".csv")
+        if (entry.is_regular_file() && get_stem(entry.path()) == "Weather" && get_suffix(entry.path()) == ".csv")
         {
             ++fileCount;
         }
