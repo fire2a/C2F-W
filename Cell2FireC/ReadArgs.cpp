@@ -199,6 +199,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	int dsim_years = 1;
 	int dnsims = 1;
 	int dweather_period_len = 60;
+	// mover esto a if(nweathers) line 280 ?
 	std::string input_string = input_folder;
 	int dweather_files = countWeathers(input_string + "/Weathers");
 	int dmax_fire_periods = 10000000;
@@ -271,7 +272,6 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	//--nweathers
 	char * nweathers = getCmdOption(argv, argv + argc, "--nweathers");
     if (nweathers){
-        printf("NWeatherFiles: %s Hola\n", nweathers);
 		args_ptr->NWeatherFiles = std::stoi (nweathers ,&sz); 
     }
 	else{
@@ -528,6 +528,8 @@ void printArgs(arguments args){
 	
 }
 
+std::string get_stem(const std::filesystem::path& p) { return p.stem().string().substr(0,7); }
+std::string get_suffix(const std::filesystem::path& p) { return p.extension().string(); }
 int countWeathers(std::string directory_path){
     /*
     Input:
@@ -543,11 +545,16 @@ int countWeathers(std::string directory_path){
     // Complete directory is checked
     for (auto& entry : dirIter)
     {
-        if (entry.is_regular_file())
+	// std::cout << get_stem(entry.path()) << '\n';
+	// std::cout << get_suffix(entry.path()) << '\n';
+        if (entry.is_regular_file() and get_stem(entry.path()) == "Weather" and get_suffix(entry.path()) == ".csv")
         {
             ++fileCount;
         }
     }
     // Number of files is returned
+    // FIXME en el print general del algoritmo esto no deberia salir entremedio de los args, sino en otro lado
+    std::cout << "Number of Weather Files Counted: " << fileCount << '\n';
     return fileCount;
 }
+

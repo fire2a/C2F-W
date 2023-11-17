@@ -34,4 +34,4 @@ FuelModelKitral.o: FuelModelKitral.cpp FuelModelKitral.h Cells.h
 FuelModelFBP.o: FuelModelFBP.cpp FuelModelFBP.h Cells.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelFBP.cpp 
 clean:
-	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o Cells.o Cell2Fire Spotting.o WriteCSV.o Ellipse.o FuelModelFBP.o FuelModelKitral.o FuelModelSpain.o*.gch
+	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o Cells.o Cell2Fire Spotting.o WriteCSV.o Ellipse.o FuelModelFBP.o FuelModelKitral.o FuelModelSpain.o *.gch
