@@ -199,9 +199,6 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	int dsim_years = 1;
 	int dnsims = 1;
 	int dweather_period_len = 60;
-	// mover esto a if(nweathers) line 280 ?
-	std::string input_string = input_folder;
-	int dweather_files = countWeathers(input_string + "/Weathers");
 	int dmax_fire_periods = 10000000;
 	int dseed = 123;
 	int diradius = 0;
@@ -275,7 +272,16 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 		args_ptr->NWeatherFiles = std::stoi (nweathers ,&sz); 
     }
 	else{
-		args_ptr->NWeatherFiles = dweather_files;
+		//std::cout << "No NWeatherFiles specified " << input_weather << std::endl;
+		if (std::string(input_weather) == "random") {
+			//std::cout << "Counting" << std::endl;
+			std::string input_string = input_folder;
+			args_ptr->NWeatherFiles = countWeathers(input_string + "/Weathers");
+		}
+		else {
+			///std::cout << "No NWeatherFiles specified 1 default" << std::endl;
+			args_ptr->NWeatherFiles = 1;
+		}
 	} 
 	
 	//--Fire-Period-Length
