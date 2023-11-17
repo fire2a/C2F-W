@@ -534,8 +534,8 @@ void printArgs(arguments args){
 	
 }
 
-std::string get_stem(const std::filesystem::path& p) { return p.stem().string().substr(0,7); }
-std::string get_suffix(const std::filesystem::path& p) { return p.extension().string(); }
+std::string get_stem(const std::experimental::filesystem::path& p) { return p.stem().string().substr(0,7); }
+std::string get_suffix(const std::experimental::filesystem::path& p) { return p.extension().string(); }
 int countWeathers(std::string directory_path){
     /*
     Input:
@@ -545,7 +545,7 @@ int countWeathers(std::string directory_path){
     int fileCount -> number of files counted
     */
     // A directory iterator is created from the path
-    auto dirIter{std::filesystem::directory_iterator(directory_path)};
+    auto dirIter{std::experimental::filesystem::directory_iterator(directory_path)};
     // File counter set to 0
     int fileCount = 0;
     // Complete directory is checked
