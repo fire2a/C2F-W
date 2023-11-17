@@ -47,7 +47,7 @@ def parser():
         help="Max index of weather files to sample for the random version (inside the Weathers Folder)",
         dest="nweathers",
         type=int,
-        default=1,
+        nargs="?",
     )
     parser.add_argument(
         "--nthreads", help="Number of threads to run the simulation", dest="nthreads", type=int, default=1
@@ -387,8 +387,8 @@ def run(args):
         "--out-cfb" if (args.OutCrownConsumption) else "",
         "--weather",
         args.WeatherOpt,
-        "--nweathers",
-        str(args.nweathers),
+        "--nweathers" if args.nweathers is not None else "",
+        str(args.nweathers) if args.nweathers is not None else "",
         "--ROS-CV",
         str(args.ROS_CV),
         "--IgnitionRad",
