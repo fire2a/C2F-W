@@ -1,0 +1,41 @@
+name: windows build
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+    windows_build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set platform system machine
+      shell: cmd
+      run: |
+        echo "Hello World!"
+        echo %PATH%
+        echo cd
+        echo "suffix=$(python3 -c 'import platform;print(platform.system()+"."+platform.machine())')" >> $GITHUB_ENV
+        choco install boost-msvc-12 eigen
+        # git clone https://gitlab.com/libeigen/eigen
+        # https://github.com/tronkko/dirent
+
+    - name: Compile Visual Studio project with MSBuild
+      working-directory: Cell2FireC
+      shell: cmd
+      run: |
+        where msbuild
+        ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild' }}
+        #    cd Cell2FireC
+        msbuild Cell2Fire.sln
+        echo "Bye World!"
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: binaries
+        path: Cell2FireC/Cell2Fire.exe
+
