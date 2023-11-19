@@ -57,11 +57,11 @@ jobs:
         echo "!!!2"
         dir Cell2FireC\include\tronkko-dirent-a3aeddf
         echo "!!!3"
-        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\eigen -Target C:\ProgramData\chocolatey\eigen
-        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\boost-msvc-12 -Target C:\ProgramData\chocolatey\boost-msvc-12
+        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\eigen -Target C:\ProgramData\chocolatey\lib\eigen
+        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\boost-msvc-12 -Target C:\ProgramData\chocolatey\lib\boost-msvc-12
         echo "!!!4"
+        dir C:\ProgramData\chocolatey\lib\eigen
         dir Cell2FireC\include\eigen
-        dir C:\ProgramData\chocolatey\eigen
         echo "!!!5"
         dir Cell2FireC\include\boost-msvc-12
         echo "Bye"
