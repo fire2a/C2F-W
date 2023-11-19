@@ -103,7 +103,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\ferna\source\lib\dirent-1.23.2\include;C:\Users\ferna\source\lib\boost_1_81_0\;C:\Users\ferna\source\lib\eigen-3.4.0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>dirent-1.24\include;C:\ProgramData\chocolatey\packages\boost_1_58_0\;C:\ProgramData\chocolatey\packages\eigen-3.4.0</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
     </ClCompile>
     <Link>
