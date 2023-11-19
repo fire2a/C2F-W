@@ -1,8 +1,8 @@
 name: cleanup caches by a branch
 on:
-  push:
-    branches:
-      - buildwindows
+  # push:
+  #   branches:
+  #     - buildwindows
   workflow_dispatch:
 
 jobs:
