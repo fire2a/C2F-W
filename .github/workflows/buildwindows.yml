@@ -15,55 +15,57 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-
-    - name: Cache Boost and Eigen packages
-      uses: actions/cache@v3
-      id: cache-choco
-      with:
-        path: C:\ProgramData\chocolatey\packages
-        key: ${{ runner.os }}-boost-eigen-${{ hashFiles('Cell2FireC/Cell2Fire.sln') }}
-        restore-keys: ${{ runner.os }}-boost-eigen-
-
-    - name: Install Boost and Eigen packages (if not cached)
-      if: steps.cache-choco.outputs.cache-hit != 'true'
-      env:
-        CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
-      run: choco install boost-msvc-12 eigen
-
-    - name: get dirent release
-      uses: robinraju/release-downloader@v1.8
-      with:
-        repository: "tronkko/dirent"
-        latest: true
-        out-file-path: "Cell2FireC/dirent"
-        extract: true
-        zipBall: true
-
-    - name: Set platform system machine
-      shell: cmd
       run: |
-        echo "Hello World!"
-        dir Cell2FireC
-        dir Cell2FireC\include\tronkko-dirent-a3aeddf
-        REM echo %PATH%
-        REM echo %cd%
-        REM echo "suffix=$(python3 -c 'import platform;print(platform.system()+"."+platform.machine())')" >> $GITHUB_ENV
-        echo `python3 -c 'import platform;print(platform.system()+"."+platform.machine())')`
         dir C:\ProgramData\chocolatey\packages
 
-    - name: Compile Visual Studio project with MSBuild
-      working-directory: Cell2FireC
-      shell: cmd
-      run: |
-        where msbuild
-        ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild' }}
-        REM    cd Cell2FireC
-        msbuild Cell2Fire.sln
-        echo "Bye World!!"
+        # - name: Cache Boost and Eigen packages
+        #   uses: actions/cache@v3
+        #   id: cache-choco
+        #   with:
+        #     path: C:\ProgramData\chocolatey\packages
+        #     key: ${{ runner.os }}-boost-eigen-${{ hashFiles('Cell2FireC/Cell2Fire.sln') }}
+        #     restore-keys: ${{ runner.os }}-boost-eigen-
 
-    - name: Upload
-      uses: actions/upload-artifact@v3
-      with:
-        name: binaries
-        path: Cell2FireC/Cell2Fire.exe
+        # - name: Install Boost and Eigen packages (if not cached)
+        #   if: steps.cache-choco.outputs.cache-hit != 'true'
+        #   env:
+        #     CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
+        #   run: choco install boost-msvc-12 eigen
+
+        # - name: get dirent release
+        #   uses: robinraju/release-downloader@v1.8
+        #   with:
+        #     repository: "tronkko/dirent"
+        #     latest: true
+        #     out-file-path: "Cell2FireC/dirent"
+        #     extract: true
+        #     zipBall: true
+
+        # - name: Set platform system machine
+        #   shell: cmd
+        #   run: |
+        #     echo "Hello World!"
+        #     dir Cell2FireC
+        #     dir Cell2FireC\include\tronkko-dirent-a3aeddf
+        #     REM echo %PATH%
+        #     REM echo %cd%
+        #     REM echo "suffix=$(python3 -c 'import platform;print(platform.system()+"."+platform.machine())')" >> $GITHUB_ENV
+        #     echo `python3 -c 'import platform;print(platform.system()+"."+platform.machine())')`
+        #     dir C:\ProgramData\chocolatey\packages
+
+        # - name: Compile Visual Studio project with MSBuild
+        #   working-directory: Cell2FireC
+        #   shell: cmd
+        #   run: |
+        #     where msbuild
+        #     ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild' }}
+        #     REM    cd Cell2FireC
+        #     msbuild Cell2Fire.sln
+        #     echo "Bye World!!"
+
+        # - name: Upload
+        #   uses: actions/upload-artifact@v3
+        #   with:
+        #     name: binaries
+        #     path: Cell2FireC/Cell2Fire.exe
 
