@@ -16,6 +16,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Cache Boost and Eigen packages
+      uses: actions/cache@v2
+      with:
+        path: C:\ProgramData\chocolatey\packages
+        key: ${{ runner.os }}-boost-eigen-${{ hashFiles('Cell2Fire.sln') }}
+        restore-keys: ${{ runner.os }}-boost-eigen-
+
+    - name: Install Boost and Eigen packages (if not cached)
+      env:
+        CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
+        run: choco install boost-msvc-12 eigen
+
     - name: Set platform system machine
       shell: cmd
       run: |
@@ -23,8 +35,9 @@ jobs:
         echo %PATH%
         echo cd
         echo "suffix=$(python3 -c 'import platform;print(platform.system()+"."+platform.machine())')" >> $GITHUB_ENV
-        choco install boost-msvc-12 eigen
-        # git clone https://gitlab.com/libeigen/eigen
+        choco install dirent
+        type C:\ProgramData\chocolatey\logs\chocolatey.log
+        REM git clone https://gitlab.com/libeigen/eigen
         # https://github.com/tronkko/dirent
 
     - name: Compile Visual Studio project with MSBuild
