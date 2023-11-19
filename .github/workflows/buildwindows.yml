@@ -17,14 +17,14 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Cache Boost and Eigen packages
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: C:\ProgramData\chocolatey\packages
         key: ${{ runner.os }}-boost-eigen-${{ hashFiles('Cell2Fire.sln') }}
         restore-keys: ${{ runner.os }}-boost-eigen-
 
     - name: Install Boost and Eigen packages (if not cached)
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       env:
         CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
         run: choco install boost-msvc-12 eigen
