@@ -24,6 +24,7 @@ jobs:
         restore-keys: ${{ runner.os }}-boost-eigen-
 
     - name: Install Boost and Eigen packages (if not cached)
+      uses: actions/cache@v2
       env:
         CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
         run: choco install boost-msvc-12 eigen
@@ -46,7 +47,7 @@ jobs:
       run: |
         where msbuild
         ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild' }}
-        #    cd Cell2FireC
+        REM    cd Cell2FireC
         msbuild Cell2Fire.sln
         echo "Bye World!!"
 
