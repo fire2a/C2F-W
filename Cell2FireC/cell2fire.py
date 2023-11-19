@@ -429,11 +429,30 @@ def run(args):
         LogName = os.path.join(args.InFolder, "LogFile.txt")
 
     # Perform the call
+    # TODO : 
+    #   - doesn't differentiate between stoud & err
+    #   - doesn't return 1 or 0 on fail success
+    # enhance with queues https://stackoverflow.com/questions/2804543/read-subprocess-stdout-line-by-line
     print("Calling Cell2Fire simulator...", flush=True)
+
     with open(LogName, "w") as output:
-        proc = subprocess.Popen(execArray, stdout=output)
-        proc.communicate()
-    proc.wait()
+        proc = subprocess.Popen(execArray, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+
+        while True:
+            line = proc.stdout.readline()
+            if not line and proc.poll() is not None:
+                break
+
+            print(line, end='', flush=True)
+            output.write(line)
+            output.flush()
+
+        proc.wait()
+
+    # with open(LogName, "w") as output:
+    #     proc = subprocess.Popen(execArray, stdout=output)
+    #     proc.communicate()
+    # proc.wait()
 
     # Perform the call
     # print("Calling Cell2Fire simulator...", flush=True)
