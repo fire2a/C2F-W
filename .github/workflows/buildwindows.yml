@@ -2,6 +2,9 @@ name: windows build
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - buildwindows
 
 permissions:
   contents: write
