@@ -6,7 +6,7 @@ permissions:
   contents: write
 
 jobs:
-    windows_build:
+  windows_build:
     runs-on: windows-latest
     steps:
     - name: Checkout
