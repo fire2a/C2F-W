@@ -36,6 +36,8 @@ jobs:
         args: install -v boost-msvc-14.3 eigen
       # choco install eigen --version v3.4.0
       # boost 1.58.0
+      # https://community.chocolatey.org/packages/eigen#files
+      # https://community.chocolatey.org/packages/boost-msvc-14.3#files
 
     - name: get dirent release
       uses: robinraju/release-downloader@v1.8
@@ -53,8 +55,8 @@ jobs:
         mkdir Cell2FireC\include
         Expand-Archive -Path .\dirent-1.24.zip -DestinationPath Cell2FireC\include
         New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\eigen -Target C:\ProgramData\chocolatey\lib\eigen\include
-        dir C:\ProgramData\chocolatey\lib\boost*
         New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\boost-msvc-12 -Target C:\ProgramData\chocolatey\lib\boost-msvc-14.3
+        dir C:\ProgramData\chocolatey\lib\boost-msvc-14.3
         echo "Bye"
 
         # - name: Set platform system machine
@@ -76,19 +78,10 @@ jobs:
       run: |
         cd Cell2FireC
         msbuild Cell2Fire.sln
-        # - name: Compile Visual Studio project with MSBuild
-        #   working-directory: Cell2FireC
-        #   shell: cmd
-        #   run: |
-        #     where msbuild
-        #     ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild' }}
-        #     REM    cd Cell2FireC
-        #     msbuild Cell2Fire.sln
-        #     echo "Bye World!!"
 
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2FireC/Cell2Fire.exe
+        path: Cell2FireC/x64/Release/Cell2Fire.exe
 
