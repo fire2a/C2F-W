@@ -35,7 +35,7 @@ jobs:
       with:
         repository: "tronkko/dirent"
         latest: true
-        out-file-path: "Cell2FireC\include"
+        out-file-path: "Cell2FireC/dirent"
         extract: true
         zipBall: true
 
