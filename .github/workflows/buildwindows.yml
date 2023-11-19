@@ -15,8 +15,13 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+
+    - name: cmdrun
       run: |
+        echo "Hello World!"
         dir C:\ProgramData\chocolatey\packages
+        dir .
+        echo "Bye World!"
 
         # - name: Cache Boost and Eigen packages
         #   uses: actions/cache@v3
