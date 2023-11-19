@@ -48,6 +48,8 @@ jobs:
     - name: check choco
       run: |
         echo "Hello"
+        pwd
+        dir
         mkdir Cell2FireC\include
         Expand-Archive -Path .\dirent-1.24.zip -DestinationPath Cell2FireC\include
         echo "!!!1"
