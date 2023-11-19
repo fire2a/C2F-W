@@ -39,19 +39,21 @@ jobs:
       uses: robinraju/release-downloader@v1.8
       with:
         repository: "tronkko/dirent"
-        latest: true
-        out-file-path: "Cell2FireC\\include"
-        extract: true
         zipBall: true
+        tarBall: false
 
     - name: check choco
       run: |
         echo "Hello"
+        mkdir Cell2FireC\include
+        Expand-Archive -Path .\dirent-1.24.zip -DestinationPath Cell2FireC\include\dirent
         dir Cell2FireC\include
-        New-Item -ItemType SymbolicLink -Path ".\Cell2FireC\include\eigen" -Target "C:\ProgramData\chocolatey\eigen"
-        New-Item -ItemType SymbolicLink -Path ".\Cell2FireC\include\boost-msvc-12" -Target "C:\ProgramData\chocolatey\boost-msvc-12"
+        dir Cell2FireC\include\dirent
+        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\eigen -Target C:\ProgramData\chocolatey\eigen
+        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\boost-msvc-12 -Target C:\ProgramData\chocolatey\boost-msvc-12
         dir Cell2FireC\include
         dir Cell2FireC\include\eigen
+        dir Cell2FireC\include\boost-msvc-12
         echo "Bye"
 
         # - name: Set platform system machine
