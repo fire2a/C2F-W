@@ -25,7 +25,7 @@ jobs:
         restore-keys: ${{ runner.os }}-boost-eigen-
 
     - name: Install Boost and Eigen packages (if not cached)
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache-choco.outputs.cache-hit != 'true'
       env:
         CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
       run: choco install boost-msvc-12 eigen
@@ -35,8 +35,8 @@ jobs:
       with:
         repository: "tronkko/dirent"
         latest: true
-        fileName: "1.24.zip"
-        out-file-path: "Cell2FireC/dirent"
+        # fileName: "1.24.zip"
+        out-file-path: "Cell2FireC\include"
         extract: true
         zipBall: true
 
@@ -45,11 +45,12 @@ jobs:
       run: |
         echo "Hello World!"
         dir Cell2FireC
-        dir Cell2FireC\dirent
+        dir Cell2FireC\include\tronkko-dirent-a3aeddf
         REM echo %PATH%
         REM echo %cd%
         REM echo "suffix=$(python3 -c 'import platform;print(platform.system()+"."+platform.machine())')" >> $GITHUB_ENV
         echo `python3 -c 'import platform;print(platform.system()+"."+platform.machine())')`
+        dir C:\ProgramData\chocolatey\packages
 
     - name: Compile Visual Studio project with MSBuild
       working-directory: Cell2FireC
