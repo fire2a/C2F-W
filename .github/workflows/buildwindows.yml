@@ -43,7 +43,8 @@ jobs:
       shell: cmd
       run: |
         echo "Hello World!"
-        dir Cell2FireC/dirent
+        dir Cell2FireC
+        dir Cell2FireC\dirent
         REM echo %PATH%
         REM echo %cd%
         REM echo "suffix=$(python3 -c 'import platform;print(platform.system()+"."+platform.machine())')" >> $GITHUB_ENV
