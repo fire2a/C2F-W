@@ -19,25 +19,25 @@ jobs:
     - name: cmdrun
       run: |
         echo "Hello World!"
-        Write-Output $( Test-Path "C:\ProgramData\chocolatey\packages" )
+        Write-Output $( Test-Path "C:\ProgramData\chocolatey\" )
         dir .
-        choco install eigen
-        Write-Output $( Test-Path "C:\ProgramData\chocolatey\lib\eigen" )
+        choco install -v boost-msvc-12 eigen
+        Write-Output $( Test-Path "C:\ProgramData\chocolatey\" )
         echo "Bye World!"
 
-        # - name: Cache Boost and Eigen packages
-        #   uses: actions/cache@v3
-        #   id: cache-choco
-        #   with:
-        #     path: C:\ProgramData\chocolatey\packages
-        #     key: ${{ runner.os }}-boost-eigen-${{ hashFiles('Cell2FireC/Cell2Fire.sln') }}
-        #     restore-keys: ${{ runner.os }}-boost-eigen-
+    - name: Cache Boost and Eigen packages
+      uses: actions/cache@v3
+      id: cache-choco
+      with:
+        path: C:\ProgramData\chocolatey\
+        key: ${{ runner.os }}-boost-eigen-${{ hashFiles('C:\ProgramData\chocolatey\*') }}
+        restore-keys: ${{ runner.os }}-boost-eigen-
 
-        # - name: Install Boost and Eigen packages (if not cached)
-        #   if: steps.cache-choco.outputs.cache-hit != 'true'
-        #   env:
-        #     CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
-        #   run: choco install boost-msvc-12 eigen
+    - name: Install Boost and Eigen packages (if not cached)
+      if: steps.cache-choco.outputs.cache-hit != 'true'
+      env:
+        CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\
+      run: choco install -v boost-msvc-12 eigen
 
         # - name: get dirent release
         #   uses: robinraju/release-downloader@v1.8
