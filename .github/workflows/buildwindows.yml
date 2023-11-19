@@ -1,4 +1,5 @@
 name: windows build
+
 on:
   workflow_dispatch:
 
@@ -31,7 +32,7 @@ jobs:
         ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild' }}
         #    cd Cell2FireC
         msbuild Cell2Fire.sln
-        echo "Bye World!"
+        echo "Bye World!!"
 
     - name: Upload
       uses: actions/upload-artifact@v3
