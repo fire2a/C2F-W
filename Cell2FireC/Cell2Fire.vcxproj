@@ -103,7 +103,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\include\dirent\include;.\include\boost-msvc-12;.\include\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include\tronkko-dirent-a3aeddf\include;.\include\boost-msvc-12;.\include\eigen</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -112,7 +112,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\include\dirent\include;.\include\boost-msvc-12;.\include\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include\tronkko-dirent-a3aeddf\include;.\include\boost-msvc-12;.\include\eigen</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
     </ClCompile>
     <Link>
