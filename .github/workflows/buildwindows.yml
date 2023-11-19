@@ -16,6 +16,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Create Chocolatey package cache directory
+      run: mkdir C:\ProgramData\chocolatey\packages
+
     - name: Cache Boost and Eigen packages
       uses: actions/cache@v3
       id: cache-choco
