@@ -48,9 +48,10 @@ jobs:
       run: |
         echo "Hello"
         dir Cell2FireC\include
-        dir C:\ProgramData\chocolatey\lib
-        mklink /J C:\ProgramData\chocolatey\eigen .\Cell2FireC\include\eigen
+        New-Item -ItemType SymbolicLink -Path ".\Cell2FireC\include\eigen" -Target "C:\ProgramData\chocolatey\eigen"
+        New-Item -ItemType SymbolicLink -Path ".\Cell2FireC\include\boost-msvc-12" -Target "C:\ProgramData\chocolatey\boost-msvc-12"
         dir Cell2FireC\include
+        dir Cell2FireC\include\eigen
         echo "Bye"
 
         # - name: Set platform system machine
