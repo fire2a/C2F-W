@@ -49,10 +49,6 @@ jobs:
         REM echo %cd%
         REM echo "suffix=$(python3 -c 'import platform;print(platform.system()+"."+platform.machine())')" >> $GITHUB_ENV
         echo `python3 -c 'import platform;print(platform.system()+"."+platform.machine())')`
-        type C:\ProgramData\chocolatey\logs\chocolatey.log
-        choco install dirent
-        REM git clone https://gitlab.com/libeigen/eigen
-        # https://github.com/tronkko/dirent
 
     - name: Compile Visual Studio project with MSBuild
       working-directory: Cell2FireC
