@@ -103,7 +103,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>include\tronkko-dirent-a3aeddf;C:\ProgramData\chocolatey\packages\boost_1_58_0\;C:\ProgramData\chocolatey\packages\eigen-3.4.0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include\tronkko-dirent;C:\ProgramData\chocolatey\lib\boost\;C:\ProgramData\chocolatey\lib\eigen</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -112,7 +112,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>include\tronkko-dirent-a3aeddf;C:\ProgramData\chocolatey\packages\boost_1_58_0\;C:\ProgramData\chocolatey\packages\eigen-3.4.0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include\tronkko-dirent;C:\ProgramData\chocolatey\lib\boost\;C:\ProgramData\chocolatey\lib\eigen</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
     </ClCompile>
     <Link>

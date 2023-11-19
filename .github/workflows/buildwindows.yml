@@ -16,27 +16,27 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: cmdrun
+    - name: Delete all caches
+      uses: actions/cache@v3
+      with:
+        restore-keys: []
+
+    - name: Create cache
       run: |
-        echo "Hello World!"
-        Write-Output $( Test-Path "C:\ProgramData\chocolatey\" )
-        dir .
         choco install -v boost-msvc-12 eigen
-        Write-Output $( Test-Path "C:\ProgramData\chocolatey\" )
-        echo "Bye World!"
 
     - name: Cache Boost and Eigen packages
       uses: actions/cache@v3
       id: cache-choco
       with:
-        path: C:\ProgramData\chocolatey\
-        key: ${{ runner.os }}-boost-eigen-${{ hashFiles('C:\ProgramData\chocolatey\*') }}
+        path: C:\ProgramData\chocolatey\packages
+        key: ${{ runner.os }}-boost-eigen-${{ hashFiles('C:\ProgramData\chocolatey\packages') }}
         restore-keys: ${{ runner.os }}-boost-eigen-
 
     - name: Install Boost and Eigen packages (if not cached)
       if: steps.cache-choco.outputs.cache-hit != 'true'
       env:
-        CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\
+        CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
       run: choco install -v boost-msvc-12 eigen
 
         # - name: get dirent release
@@ -60,6 +60,13 @@ jobs:
         #     echo `python3 -c 'import platform;print(platform.system()+"."+platform.machine())')`
         #     dir C:\ProgramData\chocolatey\packages
 
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Build solution
+      run: |
+        cd Cell2FireC
+        msbuild Cell2Fire.sln
         # - name: Compile Visual Studio project with MSBuild
         #   working-directory: Cell2FireC
         #   shell: cmd
@@ -70,9 +77,9 @@ jobs:
         #     msbuild Cell2Fire.sln
         #     echo "Bye World!!"
 
-        # - name: Upload
-        #   uses: actions/upload-artifact@v3
-        #   with:
-        #     name: binaries
-        #     path: Cell2FireC/Cell2Fire.exe
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: binaries
+        path: Cell2FireC/Cell2Fire.exe
 
