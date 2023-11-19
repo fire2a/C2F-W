@@ -19,13 +19,14 @@ jobs:
     - name: cmdrun
       run: |
         echo "Hello World!"
-        set afolder=C:\\ProgramData\\chocolatey\\packages
+        set afolder="C:\ProgramData\chocolatey\packages"
         echo %afolder%
-        cmd /c "if exists \"%afolder%" (echo FOLDER EXISTS!) else (echo folder DOES NOT exists!)"
+        cmd /c "if exists %afolder% (echo FOLDER EXISTS!) else (echo folder DOES NOT exists!)"
         dir .
+        choco install eigen
         set afolder=C:\ProgramData\chocolatey\lib\eigen
         echo %afolder%
-        cmd /c "if exists \"%afolder%" (echo FOLDER EXISTS!) else (echo folder DOES NOT exists!)"
+        cmd /c "if exists %afolder% (echo FOLDER EXISTS!) else (echo folder DOES NOT exists!)"
         echo "Bye World!"
 
         # - name: Cache Boost and Eigen packages
