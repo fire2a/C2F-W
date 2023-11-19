@@ -35,7 +35,6 @@ jobs:
       with:
         repository: "tronkko/dirent"
         latest: true
-        # fileName: "1.24.zip"
         out-file-path: "Cell2FireC\include"
         extract: true
         zipBall: true
