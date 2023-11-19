@@ -6,9 +6,11 @@
 #include <iterator>
 #include <string>
 #include <algorithm>
-#include <filesystem>
+//#include <filesystem>
 #include <fstream>
 #include <initializer_list>
+#include <dirent.h>
+
 
 
 inline char separator()
@@ -534,43 +536,26 @@ void printArgs(arguments args){
 	
 }
 
+int countWeathers(const std::string directory_path) {
+	DIR* dir;
+	struct dirent* ent;
+	int file_count = 0;
 
-#if defined __APPLE__
-std::string get_stem(const std::__fs::filesystem::path& p) { return p.stem().string().substr(0,7); }
-std::string get_suffix(const std::__fs::filesystem::path& p) { return p.extension().string(); }
-#else
-std::string get_stem(const std::filesystem::path& p) { return p.stem().string().substr(0,7); }
-std::string get_suffix(const std::filesystem::path& p) { return p.extension().string(); }
-#endif
-int countWeathers(std::string directory_path){
-    /*
-    Input:
-    std:string directory_path -> path to directory where weathers are stored. 
+	if ((dir = opendir(directory_path.c_str())) != NULL) {
+		while ((ent = readdir(dir)) != NULL) {
+			if (ent->d_type == DT_REG) {
+				std::string filename = ent->d_name;
+				if (filename.substr(0, 7) == "Weather" && filename.substr(filename.size() - 4) == ".csv") {
+					file_count++;
+				}
+			}
+		}
+		closedir(dir);
+	}
+	else {
+		std::cout << "Could not open directory" << std::endl;
+		return -1;
+	}
 
-    Output:
-    int fileCount -> number of files counted
-    */
-    // A directory iterator is created from the path
-#if defined __APPLE__
-    auto dirIter{std::__fs::filesystem::directory_iterator(directory_path)};
-#else
-    auto dirIter{std::filesystem::directory_iterator(directory_path)};
-#endif
-    // File counter set to 0
-    int fileCount = 0;
-    // Complete directory is checked
-    for (auto& entry : dirIter)
-    {
-	// std::cout << get_stem(entry.path()) << '\n';
-	// std::cout << get_suffix(entry.path()) << '\n';
-        if (entry.is_regular_file() && get_stem(entry.path()) == "Weather" && get_suffix(entry.path()) == ".csv")
-        {
-            ++fileCount;
-        }
-    }
-    // Number of files is returned
-    // FIXME en el print general del algoritmo esto no deberia salir entremedio de los args, sino en otro lado
-    std::cout << "Number of Weather Files Counted: " << fileCount << '\n';
-    return fileCount;
+	return file_count;
 }
-
