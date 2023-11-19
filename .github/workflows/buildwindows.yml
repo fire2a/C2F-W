@@ -32,23 +32,25 @@ jobs:
       env:
         CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
       run: choco install -v boost-msvc-12 eigen
+      # choco install eigen --version v3.4.0
+      # boost 1.58.0
 
     - name: get dirent release
       uses: robinraju/release-downloader@v1.8
       with:
         repository: "tronkko/dirent"
         latest: true
-        out-file-path: "Cell2FireC\\dirent"
+        out-file-path: "Cell2FireC\\include"
         extract: true
         zipBall: true
 
     - name: check choco
-      run:
+      run: |
         echo "Hello"
+        dir Cell2FireC\include
         dir C:\ProgramData\chocolatey\lib
-        dir "Cell2FireC\dirent" 
-        dir C:\ProgramData\chocolatey\lib\boost*
-        dir C:\ProgramData\chocolatey\lib\eigen
+        mklink /J C:\ProgramData\chocolatey\eigen .\Cell2FireC\include\eigen
+        dir Cell2FireC\include
         echo "Bye"
 
         # - name: Set platform system machine
