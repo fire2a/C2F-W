@@ -33,7 +33,7 @@ jobs:
       env:
         CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
       with:
-        args: install -v boost-msvc-12 eigen
+        args: install -v boost-msvc-14.3 eigen
       # choco install eigen --version v3.4.0
       # boost 1.58.0
 
@@ -49,21 +49,12 @@ jobs:
       run: |
         echo "Hello"
         # pwd D:\a\C2F-W\C2F-W
-        dir
+        # dir 
         mkdir Cell2FireC\include
         Expand-Archive -Path .\dirent-1.24.zip -DestinationPath Cell2FireC\include
-        echo "!!!1"
-        dir Cell2FireC\include
-        echo "!!!2"
-        dir Cell2FireC\include\tronkko-dirent-a3aeddf
-        echo "!!!3"
         New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\eigen -Target C:\ProgramData\chocolatey\lib\eigen\include
-        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\boost-msvc-12 -Target C:\ProgramData\chocolatey\lib\boost-msvc-12
-        echo "!!!4"
-        dir C:\ProgramData\chocolatey\lib\eigen
-        dir Cell2FireC\include\eigen
-        echo "!!!5"
-        dir Cell2FireC\include\boost-msvc-12
+        dir C:\ProgramData\chocolatey\lib\boost*
+        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\boost-msvc-12 -Target C:\ProgramData\chocolatey\lib\boost-msvc-14.3
         echo "Bye"
 
         # - name: Set platform system machine
