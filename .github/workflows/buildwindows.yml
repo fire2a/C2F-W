@@ -28,10 +28,12 @@ jobs:
         restore-keys: ${{ runner.os }}-boost-eigen-
 
     - name: Install Boost and Eigen packages (if not cached)
+      uses: crazy-max/ghaction-chocolatey@v3
       if: steps.cache-choco.outputs.cache-hit != 'true'
       env:
         CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
-      run: choco install -v boost-msvc-12 eigen
+      with:
+        args: install -v boost-msvc-12 eigen
       # choco install eigen --version v3.4.0
       # boost 1.58.0
 
@@ -39,6 +41,7 @@ jobs:
       uses: robinraju/release-downloader@v1.8
       with:
         repository: "tronkko/dirent"
+        latest: true
         zipBall: true
         tarBall: false
 
