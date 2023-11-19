@@ -21,7 +21,7 @@ jobs:
       id: cache-choco
       with:
         path: C:\ProgramData\chocolatey\packages
-        key: ${{ runner.os }}-boost-eigen-${{ hashFiles('Cell2Fire.sln') }}
+        key: ${{ runner.os }}-boost-eigen-${{ hashFiles('Cell2FireC/Cell2Fire.sln') }}
         restore-keys: ${{ runner.os }}-boost-eigen-
 
     - name: Install Boost and Eigen packages (if not cached)
@@ -30,13 +30,24 @@ jobs:
         CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
       run: choco install boost-msvc-12 eigen
 
+    - name: download cbc
+      uses: robinraju/release-downloader@v1.8
+      with:
+        repository: "tronkko/dirent"
+        latest: true
+        fileName: "*.zip"
+        out-file-path: "Cell2FireC/dirent"
+        extract: true
+
     - name: Set platform system machine
       shell: cmd
       run: |
         echo "Hello World!"
-        echo %PATH%
-        echo cd
-        echo "suffix=$(python3 -c 'import platform;print(platform.system()+"."+platform.machine())')" >> $GITHUB_ENV
+        dir Cell2FireC/dirent
+        REM echo %PATH%
+        REM echo %cd%
+        REM echo "suffix=$(python3 -c 'import platform;print(platform.system()+"."+platform.machine())')" >> $GITHUB_ENV
+        echo `python3 -c 'import platform;print(platform.system()+"."+platform.machine())')`
         type C:\ProgramData\chocolatey\logs\chocolatey.log
         choco install dirent
         REM git clone https://gitlab.com/libeigen/eigen
