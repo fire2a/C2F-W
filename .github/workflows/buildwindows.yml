@@ -1,0 +1,81 @@
+name: windows build
+
+on:
+  # push:
+  #   branches:
+  #     - buildwindows
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  windows_build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+        #- name: FIXME Create Chocolatey package cache directory
+        #  run: mkdir C:\ProgramData\chocolatey\packages
+
+        #- name: FIXME Cache Action 
+        #  uses: actions/cache@v3
+        #  id: cache-choco
+        #  with:
+        #    path: C:\ProgramData\chocolatey\packages
+        #    key: ${{ runner.os }}-boost-eigen-${{ hashFiles('C:\ProgramData\chocolatey\packages') }}
+        #    restore-keys: ${{ runner.os }}-boost-eigen-
+
+    - name: FIXME Install Boost and Eigen packages (if not cached)
+      uses: crazy-max/ghaction-chocolatey@v3
+        # if: steps.cache-choco.outputs.cache-hit != 'true'
+        # env:
+        #   CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
+      with:
+        args: install eigen wget
+      # https://community.chocolatey.org/packages
+      # choco install eigen --version v3.4.0
+      # https://community.chocolatey.org/packages/eigen#files
+      # ! boost 1.58.0 is nuget !
+      # https://community.chocolatey.org/packages/boost-msvc-14.3#files
+
+    - name: get dirent release
+      uses: robinraju/release-downloader@v1.8
+      with:
+        repository: "tronkko/dirent"
+        latest: true
+        zipBall: true
+        tarBall: false
+
+    - name: check choco
+      run: |
+        echo "Hello"
+        # pwd D:\a\C2F-W\C2F-W
+        # dir 
+        mkdir Cell2FireC\include
+        # dirent
+        Expand-Archive -Path .\dirent-1.24.zip -DestinationPath Cell2FireC\include
+        # boost
+        # ? https://github.com/marketplace/actions/build-boost
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.zip
+        Expand-Archive -Path .\boost_1_83_0.zip -DestinationPath Cell2FireC\include
+        # eigen
+        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\eigen -Target C:\ProgramData\chocolatey\lib\eigen\include
+        echo "Bye"
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.3
+
+    - name: Build solution
+      run: |
+        cd Cell2FireC
+        msbuild Cell2Fire.sln /p:Configuration=Release
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: binaries
+        path: Cell2FireC/x64/Release/Cell2Fire.exe
+
