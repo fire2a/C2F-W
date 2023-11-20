@@ -57,17 +57,11 @@ jobs:
         name: binaries
         path: Cell2FireC/Cell2Fire.Darwin.x86_64
 
-  windows_build:
-    runs-on: windows-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: call workflow file
-      uses: .github/workflows/buildwindows.yml
+  call_windows_build:
+      uses: ./.github/workflows/buildwindows.yml
 
   release:
-    needs: [ubuntu_build, macos_build, windows_build]
+    needs: [ubuntu_build, macos_build, call_windows_build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
