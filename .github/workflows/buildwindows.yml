@@ -19,7 +19,7 @@ jobs:
     - name: Create Chocolatey package cache directory
       run: mkdir C:\ProgramData\chocolatey\packages
 
-    - name: Cache Boost and Eigen packages
+    - name: Cache Action FIXME
       uses: actions/cache@v3
       id: cache-choco
       with:
@@ -33,10 +33,11 @@ jobs:
       env:
         CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
       with:
-        args: install -v boost-msvc-14.3 eigen
+        args: install eigen wget
+      # https://community.chocolatey.org/packages
       # choco install eigen --version v3.4.0
-      # boost 1.58.0
       # https://community.chocolatey.org/packages/eigen#files
+      # ! boost 1.58.0 is nuget !
       # https://community.chocolatey.org/packages/boost-msvc-14.3#files
 
     - name: get dirent release
@@ -53,23 +54,15 @@ jobs:
         # pwd D:\a\C2F-W\C2F-W
         # dir 
         mkdir Cell2FireC\include
+        # dirent
         Expand-Archive -Path .\dirent-1.24.zip -DestinationPath Cell2FireC\include
+        # boost
+        # ? https://github.com/marketplace/actions/build-boost
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.zip
+        Expand-Archive -Path .\boost_1_83_0.zip -DestinationPath Cell2FireC\include
+        # eigen
         New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\eigen -Target C:\ProgramData\chocolatey\lib\eigen\include
-        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\boost-msvc-12 -Target C:\ProgramData\chocolatey\lib\boost-msvc-14.3
-        dir C:\ProgramData\chocolatey\lib\boost-msvc-14.3
         echo "Bye"
-
-        # - name: Set platform system machine
-        #   shell: cmd
-        #   run: |
-        #     echo "Hello World!"
-        #     dir Cell2FireC
-        #     dir Cell2FireC\include\tronkko-dirent-a3aeddf
-        #     REM echo %PATH%
-        #     REM echo %cd%
-        #     REM echo "suffix=$(python3 -c 'import platform;print(platform.system()+"."+platform.machine())')" >> $GITHUB_ENV
-        #     echo `python3 -c 'import platform;print(platform.system()+"."+platform.machine())')`
-        #     dir C:\ProgramData\chocolatey\packages
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.3
