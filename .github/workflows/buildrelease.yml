@@ -8,60 +8,17 @@ permissions:
   contents: write
 
 jobs:
-  ubuntu_build:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+  call_macos_build:
+      uses: ./.github/workflows/buildmacos.yml
 
-    - name: Doit
-      run: |
-        sudo apt install g++-12 libboost-all-dev libeigen3-dev
-        cd Cell2FireC
-        make clean -f makefile.ubuntu-latest
-        make -f makefile.ubuntu-latest
-        ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
-        mv Cell2Fire Cell2Fire$ext
-        ls Cell2Fire*
-
-    - name: Upload
-      uses: actions/upload-artifact@v3
-      with:
-        name: binaries
-        path: Cell2FireC/Cell2Fire.Linux.x86_64
-
-  macos_build:
-    runs-on: macos-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Doit
-      run: |
-        # which gcc-12
-        # which brew
-        brew install boost eigen llvm libopenmpt
-        # find /usr/local -name "Eigen" 2>/dev/null
-        # find /usr/local -name "boost" 2>/dev/null
-        # find /usr/local -name "llvm" 2>/dev/null
-        cd Cell2FireC
-        make clean -f makefile.macos-latest
-        make -f makefile.macos-latest
-        ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
-        mv Cell2Fire Cell2Fire$ext
-        ls Cell2Fire*
-
-    - name: Upload
-      uses: actions/upload-artifact@v3
-      with:
-        name: binaries
-        path: Cell2FireC/Cell2Fire.Darwin.x86_64
+  call_ubuntu_build:
+      uses: ./.github/workflows/buildubuntu.yml
 
   call_windows_build:
       uses: ./.github/workflows/buildwindows.yml
 
   release:
-    needs: [ubuntu_build, macos_build, call_windows_build]
+    needs: [call_ubuntu_build, call_macos_build, call_windows_build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
