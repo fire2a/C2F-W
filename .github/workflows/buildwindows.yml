@@ -16,10 +16,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Create Chocolatey package cache directory
+    - name: FIXME Create Chocolatey package cache directory
       run: mkdir C:\ProgramData\chocolatey\packages
 
-    - name: Cache Action FIXME
+    - name: FIXME Cache Action 
       uses: actions/cache@v3
       id: cache-choco
       with:
@@ -27,7 +27,7 @@ jobs:
         key: ${{ runner.os }}-boost-eigen-${{ hashFiles('C:\ProgramData\chocolatey\packages') }}
         restore-keys: ${{ runner.os }}-boost-eigen-
 
-    - name: Install Boost and Eigen packages (if not cached)
+    - name: FIXME Install Boost and Eigen packages (if not cached)
       uses: crazy-max/ghaction-chocolatey@v3
       if: steps.cache-choco.outputs.cache-hit != 'true'
       env:
@@ -70,7 +70,7 @@ jobs:
     - name: Build solution
       run: |
         cd Cell2FireC
-        msbuild Cell2Fire.sln
+        msbuild Cell2Fire.sln /p:Configuration=Release
 
     - name: Upload
       uses: actions/upload-artifact@v3
