@@ -16,22 +16,22 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: FIXME Create Chocolatey package cache directory
-      run: mkdir C:\ProgramData\chocolatey\packages
+        #- name: FIXME Create Chocolatey package cache directory
+        #  run: mkdir C:\ProgramData\chocolatey\packages
 
-    - name: FIXME Cache Action 
-      uses: actions/cache@v3
-      id: cache-choco
-      with:
-        path: C:\ProgramData\chocolatey\packages
-        key: ${{ runner.os }}-boost-eigen-${{ hashFiles('C:\ProgramData\chocolatey\packages') }}
-        restore-keys: ${{ runner.os }}-boost-eigen-
+        #- name: FIXME Cache Action 
+        #  uses: actions/cache@v3
+        #  id: cache-choco
+        #  with:
+        #    path: C:\ProgramData\chocolatey\packages
+        #    key: ${{ runner.os }}-boost-eigen-${{ hashFiles('C:\ProgramData\chocolatey\packages') }}
+        #    restore-keys: ${{ runner.os }}-boost-eigen-
 
     - name: FIXME Install Boost and Eigen packages (if not cached)
       uses: crazy-max/ghaction-chocolatey@v3
-      if: steps.cache-choco.outputs.cache-hit != 'true'
-      env:
-        CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
+        # if: steps.cache-choco.outputs.cache-hit != 'true'
+        # env:
+        #   CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
       with:
         args: install eigen wget
       # https://community.chocolatey.org/packages
