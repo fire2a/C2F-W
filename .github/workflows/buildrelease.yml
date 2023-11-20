@@ -57,8 +57,14 @@ jobs:
         name: binaries
         path: Cell2FireC/Cell2Fire.Darwin.x86_64
 
+  windows_build:
+    runs-on: windows-latest
+    steps:
+    - name: call workflow file
+      uses: ./buildwindows.yml
+
   release:
-    needs: [ubuntu_build, macos_build]
+    needs: [ubuntu_build, macos_build, windows_build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -72,6 +78,7 @@ jobs:
         git archive --prefix=C2F/Cell2FireC/ \
           --add-file=binaries/Cell2Fire.Linux.x86_64 \
           --add-file=binaries/Cell2Fire.Darwin.x86_64 \
+          --add-file=binaries/Cell2Fire.exe \
           --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
