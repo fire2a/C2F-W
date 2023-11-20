@@ -1,10 +1,11 @@
 name: windows build
 
 on:
-  push:
-    branches:
-      - buildwindows
+  # push:
+  #   branches:
+  #     - buildwindows
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: write

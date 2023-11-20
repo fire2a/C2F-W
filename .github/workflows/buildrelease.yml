@@ -60,6 +60,9 @@ jobs:
   windows_build:
     runs-on: windows-latest
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
     - name: call workflow file
       uses: ./buildwindows.yml
 
