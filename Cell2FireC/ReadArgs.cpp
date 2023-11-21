@@ -1,12 +1,14 @@
 // Inclusions
 #include "ReadArgs.h"
-
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <iterator>
 #include <string>
 #include <algorithm>
+#include <dirent.h>
+
+
 
 inline char separator()
 {
@@ -196,7 +198,6 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	int dsim_years = 1;
 	int dnsims = 1;
 	int dweather_period_len = 60;
-	int dweather_files = 1;
 	int dmax_fire_periods = 10000000;
 	int dseed = 123;
 	int diradius = 0;
@@ -267,10 +268,20 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	//--nweathers
 	char * nweathers = getCmdOption(argv, argv + argc, "--nweathers");
     if (nweathers){
-        printf("NWeatherFiles: %s \n", nweathers);
 		args_ptr->NWeatherFiles = std::stoi (nweathers ,&sz); 
     }
-	else args_ptr->NWeatherFiles = dweather_files;
+	else{
+		//std::cout << "No NWeatherFiles specified " << input_weather << std::endl;
+		if (std::string(input_weather) == "random") {
+			//std::cout << "Counting" << std::endl;
+			std::string input_string = input_folder;
+			args_ptr->NWeatherFiles = countWeathers(input_string + "/Weathers");
+		}
+		else {
+			///std::cout << "No NWeatherFiles specified 1 default" << std::endl;
+			args_ptr->NWeatherFiles = 1;
+		}
+	} 
 	
 	//--Fire-Period-Length
 	char * input_PeriodLen = getCmdOption(argv, argv + argc, "--Fire-Period-Length");
@@ -520,4 +531,28 @@ void printArgs(arguments args){
 
 	
 	
+}
+
+int countWeathers(const std::string directory_path) {
+	DIR* dir;
+	struct dirent* ent;
+	int file_count = 0;
+
+	if ((dir = opendir(directory_path.c_str())) != NULL) {
+		while ((ent = readdir(dir)) != NULL) {
+			if (ent->d_type == DT_REG) {
+				std::string filename = ent->d_name;
+				if (filename.substr(0, 7) == "Weather" && filename.substr(filename.size() - 4) == ".csv") {
+					file_count++;
+				}
+			}
+		}
+		closedir(dir);
+	}
+	else {
+		std::cout << "Could not open directory" << std::endl;
+		return -1;
+	}
+
+	return file_count;
 }

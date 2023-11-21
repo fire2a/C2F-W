@@ -609,7 +609,6 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		//DEBUGstd::cout << "MinutesPerWP: " << this->args.MinutesPerWP << std::endl;
 		//DEBUGstd::cout << "FirePeriodLen: " << this->args.FirePeriodLen << std::endl;
 		//DEBUGstd::cout << "MaxfirePeriods: " << this->args.MaxFirePeriods << std::endl;
-
 		if (this->args.MaxFirePeriods > maxFP) {
 			this->args.MaxFirePeriods = maxFP;
 			if (this->args.verbose) {
@@ -1726,6 +1725,7 @@ int main(int argc, char* argv[]) {
 		std::default_random_engine& generator = generators[TID]; //generators[args.nthreads]
 
 		// Random generator and distributions
+		// printf("\n N weathers: %d \n", args.NWeatherFiles);
 		std::uniform_int_distribution<int> udistribution(1, args.NWeatherFiles);		// Get random weather
 		std::normal_distribution<double> ndistribution(0.0, 1.0);  							// ROSRV
 		// Random numbers (weather file and ROS-CV)

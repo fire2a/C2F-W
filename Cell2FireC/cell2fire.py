@@ -47,7 +47,7 @@ def parser():
         help="Max index of weather files to sample for the random version (inside the Weathers Folder)",
         dest="nweathers",
         type=int,
-        default=1,
+        nargs="?",
     )
     parser.add_argument(
         "--nthreads", help="Number of threads to run the simulation", dest="nthreads", type=int, default=1
@@ -387,8 +387,8 @@ def run(args):
         "--out-cfb" if (args.OutCrownConsumption) else "",
         "--weather",
         args.WeatherOpt,
-        "--nweathers",
-        str(args.nweathers),
+        "--nweathers" if args.nweathers is not None else "",
+        str(args.nweathers) if args.nweathers is not None else "",
         "--ROS-CV",
         str(args.ROS_CV),
         "--IgnitionRad",
@@ -429,11 +429,30 @@ def run(args):
         LogName = os.path.join(args.InFolder, "LogFile.txt")
 
     # Perform the call
+    # TODO : 
+    #   - doesn't differentiate between stoud & err
+    #   - doesn't return 1 or 0 on fail success
+    # enhance with queues https://stackoverflow.com/questions/2804543/read-subprocess-stdout-line-by-line
     print("Calling Cell2Fire simulator...", flush=True)
+
     with open(LogName, "w") as output:
-        proc = subprocess.Popen(execArray, stdout=output)
-        proc.communicate()
-    proc.wait()
+        proc = subprocess.Popen(execArray, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+
+        while True:
+            line = proc.stdout.readline()
+            if not line and proc.poll() is not None:
+                break
+
+            print(line, end='', flush=True)
+            output.write(line)
+            output.flush()
+
+        proc.wait()
+
+    # with open(LogName, "w") as output:
+    #     proc = subprocess.Popen(execArray, stdout=output)
+    #     proc.communicate()
+    # proc.wait()
 
     # Perform the call
     # print("Calling Cell2Fire simulator...", flush=True)

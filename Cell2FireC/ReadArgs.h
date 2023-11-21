@@ -9,7 +9,6 @@
 #include <unordered_set>
 #include <string>
 #include <algorithm>
-
 /*
 *   Args structure
 */
@@ -30,6 +29,8 @@ bool cmdOptionExists(char** begin, char** end, const std::string& option);
 void parseArgs(int argc, char * argv[], arguments * args_ptr);
 
 void printArgs(arguments args);
+
+int countWeathers(std::string directory_path);
 
 
 #endif
