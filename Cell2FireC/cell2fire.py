@@ -429,7 +429,7 @@ def run(args):
         LogName = os.path.join(args.InFolder, "LogFile.txt")
 
     # Perform the call
-    # TODO : 
+    # TODO :
     #   - doesn't differentiate between stoud & err
     #   - doesn't return 1 or 0 on fail success
     # enhance with queues https://stackoverflow.com/questions/2804543/read-subprocess-stdout-line-by-line
@@ -443,7 +443,7 @@ def run(args):
             if not line and proc.poll() is not None:
                 break
 
-            print(line, end='', flush=True)
+            print(line, end="")  # , flush=False (default) fixes line by line jamming
             output.write(line)
             output.flush()
 
