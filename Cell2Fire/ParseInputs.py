@@ -261,7 +261,12 @@ def ParseInputs():
                         help="Generates ASCII files with Crown Fire Fuel Consumption if correspondes",
                         dest="OutCrownConsumption",
                         default=False,
-                        action='store_true')                                                                        
+                        action='store_true')
+    parser.add_argument("--out-sfb",
+                        help="Generates ASCII files with Surface Fire Fuel Consumption if correspondes",
+                        dest="OutSurfConsumption",
+                        default=False,
+                        action='store_true')                                                                           
     parser.add_argument("--Prometheus-tuned",
                         help="Activates the predefined tuning parameters based on Prometheus",
                         dest="PromTuning",

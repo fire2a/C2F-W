@@ -549,11 +549,11 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		CSVFolder.MakeDir(this->cfbFolder);
 		this->cfbFolder = this->args.OutFolder + separator() +"CrownFractionBurn" + separator();
 	}
-			//Crown Fraction Burn Folder
+		//Surf Fraction Burn Folder
 	if (this->args.OutSurfConsumption && this->args.Simulator=="C") {
 		CSVWriter CSVFolder("", "");
 		this->sfbFolder = this->args.OutFolder + "SurfFractionBurn" ;
-		CSVFolder.MakeDir(this->cfbFolder);
+		CSVFolder.MakeDir(this->sfbFolder);
 		this->sfbFolder = this->args.OutFolder + separator() +"SurfFractionBurn" + separator();
 	}
 		
@@ -1396,7 +1396,7 @@ void Cell2Fire::Results(){
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFraction);
 	}
 
-			// Intensity
+		// Intensity
 	if ((this->args.OutSurfConsumption) && (this->args.Simulator=="C")) {
 		this->sfbFolder = this->args.OutFolder + "SurfFractionBurn"+separator();
 		std::string sfbName;
