@@ -392,6 +392,7 @@ def run(args):
         "--out-ros" if (args.OutRos) else "",
         "--out-crown" if (args.OutCrown) else "",
         "--out-cfb" if (args.OutCrownConsumption) else "",
+        '--out-sfb' if (self.args.OutSurfConsumption) else '',
         "--weather",
         args.WeatherOpt,
         "--nweathers" if args.nweathers is not None else "",
