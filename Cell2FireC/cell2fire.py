@@ -146,7 +146,7 @@ def parser():
     )
     parser.add_argument(
         "--sim",
-        help="Simulator version: currently S (Scott & Burgan) and K (Kitral)",
+        help="Simulator version: currently S (Scott & Burgan), K (Kitral) and C (Canada)",
         dest="Simulator",
         type=str,
         default="S",
