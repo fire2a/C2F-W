@@ -513,6 +513,7 @@ void printArgs(arguments args){
 	std::cout << "OutIntensity: " << args.OutIntensity << std::endl;
 	std::cout << "OutROS: " << args.OutRos << std::endl;
 	std::cout << "OutCrown: " << args.OutCrown << std::endl;
+	std::cout << "OutSurf: " << args.OutSurf << std::endl;
 	std::cout << "HarvestPlan: " << args.HarvestPlan << std::endl; 
 	std::cout << "TotalYears: " << args.TotalYears << std::endl; 
 	std::cout << "TotalSims: " << args.TotalSims << std::endl; 
