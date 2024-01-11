@@ -27,7 +27,7 @@ jobs:
     - name: Download
       uses: actions/download-artifact@v3
 
-    - name: Doit
+    - name: GitArchive
       run: |
         git archive --prefix=C2F/Cell2FireC/ \
           --add-file=binaries/Cell2Fire.Linux.x86_64 \
@@ -36,8 +36,15 @@ jobs:
           --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
+    - name: ZipDataInstances
+      run: |
+        cd data
+        zip -r ../Kitral.zip Kitral
+        zip -r ../CanadianFBP.zip CanadianFBP
+        zip -r ../ScottAndBurgan.zip ScottAndBurgan  
+
     - name: Create Release
       uses: ncipollo/release-action@v1.13.0
       with:
-        artifacts: "Cell2FireW_${{ github.ref_name }}.zip"
+        artifacts: "Cell2FireW_${{ github.ref_name }}.zip" data/Kitral.zip data/CanadianFBP.zip data/ScottAndBurgan.zip
         token: ${{ secrets.GITHUB_TOKEN }}
