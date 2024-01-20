@@ -217,15 +217,22 @@ def parser():
     )
     parser.add_argument(
         "--out-crown",
-        help="Generates ASCII files with Boolean for Crown Fire if correspondes",
+        help="Generates ASCII files with Boolean for Crown Fire",
         dest="OutCrown",
         default=False,
         action="store_true",
     )
     parser.add_argument(
         "--out-cfb",
-        help="Generates ASCII files with Crown Fire Fuel Consumption if correspondes",
+        help="Generates ASCII files with Crown Fire Fuel Consumption",
         dest="OutCrownConsumption",
+        default=False,
+        action="store_true",
+    )
+    parser.add_argument(
+        "--out-sfb",
+        help="Generates ASCII files with Surface Fire Fuel Consumption (only canadian fire behavior)",
+        dest="OutSurfConsumption",
         default=False,
         action="store_true",
     )
@@ -385,6 +392,7 @@ def run(args):
         "--out-ros" if (args.OutRos) else "",
         "--out-crown" if (args.OutCrown) else "",
         "--out-cfb" if (args.OutCrownConsumption) else "",
+        "--out-sfb" if (args.OutSurfConsumption) else "",
         "--weather",
         args.WeatherOpt,
         "--nweathers" if args.nweathers is not None else "",
