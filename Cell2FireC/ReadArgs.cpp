@@ -501,7 +501,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 
 
 void printArgs(arguments args){
-	std::cout<<"Simulator: "<<args.Simulator<<std::endl;
+	std::cout << "Simulator: "<<args.Simulator<<std::endl;
 	std::cout << "InFolder: " << args.InFolder << std::endl; 
 	std::cout << "OutFolder: " << args.OutFolder << std::endl; 
 	std::cout << "WeatherOpt: " << args.WeatherOpt << std::endl;
@@ -513,6 +513,8 @@ void printArgs(arguments args){
 	std::cout << "OutIntensity: " << args.OutIntensity << std::endl;
 	std::cout << "OutROS: " << args.OutRos << std::endl;
 	std::cout << "OutCrown: " << args.OutCrown << std::endl;
+	std::cout << "OutCrownConsumption: " << args.OutCrownConsumption << std::endl;
+	std::cout << "OutSurfConsumption: " << args.OutSurfConsumption << std::endl;
 	std::cout << "HarvestPlan: " << args.HarvestPlan << std::endl; 
 	std::cout << "TotalYears: " << args.TotalYears << std::endl; 
 	std::cout << "TotalSims: " << args.TotalSims << std::endl; 
