@@ -14,6 +14,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include "WriteCSV.h"
 #include "ReadArgs.h"
 #include "Lightning.h"
+#include "DataGenerator.h"
 
 // Include libraries
 #include <omp.h>
@@ -33,6 +34,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include <random>
 #include <algorithm> 
 #include <chrono>
+#include <memory>
 
 using namespace std;
 
@@ -187,7 +189,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	// Populate the df [nCells] objects
 	CSVParser.parseDF(df_ptr, DF,this->args_ptr, this->nCells); //iterates from the first element of df, using DF, args_ptr and the number of cells
 
-	// Initialize and populate relevant vectors 
+	// Initialize and populate relevant vectors
 	this->fTypeCells = std::vector<int> (this->nCells, 1); 
 	this->fTypeCells2 = std::vector<string> (this->nCells, "Burnable"); 
     this->statusCells = std::vector<int> (this->nCells, 0);
@@ -1671,7 +1673,7 @@ int main(int argc, char* argv[]) {
 	arguments args;
 	arguments* args_ptr = &args;
 	parseArgs(argc, argv, args_ptr);
-	//printArgs(args);
+	printArgs(args);
 
 	// Random generator and distributions
 	//std::default_random_engine generator (args.seed);
