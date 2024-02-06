@@ -13,29 +13,6 @@
 #include <algorithm>
 #include <memory>
 
-// BaseData::BaseData() = default
-
-/*
-// Implementations for StringData
-std::string StringData::toString() const {
-    return value;
-}
-
-// Implementations for FloatData
-FloatData::FloatData(float val) : value(val) {}
-
-std::string FloatData::toString() const {
-    return std::to_string(value);
-}
-
-// Implementations for IntData
-IntData::IntData(int val) : value(val) {}
-
-std::string IntData::toString() const {
-    return std::to_string(value);
-}
-*/
-
 // Reads fbp_lookup_table.csv and creates dictionaries for the fuel types and cells' ColorsDict
 std::tuple<std::unordered_map<std::string, std::string>, std::unordered_map<std::string, std::tuple<float, float, float, float>>> Dictionary(const std::string& filename) {
 
@@ -243,7 +220,8 @@ void DataGrids(const std::string& filename, std::vector<float>& data, int nCells
     
 }
 
-std::vector<std::vector<std::unique_ptr<BaseData>>> GenerateDat(const std::vector<std::string>& GFuelType, const std::vector<int>& GFuelTypeN,
+
+std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::vector<std::string>& GFuelType, const std::vector<int>& GFuelTypeN,
                  const std::vector<float>& Elevation, const std::vector<float>& PS,
                  const std::vector<float>& SAZ, const std::vector<float>& Curing,
                  const std::vector<float>& CBD, const std::vector<float>& CBH,
@@ -283,184 +261,178 @@ std::vector<std::vector<std::unique_ptr<BaseData>>> GenerateDat(const std::vecto
         {"M3M4_60", 60}, {"M3M4_65", 65}, {"M3M4_70", 70}, {"M3M4_75", 75}, {"M3M4_80", 80}, {"M3M4_85", 85}, {"M3M4_90", 90}, {"M3M4_95", 95}};
 
     // Create a vector to store unique_ptr of ~BaseData
-    std::vector<std::vector<std::unique_ptr<BaseData>>> dataGrids;
+    std::vector<std::vector<std::unique_ptr<std::string>>> dataGrids;
     // Dataframe
     // std::vector<std::vector<boost::any>> DF(GFuelType.size(), std::vector<boost::any>(Columns.size()));
 
     // Populate DF
     for (size_t i = 0; i < GFuelType.size(); ++i) {
 
-        std::vector<std::unique_ptr<BaseData>> rowData;
+        std::vector<std::unique_ptr<std::string>> rowData;
 
         // Fuel Type 0
-        rowData.emplace_back(std::make_unique<StringData>(GFuelType[i]));
+        rowData.emplace_back(std::make_unique<std::string>(GFuelType[i]));
 
         // lat 1
-        rowData.emplace_back(std::make_unique<FloatData>(51.621244f));
+        rowData.emplace_back(std::make_unique<std::string>("51.621244"));
+
 
         // lon 2
-        rowData.emplace_back(std::make_unique<FloatData>(-115.608378f));
+        rowData.emplace_back(std::make_unique<std::string>("-115.608378"));
 
         // Elevation 3
         if (std::isnan(Elevation[i]))
         {
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else {
-            rowData.emplace_back(std::make_unique<FloatData>(Elevation[i]));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(Elevation[i])));
         }
         
 
         // Blank space (task: check why) 4,5
-        rowData.emplace_back(std::make_unique<StringData>(""));
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
 
         // PS 6
         if (std::isnan(PS[i]))
         {
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else {
-            rowData.emplace_back(std::make_unique<FloatData>(PS[i]));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PS[i])));
         }
         
 
         // SAZ 7
         if (std::isnan(SAZ[i]))
         {
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else {
-            rowData.emplace_back(std::make_unique<FloatData>(SAZ[i]));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(SAZ[i])));
         }
 
         
          // Handle special cases 8
         if (std::isnan(Curing[i]) && (GFuelType[i] == "O1a" || GFuelType[i] == "O1b")) {
-            rowData.emplace_back(std::make_unique<IntData>(60));  // "cur"
+            rowData.emplace_back(std::make_unique<std::string>("60"));  // "cur"
         }
         else
         {
-            rowData.emplace_back(std::make_unique<StringData>(""));
+            rowData.emplace_back(std::make_unique<std::string>(""));
         }
 
         // CBD 9
         if (std::isnan(CBD[i]))
         {
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else {
-            rowData.emplace_back(std::make_unique<FloatData>(CBD[i]));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(CBD[i])));
         }
 
         // CBH 10
         if (std::isnan(CBH[i]))
         {
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else {
-            rowData.emplace_back(std::make_unique<FloatData>(CBH[i]));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(CBH[i])));
         }
 
         // CCF 11
         if (std::isnan(CCF[i]))
         {
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else {
-            rowData.emplace_back(std::make_unique<FloatData>(CCF[i]));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(CCF[i])));
         }
 
         // Fuel Type N 12
         if (std::isnan(GFuelTypeN[i]))
         {
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else {
-            rowData.emplace_back(std::make_unique<FloatData>(GFuelTypeN[i]));
+            rowData.emplace_back(std::make_unique<std::string>(GFuelTypeN[i]));
         }
 
         // FMC 13
         if (std::isnan(FMC[i]))
         {
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else {
-            rowData.emplace_back(std::make_unique<FloatData>(FMC[i]));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(FMC[i])));
         }
 
         // PY 14
         if (std::isnan(PY[i]))
         {
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else {
-            rowData.emplace_back(std::make_unique<FloatData>(PY[i]));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PY[i])));
         }
 
         // Blank space (jd,jd_min) 15,16
-        rowData.emplace_back(std::make_unique<StringData>(""));
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
 
         // Populate PC 17
         if (PCD.find(GFuelType[i]) != PCD.end()) {
-            rowData.emplace_back(std::make_unique<IntData>(PCD[GFuelType[i]]));  // "pc"
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PCD[GFuelType[i]])));  // "pc"
         }
         else
         {
-            rowData.emplace_back(std::make_unique<StringData>(""));
+
+            rowData.emplace_back(std::make_unique<std::string>(""));
         }
 
         // Populate PDF 18
         if (PDFD.find(GFuelType[i]) != PDFD.end()) {
-            rowData.emplace_back(std::make_unique<IntData>(PDFD[GFuelType[i]]));  // "pdf"
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PDFD[GFuelType[i]])));  // "pdf"
         }
         else
         {
-            rowData.emplace_back(std::make_unique<StringData>(""));
+            rowData.emplace_back(std::make_unique<std::string>(""));
         }
 
         // time 19
-        rowData.emplace_back(std::make_unique<IntData>(20));
+        rowData.emplace_back(std::make_unique<std::string>("20"));
 
         // Blank space (ffmc,bui) 20,21
-        rowData.emplace_back(std::make_unique<StringData>(""));
-        rowData.emplace_back(std::make_unique<StringData>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
+        rowData.emplace_back(std::make_unique<std::string>(""));
 
         // GFL 22
         if (GFLD.find(GFuelType[i]) != GFLD.end()) {
-            rowData.emplace_back(std::make_unique<FloatData>(GFLD[GFuelType[i]]));  // "gfl"
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(GFLD[GFuelType[i]])));  // "gfl"
         }
         else
         {
-            rowData.emplace_back(std::make_unique<StringData>(""));
+            rowData.emplace_back(std::make_unique<std::string>(""));
         }
         
-        // pattern 23
-        /*
-        if (std::isnan(PS[i]))
-        {
-        rowData.emplace_back(std::make_unique<StringData>(""));
-        }
-        else {
-            rowData.emplace_back(std::make_unique<FloatData>(PS[i]));
-        }
-        */
-
-        rowData.emplace_back(std::make_unique<StringData>(""));
-
         
+        rowData.emplace_back(std::make_unique<std::string>(""));
 
         // Add the rowData to dataGrids
         dataGrids.push_back(std::move(rowData));
 
+        rowData.clear();
+        
+
+    }
     
     return dataGrids;
 }
 
 // Function to write data to a CSV file
-void writeDataToFile(const std::vector<std::vector<std::unique_ptr<BaseData>>>& dataGrids,
-                    const std::string& InFolder) {
+void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids, const std::string& InFolder) 
+{
 
     std::ofstream dataFile(InFolder + "/Data.csv");
     std::vector<std::string> Columns = {"fueltype", "lat", "lon", "elev", "ws", "waz", "ps", "saz", "cur", "cbd", "cbh", "ccf", "ftypeN", "fmc", "py",
@@ -473,12 +445,12 @@ void writeDataToFile(const std::vector<std::vector<std::unique_ptr<BaseData>>>& 
         dataFile << "\n";
 
         // Write data
-        for (const auto& rowData : dataGrids) {
+       for (const auto& rowData : dataGrids) {
             for (const auto& item : rowData) {
-                dataFile << item->toString() << ",";
-            }
-            dataFile << "\n";
-        }
+                dataFile << *item << ",";  // Dereference the unique_ptr before writing
+    }
+    dataFile << "\n";
+}
 
         std::cout << "Data file generated successfully" << std::endl;
         dataFile.close();
@@ -589,7 +561,7 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     }
 
     // Call GenerateDat function
-    std::vector<std::vector<std::unique_ptr<BaseData>>> result = GenerateDat(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, PY, FMC, InFolder);
+    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, PY, FMC, InFolder);
     writeDataToFile(result,InFolder);
 
 }
