@@ -230,7 +230,8 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
     // Gets cell size from geotransform
     double cellSizeX = adfGeoTransform[1];
     double cellSizeY = adfGeoTransform[5];
-    if (fuelsDataset == NULL) {
+    const double epsilon = std::numeric_limits<double>::epsilon();
+    if (fabs(cellSizeX + cellSizeY) > epsilon) {
         throw std::runtime_error("Error: Cells are not square in: '" + filename + "'");
     }
     // Read raster data
