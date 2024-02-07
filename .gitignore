@@ -196,4 +196,5 @@ cython_debug/
 #.idea/
 
 .vs/
+**/.vscode/
 /Cell2FireC/x64

@@ -44,10 +44,72 @@ def Dictionary(filename):
 
 # Reads the ASCII file with the forest grid structure and returns an array with all the cells and grid dimensions nxm
 # Modified Feb 2018 by DLW to read the forest params (e.g. cell size) as well
+
 def ForestGrid(filename, Dictionary):
+    """
+    fuels.asc is read
+    """
     with open(filename, "r") as f:
         filelines = f.readlines()
+    line = filelines[4].replace("\n","")
+    parts = line.split()
+    
+    if parts[0] != "cellsize":
+        print ("line=",line)
+        raise RuntimeError("Expected cellsize on line 5 of "+ filename)
+    cellsize = float(parts[1])
+    
+    cells = 0
+    row = 1
+    trows = 0 
+    tcols = 0
+    gridcell1 = []
+    gridcell2 = []
+    gridcell3 = []
+    gridcell4 = []
+    grid = []
+    grid2 = []
+    
+    # Read the ASCII file with the grid structure
+    for row in range(6, len(filelines)):
+        line = filelines[row]
+        line = line.replace("\n","")
+        line = ' '.join(line.split())
+        line = line.split(" ")
+        #print(line)
+        
+        
+        for c in line: #range(0,len(line)-1):
+            if c not in Dictionary.keys():
+                gridcell1.append("NF")
+                gridcell2.append("NF")
+                gridcell3.append(int(0))
+                gridcell4.append("NF")
+            else:
+                gridcell1.append(c)
+                gridcell2.append(Dictionary[c])
+                gridcell3.append(int(c))
+                gridcell4.append(Dictionary[c])
+            tcols = np.max([tcols,len(line)])
 
+        grid.append(gridcell1)
+        grid2.append(gridcell2)
+        gridcell1 = []
+        gridcell2 = []
+    
+    # Adjacent list of dictionaries and Cells coordinates
+    CoordCells = np.empty([len(grid)*(tcols), 2]).astype(int)
+    n = 1
+    tcols += 1
+    
+    return gridcell3, gridcell4, len(grid), tcols-1, cellsize
+
+def ForestGrid_tiff(filename, Dictionary):
+    """
+    Fuels layer is read from .tif file.
+    """
+    with open(filename, "r") as f:
+        filelines = f.readlines()
     line = filelines[4].replace("\n","")
     parts = line.split()
     
