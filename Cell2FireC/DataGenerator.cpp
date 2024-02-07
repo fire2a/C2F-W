@@ -281,7 +281,9 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
         rowData.emplace_back(std::make_unique<std::string>("-115.608378"));
 
         // Elevation 3
+        
         if (std::isnan(Elevation[i]))
+        
         {
         rowData.emplace_back(std::make_unique<std::string>(""));
         }
@@ -356,7 +358,7 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
         rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else {
-            rowData.emplace_back(std::make_unique<std::string>(GFuelTypeN[i]));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(GFuelTypeN[i])));
         }
 
         // FMC 13
@@ -540,28 +542,43 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
 
     for (const auto& name : filenames) {
         std::string filePath = InFolder + "/" + name;
+        std::cout << filePath << std::endl;
+    
         if (fileExists(filePath)) {
-            if (name == "slope.asc") {
-                // Assuming "slope.asc" corresponds to PS (Pitch or Slope)
-                DataGrids(filePath, PS, NCells);
-            } else {
-                // Read other grid data
+            if (name == "elevation.asc") {
                 DataGrids(filePath, Elevation, NCells);
+            } else if (name == "saz.asc") {
                 DataGrids(filePath, SAZ, NCells);
+            } else if (name == "slope.asc") {
+                DataGrids(filePath, PS, NCells);
+            } else if (name == "cur.asc") {
                 DataGrids(filePath, Curing, NCells);
+            } else if (name == "cbd.asc") {
                 DataGrids(filePath, CBD, NCells);
+            } else if (name == "cbh.asc") {
                 DataGrids(filePath, CBH, NCells);
+            } else if (name == "ccf.asc") {
                 DataGrids(filePath, CCF, NCells);
+            } else if (name == "py.asc") {
                 DataGrids(filePath, PY, NCells);
+            } else if (name == "fmc.asc") {
                 DataGrids(filePath, FMC, NCells);
+            } else {
+                // Handle the case where the file name doesn't match any condition
+                // std::cout << "Unhandled file: " << name << std::endl;
             }
-        } else {
-            //std::cout << "No " << name << " file, filling with NaN" << std::endl;
+        } 
+        else {
+            std::cout << "No " << name << " file, filling with NaN" << std::endl;
         }
+    }
+
+    for (size_t i = 0; i < 30; ++i) {
+        std::cout << std::to_string(Elevation[i]) << std::endl;
     }
 
     // Call GenerateDat function
     std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, PY, FMC, InFolder);
     writeDataToFile(result,InFolder);
-
+    std::cout << "File Generated";
 }

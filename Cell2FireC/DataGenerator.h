@@ -1,5 +1,5 @@
-#ifndef DataGenerator
-#define DataGenerator
+#ifndef DATAGENERATOR_H
+#define DATAGENERATOR_H
 
 #include <iostream>
 #include <fstream>

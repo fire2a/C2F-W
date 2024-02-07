@@ -1691,6 +1691,9 @@ int main(int argc, char* argv[]) {
 	//std::uniform_int_distribution<int> udistributionIgnition(1, Forest.nCells);		// Get random ignition point
 
 	// Episodes
+
+	GenDataFile(args.InFolder,args.Simulator);
+
 	int ep = 0;
 	int tstep = 0;
 	int stop = 0;
