@@ -2,7 +2,7 @@
 MPCC = g++-12
 OPENMP = -fopenmp
 CFLAGS = -std=c++14 -O3 -I /usr/include -I /usr/include/eigen3 -fopenmp
-LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
+LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl -gdal
 TARGETS = Cell2Fire
 all:	$(TARGETS)
 Cell2Fire: Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o

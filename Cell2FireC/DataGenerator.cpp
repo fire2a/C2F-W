@@ -14,7 +14,7 @@
 #include <array>
 #include <algorithm>
 #include <memory>
-
+#include <cassert>
 // Reads fbp_lookup_table.csv and creates dictionaries for the fuel types and cells' ColorsDict
 std::tuple<std::unordered_map<std::string, std::string>, std::unordered_map<std::string, std::tuple<float, float, float, float>>> Dictionary(const std::string& filename) {
 
@@ -166,85 +166,6 @@ ForestGrid(const std::string& filename, const std::unordered_map<std::string, st
     return std::make_tuple(gridcell3, gridcell4, grid.size(), tcols - 1, cellsize);
 }
 
-std::tuple<std::vector<int>, std::vector<std::string>, int, int, float>
-ForestGridTif(const std::string& filename, const std::unordered_map<std::string, std::string>& Dictionary) {
-    /*
-    Reads fuel data from a .tif
-    Args:
-       filename (std::string): Name of .tif file.
-       Dictionary (std::unordered_map<std::string, std::string>&): Reference to fuels dictionary
-
-    Returns:
-        Fuel vectors, number of cells y cell size (tuple[std::vector<int>, std::vector<std::string>)
-    */
-    // Tries to open file
-    GDALAllRegister();
-    GDALDataset *fuelsDataset;
-    GDALRasterBand *fuelsBand;
-    fuelsDataset = (GDALDataset *) GDALOpen(filename.c_str(), GA_ReadOnly);
-    // If not succesfull, throws exception
-    if (fuelsDataset == NULL) {
-        throw std::runtime_error("Error: Could not open file '" + filename + "'");
-    }
-    int cells = 0;
-    int tFBPDicts = 0;
-    int tcols = 0;
-    // Vectors with fuel information in different formats
-    std::vector<std::string> gridcell1;
-    std::vector<std::string> gridcell2;
-    std::vector<int> gridcell3;
-    std::vector<std::string> gridcell4;
-    std::vector<std::vector<std::string>> grid;
-    std::vector<std::vector<std::string>> grid2;
-    // Get fuel band
-    fuelsBand = fuelsDataset->GetRasterBand(1);
-    // Get Raster dimentions
-    int nXSize = fuelsBand->GetXSize();
-    int nYSize = fuelsBand->GetYSize();
-    // Extracts geotransform
-    double adfGeoTransform[6];
-    fuelsDataset->GetGeoTransform(adfGeoTransform);
-    // Gets cell size from geotransform
-    double cellSizeX = adfGeoTransform[1];
-    double cellSizeY = adfGeoTransform[5];
-    const double epsilon = std::numeric_limits<double>::epsilon();
-    if (fabs(cellSizeX + cellSizeY) > epsilon) {
-        throw std::runtime_error("Error: Cells are not square in: '" + filename + "'");
-    }
-    // Read raster data
-    float *pafScanline;
-    pafScanline = (float *) CPLMalloc(sizeof(float) * nXSize * nYSize);
-    // For each row
-    for (int i = 0; i < nYSize; i++) {
-        // Read pixel values for the current row
-        fuelsBand->RasterIO(GF_Read, 0, i, nXSize, 1, pafScanline, nXSize, 1, GDT_Float32, 0, 0);
-
-        // For each column
-        for (int j = 0; j < nXSize; j++) {
-            // Access the pixel value at position (i, j)
-            float pixelValue = pafScanline[j];
-            std::string token = std::to_string(static_cast<int>(pafScanline[j]));
-            if (pixelValue != pixelValue || Dictionary.find(token) == Dictionary.end()) {
-                    // If fuel not in Dictionary:
-                    gridcell1.push_back("NF");
-                    gridcell2.push_back("NF");
-                    gridcell3.push_back(0);
-                    gridcell4.push_back("NF");
-            } else {
-                    gridcell1.push_back(token);
-                    gridcell2.push_back(Dictionary.at(token));
-                    gridcell3.push_back(std::stoi(token));
-                    gridcell4.push_back(Dictionary.at(token));
-            }
-            tcols = std::max(tcols, static_cast<int>(gridcell1.size()));
-        }  
-    }
-    std::vector<std::array<int, 2>> CoordCells;
-    CoordCells.reserve(grid.size() * tcols);
-    int n = 1;
-    tcols += 1;
-    return std::make_tuple(gridcell3, gridcell4, grid.size(), tcols - 1, cellSizeX - cellSizeY);
-}
 // Function to check if a file exists
 bool fileExists(const std::string& filename) {
     std::ifstream file(filename);
@@ -542,6 +463,164 @@ void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>
     }
 }
 
+std::tuple<std::vector<int>, std::vector<std::string>, int, int, float>
+ForestGridTif(const std::string& filename, const std::unordered_map<std::string, std::string>& Dictionary) {
+    /*
+    Reads fuel data from a .tif
+    Args:
+       filename (std::string): Name of .tif file.
+       Dictionary (std::unordered_map<std::string, std::string>&): Reference to fuels dictionary
+
+    Returns:
+        Fuel vectors, number of cells y cell size (tuple[std::vector<int>, std::vector<std::string>)
+    */
+    // Tries to open file
+    GDALAllRegister();
+    GDALDataset *fuelsDataset;
+    GDALRasterBand *fuelsBand;
+    fuelsDataset = (GDALDataset *) GDALOpen(filename.c_str(), GA_ReadOnly);
+    // If not succesfull, throws exception
+    if (fuelsDataset == NULL) {
+        throw std::runtime_error("Error: Could not open file '" + filename + "'");
+    }
+    int cells = 0;
+    int tFBPDicts = 0;
+    int tcols = 0;
+    // Vectors with fuel information in different formats
+    std::vector<std::string> gridcell1;
+    std::vector<std::string> gridcell2;
+    std::vector<int> gridcell3;
+    std::vector<std::string> gridcell4;
+    std::vector<std::vector<std::string>> grid;
+    std::vector<std::vector<std::string>> grid2;
+    // Get fuel band
+    fuelsBand = fuelsDataset->GetRasterBand(1);
+    // Get Raster dimentions
+    int nXSize = fuelsBand->GetXSize();
+    int nYSize = fuelsBand->GetYSize();
+    // Extracts geotransform
+    double adfGeoTransform[6];
+    fuelsDataset->GetGeoTransform(adfGeoTransform);
+    // Gets cell size from geotransform
+    double cellSizeX = adfGeoTransform[1];
+    double cellSizeY = adfGeoTransform[5];
+    const double epsilon = std::numeric_limits<double>::epsilon();
+    if (fabs(cellSizeX + cellSizeY) > epsilon) {
+        throw std::runtime_error("Error: Cells are not square in: '" + filename + "'");
+    }
+    // Read raster data
+    float *pafScanline;
+    pafScanline = (float *) CPLMalloc(sizeof(float) * nXSize * nYSize);
+    // For each row
+    for (int i = 0; i < nYSize; i++) {
+        // Read pixel values for the current row
+        CPLErr errcode = fuelsBand->RasterIO(GF_Read, 0, i, nXSize, 1, pafScanline, nXSize, 1, GDT_Float32, 0, 0);
+        if (errcode != 0) {
+            throw std::runtime_error("Error: Raster reading failed in: '" + filename + "'");
+        }
+        // For each column
+        for (int j = 0; j < nXSize; j++) {
+            // Access the pixel value at position (i, j)
+            float pixelValue = pafScanline[j];
+            std::string token = std::to_string(static_cast<int>(pafScanline[j]));
+            if (pixelValue != pixelValue || Dictionary.find(token) == Dictionary.end()) {
+                    // If fuel not in Dictionary:
+                    gridcell1.push_back("NF");
+                    gridcell2.push_back("NF");
+                    gridcell3.push_back(0);
+                    gridcell4.push_back("NF");
+            } else {
+                    gridcell1.push_back(token);
+                    gridcell2.push_back(Dictionary.at(token));
+                    gridcell3.push_back(std::stoi(token));
+                    gridcell4.push_back(Dictionary.at(token));
+            }
+            tcols = std::max(tcols, static_cast<int>(gridcell1.size()));
+            
+        } 
+        grid.push_back(gridcell1);
+        grid2.push_back(gridcell2);
+        gridcell1.clear();
+        gridcell2.clear(); 
+    }
+    std::vector<std::array<int, 2>> CoordCells;
+    CoordCells.reserve(grid.size() * tcols);
+    int n = 1;
+    tcols += 1;
+    return std::make_tuple(gridcell3, gridcell4, grid.size(), tcols - 1, cellSizeX);
+}
+
+// Function to read grid data from ASCII file
+void DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells) {
+    /*
+    Reads fuel data from a .tif
+    Args:
+       filename (std::string): Name of .tif file.
+       Dictionary (std::unordered_map<std::string, std::string>&): Reference to fuels dictionary
+
+    Returns:
+        Fuel vectors, number of cells y cell size (tuple[std::vector<int>, std::vector<std::string>)
+    */
+    // Tries to open file
+    GDALAllRegister();
+    GDALDataset *fuelsDataset;
+    GDALRasterBand *fuelsBand;
+    fuelsDataset = (GDALDataset *) GDALOpen(filename.c_str(), GA_ReadOnly);
+    // If not succesfull, throws exception
+    if (fuelsDataset == NULL) {
+        throw std::runtime_error("Error: Could not open file '" + filename + "'");
+    }
+
+    std::vector<std::string> filelines;
+
+    
+    float cellsize;
+    // Extracts geotransform
+    double adfGeoTransform[6];
+    fuelsDataset->GetGeoTransform(adfGeoTransform);
+    // Gets cell size from geotransform
+    double cellSizeX = adfGeoTransform[1];
+    double cellSizeY = adfGeoTransform[5];
+    const double epsilon = std::numeric_limits<double>::epsilon();
+    if (fabs(cellSizeX + cellSizeY) > epsilon) {
+        throw std::runtime_error("Error: Cells are not square in: '" + filename + "'");
+    }
+    cellsize = static_cast<float>(cellSizeX);
+    // Get fuel band
+    fuelsBand = fuelsDataset->GetRasterBand(1);
+    // Get Raster dimentions
+    int nXSize = fuelsBand->GetXSize();
+    int nYSize = fuelsBand->GetYSize();
+    int aux = 0;
+    // Read raster data
+    float *pafScanline;
+    pafScanline = (float *) CPLMalloc(sizeof(float) * nXSize * nYSize);
+    // For each row
+    for (int i = 0; i < nYSize; i++) {
+        // Read pixel values for the current row
+        CPLErr errcode = fuelsBand->RasterIO(GF_Read, 0, i, nXSize, 1, pafScanline, nXSize, 1, GDT_Float32, 0, 0);
+        if (errcode != 0) {
+            throw std::runtime_error("Error: Raster reading failed in: '" + filename + "'");
+        }
+        // For each column
+        for (int j = 0; j < nXSize; j++) {
+            // Access the pixel value at position (i, j)
+            float pixelValue = pafScanline[j];
+            if (pixelValue == pixelValue){
+                std::string token = std::to_string(static_cast<int>(pafScanline[j]));
+                //std::cout << token << '\n';
+                data[aux] = pixelValue;
+            } else {
+                data[aux] = pixelValue;
+            }
+            aux++;
+            if (aux == nCells) {
+                return;  // Stop reading if we've filled the data vector
+            }
+            }
+    }
+}
+
 // Main function
 void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     std::unordered_map<std::string, std::string> FBPDict;
@@ -559,14 +638,27 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
 
     // Call Dictionary function to read lookup table
     std::tie(FBPDict, ColorsDict) = Dictionary(FBPlookup);
-
+    //If fuels.tif exists, then .tif's are used, otherwise .asc
+    std::string extension;
+    if(fileExists(InFolder + "/" + "fuels.tif")){
+        extension = ".tif";
+        std::cout << "Using .tif" << '\n';
+    } else {
+        extension = ".asc";
+        std::cout << "Using .asc" << '\n';
+    }
     // Call ForestGrid function
-    std::string FGrid = InFolder + "/fuels.asc";
+    std::string FGrid = InFolder + "fuels.asc";
     std::vector<int> GFuelTypeN;
     std::vector<std::string> GFuelType;
     int FBPDicts, Cols;
     float CellSide;
-    std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGrid(FGrid, FBPDict);
+    if(extension == ".tif"){
+        std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGridTif(FGrid, FBPDict);
+    } else{
+        std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGrid(FGrid, FBPDict);
+    }
+    
 
     // FOR DEBUGING ----------------------------------------------------------
     /*
@@ -617,40 +709,69 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     std::vector<float> FMC(NCells, std::nanf(""));
 
     std::vector<std::string> filenames = {
-        "elevation.asc", "saz.asc", "slope.asc", "cur.asc",
-        "cbd.asc", "cbh.asc", "ccf.asc", "py.asc", "fmc.asc"
+        "elevation" + extension, "saz" + extension, "slope" + extension, "cur" + extension,
+        "cbd" + extension, "cbh" + extension, "ccf" + extension, "py" + extension, "fmc" + extension
     };
 
     for (const auto& name : filenames) {
-        std::string filePath = InFolder + "/" + name;
+        std::string filePath = InFolder + name;
         std::cout << filePath << std::endl;
-    
-        if (fileExists(filePath)) {
-            if (name == "elevation.asc") {
-                DataGrids(filePath, Elevation, NCells);
-            } else if (name == "saz.asc") {
-                DataGrids(filePath, SAZ, NCells);
-            } else if (name == "slope.asc") {
-                DataGrids(filePath, PS, NCells);
-            } else if (name == "cur.asc") {
-                DataGrids(filePath, Curing, NCells);
-            } else if (name == "cbd.asc") {
-                DataGrids(filePath, CBD, NCells);
-            } else if (name == "cbh.asc") {
-                DataGrids(filePath, CBH, NCells);
-            } else if (name == "ccf.asc") {
-                DataGrids(filePath, CCF, NCells);
-            } else if (name == "py.asc") {
-                DataGrids(filePath, PY, NCells);
-            } else if (name == "fmc.asc") {
-                DataGrids(filePath, FMC, NCells);
-            } else {
-                // Handle the case where the file name doesn't match any condition
-                // std::cout << "Unhandled file: " << name << std::endl;
+        if (extension == ".tif") {
+            if (fileExists(filePath)) {
+                if (name == "elevation" + extension) {
+                    DataGridsTif(filePath, Elevation, NCells);
+                } else if (name == "saz" + extension) {
+                    DataGridsTif(filePath, SAZ, NCells);
+                } else if (name == "slope" + extension) {
+                    DataGridsTif(filePath, PS, NCells);
+                } else if (name == "cur" + extension) {
+                    DataGridsTif(filePath, Curing, NCells);
+                } else if (name == "cbd" + extension) {
+                    DataGridsTif(filePath, CBD, NCells);
+                } else if (name == "cbh" + extension) {
+                    DataGridsTif(filePath, CBH, NCells);
+                } else if (name == "ccf" + extension) {
+                    DataGridsTif(filePath, CCF, NCells);
+                } else if (name == "py" + extension) {
+                    DataGridsTif(filePath, PY, NCells);
+                } else if (name == "fmc" + extension) {
+                    DataGridsTif(filePath, FMC, NCells);
+                } else {
+                    // Handle the case where the file name doesn't match any condition
+                    // std::cout << "Unhandled file: " << name << std::endl;
+                }
+            } 
+            else {
+                std::cout << "No " << name << " file, filling with NaN" << std::endl;
             }
-        } 
-        else {
-            std::cout << "No " << name << " file, filling with NaN" << std::endl;
+        } else {
+            if (fileExists(filePath)) {
+                if (name == "elevation" + extension) {
+                    DataGrids(filePath, Elevation, NCells);
+                } else if (name == "saz" + extension) {
+                    DataGrids(filePath, SAZ, NCells);
+                } else if (name == "slope" + extension) {
+                    DataGrids(filePath, PS, NCells);
+                } else if (name == "cur" + extension) {
+                    DataGrids(filePath, Curing, NCells);
+                } else if (name == "cbd" + extension) {
+                    DataGrids(filePath, CBD, NCells);
+                } else if (name == "cbh" + extension) {
+                    DataGrids(filePath, CBH, NCells);
+                } else if (name == "ccf" + extension) {
+                    DataGrids(filePath, CCF, NCells);
+                } else if (name == "py" + extension) {
+                    DataGrids(filePath, PY, NCells);
+                } else if (name == "fmc" + extension) {
+                    DataGrids(filePath, FMC, NCells);
+                } else {
+                    // Handle the case where the file name doesn't match any condition
+                    // std::cout << "Unhandled file: " << name << std::endl;
+                }
+            } 
+            else {
+                std::cout << "No " << name << " file, filling with NaN" << std::endl;
+            }
         }
     }
 
@@ -663,3 +784,50 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     writeDataToFile(result,InFolder);
     std::cout << "File Generated";
 }
+/*
+int main() {
+    std::unordered_map<std::string, std::string> FBPDict;
+    std::unordered_map<std::string, std::tuple<float, float, float, float>> ColorsDict;
+    // Call Dictionary function to read lookup table
+    std::tie(FBPDict, ColorsDict) = Dictionary("../data/CanadianFBP/dogrib/fbp_lookup_table.csv");
+    // Call ForestGrid function
+    std::string FGrid = "../data/CanadianFBP/dogrib/fuels.asc";
+    std::string EGrid = "../data/CanadianFBP/dogrib/slope.asc";
+    std::string FGrid_tif = "../data/CanadianFBP/dogrib/fuels.tif";
+    std::string EGrid_tif = "../data/CanadianFBP/dogrib/slope.tif";
+    std::vector<int> GFuelTypeN;
+    std::vector<std::string> GFuelType;
+    int FBPDicts, Cols;
+    float CellSide;
+    std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGrid(FGrid, FBPDict);
+    int NCells = GFuelType.size();
+    std::vector<float> Elevation(NCells, std::nanf(""));
+    DataGrids(EGrid, Elevation, NCells);
+    std::vector<int> GFuelTypeN_tif;
+    std::vector<std::string> GFuelType_tif;
+    int FBPDicts_tif, Cols_tif;
+    float CellSide_tif;
+    std::tie(GFuelTypeN_tif, GFuelType_tif, FBPDicts_tif, Cols_tif, CellSide_tif) = ForestGridTif(FGrid_tif, FBPDict);
+    int NCells_tif = GFuelType_tif.size();
+    std::vector<float> Elevation_tif(NCells, std::nanf(""));
+    DataGridsTif(EGrid_tif, Elevation_tif, NCells);
+    assert(NCells == NCells_tif);
+    assert(CellSide == CellSide_tif);
+    assert(FBPDicts == FBPDicts_tif);
+    assert(GFuelTypeN.size() == GFuelTypeN_tif.size());
+    for (int i = 0; i < NCells; i++)
+    {
+        assert(GFuelType[i] == GFuelType_tif[i]);
+    }
+    for (int i = 0; i < GFuelTypeN.size(); i++)
+    {
+        assert(GFuelTypeN[i] == GFuelTypeN_tif[i]);
+    }
+    for (int i = 0; i < NCells; i++)
+    {
+        assert(Elevation[i] == Elevation_tif[i]);
+    }
+    return 0;
+}
+
+*/
