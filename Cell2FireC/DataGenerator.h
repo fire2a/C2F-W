@@ -1,6 +1,8 @@
 #ifndef DATAGENERATOR_H
 #define DATAGENERATOR_H
-
+#include <gdal/gdal.h>
+#include <gdal/gdal_priv.h>
+#include <gdal/cpl_conv.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
