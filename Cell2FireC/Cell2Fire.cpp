@@ -35,6 +35,9 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include <algorithm> 
 #include <chrono>
 #include <memory>
+#include <fstream>
+#include <streambuf>
+
 
 using namespace std;
 
@@ -104,6 +107,27 @@ void CSVGrid(int rows, int cols, int gridNumber, std::string gridFolder, std::ve
 	CSVPloter.printCSV_V2(rows, cols, statusCellsCSV);
 }
 
+class teebuf : public std::streambuf {
+public:
+    teebuf(std::streambuf *sb1, std::streambuf *sb2)
+        : sb1(sb1), sb2(sb2) {}
+protected:
+    virtual int overflow(int c) {
+        if (c == EOF) {
+            return !EOF;
+        } else {
+            int const r1 = sb1->sputc(c);
+            int const r2 = sb2->sputc(c);
+            return r1 == EOF || r2 == EOF ? EOF : c;
+        }
+    }
+    virtual int sync() {
+        return !sb1->pubsync() && !sb2->pubsync() ? 0 : -1;
+    }   
+private:
+    std::streambuf *sb1;
+    std::streambuf *sb2;
+};
 
 /******************************************************************************
 															Constructor 
@@ -1656,18 +1680,13 @@ std::vector<float> Cell2Fire::getFireProgressMatrix(){
 }
 
 
-
-
-
-
-
-
 /******************************************************************************
 
 																Main Program	
 
 *******************************************************************************/
 int main(int argc, char* argv[]) {
+	
 	// Read Arguments
 	std::cout << "------ Command line values ------\n";
 	arguments args;
