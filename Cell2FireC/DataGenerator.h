@@ -1,5 +1,5 @@
-#ifndef DataGenerator
-#define DataGenerator
+#ifndef DATAGENERATOR_H
+#define DATAGENERATOR_H
 
 #include <iostream>
 #include <fstream>
@@ -12,51 +12,6 @@
 #include <algorithm>
 #include <memory>
 
-
-class BaseData {
-public:
-    virtual ~BaseData() = default;
-    virtual std::string toString() const = 0;
-};
-
-class StringData : public BaseData {
-private:
-    std::string value;
-
-public:
-    explicit StringData(const std::string& val) : value(val) {}
-
-    std::string toString() const override {
-        return value;
-    }
-};
-
-class FloatData : public BaseData {
-private:
-    float value;
-
-public:
-    explicit FloatData(float val) : value(val) {}
-
-    std::string toString() const override {
-        return std::to_string(value);
-    }
-};
-
-class IntData : public BaseData {
-private:
-    int value;
-
-public:
-    explicit IntData(int val) : value(val) {}
-
-    std::string toString() const override {
-        return std::to_string(value);
-    }
-};
-
-
-
 std::tuple<std::unordered_map<std::string, std::string>, std::unordered_map<std::string, std::tuple<float, float, float, float>>> Dictionary(const std::string& filename);
 
 std::tuple<std::vector<int>, std::vector<std::string>, int, int, float> ForestGrid(const std::string& filename, const std::unordered_map<std::string, std::string>& Dictionary);
@@ -65,14 +20,14 @@ bool fileExists(const std::string& filename);
 
 void DataGrids(const std::string& filename, std::vector<float>& data, int nCells);
 
-std::vector<std::vector<std::unique_ptr<BaseData>>> GenerateDat(const std::vector<std::string>& GFuelType, const std::vector<int>& GFuelTypeN,
+std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::vector<std::string>& GFuelType, const std::vector<int>& GFuelTypeN,
                  const std::vector<float>& Elevation, const std::vector<float>& PS,
                  const std::vector<float>& SAZ, const std::vector<float>& Curing,
                  const std::vector<float>& CBD, const std::vector<float>& CBH,
                  const std::vector<float>& CCF, const std::vector<float>& PY,
                  const std::vector<float>& FMC, const std::string& InFolder);
 
-void writeDataToFile(const std::vector<std::vector<std::unique_ptr<BaseData>>>& dataGrids, const std::string& InFolder);
+void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids, const std::string& InFolder);
 
 void GenDataFile(const std::string& InFolder, const std::string& Simulator);
 
