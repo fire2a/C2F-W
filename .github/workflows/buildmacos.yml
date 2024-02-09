@@ -30,8 +30,9 @@ jobs:
         export CPATH=/usr/local/opt/gdal/include:$CPATH
         export C_INCLUDE_PATH=/usr/local/opt/gdal/include:$C_INCLUDE_PATH
         export CPLUS_INCLUDE_PATH=/usr/local/opt/gdal/include:$CPLUS_INCLUDE_PATH
+        echo "checking directory:"
         ls /usr/local/opt/gdal/include/
-        ls /usr/local/opt/gdal/include/gdal/
+        # ls /usr/local/opt/gdal/include/gdal/
         cd Cell2FireC
         make clean -f makefile.macos-latest
         make -f makefile.macos-latest
