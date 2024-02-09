@@ -27,7 +27,9 @@ jobs:
         # find /usr/local -name "llvm" 2>/dev/null
         find /usr/local -name "gdal" 2>/dev/null
         brew --prefix gdal
-        ls /usr/local/opt/gdal/include
+        echo $CPATH
+        echo $C_INCLUDE_PATH
+        echo $CPLUS_INCLUDE_PATH
         cd Cell2FireC
         make clean -f makefile.macos-latest
         make -f makefile.macos-latest
