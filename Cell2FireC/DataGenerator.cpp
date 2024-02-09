@@ -475,6 +475,7 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
         Fuel vectors, number of cells y cell size (tuple[std::vector<int>, std::vector<std::string>)
     */
     // Tries to open file
+    std::cout << filename << '\n';
     GDALAllRegister();
     GDALDataset *fuelsDataset;
     GDALRasterBand *fuelsBand;
