@@ -648,7 +648,8 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
         std::cout << "Using .asc" << '\n';
     }
     // Call ForestGrid function
-    std::string FGrid = InFolder + "fuels.asc";
+    std::string FGrid = InFolder + "fuels" + extension;
+    //std::cout << FGrid << '\n';
     std::vector<int> GFuelTypeN;
     std::vector<std::string> GFuelType;
     int FBPDicts, Cols;
@@ -789,12 +790,12 @@ int main() {
     std::unordered_map<std::string, std::string> FBPDict;
     std::unordered_map<std::string, std::tuple<float, float, float, float>> ColorsDict;
     // Call Dictionary function to read lookup table
-    std::tie(FBPDict, ColorsDict) = Dictionary("../data/CanadianFBP/dogrib/fbp_lookup_table.csv");
+    std::tie(FBPDict, ColorsDict) = Dictionary("../data/Kitral/Portezuelo/kitral_lookup_table.csv");
     // Call ForestGrid function
-    std::string FGrid = "../data/CanadianFBP/dogrib/fuels.asc";
-    std::string EGrid = "../data/CanadianFBP/dogrib/slope.asc";
-    std::string FGrid_tif = "../data/CanadianFBP/dogrib/fuels.tif";
-    std::string EGrid_tif = "../data/CanadianFBP/dogrib/slope.tif";
+    std::string FGrid = "../data/Kitral/Portezuelo/fuels.asc";
+    std::string EGrid = "../data/Kitral/Portezuelo/slope.asc";
+    std::string FGrid_tif = "../data/Kitral/Portezuelo/fuels.tif";
+    std::string EGrid_tif = "../data/Kitral/Portezuelo/slope.tif";
     std::vector<int> GFuelTypeN;
     std::vector<std::string> GFuelType;
     int FBPDicts, Cols;
@@ -829,5 +830,4 @@ int main() {
     }
     return 0;
 }
-
 */
