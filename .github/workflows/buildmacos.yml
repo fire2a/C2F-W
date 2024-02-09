@@ -22,10 +22,11 @@ jobs:
         # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt gdal
+        ls /usr/local/include/gdal
         # find /usr/local -name "Eigen" 2>/dev/null
         # find /usr/local -name "boost" 2>/dev/null
         # find /usr/local -name "llvm" 2>/dev/null
-        # find /usr/local -name "gdal" 2>/dev/null
+        find /usr/local -name "gdal" 2>/dev/null
         brew --prefix gdal
         cd Cell2FireC
         make clean -f makefile.macos-latest
