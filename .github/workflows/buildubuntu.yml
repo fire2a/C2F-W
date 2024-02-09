@@ -19,8 +19,7 @@ jobs:
 
     - name: Doit
       run: |
-        sudo apt install g++-12 libboost-all-dev libeigen3-dev
-        sudo add-apt-repository ppa:ubuntugis/ppa && sudo apt-get update gdal-bin libgdal-dev
+        sudo apt install g++-12 libboost-all-dev libeigen3-dev gdal-bin libgdal-dev
         cd Cell2FireC
         make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
