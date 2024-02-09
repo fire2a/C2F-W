@@ -31,12 +31,14 @@ jobs:
         export C_INCLUDE_PATH=/usr/local/opt/gdal/include:$C_INCLUDE_PATH
         export CPLUS_INCLUDE_PATH=/usr/local/opt/gdal/include:$CPLUS_INCLUDE_PATH
         echo "checking directory:"
-        mkdir /usr/local/opt/gdal/include/gdal 
         cd /usr/local/opt/gdal/include/
+        mkdir gdal 
         for item in *; do if [ "$item" != "gdal" ]; then mv "$item" gdal/; fi; done
-        cd ~
         ls
-        # ls /usr/local/opt/gdal/include/gdal/
+        cd gdal 
+        ls
+        cd /Users/runner/work/C2F-W/C2F-W
+        ls
         cd Cell2FireC
         make clean -f makefile.macos-latest
         make -f makefile.macos-latest
