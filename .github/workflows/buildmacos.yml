@@ -1,9 +1,9 @@
 name: macos build
 
 on:
-  # push:
-  #   branches:
-  #     - buildwindows
+  push:
+    branches:
+      - buildmacos
   workflow_dispatch:
   workflow_call:
 
