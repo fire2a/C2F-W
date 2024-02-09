@@ -20,6 +20,9 @@ jobs:
     - name: Doit
       run: |
         sudo apt install g++ libboost-all-dev libeigen3-dev libgdal-dev
+        cd /usr/include/gdal
+        ls
+        cd ~
         cd Cell2FireC
         make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
