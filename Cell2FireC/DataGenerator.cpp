@@ -542,8 +542,7 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
 
     for (const auto& name : filenames) {
         std::string filePath = InFolder + "/" + name;
-        std::cout << filePath << std::endl;
-    
+
         if (fileExists(filePath)) {
             if (name == "elevation.asc") {
                 DataGrids(filePath, Elevation, NCells);
@@ -571,10 +570,6 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
         else {
             std::cout << "No " << name << " file, filling with NaN" << std::endl;
         }
-    }
-
-    for (size_t i = 0; i < 30; ++i) {
-        std::cout << std::to_string(Elevation[i]) << std::endl;
     }
 
     // Call GenerateDat function

@@ -35,8 +35,6 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include <algorithm> 
 #include <chrono>
 #include <memory>
-#include <fstream>
-#include <streambuf>
 
 
 using namespace std;
@@ -1692,7 +1690,7 @@ int main(int argc, char* argv[]) {
 	arguments args;
 	arguments* args_ptr = &args;
 	parseArgs(argc, argv, args_ptr);
-	printArgs(args);
+	//printArgs(args);
 
 	// Random generator and distributions
 	//std::default_random_engine generator (args.seed);
