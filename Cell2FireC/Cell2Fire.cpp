@@ -35,6 +35,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include <algorithm> 
 #include <chrono>
 #include <memory>
+#include <typeinfo>
 
 
 using namespace std;
@@ -1351,18 +1352,16 @@ void Cell2Fire::Results(){
 		N2O_map[fuelTypes[i]] = N2O[i];
     }
 
-
-	std::string cell_ftype = "";
+	//std::string cell_ftype = "";
 	float sum=0;
 	for (const auto& value : this->burntCells) {
-		cell_ftype = df_ptr[value-1].fueltype;
-		sum = this->crownFraction[value-1]+this->surfFraction[value];
-        tfc += sum*(CO2_map[cell_ftype]+CH4_map[cell_ftype]*27.2+N2O_map[cell_ftype]*273);
+		std::string cell_ftype = df_ptr[value-1].fueltype;
 
-		std::cout << std::endl << cell_ftype << std::endl;
-		std::cout << std::endl << CO2_map[cell_ftype] << cell_ftype << std::endl;
-		std::cout << std::endl << CO2_map["C1"] << std::endl;
-		//std::cout << CH4_map[cell_ftype] << std::endl;
+		//remove unprintable characters
+		cell_ftype.erase(std::remove(cell_ftype.begin(), cell_ftype.end(), ' '), cell_ftype.end());
+		
+		sum = this->crownFraction[value-1]+this->surfFraction[value];
+        tfc += sum*(CO2_map[cell_ftype]+CH4_map[cell_ftype]*27.2+N2O_map[cell_ftype]*273)*(pow(10,-2));
 
 	}
 
@@ -1373,7 +1372,7 @@ void Cell2Fire::Results(){
 	std::cout << "Total Burnt Cells:        " << BCells << " - % of the Forest: " <<  BCells/nCells*100.0 <<"%" << std::endl;
 	std::cout << "Total Non-Burnable Cells: " << NBCells << " - % of the Forest: " <<  NBCells/nCells*100.0 <<"%"<< std::endl;
 	std::cout << "Total Firebreak Cells: " << HCells << " - % of the Forest: " <<  HCells/nCells*100.0 <<"%"<< std::endl;
-	std::cout << "Total CO2 eq. emited: " << tfc << std::endl;
+	std::cout << "Total CO2-eq emited: " << tfc << std::endl;
 
 	// Final Grid 
 	if(this->args.FinalGrid){
