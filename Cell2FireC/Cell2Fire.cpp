@@ -106,27 +106,6 @@ void CSVGrid(int rows, int cols, int gridNumber, std::string gridFolder, std::ve
 	CSVPloter.printCSV_V2(rows, cols, statusCellsCSV);
 }
 
-class teebuf : public std::streambuf {
-public:
-    teebuf(std::streambuf *sb1, std::streambuf *sb2)
-        : sb1(sb1), sb2(sb2) {}
-protected:
-    virtual int overflow(int c) {
-        if (c == EOF) {
-            return !EOF;
-        } else {
-            int const r1 = sb1->sputc(c);
-            int const r2 = sb2->sputc(c);
-            return r1 == EOF || r2 == EOF ? EOF : c;
-        }
-    }
-    virtual int sync() {
-        return !sb1->pubsync() && !sb2->pubsync() ? 0 : -1;
-    }   
-private:
-    std::streambuf *sb1;
-    std::streambuf *sb2;
-};
 
 /******************************************************************************
 															Constructor 
@@ -223,6 +202,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->Intensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
 	this->FlameLengths = std::vector<float> (this->nCells, 0);
+	this->Co2eq = 0;
 
 	this->ignProb = std::vector<float>(this->nCells, 1);
 	CSVParser.parsePROB(this->ignProb, DF, this->nCells);
@@ -276,6 +256,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->burningCells.clear();
 	this->burntCells.clear();
 	this->harvestCells.clear();
+	this->Co2eq = 0;
 	for (i=0; i < this->statusCells.size(); i++){
 		if(this->statusCells[i] < 3) this->availCells.insert (i+1);
 		else if (this->statusCells[i] == 4)  this->nonBurnableCells.insert(i+1);
@@ -521,6 +502,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->done = false;
 	this->fire_period = vector<int>(this->args.TotalYears, 0);
 	this->sim = simExt;
+	this->Co2eq = 0;
 	// Initial status grid folder
 	if(this->args.OutputGrids || this->args.FinalGrid){
 		CSVWriter CSVFolder("","");
@@ -777,6 +759,50 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	}
 }
 
+float Cell2Fire::get_co2eq(inputs* df_ptr){
+	
+	float tfc = 0;
+	float sum=0;
+
+	std::unordered_map<std::string, double> fuel_load = {
+		{"C1", 1.575}, {"C2", 5.08}, {"C3", 5.115}, {"C4", 5.12},
+		{"C5", 5.12}, {"C6", 5.18}, {"C7", 3.55}, {"D1", 1.5},
+		{"M1", 5.08}, {"M2", 5.08}, {"M3", 5.08}, {"M4", 5.08},
+		{"S1", 8.0}, {"S2", 16.0}, {"S3", 32.0}, {"O1a", 0.3}, {"O1b", 0.3}
+	};
+
+	// Definir las columnas
+	std::vector<std::string> fuelTypes = {"O1a", "O1b", "S1", "S2", "S3", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "D1", "D2", "M1", "M2", "M3", "M4"};
+	std::vector<int> CO2 = {1613, 1613, 1613, 1613, 1613, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569};
+	std::vector<double> CH4 = {2.3, 2.3, 2.3, 2.3, 2.3, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7};
+	std::vector<double> N2O = {0.21, 0.21, 0.21, 0.21, 0.21, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26};
+
+	std::unordered_map<std::string, double> CO2_map;
+	std::unordered_map<std::string, double> CH4_map;
+	std::unordered_map<std::string, double> N2O_map;
+
+	for (size_t i = 0; i < fuelTypes.size(); ++i) {
+		CO2_map[fuelTypes[i]] = CO2[i];
+		CH4_map[fuelTypes[i]] = CH4[i];
+		N2O_map[fuelTypes[i]] = N2O[i];
+		}
+
+	
+	for (const auto& value : this->burntCells) {
+			std::string cell_ftype = df_ptr[value-1].fueltype;
+
+			//remove unprintable characters
+			cell_ftype.erase(std::remove(cell_ftype.begin(), cell_ftype.end(), ' '), cell_ftype.end());
+		
+			sum = 
+			//this->crownFraction[value-1]+
+			this->surfFraction[value];
+			
+			tfc += sum*(CO2_map[cell_ftype]+CH4_map[cell_ftype]*27.2+N2O_map[cell_ftype]*273)*(pow(10,-2));
+		}
+
+	return tfc;
+}
 
 //Ignition method (False then ignition)
 bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
@@ -989,7 +1015,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 
 
 // Send messages 
-std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
+	std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 	// Iterator
 	std::unordered_map<int, Cells>::iterator it;
 	
@@ -1326,53 +1352,13 @@ void Cell2Fire::Results(){
 	float HCells = this->harvestCells.size();
 
 	
-	// TOTAL EQUIVALENT CO2 CALCULATION --- MUST REMOVE FROM HERE
-	float tfc = 0;
-
-	std::unordered_map<std::string, double> fuel_load = {
-        {"C1", 1.575}, {"C2", 5.08}, {"C3", 5.115}, {"C4", 5.12},
-        {"C5", 5.12}, {"C6", 5.18}, {"C7", 3.55}, {"D1", 1.5},
-        {"M1", 5.08}, {"M2", 5.08}, {"M3", 5.08}, {"M4", 5.08},
-        {"S1", 8.0}, {"S2", 16.0}, {"S3", 32.0}, {"O1a", 0.3}, {"O1b", 0.3}
-    };
-
-	// Definir las columnas
-    std::vector<std::string> fuelTypes = {"O1a", "O1b", "S1", "S2", "S3", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "D1", "D2", "M1", "M2", "M3", "M4"};
-    std::vector<int> CO2 = {1613, 1613, 1613, 1613, 1613, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569};
-    std::vector<double> CH4 = {2.3, 2.3, 2.3, 2.3, 2.3, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7};
-    std::vector<double> N2O = {0.21, 0.21, 0.21, 0.21, 0.21, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26};
-
-    std::unordered_map<std::string, double> CO2_map;
-	std::unordered_map<std::string, double> CH4_map;
-	std::unordered_map<std::string, double> N2O_map;
-
-    for (size_t i = 0; i < fuelTypes.size(); ++i) {
-        CO2_map[fuelTypes[i]] = CO2[i];
-		CH4_map[fuelTypes[i]] = CH4[i];
-		N2O_map[fuelTypes[i]] = N2O[i];
-    }
-
-	//std::string cell_ftype = "";
-	float sum=0;
-	for (const auto& value : this->burntCells) {
-		std::string cell_ftype = df_ptr[value-1].fueltype;
-
-		//remove unprintable characters
-		cell_ftype.erase(std::remove(cell_ftype.begin(), cell_ftype.end(), ' '), cell_ftype.end());
-		
-		sum = this->crownFraction[value-1]+this->surfFraction[value];
-        tfc += sum*(CO2_map[cell_ftype]+CH4_map[cell_ftype]*27.2+N2O_map[cell_ftype]*273)*(pow(10,-2));
-
-	}
-
-	// TOTAL EQUIVALENT CO2 CALCULATION --- END
 
 	std::cout <<"\n----------------------------- Results -----------------------------" << std::endl;
 	std::cout << "Total Available Cells:    " << ACells << " - % of the Forest: " <<  ACells/nCells*100.0 << "%" << std::endl;
 	std::cout << "Total Burnt Cells:        " << BCells << " - % of the Forest: " <<  BCells/nCells*100.0 <<"%" << std::endl;
 	std::cout << "Total Non-Burnable Cells: " << NBCells << " - % of the Forest: " <<  NBCells/nCells*100.0 <<"%"<< std::endl;
 	std::cout << "Total Firebreak Cells: " << HCells << " - % of the Forest: " <<  HCells/nCells*100.0 <<"%"<< std::endl;
-	std::cout << "Total CO2-eq emited: " << tfc << std::endl;
+	std::cout << "Total CO2-eq emited: " << this->Co2eq << "Ton" <<std::endl;
 
 	// Final Grid 
 	if(this->args.FinalGrid){
@@ -1565,11 +1551,15 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	 // One step (one fire period, ignition - if needed -, sending messages and receiving them - if needed)
 	 // For completeness: just in case user runs it longer than the horizon (should not happen)
 	if (this->year > this->args.TotalYears){
+
+		this->Co2eq = this->get_co2eq(df_ptr);
+
 		if (this->args.verbose){
 			printf("\nYear is greater than the Horizon, no more steps");
 		}
 		this->done = true;
 		// Print-out results to folder
+	
 		if (this->args.verbose) this->Results();        
 		
 		//Next Sim
@@ -1603,6 +1593,7 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 				// If more than planning horizon, next sim
 				if (this->year > this->args.TotalYears) {
 					// Print-out results to folder
+					this->Co2eq = this->get_co2eq(df_ptr);
 					this->Results();
 
 					// Next Sim if max year
@@ -1659,6 +1650,7 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	if (this->year > this->args.TotalYears){
 		//printf("\n\nEntra a year mayor al total...\n\n");
 		// Print-out results to folder
+		this->Co2eq = this->get_co2eq(df_ptr);
 		this->Results();
 
 		// Next Sim if max year
@@ -1672,6 +1664,7 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 		this->done = true;
 		
 		// Print-out results to folder
+		this->Co2eq = this->get_co2eq(df_ptr);
 		this->Results();        
 		
 		// Next Sim if max year
@@ -1765,8 +1758,11 @@ int main(int argc, char* argv[]) {
 	int TID = 0;
 
 	
+
 	Cell2Fire Forest2(args); //generate Forest object
 	std::vector<Cell2Fire> Forests(num_threads, Forest2);
+
+	
 
 	// Multigenerator
 	std::vector<std::default_random_engine> generators;
