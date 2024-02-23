@@ -82,6 +82,7 @@ class Cell2Fire {
 		 string cfbFolder;
 		 string flFolder;
 		 string historyFolder;
+		 string co2eqFolder;
 	
 		 // Vectors
 		 std::vector<int> fire_period;
@@ -106,6 +107,7 @@ class Cell2Fire {
 		 std::vector<float>RateOfSpreads;
 		 std::vector<float>FlameLengths;
 		 std::vector<std::vector<int>> IgnitionSets;
+		 std::vector<float>co2_v;
 
 		 // Sets
 		 std::unordered_set<int> availCells;				

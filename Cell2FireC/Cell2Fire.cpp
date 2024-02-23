@@ -48,6 +48,7 @@ inputs * df;
 std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;   
 std::vector<int> NFTypesCells;
+std::vector<float> co2_v;
 
 /******************************************************************************
 																Utils
@@ -225,12 +226,14 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	
 	// Harvested cells
 	if(strcmp(this->args.HarvestPlan.c_str(), EM) != 0){
+
+		cout << "Harvest plan is non empty" << endl;
 		std::string sep = ",";
 		CSVReader CSVHPlan(this->args.HarvestPlan, sep);
 						
 		// Populate Ignitions vector 
 		std::vector<std::vector<std::string>> HarvestedDF  = CSVHPlan.getData();
-		//CSVHPlan.printData(HarvestedDF);
+		CSVHPlan.printData(HarvestedDF);
 		
 		// Cells
 		int HCellsP = HarvestedDF.size() - 1;
@@ -760,10 +763,12 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 }
 
 float Cell2Fire::get_co2eq(inputs* df_ptr){
-	
+
 	float tfc = 0;
 	float sum=0;
 
+	if (this->args.Co2eq){
+	
 	std::unordered_map<std::string, double> fuel_load = {
 		{"C1", 1.575}, {"C2", 5.08}, {"C3", 5.115}, {"C4", 5.12},
 		{"C5", 5.12}, {"C6", 5.18}, {"C7", 3.55}, {"D1", 1.5},
@@ -787,7 +792,6 @@ float Cell2Fire::get_co2eq(inputs* df_ptr){
 		N2O_map[fuelTypes[i]] = N2O[i];
 		}
 
-	
 	for (const auto& value : this->burntCells) {
 			std::string cell_ftype = df_ptr[value-1].fueltype;
 
@@ -800,6 +804,7 @@ float Cell2Fire::get_co2eq(inputs* df_ptr){
 			
 			tfc += sum*(CO2_map[cell_ftype]+CH4_map[cell_ftype]*27.2+N2O_map[cell_ftype]*273)*(pow(10,-2));
 		}
+	}
 
 	return tfc;
 }
@@ -1358,8 +1363,11 @@ void Cell2Fire::Results(){
 	std::cout << "Total Burnt Cells:        " << BCells << " - % of the Forest: " <<  BCells/nCells*100.0 <<"%" << std::endl;
 	std::cout << "Total Non-Burnable Cells: " << NBCells << " - % of the Forest: " <<  NBCells/nCells*100.0 <<"%"<< std::endl;
 	std::cout << "Total Firebreak Cells: " << HCells << " - % of the Forest: " <<  HCells/nCells*100.0 <<"%"<< std::endl;
-	std::cout << "Total CO2-eq emited: " << this->Co2eq << "Ton" <<std::endl;
-
+	
+	if (this->args.Co2eq){
+	std::cout << "Total CO2-eq emited: " << this->Co2eq << " Ton" <<std::endl;
+	}
+	
 	// Final Grid 
 	if(this->args.FinalGrid){
 		CSVWriter CSVFolder("","");
@@ -1434,8 +1442,8 @@ void Cell2Fire::Results(){
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->FlameLengths);
 	}
 
-	
-		// Intensity
+
+	// Intensity
 	if ((this->args.OutCrownConsumption) && (this->args.AllowCROS)) {
 		this->cfbFolder = this->args.OutFolder + "CrownFractionBurn"+separator();
 		std::string cfbName;
@@ -1479,7 +1487,12 @@ void Cell2Fire::Results(){
 		CSVWriter CSVPloter(crownName, " ");
 		//CSVPloter.printCrownAscii(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownMetrics, statusCells2); /OLD VERSION
 		CSVPloter.printASCIIInt(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownState);
-	}	
+	}
+
+	if (this->Co2eq){
+
+		co2_v.push_back(this->Co2eq);
+	}
 }
 
 
@@ -1683,6 +1696,15 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 			WtFile.printWeather(WeatherHistory);
 		}
 	}
+
+	if (this->sim > args.TotalSims){
+		std::string filename = "emissions.csv";
+		CSVWriter co2eqFolder("", "");
+		this->co2eqFolder = this->args.OutFolder + "Co2eq"+separator() ;
+		co2eqFolder.MakeDir(this->co2eqFolder);
+		CSVWriter co2File(this->co2eqFolder + filename);
+		co2File.printCO2(co2_v);
+    }
 		
 	// Print current status
 	if (!this->done && this->args.verbose){
@@ -1761,8 +1783,6 @@ int main(int argc, char* argv[]) {
 
 	Cell2Fire Forest2(args); //generate Forest object
 	std::vector<Cell2Fire> Forests(num_threads, Forest2);
-
-	
 
 	// Multigenerator
 	std::vector<std::default_random_engine> generators;
