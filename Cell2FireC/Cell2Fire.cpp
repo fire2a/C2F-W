@@ -1667,9 +1667,16 @@ std::vector<float> Cell2Fire::getFireProgressMatrix(){
 *******************************************************************************/
 int main(int argc, char* argv[]) {
 	// Read Arguments
-	std::cout << "------ Command line values ------\n";
+	
 	arguments args;
 	arguments* args_ptr = &args;
+
+	if (args.InFolder.empty() || args.OutFolder.empty()){
+		cout << "Must specify non-empty input and output folder (hint: use --input-instance-folder and --output-folder)" << endl;
+		return 1;
+	}
+	
+	std::cout << "------ Command line values ------\n";
 	parseArgs(argc, argv, args_ptr);
 	//printArgs(args);
 
