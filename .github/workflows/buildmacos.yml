@@ -1,9 +1,9 @@
 name: macos build
 
 on:
-  # push:
-  #   branches:
-  #     - buildwindows
+  push:
+    branches:
+      - buildmacos
   workflow_dispatch:
   workflow_call:
 
@@ -21,10 +21,19 @@ jobs:
       run: |
         # which gcc-12
         # which brew
-        brew install boost eigen llvm libopenmpt
+        brew install boost eigen llvm libopenmpt gdal
         # find /usr/local -name "Eigen" 2>/dev/null
         # find /usr/local -name "boost" 2>/dev/null
         # find /usr/local -name "llvm" 2>/dev/null
+        # find /usr/local -name "gdal" 2>/dev/null
+        brew --prefix gdal
+        export CPATH=/usr/local/opt/gdal/include:$CPATH
+        export C_INCLUDE_PATH=/usr/local/opt/gdal/include:$C_INCLUDE_PATH
+        export CPLUS_INCLUDE_PATH=/usr/local/opt/gdal/include:$CPLUS_INCLUDE_PATH
+        cd /usr/local/opt/gdal/include/
+        mkdir gdal 
+        for item in *; do if [ "$item" != "gdal" ]; then mv "$item" gdal/; fi; done
+        cd /Users/runner/work/C2F-W/C2F-W
         cd Cell2FireC
         make clean -f makefile.macos-latest
         make -f makefile.macos-latest
