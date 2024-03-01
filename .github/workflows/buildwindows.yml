@@ -34,7 +34,7 @@ jobs:
         # env:
         #   CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
       with:
-        args: install eigen wget
+        args: install eigen gdal wget 
       # https://community.chocolatey.org/packages
       # choco install eigen --version v3.4.0
       # https://community.chocolatey.org/packages/eigen#files
