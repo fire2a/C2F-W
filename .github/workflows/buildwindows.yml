@@ -34,12 +34,28 @@ jobs:
         # env:
         #   CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
       with:
-        args: install eigen gdal wget 
+        args: install eigen wget 
       # https://community.chocolatey.org/packages
       # choco install eigen --version v3.4.0
       # https://community.chocolatey.org/packages/eigen#files
       # ! boost 1.58.0 is nuget !
       # https://community.chocolatey.org/packages/boost-msvc-14.3#files
+
+
+    # Bootstrapping vcpkg (setting up vcpkg)
+    - name: Bootstrap vcpkg
+      run: .\vcpkg\bootstrap-vcpkg.bat
+      shell: cmd
+
+    # Integrating vcpkg
+    - name: Integrate vcpkg
+      run: .\vcpkg\vcpkg integrate install
+      shell: cmd
+
+    # Installing GDAL with vcpkg
+    - name: Install GDAL
+      run: .\vcpkg\vcpkg install gdal
+      shell: cmd
 
     - name: get dirent release
       uses: robinraju/release-downloader@v1.8
