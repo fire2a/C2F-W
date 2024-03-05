@@ -10,6 +10,7 @@
 #include "WriteCSV.h"
 #include "ReadArgs.h"
 #include "Lightning.h"
+#include "DataGenerator.h"
 
 // Include libraries
 #include <stdio.h>
@@ -25,6 +26,7 @@
 #include <string.h>
 #include <random>
 #include <algorithm> 
+#include <memory>
 
 using namespace std;
 

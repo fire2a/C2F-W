@@ -45,7 +45,7 @@ To use the correspondent version of the simulator, choose version with the follo
 ```
 $ --sim XXX
 ```
-Where XXX can be *S*, for Scott and Burgan Fuel Model, or *K*, for Kitral Fuel Model
+Where XXX can be *S*, for Scott and Burgan Fuel Model, or *K*, for Kitral Fuel Model, *C* for Canadian fire behavior prediction system
 
 # Disclaimer
 This software is for research use only. There is no warranty of any kind; there is not even the implied warranty of fitness for use.

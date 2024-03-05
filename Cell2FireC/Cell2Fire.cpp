@@ -14,6 +14,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include "WriteCSV.h"
 #include "ReadArgs.h"
 #include "Lightning.h"
+#include "DataGenerator.h"
 
 // Include libraries
 #include <omp.h>
@@ -33,6 +34,8 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include <random>
 #include <algorithm> 
 #include <chrono>
+#include <memory>
+
 
 using namespace std;
 
@@ -187,7 +190,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	// Populate the df [nCells] objects
 	CSVParser.parseDF(df_ptr, DF,this->args_ptr, this->nCells); //iterates from the first element of df, using DF, args_ptr and the number of cells
 
-	// Initialize and populate relevant vectors 
+	// Initialize and populate relevant vectors
 	this->fTypeCells = std::vector<int> (this->nCells, 1); 
 	this->fTypeCells2 = std::vector<string> (this->nCells, "Burnable"); 
     this->statusCells = std::vector<int> (this->nCells, 0);
@@ -964,7 +967,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 
 
 // Send messages 
-std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
+	std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 	// Iterator
 	std::unordered_map<int, Cells>::iterator it;
 	
@@ -1654,18 +1657,13 @@ std::vector<float> Cell2Fire::getFireProgressMatrix(){
 }
 
 
-
-
-
-
-
-
 /******************************************************************************
 
 																Main Program	
 
 *******************************************************************************/
 int main(int argc, char* argv[]) {
+	
 	// Read Arguments
 	std::cout << "------ Command line values ------\n";
 	arguments args;
@@ -1689,6 +1687,9 @@ int main(int argc, char* argv[]) {
 	//std::uniform_int_distribution<int> udistributionIgnition(1, Forest.nCells);		// Get random ignition point
 
 	// Episodes
+
+	GenDataFile(args.InFolder,args.Simulator);
+
 	int ep = 0;
 	int tstep = 0;
 	int stop = 0;
