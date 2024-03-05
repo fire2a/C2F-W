@@ -14,6 +14,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include "WriteCSV.h"
 #include "ReadArgs.h"
 #include "Lightning.h"
+#include "ReadArgs2.h"
 
 // Include libraries
 #include <omp.h>
@@ -1670,14 +1671,8 @@ int main(int argc, char* argv[]) {
 	
 	arguments args;
 	arguments* args_ptr = &args;
-
-	if (args.InFolder.empty() || args.OutFolder.empty()){
-		cout << "Must specify non-empty input and output folder (hint: use --input-instance-folder and --output-folder)" << endl;
-		return 1;
-	}
-	
 	std::cout << "------ Command line values ------\n";
-	parseArgs(argc, argv, args_ptr);
+	parseArgs2(argc, argv, args_ptr);
 	//printArgs(args);
 
 	// Random generator and distributions
