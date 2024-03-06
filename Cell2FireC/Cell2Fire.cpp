@@ -790,6 +790,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				//if (ignProb[selected - 1] / static_cast<float>(100) > rd_number) {    //If probabilities enter as integers, e.g: 80 as 0.8
 				if (this->ignProb[selected - 1] > rd_number) {
 					aux = selected;
+					this->IgnitionHistory.push_back(aux);
 					//DEBUSstd::cout << "selected_point" << std::endl;
 					break;
 				}
@@ -853,7 +854,8 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 		if (this->args.IgnitionRadius > 0){
 			// Pick any at random and set temp with that cell
 			std::uniform_int_distribution<int> udistribution(0, this->IgnitionSets[this->year - 1].size()-1);
-            temp = this->IgnitionSets[this->year - 1][udistribution(generator)];          
+            temp = this->IgnitionSets[this->year - 1][udistribution(generator)];
+			this->IgnitionHistory.push_back(temp);        
 		}
 
 		std::cout << "\nSelected ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< temp;
@@ -961,6 +963,9 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 		// Next year
 		this->year+=1;  
 	}
+
+	//std::cout << endl << "el punto de ignicion es: " << aux << std::endl;
+	
 	
 	return this->noIgnition;
 }
@@ -1625,7 +1630,18 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 			WtFile.printWeather(WeatherHistory);
 		}
 	}
-		
+
+	
+	if (this->sim > args.TotalSims){
+		std::string filename = "ignitions_log.csv";
+		CSVWriter igHistoryFolder("", "");
+		this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory"+separator() ;
+		igHistoryFolder.MakeDir(this->ignitionsFolder);
+		CSVWriter ignitionsFile(this->ignitionsFolder + filename);
+		ignitionsFile.printCO2(this->IgnitionHistory);
+    }
+	
+
 	// Print current status
 	if (!this->done && this->args.verbose){
 		printf("\nFire Period: %d", this->fire_period[this->year - 1]);
