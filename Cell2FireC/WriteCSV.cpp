@@ -255,6 +255,19 @@ void CSVWriter::printWeather(std::vector<std::string> weatherHistory)
 	ofs.close();
 }
 
+void CSVWriter::printIgnitions(std::vector<int> ignitionsHistory)
+{
+	std::ofstream ofs(this->fileName, std::ofstream::out);
+	int i;
+
+	for (i = 0; i < ignitionsHistory.size(); i++)
+	{
+		ofs << ignitionsHistory[i] << "\n";
+	}
+	// Close file 
+	ofs.close();
+}
+
 void CSVWriter::printCSV_V2(int rows, int cols, std::vector<int> statusCells)
 {
 	std::ofstream ofs(this->fileName, std::ofstream::out);

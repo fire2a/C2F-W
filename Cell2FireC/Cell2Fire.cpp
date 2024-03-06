@@ -1631,17 +1631,15 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 		}
 	}
 
-	
 	if (this->sim > args.TotalSims){
 		std::string filename = "ignitions_log.csv";
 		CSVWriter igHistoryFolder("", "");
 		this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory"+separator() ;
 		igHistoryFolder.MakeDir(this->ignitionsFolder);
 		CSVWriter ignitionsFile(this->ignitionsFolder + filename);
-		ignitionsFile.printCO2(this->IgnitionHistory);
+		ignitionsFile.printIgnitions(this->IgnitionHistory);
     }
 	
-
 	// Print current status
 	if (!this->done && this->args.verbose){
 		printf("\nFire Period: %d", this->fire_period[this->year - 1]);
