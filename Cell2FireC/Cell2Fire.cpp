@@ -14,7 +14,6 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include "WriteCSV.h"
 #include "ReadArgs.h"
 #include "Lightning.h"
-#include "ReadArgs2.h"
 
 // Include libraries
 #include <omp.h>
@@ -1672,7 +1671,7 @@ int main(int argc, char* argv[]) {
 	arguments args;
 	arguments* args_ptr = &args;
 	std::cout << "------ Command line values ------\n";
-	parseArgs2(argc, argv, args_ptr);
+	parseArgs(argc, argv, args_ptr);
 	//printArgs(args);
 
 	// Random generator and distributions

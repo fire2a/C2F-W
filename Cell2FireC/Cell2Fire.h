@@ -9,7 +9,6 @@
 #include "ReadCSV.h"
 #include "WriteCSV.h"
 #include "ReadArgs.h"
-#include "ReadArgs2.h"
 #include "Lightning.h"
 
 // Include libraries
