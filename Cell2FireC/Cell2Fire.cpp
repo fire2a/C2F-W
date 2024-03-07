@@ -854,10 +854,10 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 		if (this->args.IgnitionRadius > 0){
 			// Pick any at random and set temp with that cell
 			std::uniform_int_distribution<int> udistribution(0, this->IgnitionSets[this->year - 1].size()-1);
-            temp = this->IgnitionSets[this->year - 1][udistribution(generator)];
-			this->IgnitionHistory.push_back(temp);        
+            temp = this->IgnitionSets[this->year - 1][udistribution(generator)];        
 		}
-
+		this->IgnitionHistory.push_back(temp);
+		
 		std::cout << "\nSelected ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< temp;
 	
 		// If cell is available 
