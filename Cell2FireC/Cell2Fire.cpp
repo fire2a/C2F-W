@@ -34,7 +34,6 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include <random>
 #include <algorithm> 
 #include <chrono>
-#include <memory>
 
 
 using namespace std;
