@@ -813,6 +813,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				
 				if (it->second.getStatus() == "Available" && it->second.fType != 0) {
 					std::cout << "\nSelected (Random) ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< aux;
+					this->IgnitionHistory.push_back(aux);
 					std::vector<int> ignPts = {aux};
 					if (it->second.ignition(this->fire_period[year - 1], this->year, ignPts, & df[aux - 1], this->coef_ptr, this->args_ptr, & wdf[this->weatherPeriod],this->activeCrown,this->perimeterCells)) {
 						//Printing info about ignitions        
@@ -852,11 +853,12 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 		if (this->args.IgnitionRadius > 0){
 			// Pick any at random and set temp with that cell
 			std::uniform_int_distribution<int> udistribution(0, this->IgnitionSets[this->year - 1].size()-1);
-            temp = this->IgnitionSets[this->year - 1][udistribution(generator)];          
+            temp = this->IgnitionSets[this->year - 1][udistribution(generator)];        
 		}
-
+		
 		std::cout << "\nSelected ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< temp;
-	
+		this->IgnitionHistory.push_back(temp);
+		
 		// If cell is available 
 		if (this->burntCells.find(temp) == this->burntCells.end() && this->statusCells[temp - 1] < 3) {
 			if (this->Cells_Obj.find(temp) == this->Cells_Obj.end()) {
@@ -960,6 +962,9 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 		// Next year
 		this->year+=1;  
 	}
+
+	//std::cout << endl << "el punto de ignicion es: " << aux << std::endl;
+	
 	
 	return this->noIgnition;
 }
@@ -1624,7 +1629,16 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 			WtFile.printWeather(WeatherHistory);
 		}
 	}
-		
+
+	if (this->sim > args.TotalSims){
+		std::string filename = "ignitions_log.csv";
+		CSVWriter igHistoryFolder("", "");
+		this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory"+separator() ;
+		igHistoryFolder.MakeDir(this->ignitionsFolder);
+		CSVWriter ignitionsFile(this->ignitionsFolder + filename);
+		ignitionsFile.printIgnitions(this->IgnitionHistory);
+    }
+	
 	// Print current status
 	if (!this->done && this->args.verbose){
 		printf("\nFire Period: %d", this->fire_period[this->year - 1]);
