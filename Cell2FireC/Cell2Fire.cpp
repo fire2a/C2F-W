@@ -790,7 +790,6 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				//if (ignProb[selected - 1] / static_cast<float>(100) > rd_number) {    //If probabilities enter as integers, e.g: 80 as 0.8
 				if (this->ignProb[selected - 1] > rd_number) {
 					aux = selected;
-					this->IgnitionHistory.push_back(aux);
 					//DEBUSstd::cout << "selected_point" << std::endl;
 					break;
 				}
@@ -815,6 +814,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				
 				if (it->second.getStatus() == "Available" && it->second.fType != 0) {
 					std::cout << "\nSelected (Random) ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< aux;
+					this->IgnitionHistory.push_back(aux);
 					std::vector<int> ignPts = {aux};
 					if (it->second.ignition(this->fire_period[year - 1], this->year, ignPts, & df[aux - 1], this->coef_ptr, this->args_ptr, & wdf[this->weatherPeriod],this->activeCrown,this->perimeterCells)) {
 						//Printing info about ignitions        
@@ -856,10 +856,10 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 			std::uniform_int_distribution<int> udistribution(0, this->IgnitionSets[this->year - 1].size()-1);
             temp = this->IgnitionSets[this->year - 1][udistribution(generator)];        
 		}
-		this->IgnitionHistory.push_back(temp);
 		
 		std::cout << "\nSelected ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< temp;
-	
+		this->IgnitionHistory.push_back(temp);
+		
 		// If cell is available 
 		if (this->burntCells.find(temp) == this->burntCells.end() && this->statusCells[temp - 1] < 3) {
 			if (this->Cells_Obj.find(temp) == this->Cells_Obj.end()) {
