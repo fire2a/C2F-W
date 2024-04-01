@@ -49,6 +49,8 @@ jobs:
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.3
+
+    - name: Build Solution
       run: |
         # local using powershell
         # & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" Cell2Fire.sln /p:Configuration=Release
