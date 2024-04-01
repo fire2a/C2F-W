@@ -17,59 +17,43 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-        #- name: FIXME Create Chocolatey package cache directory
-        #  run: mkdir C:\ProgramData\chocolatey\packages
-
-        #- name: FIXME Cache Action 
-        #  uses: actions/cache@v3
-        #  id: cache-choco
-        #  with:
-        #    path: C:\ProgramData\chocolatey\packages
-        #    key: ${{ runner.os }}-boost-eigen-${{ hashFiles('C:\ProgramData\chocolatey\packages') }}
-        #    restore-keys: ${{ runner.os }}-boost-eigen-
-
-    - name: FIXME Install Boost and Eigen packages (if not cached)
-      uses: crazy-max/ghaction-chocolatey@v3
-        # if: steps.cache-choco.outputs.cache-hit != 'true'
-        # env:
-        #   CHOCOLATEY_CACHE_LOCATION: C:\ProgramData\chocolatey\packages
-      with:
-        args: install eigen wget
-      # https://community.chocolatey.org/packages
-      # choco install eigen --version v3.4.0
-      # https://community.chocolatey.org/packages/eigen#files
-      # ! boost 1.58.0 is nuget !
-      # https://community.chocolatey.org/packages/boost-msvc-14.3#files
-
-    - name: get dirent release
-      uses: robinraju/release-downloader@v1.8
-      with:
-        repository: "tronkko/dirent"
-        latest: true
-        zipBall: true
-        tarBall: false
-
-    - name: check choco
+    - name: download dependencies
       run: |
         echo "Hello"
-        # pwd D:\a\C2F-W\C2F-W
-        # dir 
-        mkdir Cell2FireC\include
+        cd Cell2FireC
+        mkdir include
+
         # dirent
-        Expand-Archive -Path .\dirent-1.24.zip -DestinationPath Cell2FireC\include
-        # boost
-        # ? https://github.com/marketplace/actions/build-boost
-        wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.zip
-        Expand-Archive -Path .\boost_1_83_0.zip -DestinationPath Cell2FireC\include
+        Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.24.zip -OutFile dirent-1.24.zip
+        Expand-Archive -Path .\dirent-1.24.zip -DestinationPath include
+
         # eigen
-        New-Item -ItemType SymbolicLink -Path .\Cell2FireC\include\eigen -Target C:\ProgramData\chocolatey\lib\eigen\include
+        $project_id = 15462818
+        $commit_sha = "776d86d8df175b7036467a0ef131bd34755f847d"
+        $path = "Eigen"
+        $url = "https://gitlab.com/api/v4/projects/$project_id/repository/archive?sha=$commit_sha&path=$path"
+        Invoke-WebRequest -Uri $url -OutFile eigen.tar.gz
+        tar -xzf eigen.tar.gz
+        mv eigen-$commit_sha-$commit_sha-Eigen include\eigen3
+
+        # boost
+        $fname = "boost_1_84_0.tar.gz"
+        Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
+        tar -xzf $fname -C include
+
+        # gdal
+        # Invoke-WebRequest -Uri https://github.com/OSGeo/gdal/releases/download/v3.8.4/gdal-3.8.4.tar.gz -OutFile gdal-3.8.4.tar.gz
+        # tar -xzf gdal-3.8.4.tar.gz -C include
+
         echo "Bye"
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.3
 
-    - name: Build solution
+    - name: Build Solution
       run: |
+        # local using powershell
+        # & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" Cell2Fire.sln /p:Configuration=Release
         cd Cell2FireC
         msbuild Cell2Fire.sln /p:Configuration=Release
 

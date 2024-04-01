@@ -197,3 +197,4 @@ cython_debug/
 
 .vs/
 /Cell2FireC/x64
+/Cell2FireC/include

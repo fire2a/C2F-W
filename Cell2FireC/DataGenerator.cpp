@@ -233,14 +233,14 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
 
     // GFL dictionary (FBP)
     std::unordered_map<std::string, float> GFLD = {
-        {"C1", 0.75}, {"C2", 0.8}, {"C3", 1.15}, {"C4", 1.2}, {"C5", 1.2}, {"C6", 1.2}, {"C7", 1.2},
-        {"D1", std::nanf("")}, {"D2", std::nanf("")},
-        {"S1", std::nanf("")}, {"S2", std::nanf("")}, {"S3", std::nanf("")},
-        {"O1a", 0.35}, {"O1b", 0.35},
-        {"M1", std::nanf("")}, {"M2", std::nanf("")}, {"M3", std::nanf("")}, {"M4", std::nanf("")}, {"NF", std::nanf("")},
-        {"M1_5", 0.1}, {"M1_10", 0.2}, {"M1_15", 0.3}, {"M1_20", 0.4}, {"M1_25", 0.5}, {"M1_30", 0.6},
-        {"M1_35", 0.7}, {"M1_40", 0.8}, {"M1_45", 0.8}, {"M1_50", 0.8}, {"M1_55", 0.8}, {"M1_60", 0.8},
-        {"M1_65", 1.0}, {"M1_70", 1.0}, {"M1_75", 1.0}, {"M1_80", 1.0}, {"M1_85", 1.0}, {"M1_90", 1.0}, {"M1_95", 1.0}};
+        {"C1", 0.75f}, {"C2", 0.8f}, {"C3", 1.15f}, {"C4", 1.2f}, {"C5", 1.2f}, {"C6", 1.2f}, {"C7", 1.2f},
+        {"D1", static_cast<float>(std::nanf(""))}, {"D2", static_cast<float>(std::nanf(""))},
+        {"S1", static_cast<float>(std::nanf(""))}, {"S2", static_cast<float>(std::nanf(""))}, {"S3", static_cast<float>(std::nanf(""))},
+        {"O1a", 0.35f}, {"O1b", 0.35f},
+        {"M1", static_cast<float>(std::nanf(""))}, {"M2", static_cast<float>(std::nanf(""))}, {"M3", static_cast<float>(std::nanf(""))}, {"M4", static_cast<float>(std::nanf(""))}, {"NF", static_cast<float>(std::nanf(""))},
+        {"M1_5", 0.1f}, {"M1_10", 0.2f}, {"M1_15", 0.3f}, {"M1_20", 0.4f}, {"M1_25", 0.5f}, {"M1_30", 0.6f},
+        {"M1_35", 0.7f}, {"M1_40", 0.8f}, {"M1_45", 0.8f}, {"M1_50", 0.8f}, {"M1_55", 0.8f}, {"M1_60", 0.8f},
+        {"M1_65", 1.0f}, {"M1_70", 1.0f}, {"M1_75", 1.0f}, {"M1_80", 1.0f}, {"M1_85", 1.0f}, {"M1_90", 1.0f}, {"M1_95", 1.0f}};
 
     // PDF dictionary (CANADA)
     std::unordered_map<std::string, int> PDFD = {
@@ -353,7 +353,8 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
         }
 
         // Fuel Type N 12
-        if (std::isnan(GFuelTypeN[i]))
+        //if (std::isnan(GFuelTypeN[i]))
+        if (std::isnan(static_cast<double>(GFuelTypeN[i])))
         {
         rowData.emplace_back(std::make_unique<std::string>(""));
         }
@@ -525,15 +526,15 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     int NCells = GFuelType.size();
 
     // Call DataGrids function (formerly DataGrids)
-    std::vector<float> Elevation(NCells, std::nanf(""));
-    std::vector<float> SAZ(NCells, std::nanf(""));
-    std::vector<float> PS(NCells, std::nanf(""));
-    std::vector<float> Curing(NCells, std::nanf(""));
-    std::vector<float> CBD(NCells, std::nanf(""));
-    std::vector<float> CBH(NCells, std::nanf(""));
-    std::vector<float> CCF(NCells, std::nanf(""));
-    std::vector<float> PY(NCells, std::nanf(""));
-    std::vector<float> FMC(NCells, std::nanf(""));
+    std::vector<float> Elevation(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> SAZ(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> PS(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> Curing(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> CBD(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> CBH(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> CCF(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> PY(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> FMC(NCells, static_cast<float>(std::nanf("")));
 
     std::vector<std::string> filenames = {
         "elevation.asc", "saz.asc", "slope.asc", "cur.asc",
