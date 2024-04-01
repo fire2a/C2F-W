@@ -51,6 +51,9 @@
     <ClCompile Include="Spotting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DataGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cell2Fire.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Spotting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
