@@ -61,5 +61,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2FireC/x64/Release/Cell2Fire.exe
+        path: Cell2Fire/x64/Release/Cell2Fire.exe
 

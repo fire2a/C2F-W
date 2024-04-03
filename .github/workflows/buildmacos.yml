@@ -36,4 +36,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2FireC/Cell2Fire.Darwin.x86_64
+        path: Cell2Fire/Cell2Fire.Darwin.x86_64
