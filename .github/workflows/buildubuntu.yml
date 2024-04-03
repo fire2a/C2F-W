@@ -20,7 +20,7 @@ jobs:
     - name: Doit
       run: |
         sudo apt install g++-12 libboost-all-dev libeigen3-dev
-        cd Cell2FireC
+        cd Cell2Fire
         make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
