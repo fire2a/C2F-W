@@ -7,6 +7,7 @@ PATH=../Cell2FireC:$PATH
 # run
 for model in fbp kitral sb; do
     echo running ${model}
+    mkdir -p test_results/${model}
     rm -rf test_results/${model}/*
     if [ "$model" == "fbp" ]; then
         additional_args="--cros"
