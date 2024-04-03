@@ -1,43 +1,71 @@
 #!/bin/bash
-cd ../Cell2FireC
-pwd
+set -x # enable debug tracing
 
-#RUN CANADIAN FBP INSTANCE
-./Cell2Fire.Linux.x86_64 --input-instance-folder ../test/FBP_Instance --output-folder ../test/test_results/FBP --sim-years 1 --nsims 100 --output-messages --grids --out-ros --out-intensity --sim C --seed 123 # 
+# run simulations from model, put them in test_results, compare to target_results
+PATH=../Cell2FireC:$PATH
 
-#RUN KITRAL INSTANCE
-./Cell2Fire.Linux.x86_64 --input-instance-folder ../test/Kitral_Instance --output-folder ../test/test_results/Kitral --sim-years 1 --nsims 100 --output-messages --out-ros --out-intensity --grids --sim K -seed 123
+# run
+for model in fbp kitral sb; do
+    echo running ${model}
+    rm -rf test_results/${model}/*
+    if [ "$model" == "fbp" ]; then
+        additional_args="--cros"
+        sim_code="C"
+    elif [ "$model" == "sb" ]; then
+        additional_args="--scenario 1"
+        sim_code="S"
+    elif [ "$model" == "kitral" ]; then
+        additional_args=""
+        sim_code="K"
+    fi
+    Cell2Fire.Linux.x86_64 --input-instance-folder model/${model} --output-folder test_results/${model} --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 $additional_args > test_results/${model}/log.txt 
+done
+set +x # disable debug tracing
 
-#RUN SCOTT AND BURGAN INSTANCE
-./Cell2Fire.Linux.x86_64 --input-instance-folder ../test/SB_Instance --output-folder ../test/test_results/SB --sim-years 1 --nsims 100 --output-messages --out-ros --out-intensity --grids --sim S --seed 123
 
+# find difference between directories and files
 
-#FIND DIFFERENCE BETWEEN FILES
-#for filename in ../test/test_results/*;
-#do
-#echo $filename
-#done
+# define the directories to compare
+dir1="test_results"
+dir2="target_results"
 
-# Define the directories to compare
-dir1="../test/test_results"
-dir2="../test/results"
-
-# Get the list of files in each directory
+# get the list of files in each directory
 dir1_files=$(find "$dir1" -type f | sort)
+dir1_num_files=$(ls -1 $dir1_files | wc -l)
+# echo $dir1_files $dir1_num_files
 dir2_files=$(find "$dir2" -type f | sort)
+dir2_num_files=$(ls -1 $dir2_files | wc -l)
+# echo $dir2_files $dir2_num_files
 
-# Check if the number of files in each directory is equal
-if [ "$(echo "$dir1_files" | wc -l)" -ne "$(echo "$dir2_files" | wc -l)" ]; then
+# check if the number of files in each directory is equal
+if [ $dir1_num_files -ne $dir2_num_files ]; then
     echo "Directories are not equal due to number"
+    echo "Directory ${dir1} has ${dir1_num_files} files"
+    echo "Directory ${dir2} has ${dir2_num_files} files"
     exit 1
 fi
 
-# Use diff to compare the files in each directory
+# use diff to compare the files in each directory
 diff_output=$(diff -rq "$dir1" "$dir2")
+# echo $diff_output
 
-# Check if there is any difference
+# check if there is any difference
 if [ -z "$diff_output" ]; then
     echo "Directories are equal"
 else
     echo "Directories are not equal due to differences"
+    # compare file by file if fails show the file name
+    for file1 in $(find "$dir1" -type f); do
+        # find file1 in dir2
+        file2=$(echo $file1 | sed "s/${dir1}/${dir2}/")
+        # echo "Comparing $file1 and $file2"
+        diff_output=$(diff "$file1" "$file2")
+        if [ -n "$diff_output" ]; then
+            echo "Files are not equal"
+            echo $diff_output
+        fi
+    done
+    exit 1
 fi
+
+exit 0
