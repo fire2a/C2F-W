@@ -15,6 +15,12 @@ Installation, usage, specifications available by [reading the friendly manual he
 - Moderate: Download a release, unzip, and run the CLI
 - Collaborative: Clone & [compile](https://fire2a.github.io/docs/docs/Cell2Fire/README.html)
 
+# Output examples
+## Previncat's Zone 60 (Catalonian Instance): forest and a simulated fire spread with its corresponding scar and growth propagation tree. 
+![Example-Instance_Scar](output/example-scar.png)
+## Risk metrics: Burn Probability (BP), Betweenness Centrality (BC), Downstream Protection Value (DPV), and Growth Propagation Tree (GPT). 
+![Example-Risk_Metrics](output/example-metrics.png)
+
 ## Easy: Graphical User Interface for QGIS
 1. Install QGIS >= LTR version
 2. Add [this](https://fire2a.github.io/fire-analytics-qgis-processing-toolbox-plugin/plugins.xml) as plugin server repo in QGIS
@@ -56,9 +62,3 @@ sudo make install
 git switch -c my-feature
 ```
 Other platform details at `.github/workflows/build\*.yml`
-
-# Output examples
-## Previncat's Zone 60 (Catalonian Instance): forest and a simulated fire spread with its corresponding scar and growth propagation tree. 
-![Example-Instance_Scar](output/example-scar.png)
-## Risk metrics: Burn Probability (BP), Betweenness Centrality (BC), Downstream Protection Value (DPV), and Growth Propagation Tree (GPT). 
-![Example-Risk_Metrics](output/example-metrics.png)
