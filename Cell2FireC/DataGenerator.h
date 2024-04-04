@@ -2,6 +2,7 @@
 #define DATAGENERATOR_H
 #include <cstdint>
 #include "tiffio.h"
+#include <limits>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -12,6 +13,7 @@
 #include <array>
 #include <algorithm>
 #include <memory>
+#include <limits>
 
 std::tuple<std::unordered_map<std::string, std::string>, std::unordered_map<std::string, std::tuple<float, float, float, float>>> Dictionary(const std::string& filename);
 

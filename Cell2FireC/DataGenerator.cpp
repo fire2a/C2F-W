@@ -3,6 +3,7 @@
 #include "DataGenerator.h"
 #include <cstdint>
 #include "tiffio.h"
+#include <limits>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -14,6 +15,7 @@
 #include <algorithm>
 #include <memory>
 #include <cassert>
+#include <limits>
 // Reads fbp_lookup_table.csv and creates dictionaries for the fuel types and cells' ColorsDict
 std::tuple<std::unordered_map<std::string, std::string>, std::unordered_map<std::string, std::tuple<float, float, float, float>>> Dictionary(const std::string& filename) {
 
