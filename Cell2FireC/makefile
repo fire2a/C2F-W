@@ -1,10 +1,10 @@
 ﻿LDFLAGS="-L/user/local/llvm/lib"
 CPPFLAGS="-I/user/local/llvm/include"
-CC = g++-12
-MPCC = g++-12
+CC = g++
+MPCC = g++
 OPENMP = -fopenmp
-CFLAGS = -std=c++14 -O3 -I /usr/local/include -I /usr/include/eigen3 -I /usr/include/gdal -fopenmp
-LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl -lgdal
+CFLAGS = -std=c++14 -O3 -I /usr/local/include -I /usr/include/eigen3 -I -fopenmp
+LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl -ltiff
 TARGETS = Cell2Fire
 all:	$(TARGETS)
 Cell2Fire: Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o

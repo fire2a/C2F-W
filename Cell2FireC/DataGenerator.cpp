@@ -1,9 +1,8 @@
 // author = "Matias Vilches"
 
 #include "DataGenerator.h"
-#include <gdal/gdal.h>
-#include <gdal/gdal_priv.h>
-#include <gdal/cpl_conv.h>
+#include <cstdint>
+#include "tiffio.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -112,7 +111,6 @@ ForestGrid(const std::string& filename, const std::unordered_map<std::string, st
     }
 
     float cellsize = std::stof(value);
-
     int cells = 0;
     int tFBPDicts = 0;
     int tcols = 0;
@@ -162,7 +160,6 @@ ForestGrid(const std::string& filename, const std::unordered_map<std::string, st
     CoordCells.reserve(grid.size() * tcols);
     int n = 1;
     tcols += 1;
-
     return std::make_tuple(gridcell3, gridcell4, grid.size(), tcols - 1, cellsize);
 }
 
@@ -476,14 +473,11 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
     */
     // Tries to open file
     std::cout << filename << '\n';
-    GDALAllRegister();
-    GDALDataset *fuelsDataset;
-    GDALRasterBand *fuelsBand;
-    fuelsDataset = (GDALDataset *) GDALOpen(filename.c_str(), GA_ReadOnly);
-    // If not succesfull, throws exception
-    if (fuelsDataset == NULL) {
+    TIFF* fuelsDataset = TIFFOpen(filename.c_str(), "r");
+    if (!fuelsDataset) {
         throw std::runtime_error("Error: Could not open file '" + filename + "'");
     }
+
     int cells = 0;
     int tFBPDicts = 0;
     int tcols = 0;
@@ -494,36 +488,41 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
     std::vector<std::string> gridcell4;
     std::vector<std::vector<std::string>> grid;
     std::vector<std::vector<std::string>> grid2;
-    // Get fuel band
-    fuelsBand = fuelsDataset->GetRasterBand(1);
     // Get Raster dimentions
-    int nXSize = fuelsBand->GetXSize();
-    int nYSize = fuelsBand->GetYSize();
-    // Extracts geotransform
-    double adfGeoTransform[6];
-    fuelsDataset->GetGeoTransform(adfGeoTransform);
-    // Gets cell size from geotransform
-    double cellSizeX = adfGeoTransform[1];
-    double cellSizeY = adfGeoTransform[5];
+    uint32_t nXSize, nYSize;
+    TIFFGetField(fuelsDataset, TIFFTAG_IMAGEWIDTH, &nXSize);
+    TIFFGetField(fuelsDataset, TIFFTAG_IMAGELENGTH, &nYSize);
+    double* modelPixelScale;
+    uint32_t  count;
+    //TIFFGetField(tiff, 33424, &count, &data);
+    TIFFGetField(fuelsDataset, 33550, &count, &modelPixelScale);
+    // Gets cell size
+    double cellSizeX {modelPixelScale[0]};
+    double cellSizeY {modelPixelScale[1]};
     const double epsilon = std::numeric_limits<double>::epsilon();
-    if (fabs(cellSizeX + cellSizeY) > epsilon) {
+    if (fabs(cellSizeX - cellSizeY) > epsilon) {
         throw std::runtime_error("Error: Cells are not square in: '" + filename + "'");
     }
     // Read raster data
-    float *pafScanline;
-    pafScanline = (float *) CPLMalloc(sizeof(float) * nXSize * nYSize);
+    // Allocate memory for one row of pixel data
+    uint32_t* buf = (uint32_t*) _TIFFmalloc(nXSize * sizeof(uint32_t));
+    if (!buf) {
+        TIFFClose(fuelsDataset);
+        throw std::runtime_error("Could not allocate memory");
+    }
     // For each row
     for (int i = 0; i < nYSize; i++) {
         // Read pixel values for the current row
-        CPLErr errcode = fuelsBand->RasterIO(GF_Read, 0, i, nXSize, 1, pafScanline, nXSize, 1, GDT_Float32, 0, 0);
-        if (errcode != 0) {
-            throw std::runtime_error("Error: Raster reading failed in: '" + filename + "'");
+        if (TIFFReadScanline(fuelsDataset, buf, i) != 1) {
+            _TIFFfree(buf);
+            TIFFClose(fuelsDataset);
+            throw std::runtime_error("Read error on row " + std::to_string(i));
         }
         // For each column
         for (int j = 0; j < nXSize; j++) {
             // Access the pixel value at position (i, j)
-            float pixelValue = pafScanline[j];
-            std::string token = std::to_string(static_cast<int>(pafScanline[j]));
+            float pixelValue = static_cast<float>(buf[j]);
+            std::string token = std::to_string(static_cast<int>(buf[j]));
             if (pixelValue != pixelValue || Dictionary.find(token) == Dictionary.end()) {
                     // If fuel not in Dictionary:
                     gridcell1.push_back("NF");
@@ -552,63 +551,67 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
 }
 
 // Function to read grid data from ASCII file
-void DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells) {
-    /*
-    Reads fuel data from a .tif
-    Args:
-       filename (std::string): Name of .tif file.
-       Dictionary (std::unordered_map<std::string, std::string>&): Reference to fuels dictionary
 
-    Returns:
-        Fuel vectors, number of cells y cell size (tuple[std::vector<int>, std::vector<std::string>)
-    */
+void DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells) {
+        /*
+        Reads fuel data from a .tif
+        Args:
+        filename (std::string): Name of .tif file.
+        Dictionary (std::unordered_map<std::string, std::string>&): Reference to fuels dictionary
+
+        Returns:
+            Fuel vectors, number of cells y cell size (tuple[std::vector<int>, std::vector<std::string>)
+        */
     // Tries to open file
-    GDALAllRegister();
-    GDALDataset *fuelsDataset;
-    GDALRasterBand *fuelsBand;
-    fuelsDataset = (GDALDataset *) GDALOpen(filename.c_str(), GA_ReadOnly);
-    // If not succesfull, throws exception
-    if (fuelsDataset == NULL) {
+    std::cout << filename << '\n';
+    TIFF* fuelsDataset = TIFFOpen(filename.c_str(), "r");
+    if (!fuelsDataset) {
         throw std::runtime_error("Error: Could not open file '" + filename + "'");
     }
 
     std::vector<std::string> filelines;
-
-    
-    float cellsize;
-    // Extracts geotransform
-    double adfGeoTransform[6];
-    fuelsDataset->GetGeoTransform(adfGeoTransform);
-    // Gets cell size from geotransform
-    double cellSizeX = adfGeoTransform[1];
-    double cellSizeY = adfGeoTransform[5];
+    // Get cell side
+    double* modelPixelScale;
+    uint32_t  count;
+    //TIFFGetField(tiff, 33424, &count, &data);
+    TIFFGetField(fuelsDataset, 33550, &count, &modelPixelScale);
+    // Gets cell size
+    double cellSizeX {modelPixelScale[0]};
+    double cellSizeY {modelPixelScale[1]};
     const double epsilon = std::numeric_limits<double>::epsilon();
-    if (fabs(cellSizeX + cellSizeY) > epsilon) {
+    if (fabs(cellSizeX - cellSizeY) > epsilon) {
         throw std::runtime_error("Error: Cells are not square in: '" + filename + "'");
     }
-    cellsize = static_cast<float>(cellSizeX);
-    // Get fuel band
-    fuelsBand = fuelsDataset->GetRasterBand(1);
+    double cellsize;
+    cellsize = cellSizeX;
     // Get Raster dimentions
-    int nXSize = fuelsBand->GetXSize();
-    int nYSize = fuelsBand->GetYSize();
+    uint32_t nXSize, nYSize;
+    TIFFGetField(fuelsDataset, TIFFTAG_IMAGEWIDTH, &nXSize);
+    TIFFGetField(fuelsDataset, TIFFTAG_IMAGELENGTH, &nYSize);
     int aux = 0;
     // Read raster data
-    float *pafScanline;
-    pafScanline = (float *) CPLMalloc(sizeof(float) * nXSize * nYSize);
+    // Allocate memory for one row of pixel data
+    float* buf = (float*) _TIFFmalloc(nXSize * sizeof(float));
+    if (!buf) {
+        TIFFClose(fuelsDataset);
+        throw std::runtime_error("Could not allocate memory");
+    }
     // For each row
     for (int i = 0; i < nYSize; i++) {
         // Read pixel values for the current row
-        CPLErr errcode = fuelsBand->RasterIO(GF_Read, 0, i, nXSize, 1, pafScanline, nXSize, 1, GDT_Float32, 0, 0);
-        if (errcode != 0) {
-            throw std::runtime_error("Error: Raster reading failed in: '" + filename + "'");
+        if (TIFFReadScanline(fuelsDataset, buf, i) != 1) {
+            _TIFFfree(buf);
+            TIFFClose(fuelsDataset);
+            throw std::runtime_error("Read error on row " + std::to_string(i));
         }
         // For each column
         for (int j = 0; j < nXSize; j++) {
             // Access the pixel value at position (i, j)
-            float pixelValue = pafScanline[j];
+            float pixelValue = static_cast<float>(buf[j]);
+            std::string token = std::to_string(static_cast<int>(buf[j]));
+            //std::cout << token << '\n';
             if (pixelValue == pixelValue){
-                std::string token = std::to_string(static_cast<int>(pafScanline[j]));
+                std::string token = std::to_string(static_cast<int>(buf[j]));
                 //std::cout << token << '\n';
                 data[aux] = pixelValue;
             } else {
@@ -621,6 +624,7 @@ void DataGridsTif(const std::string& filename, std::vector<float>& data, int nCe
             }
     }
 }
+
 
 // Main function
 void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
@@ -718,6 +722,7 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     for (const auto& name : filenames) {
         std::string filePath = InFolder + name;
         std::cout << filePath << std::endl;
+        
         if (extension == ".tif") {
             if (fileExists(filePath)) {
                 if (name == "elevation" + extension) {
@@ -742,6 +747,7 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
                     // Handle the case where the file name doesn't match any condition
                     // std::cout << "Unhandled file: " << name << std::endl;
                 }
+                
             } 
             else {
                 std::cout << "No " << name << " file, filling with NaN" << std::endl;
@@ -822,13 +828,15 @@ int main() {
         assert(GFuelType[i] == GFuelType_tif[i]);
     }
     for (int i = 0; i < GFuelTypeN.size(); i++)
-    {
+    {   
         assert(GFuelTypeN[i] == GFuelTypeN_tif[i]);
     }
+
     for (int i = 0; i < NCells; i++)
     {
         assert(Elevation[i] == Elevation_tif[i]);
     }
+    std::cout << "Read Succesfully" << '\n';
     return 0;
 }
 */
