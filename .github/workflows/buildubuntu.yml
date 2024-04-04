@@ -19,7 +19,7 @@ jobs:
 
     - name: Doit
       run: |
-        sudo apt install g++-12 libboost-all-dev libeigen3-dev libgdal-dev
+        sudo apt install g++-12 libboost-all-dev libeigen3-dev libtiff-devel
         cd Cell2FireC
         make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
