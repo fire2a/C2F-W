@@ -35,3 +35,10 @@ DataGenerator.o: DataGenerator.cpp DataGenerator.h
 	$(CC) -c $(LIBS) $(CFLAGS) DataGenerator.cpp
 clean:
 	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o Cells.o Cell2Fire Spotting.o WriteCSV.o Ellipse.o FuelModelFBP.o FuelModelKitral.o FuelModelSpain.o DataGenerator.o *.gch
+	
+DESTDIR = /usr/local/bin
+install: all
+	cp $(TARGETS) $(DESTDIR)
+uninstall: all
+	rm -rf $(DESTDIR)/$(TARGETS) 
+
