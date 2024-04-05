@@ -25,9 +25,12 @@ jobs:
         make -f makefile.ubuntu-latest
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
         mv Cell2Fire Cell2Fire$ext
-        ls Cell2Fire*
+        # ls Cell2Fire*
+
+    - name: Test
+      run: |
         cd ../test
-        bash test.py
+        bash test.sh
 
     - name: Upload
       uses: actions/upload-artifact@v3
