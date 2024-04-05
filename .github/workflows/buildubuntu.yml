@@ -26,10 +26,6 @@ jobs:
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
         mv Cell2Fire Cell2Fire$ext
         ls Cell2Fire*
-
-    - name: Test
-      run: |
-        pwd
         cd ../test
         bash test.py
 
