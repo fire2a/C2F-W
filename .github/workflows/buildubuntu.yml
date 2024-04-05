@@ -17,7 +17,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Doit
+    - name: Build
       run: |
         sudo apt install g++-12 libboost-all-dev libeigen3-dev
         cd Cell2FireC
@@ -25,7 +25,12 @@ jobs:
         make -f makefile.ubuntu-latest
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
         mv Cell2Fire Cell2Fire$ext
-        ls Cell2Fire*
+        # ls Cell2Fire*
+
+    - name: Test
+      run: |
+        cd test
+        bash test.sh
 
     - name: Upload
       uses: actions/upload-artifact@v3
