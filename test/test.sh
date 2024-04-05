@@ -1,9 +1,12 @@
 #!/bin/bash
-set -x # enable debug tracing
+
+unzip -q target_results.zip 
+#zip -r target_results.zip target_results
 
 # run simulations from model, put them in test_results, compare to target_results
 PATH=../Cell2FireC:$PATH
 
+set -x # enable debug tracing
 # run
 for model in fbp kitral sb; do
     echo running ${model}
@@ -65,6 +68,7 @@ else
             echo "Files are not equal, $file1"
             echo $diff_output
             # exit at first different
+            rm -rf target_results
             exit 1
         fi
     done
@@ -72,4 +76,5 @@ else
     #exit 1
 fi
 
+rm -rf target_results
 exit 0
