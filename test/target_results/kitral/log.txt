@@ -1,0 +1,819 @@
+------ Command line values ------
+InFolder: model/kitral 
+OutFolder: test_results/kitral 
+OutMessages: 1 
+OutIntensity: 1 
+OutROS: 1 
+OutputGrids: 1 
+TotalSims: 113 
+Simulator: K 
+seed: 123 
+No elevation.asc file, filling with NaN
+No saz.asc file, filling with NaN
+No slope.asc file, filling with NaN
+No cur.asc file, filling with NaN
+No cbd.asc file, filling with NaN
+No cbh.asc file, filling with NaN
+No ccf.asc file, filling with NaN
+No py.asc file, filling with NaN
+No fmc.asc file, filling with NaN
+Data file generated successfully
+File Generated------------------Forest Data ----------------------
+
+Forest DataFrame from instance model/kitral/Data.csv
+Number of cells: 49
+
+Weather DataFrame from instance model/kitral/Weather.csv
+Weather Periods: 11
+There are 1 threads
+
+Selected (Random) ignition point for Year 1, sim 1: 3
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 2: 5
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 3: 7
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 4: 10
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 5: 12
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 6: 14
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 7: 17
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 8: 19
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 9: 21
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 10: 24
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 11: 26
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 12: 28
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 13: 31
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 14: 44
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 15: 25
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 16: 23
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 17: 40
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 18: 42
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 19: 44
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 20: 47
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 21: 49
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 22: 2
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 23: 5
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 24: 7
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 25: 9
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 26: 12
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 27: 14
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 28: 16
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 29: 19
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 30: 21
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 31: 23
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 32: 25
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 33: 28
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 34: 30
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 35: 12
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 36: 1
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 37: 39
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 38: 39
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 39: 42
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 40: 44
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 41: 46
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 42: 49
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 43: 2
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 44: 4
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 45: 7
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 46: 9
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 47: 11
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 48: 13
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 49: 16
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 50: 18
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 51: 20
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 52: 23
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 53: 25
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 54: 27
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 55: 30
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 56: 29
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 57: 18
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 58: 7
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 59: 39
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 60: 41
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 61: 43
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 62: 46
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 63: 48
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 64: 1
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 65: 4
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 66: 6
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 67: 8
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 68: 11
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 69: 13
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 70: 15
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 71: 18
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 72: 20
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 73: 22
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 74: 25
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 75: 27
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 76: 29
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 77: 31
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 78: 30
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 79: 24
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 80: 38
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 81: 41
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 82: 43
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 83: 45
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 84: 48
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 85: 1
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 86: 3
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 87: 6
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 88: 8
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 89: 10
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 90: 13
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 91: 15
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 92: 17
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 93: 19
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 94: 22
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 95: 24
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 96: 26
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 97: 29
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 98: 31
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 99: 3
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 100: 41
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 101: 38
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 102: 40
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 103: 43
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 104: 45
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 105: 47
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 106: 49
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 107: 3
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 108: 5
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 109: 7
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 110: 10
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 111: 12
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 112: 14
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%
+
+Selected (Random) ignition point for Year 1, sim 113: 17
+----------------------------- Results -----------------------------
+Total Available Cells:    0 - % of the Forest: 0%
+Total Burnt Cells:        43 - % of the Forest: 87.7551%
+Total Non-Burnable Cells: 6 - % of the Forest: 12.2449%
+Total Firebreak Cells: 0 - % of the Forest: 0%

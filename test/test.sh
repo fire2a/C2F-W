@@ -62,11 +62,14 @@ else
         # echo "Comparing $file1 and $file2"
         diff_output=$(diff "$file1" "$file2")
         if [ -n "$diff_output" ]; then
-            echo "Files are not equal"
+            echo "Files are not equal, $file1"
             echo $diff_output
+            # exit at first different
+            exit 1
         fi
     done
-    exit 1
+    #uncomment exit below to check all differences
+    #exit 1
 fi
 
 exit 0
