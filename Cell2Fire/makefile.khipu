@@ -35,4 +35,13 @@ FuelModelFBP.o: FuelModelFBP.cpp FuelModelFBP.h Cells.h
 DataGenerator.o: DataGenerator.cpp DataGenerator.h
 	$(CC) -c $(LIBS) $(CFLAGS) DataGenerator.cpp
 clean:
-	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o Cells.o Cell2Fire Spotting.o WriteCSV.o Ellipse.o FuelModelFBP.o FuelModelKitral.o DataGenerator.o FuelModelSpain.o *.gch
+	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o Cells.o Cell2Fire Spotting.o WriteCSV.o Ellipse.o FuelModelFBP.o FuelModelKitral.o FuelModelSpain.o DataGenerator.o *.gch
+	
+DESTDIR = ~/bin
+install: all
+	mkdir -p $(DESTDIR)
+	cp $(TARGETS) $(DESTDIR)
+	echo "export PATH=\$$PATH:$(DESTDIR)" >> ~/.bashrc
+uninstall: all
+	rm -rf $(DESTDIR)/$(TARGETS) 
+
