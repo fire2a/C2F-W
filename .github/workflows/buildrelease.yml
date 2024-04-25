@@ -43,7 +43,7 @@ jobs:
         zip -r ../../Kitral_asc.zip Kitral
         zip -r ../../CanadianFBP_asc.zip CanadianFBP
         zip -r ../../ScottAndBurgan_asc.zip ScottAndBurgan  
-        cd data/tif
+        cd ../tif
         zip -r ../../Kitral_tif.zip Kitral
         zip -r ../../ScottAndBurgan_tif.zip ScottAndBurgan  
 
