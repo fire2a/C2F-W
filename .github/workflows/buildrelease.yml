@@ -38,10 +38,13 @@ jobs:
 
     - name: ZipDataInstances
       run: |
-        cd data
-        zip -r ../Kitral.zip Kitral
-        zip -r ../CanadianFBP.zip CanadianFBP
-        zip -r ../ScottAndBurgan.zip ScottAndBurgan  
+        cd data/asc
+        zip -r ../../Kitral_asc.zip Kitral
+        zip -r ../../CanadianFBP_asc.zip CanadianFBP
+        zip -r ../../ScottAndBurgan_asc.zip ScottAndBurgan  
+        cd data/tif
+        zip -r ../../Kitral_tif.zip Kitral
+        zip -r ../../ScottAndBurgan_tif.zip ScottAndBurgan  
 
     - name: Create Release
       uses: ncipollo/release-action@v1.13.0
