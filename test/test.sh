@@ -4,7 +4,7 @@ unzip -q target_results.zip
 #zip -r target_results.zip target_results
 
 # run simulations from model, put them in test_results, compare to target_results
-PATH=../Cell2FireC:$PATH
+PATH=../Cell2Fire:$PATH
 
 set -x # enable debug tracing
 # run
@@ -77,4 +77,5 @@ else
 fi
 
 rm -rf target_results
+rm -rf test_results
 exit 0
