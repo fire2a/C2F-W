@@ -50,5 +50,5 @@ jobs:
     - name: Create Release
       uses: ncipollo/release-action@v1.13.0
       with:
-        artifacts: "Cell2FireW_${{ github.ref_name }}.zip,Kitral.zip,CanadianFBP.zip,ScottAndBurgan.zip"
+        artifacts: "Cell2FireW_${{ github.ref_name }}.zip,Kitral_asc.zip,CanadianFBP_asc.zip,ScottAndBurgan_asc.zip,Kitral_tif.zip,ScottAndBurgan_tif.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
