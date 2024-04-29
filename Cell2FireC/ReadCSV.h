@@ -3,7 +3,8 @@
 
 #include "Cells.h"
 #include "ReadArgs.h"
-
+#include "DataGenerator.h"
+#include "tiffio.h"
 #include <iostream>
 #include <fstream>
 #include <vector>

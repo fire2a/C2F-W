@@ -649,11 +649,10 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     std::string extension;
     if(fileExists(InFolder + "/" + "fuels.tif")){
         extension = ".tif";
-        std::cout << "Using .tif" << '\n';
     } else {
         extension = ".asc";
-        std::cout << "Using .asc" << '\n';
     }
+    std::cout << "Using " << extension << '\n';
     // Call ForestGrid function
     std::string FGrid = InFolder + "fuels" + extension;
     //std::cout << FGrid << '\n';
