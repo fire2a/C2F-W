@@ -151,7 +151,6 @@ ForestGrid(const std::string& filename, const std::unordered_map<std::string, st
             gridcell4.push_back(Dictionary.at(token));
         }
         tcols = std::max(tcols, static_cast<int>(gridcell1.size()));
-        std::cout << token << '\n';
     }
 
     grid.push_back(gridcell1);
@@ -269,7 +268,7 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
     }
     // Read raster data
     // Allocate memory for one row of pixel data
-    uint32_t* buf = (uint32_t*) _TIFFmalloc(nXSize * sizeof(uint32_t));
+    uint32_t* buf = (uint32_t*) _TIFFmalloc(nXSize * sizeof(double));
     if (!buf) {
         TIFFClose(fuelsDataset);
         throw std::runtime_error("Could not allocate memory");
@@ -287,17 +286,18 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
             // Access the pixel value at position (i, j)
             float pixelValue = static_cast<float>(buf[j]);
             std::string token = std::to_string(static_cast<int>(buf[j]));
-            std::cout << pixelValue << '\n';
+            //std::cout << token << '\n';
+            //std::cout << pixelValue << '\n';
             if (pixelValue != pixelValue || Dictionary.find(token) == Dictionary.end()) {
                     // If fuel not in Dictionary:
                     gridcell1.push_back("NF");
-                    std::cout << "Error" << '\n';
+                    
                     gridcell2.push_back("NF");
-                    std::cout << "Error" << '\n';
+                    
                     gridcell3.push_back(0);
                     gridcell4.push_back("NF");
             } else {
-                    std::cout << "Error 1" << '\n';
+                    
                     gridcell1.push_back(token);
                     gridcell2.push_back(Dictionary.at(token));
                     gridcell3.push_back(std::stoi(token));
@@ -359,7 +359,7 @@ void DataGridsTif(const std::string& filename, std::vector<float>& data, int nCe
     int aux = 0;
     // Read raster data
     // Allocate memory for one row of pixel data
-    float* buf = (float*) _TIFFmalloc(nXSize * sizeof(float));
+    float* buf = (float*) _TIFFmalloc(nXSize * sizeof(double));
     if (!buf) {
         TIFFClose(fuelsDataset);
         throw std::runtime_error("Could not allocate memory");
