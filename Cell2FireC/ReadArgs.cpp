@@ -151,6 +151,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 		printf("verbose: %d \n", verbose_input);
 	}
 
+	// --ignitionsLog
 	if (cmdOptionExists(argv, argv + argc, "--ignitionsLog")) {
 		iplog_input = true;
 		printf("Ignition Points Log: %d \n", iplog_input);

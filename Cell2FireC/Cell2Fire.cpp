@@ -1443,6 +1443,7 @@ void Cell2Fire::Results(){
 		CSVPloter.printASCIIInt(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownState);
 	}	
 
+	// Ignition Logfile
 	if (this->sim = args.TotalSims && this->args.IgnitionsLog){
 		std::cout << "WRITING CSV";
 		std::string filename = "ignitions_log.csv";
