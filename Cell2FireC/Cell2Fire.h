@@ -106,7 +106,7 @@ class Cell2Fire {
 		 std::vector<float>RateOfSpreads;
 		 std::vector<float>FlameLengths;
 		 std::vector<std::vector<int>> IgnitionSets;
-		 std::vector<int> IgnitionHistory;
+		 // std::vector<int> IgnitionHistory;
 
 		 // Sets
 		 std::unordered_set<int> availCells;				

@@ -47,6 +47,7 @@ inputs * df;
 std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;   
 std::vector<int> NFTypesCells;
+std::unordered_map<int,int> IgnitionHistory;
 
 /******************************************************************************
 																Utils
@@ -813,8 +814,8 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				}
 				
 				if (it->second.getStatus() == "Available" && it->second.fType != 0) {
+					IgnitionHistory[sim] = aux;
 					std::cout << "\nSelected (Random) ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< aux;
-					this->IgnitionHistory.push_back(aux);
 					std::vector<int> ignPts = {aux};
 					if (it->second.ignition(this->fire_period[year - 1], this->year, ignPts, & df[aux - 1], this->coef_ptr, this->args_ptr, & wdf[this->weatherPeriod],this->activeCrown,this->perimeterCells)) {
 						//Printing info about ignitions        
@@ -858,7 +859,8 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 		}
 		
 		std::cout << "\nSelected ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< temp;
-		this->IgnitionHistory.push_back(temp);
+		//this->
+		IgnitionHistory[sim] = temp;
 		
 		// If cell is available 
 		if (this->burntCells.find(temp) == this->burntCells.end() && this->statusCells[temp - 1] < 3) {
@@ -902,6 +904,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 			this->year++;
 			this->weatherPeriod = 0;
 		}
+
 	}
 	
 	
@@ -1307,12 +1310,15 @@ void Cell2Fire::Results(){
 	float BCells = this->burntCells.size();
 	float NBCells = this->nonBurnableCells.size();
 	float HCells = this->harvestCells.size();
+
 	
 	std::cout <<"\n----------------------------- Results -----------------------------" << std::endl;
 	std::cout << "Total Available Cells:    " << ACells << " - % of the Forest: " <<  ACells/nCells*100.0 << "%" << std::endl;
 	std::cout << "Total Burnt Cells:        " << BCells << " - % of the Forest: " <<  BCells/nCells*100.0 <<"%" << std::endl;
 	std::cout << "Total Non-Burnable Cells: " << NBCells << " - % of the Forest: " <<  NBCells/nCells*100.0 <<"%"<< std::endl;
 	std::cout << "Total Firebreak Cells: " << HCells << " - % of the Forest: " <<  HCells/nCells*100.0 <<"%"<< std::endl;
+
+	
 
 	// Final Grid 
 	if(this->args.FinalGrid){
@@ -1324,6 +1330,8 @@ void Cell2Fire::Results(){
 		//std::string gridName = this->gridFolder + "FinalStatus_" + std::to_string(this->sim) + ".csv";
 		outputGrid();
 	}
+	
+	//this->
 	
 	
 	// Messages
@@ -1434,6 +1442,16 @@ void Cell2Fire::Results(){
 		//CSVPloter.printCrownAscii(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownMetrics, statusCells2); /OLD VERSION
 		CSVPloter.printASCIIInt(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownState);
 	}	
+
+	if (this->sim = args.TotalSims && this->args.IgnitionsLog){
+		std::cout << "WRITING CSV";
+		std::string filename = "ignitions_log.csv";
+		CSVWriter igHistoryFolder("", "");
+		this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory"+separator() ;
+		igHistoryFolder.MakeDir(this->ignitionsFolder);
+		CSVWriter ignitionsFile(this->ignitionsFolder + filename);
+		ignitionsFile.printIgnitions(IgnitionHistory);
+    }
 }
 
 
@@ -1464,6 +1482,7 @@ void Cell2Fire::outputGrid(){
 	CSVWriter CSVPloter(gridName, ",");
 	CSVPloter.printCSV(this->rows, this->cols, statusCells2);
 	this->gridNumber++;
+
 }
 
 
@@ -1630,15 +1649,6 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 			WtFile.printWeather(WeatherHistory);
 		}
 	}
-
-	if (this->sim > args.TotalSims){
-		std::string filename = "ignitions_log.csv";
-		CSVWriter igHistoryFolder("", "");
-		this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory"+separator() ;
-		igHistoryFolder.MakeDir(this->ignitionsFolder);
-		CSVWriter ignitionsFile(this->ignitionsFolder + filename);
-		ignitionsFile.printIgnitions(this->IgnitionHistory);
-    }
 	
 	// Print current status
 	if (!this->done && this->args.verbose){
@@ -1683,6 +1693,7 @@ int main(int argc, char* argv[]) {
 	arguments args;
 	arguments* args_ptr = &args;
 	parseArgs(argc, argv, args_ptr);
+	
 	//printArgs(args);
 
 	// Random generator and distributions
