@@ -33,7 +33,7 @@ Plugin repo: [fire2a/fire-analytics-qgis-processing-toolbox-plugin](https://gith
 
 ## Moderate: CLI 
 1. Download a release (Cell2FireW...zip) from the right vertical tab bar, unzip
-2. Download a prepared instance, also from the releases tab, choose your fuel model: Kitral, Scott&Burgan, or Canada
+2. Download a prepared instance, also from the releases tab, choose your fuel model: Kitral, Scott&Burgan, or Canada (--sim <K|S|C>)
 3. Open a terminal, type the following:
 ```
 # needs an empty directory to store the results
@@ -42,7 +42,7 @@ mkdir results
 # locate your binary
 cd C2F-W/Cell2Fire/
 
-# run idea 
+# run idea
 ./Cell2Fire[.exe|Linux.x86-64|Darwin.x86-64] --input-instance-folder </path/to/instance> --output-folder </path/to/empty/results> --sim <K|S|C> --nthreads 16 > log.txt
 
 # sample
