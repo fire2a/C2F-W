@@ -253,8 +253,18 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
     std::vector<std::vector<std::string>> grid2;
     // Get Raster dimentions
     uint32_t nXSize, nYSize;
+    uint16_t data_type;
+    uint16_t samplesPerPixel;
     TIFFGetField(fuelsDataset, TIFFTAG_IMAGEWIDTH, &nXSize);
     TIFFGetField(fuelsDataset, TIFFTAG_IMAGELENGTH, &nYSize);
+    TIFFGetField(fuelsDataset, TIFFTAG_SAMPLEFORMAT, &data_type);
+    TIFFGetField(fuelsDataset, TIFFTAG_SAMPLESPERPIXEL, &samplesPerPixel);
+    tsize_t scan_size = TIFFRasterScanlineSize(fuelsDataset);
+    std::cout << scan_size << '\n';
+    std::cout << nXSize << '\n';
+    std::cout << data_type << '\n';
+    int n_bits = (scan_size / nXSize) * 8;
+    std::cout << n_bits << '\n';
     double* modelPixelScale;
     uint32_t  count;
     //TIFFGetField(tiff, 33424, &count, &data);
@@ -268,7 +278,17 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
     }
     // Read raster data
     // Allocate memory for one row of pixel data
-    uint32_t* buf = (uint32_t*) _TIFFmalloc(nXSize * sizeof(double));
+    void *buf;
+    if (n_bits == 64){
+        buf = (double*)_TIFFmalloc(nXSize * sizeof(double));
+    }
+    else if (n_bits == 32) {
+        buf = (int32_t*)_TIFFmalloc(nXSize * sizeof(int32_t));
+    } 
+    else {
+        throw std::runtime_error("Error: file type is not supported: '" + filename + "'");
+    }
+    
     if (!buf) {
         TIFFClose(fuelsDataset);
         throw std::runtime_error("Could not allocate memory");
@@ -282,10 +302,20 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
             throw std::runtime_error("Read error on row " + std::to_string(i));
         }
         // For each column
+        float pixelValue;
+        std::string token; 
         for (int j = 0; j < nXSize; j++) {
+            if (n_bits == 64){
+                double *values = (double *) buf;
+                pixelValue = ((double *) buf)[j];
+                token = std::to_string(static_cast<int>( ((double *) buf)[j]));
+            } 
+            else {
+                float *values = (float *) buf;
+                pixelValue = ((int32_t *) buf)[j];
+                token = std::to_string(static_cast<int>( ((int32_t *) buf)[j]));
+            }
             // Access the pixel value at position (i, j)
-            float pixelValue = static_cast<float>(buf[j]);
-            std::string token = std::to_string(static_cast<int>(buf[j]));
             //std::cout << token << '\n';
             //std::cout << pixelValue << '\n';
             if (pixelValue != pixelValue || Dictionary.find(token) == Dictionary.end()) {
@@ -356,15 +386,28 @@ void DataGridsTif(const std::string& filename, std::vector<float>& data, int nCe
     uint32_t nXSize, nYSize;
     TIFFGetField(fuelsDataset, TIFFTAG_IMAGEWIDTH, &nXSize);
     TIFFGetField(fuelsDataset, TIFFTAG_IMAGELENGTH, &nYSize);
+    tsize_t scan_size = TIFFRasterScanlineSize(fuelsDataset);
+    int n_bits = (scan_size / nXSize) * 8;
     int aux = 0;
     // Read raster data
     // Allocate memory for one row of pixel data
-    float* buf = (float*) _TIFFmalloc(nXSize * sizeof(double));
+    void *buf;
+    if (n_bits == 64){
+        buf = (double*)_TIFFmalloc(nXSize * sizeof(double));
+    }
+    else if (n_bits == 32) {
+        buf = (float*)_TIFFmalloc(nXSize * sizeof(float));
+    } 
+    else {
+        throw std::runtime_error("Error: file type is not supported: '" + filename + "'");
+    }
     if (!buf) {
         TIFFClose(fuelsDataset);
         throw std::runtime_error("Could not allocate memory");
     }
     // For each row
+    // For each column
+    float pixelValue;
     for (int i = 0; i < nYSize; i++) {
         // Read pixel values for the current row
         if (TIFFReadScanline(fuelsDataset, buf, i) != 1) {
@@ -375,11 +418,15 @@ void DataGridsTif(const std::string& filename, std::vector<float>& data, int nCe
         // For each column
         for (int j = 0; j < nXSize; j++) {
             // Access the pixel value at position (i, j)
-            float pixelValue = static_cast<float>(buf[j]);
-            std::string token = std::to_string(static_cast<int>(buf[j]));
-            //std::cout << token << '\n';
+            if (n_bits == 64){
+                double *values = (double *) buf;
+                pixelValue = ((double *) buf)[j];
+            } 
+            else {
+                float *values = (float *) buf;
+                pixelValue = ((int32_t *) buf)[j];
+            }
             if (pixelValue == pixelValue){
-                std::string token = std::to_string(static_cast<int>(buf[j]));
                 //std::cout << token << '\n';
                 data[aux] = pixelValue;
             } else {

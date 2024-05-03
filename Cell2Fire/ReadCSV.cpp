@@ -84,6 +84,8 @@ std::vector<std::vector<std::string>> CSVReader::getData() {
 		double cellSizeX {modelPixelScale[0]};
 		double cellSizeY {modelPixelScale[1]};
 		const double epsilon = std::numeric_limits<double>::epsilon();
+		tsize_t scan_size = TIFFRasterScanlineSize(fuelsDataset);
+		int n_bits = (scan_size / nXSize) * 8;
 		if (fabs(cellSizeX - cellSizeY) > epsilon) {
         	throw std::runtime_error("Error: Cells are not square in: '" + fileName + "'");
     	}
@@ -111,7 +113,16 @@ std::vector<std::vector<std::string>> CSVReader::getData() {
 		vec5.push_back("cellsize");
 		vec5.push_back(std::to_string(cellSizeX));
 		dataList.push_back(vec5);
-		uint32_t* buf = (uint32_t*) _TIFFmalloc(nXSize * sizeof(double));
+		void *buf;
+		if (n_bits == 64){
+			buf = (double*)_TIFFmalloc(nXSize * sizeof(double));
+		}
+		else if (n_bits == 32) {
+			buf = (int32_t*)_TIFFmalloc(nXSize * sizeof(int32_t));
+		} 
+		else {
+			throw std::runtime_error("Error: file type is not supported: '" + fileName + "'");
+		}
 		if (!buf) {
 			TIFFClose(fuelsDataset);
 			throw std::runtime_error("Could not allocate memory");
@@ -126,9 +137,15 @@ std::vector<std::vector<std::string>> CSVReader::getData() {
 				throw std::runtime_error("Read error on row " + std::to_string(i));
 			}
 			// For each column
+        	std::string token; 
 			for (int j = 0; j < nXSize; j++) {
 				// Access the pixel value at position (i, j)
-				std::string token = std::to_string(static_cast<int>(buf[j]));
+				if (n_bits == 64){
+					token = std::to_string(static_cast<int>( ((double *) buf)[j]));
+				} 
+				else {
+					token = std::to_string(static_cast<int>( ((int32_t *) buf)[j]));
+				}
 				vec_rows.push_back(token);
 			}
 			dataList.push_back(vec_rows);
