@@ -43,7 +43,7 @@ mkdir results
 cd C2F-W/Cell2Fire/
 
 # run idea 
-./Cell2Fire[.exe|Linux.x86-64|Darwin.x86-64] --input </path/to/instance> --output </path/to/empty/results> --sim <K|S|C> --nthreads 16 > log.txt
+./Cell2Fire[.exe|Linux.x86-64|Darwin.x86-64] --input-instance-folder </path/to/instance> --output-folder </path/to/empty/results> --sim <K|S|C> --nthreads 16 > log.txt
 
 # sample
 ./Cell2Fire.Linux.x86_64 --final-grid --output-messages --out-ros --sim S --nsims 2 --seed 123 --nthreads 3 --fmc 66 --scenario 2 --cros --weather rows --input-instance-folder /tmp/processing_cdcCGk/Vilopriu_2013 --output-folder /tmp/processing_cdcCGk/Vilopriu_2013/results | tee log.txt
