@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>.\Cell2Fire.exe --input-instance-folder ..\..\..\data\Hom_Fuel_101_40x40\ --sim S</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>.\Cell2Fire.exe --input-instance-folder ..\..\..\data\ScottAndBurgan\Hom_Fuel_101_40x40\ --nsims 2</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>.\Cell2Fire.exe --input-instance-folder C:\Users\ferna\source\repos\fire2a\C2F-W\Hom_Fuel_101_40x40\ --output-folder C:\Users\ferna\source\repos\fire2a\C2F-W\Hom_Fuel_101_40x40\results</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>.\Cell2Fire.exe --input-instance-folder ..\..\..\data\ScottAndBurgan\Hom_Fuel_101_40x40\ --nsims 2</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

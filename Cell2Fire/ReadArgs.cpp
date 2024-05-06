@@ -134,16 +134,16 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	
 
 	//--trajectories
-	if (cmdOptionExists(argv, argv + argc, "--trajectories")) {
-		out_trajectories = true;
-		printf("Trajectories: %d \n", out_trajectories);
-	}
+	//if (cmdOptionExists(argv, argv + argc, "--trajectories")) {
+	//	out_trajectories = true;
+	//	printf("Trajectories: %d \n", out_trajectories);
+	//}
 
 	//--no-output
-	if (cmdOptionExists(argv, argv + argc, "--no-output")) {
-		no_output = true;
-		printf("noOutput: %d \n", no_output);
-	}
+	//if (cmdOptionExists(argv, argv + argc, "--no-output")) {
+	//	no_output = true;
+	//	printf("noOutput: %d \n", no_output);
+	//}
 
 	//--verbose
 	if (cmdOptionExists(argv, argv + argc, "--verbose")) {
@@ -176,16 +176,16 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	}
 
 	//--Prom_tuned
-	if (cmdOptionExists(argv, argv + argc, "--PromTuned")) {
-		prom_tuned = true;
-		printf("PromTuned: %d \n", prom_tuned);
-	}
+	//if (cmdOptionExists(argv, argv + argc, "--PromTuned")) {
+	//	prom_tuned = true;
+	//	printf("PromTuned: %d \n", prom_tuned);
+	//}
 
 	//--statistics
-	if (cmdOptionExists(argv, argv + argc, "--statistics")) {
-		out_stats = true;
-		printf("Statistics: %d \n", out_stats);
-	}
+	//if (cmdOptionExists(argv, argv + argc, "--statistics")) {
+	//	out_stats = true;
+	//	printf("Statistics: %d \n", out_stats);
+	//}
 
 	//--bbo
 	if (cmdOptionExists(argv, argv + argc, "--bbo")) {
@@ -214,16 +214,16 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	float dROS_Threshold= 0.1;
 	float dHFI_Threshold= 0.1;
 	float dCROS_Threshold= 0.5;
-	float dCROSAct_Threshold= 1.0;
+	//float dCROSAct_Threshold= 1.0;
 	float dROSCV= 0.;
 	float dHFactor = 1.0;
 	float dFFactor = 1.0;
 	float dBFactor = 1.0;
 	float dEFactor = 1.0;
-	float dCBDFactor = 0.0;
-	float dCBHFactor = 1.0;
-	float dCCFFactor = 0.0;
-	float dROS10Factor = 3.34;
+	float dCBDFactor = 0.0; //spain
+	//float dCBHFactor = 1.0;
+	float dCCFFactor = 0.0; //spain
+	float dROS10Factor = 3.34; //spain
 	float dinput_PeriodLen= 1.;
 	
 	// aux 
