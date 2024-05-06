@@ -1,8 +1,10 @@
 #!/bin/bash
 
 unzip -q target_results.zip 
+
 # recreate targets with tests
-# zip -r target_results.zip test_results
+# mv test_results target_results
+# zip -r target_results.zip target_results
 
 # run simulations from model, put them in test_results, compare to target_results
 PATH=../Cell2Fire:$PATH
