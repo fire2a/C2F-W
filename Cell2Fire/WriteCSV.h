@@ -25,7 +25,6 @@ public:
 	// mutable
 	int linesCount;
 	
-	
 	// Constructor
 	CSVWriter(std::string filename, std::string delm = ",");
  

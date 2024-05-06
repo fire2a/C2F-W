@@ -260,8 +260,8 @@ void CSVWriter::printIgnitions(std::unordered_map<int,int> ignitionsHistory)
 	std::ofstream ofs(fileName, std::ofstream::out);
 	int i;
 
-    // Print column titles
-    ofs << "sim,point\n";
+	// Print column titles
+	ofs << "sim,point\n";
 
 	// Iterate through the map and print key-value pairs
 	for (i = 1; i < ignitionsHistory.size()+1; i++) {
