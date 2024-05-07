@@ -19,7 +19,7 @@ jobs:
 
     - name: Doit
       run: |
-          # which gcc-12
+        # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt
         echo "find boost"
