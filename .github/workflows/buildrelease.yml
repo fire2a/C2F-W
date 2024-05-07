@@ -10,10 +10,10 @@ permissions:
 
 jobs:
   call_macos_build:
-      uses: ./.github/workflows/buildmacos.yml
+      uses: ./.github/workflows/buildmacos-latest.yml
 
   call_ubuntu_build:
-      uses: ./.github/workflows/buildubuntu.yml
+      uses: ./.github/workflows/buildubuntu-latest.yml
 
   call_windows_build:
       uses: ./.github/workflows/buildwindows.yml
