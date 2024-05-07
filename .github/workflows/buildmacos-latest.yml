@@ -23,7 +23,11 @@ jobs:
         # which brew
         brew install boost eigen llvm libopenmpt
         echo "ls 0"
-        ls -l /user/local/include 
+        ls 
+        ls /usr
+        ls /usr/local
+        ls /opt
+        ls /opt/homebrew
         echo "ls 1"
         ls -l /opt/homebrew/include
         echo "ls 2"
