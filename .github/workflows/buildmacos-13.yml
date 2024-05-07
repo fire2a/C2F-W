@@ -21,10 +21,8 @@ jobs:
       run: |
         echo "arch"
         arch
-        echo "clang"
-        clang --version
-        echo "llvm"
-        which llvm-config
+        # echo "clang"
+        # clang --version
         # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt
