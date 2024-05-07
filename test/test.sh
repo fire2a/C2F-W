@@ -3,6 +3,7 @@
 unzip -q target_results.zip 
 
 # recreate targets with tests
+# rm -rf target_results.zip
 # mv test_results target_results
 # zip -r target_results.zip target_results
 
