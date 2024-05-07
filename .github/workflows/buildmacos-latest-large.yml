@@ -12,13 +12,15 @@ permissions:
 
 jobs:
   macos_build:
-    runs-on: macos-latest-large
+    runs-on: macos-13
     steps:
     - name: Checkout
       uses: actions/checkout@v3
 
     - name: Doit
       run: |
+        echo "arch"
+        arch
         # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt
