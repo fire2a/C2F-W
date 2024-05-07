@@ -25,6 +25,8 @@ jobs:
         echo "find 0"
         find /usr/local -name "Eigen"
         echo "find 1"
+        find /opt/homebrew -name "Eigen"
+        echo "find 2"
         # find /usr/local -name "boost" 2>/dev/null
         # find /usr/local -name "llvm" 2>/dev/null
         cd Cell2Fire
