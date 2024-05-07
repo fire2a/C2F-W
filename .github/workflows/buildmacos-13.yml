@@ -19,7 +19,11 @@ jobs:
 
     - name: Doit
       run: |
+        echo "hello world!"
         echo "arch: $arch"
+        arch
+        clang --version
+        llvm-config --version
         # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt
