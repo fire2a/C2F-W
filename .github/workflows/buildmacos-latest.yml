@@ -22,6 +22,11 @@ jobs:
         # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt
+        echo "ls 0"
+        ls -l /user/local/include 
+        echo "ls 1"
+        ls -l /opt/homebrew/include
+        echo "ls 2"
         # echo "find 0"
         # find /usr/local -name "Eigen"
         # echo "find 1"
