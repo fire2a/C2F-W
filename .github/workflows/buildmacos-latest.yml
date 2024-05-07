@@ -23,17 +23,22 @@ jobs:
         # which brew
         brew install boost eigen llvm libopenmpt
         find /opt/homebrew -name "boost" 2>/dev/null
+        find /usr -name "boost" 2>/dev/null
         echo "find llvm"
         find /opt/homebrew -name "llvm" 2>/dev/null
+        find /usr -name "llvm" 2>/dev/null
         echo "find Eigen"
         find /opt/homebrew -name "Eigen" 2>/dev/null
+        find /usr -name "Eigen" 2>/dev/null
         echo "find boost"
         cd Cell2Fire
         make clean -f makefile.macos-latest
         make -f makefile.macos-latest
+        ls Cell2Fire*
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
+        echo "extension $ext"
         mv Cell2Fire Cell2Fire$ext
-        # ls Cell2Fire*
+        ls Cell2Fire*
 
     - name: Upload
       uses: actions/upload-artifact@v3
