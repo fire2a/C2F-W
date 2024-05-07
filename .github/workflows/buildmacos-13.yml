@@ -27,12 +27,12 @@ jobs:
         # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt
-        echo "find boost"
-        find / -name "boost" 2>/dev/null
-        echo "find llvm"
-        find / -name "llvm" 2>/dev/null
-        echo "find Eigen"
-        find / -name "Eigen" 2>/dev/null
+        # echo "find boost"
+        # find / -name "boost" 2>/dev/null
+        # echo "find llvm"
+        # find / -name "llvm" 2>/dev/null
+        # echo "find Eigen"
+        # find / -name "Eigen" 2>/dev/null
         cd Cell2Fire
         echo "cleaning"
         make clean -f makefile.macos-13
