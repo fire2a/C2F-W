@@ -19,22 +19,15 @@ jobs:
 
     - name: Doit
       run: |
-        echo "ls /"
-        ls /
-        echo "arch"
-        arch
         # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt
         echo "find boost"
         find /opt/homebrew -name "boost" 2>/dev/null
-        find /usr -name "boost" 2>/dev/null
         echo "find llvm"
         find /opt/homebrew -name "llvm" 2>/dev/null
-        find /usr -name "llvm" 2>/dev/null
         echo "find Eigen"
         find /opt/homebrew -name "Eigen" 2>/dev/null
-        find /usr -name "Eigen" 2>/dev/null
         cd Cell2Fire
         echo "cleaning"
         make clean -f makefile.macos-latest
@@ -51,4 +44,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2Fire/Cell2Fire.Darwin.x86_64
+        path: Cell2Fire/Cell2Fire.Darwin.arm64
