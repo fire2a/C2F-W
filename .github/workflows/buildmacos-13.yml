@@ -1,4 +1,4 @@
-name: macos build
+name: macos-13 build
 
 on:
   # push:
