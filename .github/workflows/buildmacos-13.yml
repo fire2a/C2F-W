@@ -19,22 +19,21 @@ jobs:
 
     - name: Doit
       run: |
-        echo "arch"
-        arch
+        echo "arch: $arch"
         # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt
         echo "find boost"
-        find /opt/homebrew -name "boost" 2>/dev/null
+        find / -name "boost" 2>/dev/null
         echo "find llvm"
-        find /opt/homebrew -name "llvm" 2>/dev/null
+        find / -name "llvm" 2>/dev/null
         echo "find Eigen"
-        find /opt/homebrew -name "Eigen" 2>/dev/null
+        find / -name "Eigen" 2>/dev/null
         cd Cell2Fire
         echo "cleaning"
-        make clean -f makefile.macos-latest-large
+        make clean -f makefile.macos-13
         echo "building"
-        make -f makefile.macos-latest-large
+        make -f makefile.macos-13
         echo "end build"
         ls Cell2Fire*
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
