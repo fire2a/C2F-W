@@ -1,5 +1,5 @@
-﻿LDFLAGS="-L/user/local/llvm/lib"
-CPPFLAGS="-I/user/local/llvm/include"
+﻿# LDFLAGS="-L/usr/local/llvm/lib"
+# CPPFLAGS="-I/usr/local/llvm/include"
 CC = g++-12
 MPCC = g++-12
 OPENMP = -fopenmp
