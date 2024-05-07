@@ -1443,7 +1443,7 @@ void Cell2Fire::Results(){
 	}	
 
 	// Ignition Logfile
-	if (this->sim = args.TotalSims && this->args.IgnitionsLog){
+	if (this->sim == args.TotalSims && this->args.IgnitionsLog){
 		std::cout << "WRITING CSV";
 		std::string filename = "ignitions_log.csv";
 		CSVWriter igHistoryFolder("", "");
