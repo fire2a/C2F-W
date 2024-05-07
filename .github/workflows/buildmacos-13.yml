@@ -26,6 +26,7 @@ jobs:
         # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt
+        brew reinstall -sv gcc@12
         # echo "find boost"
         # find / -name "boost" 2>/dev/null
         # echo "find llvm"
