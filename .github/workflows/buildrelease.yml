@@ -12,6 +12,9 @@ jobs:
   call_macos_build:
       uses: ./.github/workflows/buildmacos-latest.yml
 
+  call_macos_build_large:
+      uses: ./.github/workflows/buildmacos-latest-large.yml
+
   call_ubuntu_build:
       uses: ./.github/workflows/buildubuntu-latest.yml
 
@@ -19,7 +22,7 @@ jobs:
       uses: ./.github/workflows/buildwindows.yml
 
   release:
-    needs: [call_ubuntu_build, call_macos_build, call_windows_build]
+    needs: [call_ubuntu_build, call_macos_build_large, call_macos_build, call_windows_build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -32,6 +35,7 @@ jobs:
       run: |
         git archive --prefix=C2F/Cell2Fire/ \
           --add-file=binaries/Cell2Fire.Linux.x86_64 \
+          --add-file=binaries/Cell2Fire.Darwin.arm64\
           --add-file=binaries/Cell2Fire.Darwin.x86_64 \
           --add-file=binaries/Cell2Fire.exe \
           --prefix=C2F/ \

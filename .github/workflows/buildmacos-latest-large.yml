@@ -12,14 +12,14 @@ permissions:
 
 jobs:
   macos_build:
-    runs-on: macos-latest
+    runs-on: macos-latest-large
     steps:
     - name: Checkout
       uses: actions/checkout@v3
 
     - name: Doit
       run: |
-          # which gcc-12
+        # which gcc-12
         # which brew
         brew install boost eigen llvm libopenmpt
         echo "find boost"
@@ -30,9 +30,9 @@ jobs:
         find /opt/homebrew -name "Eigen" 2>/dev/null
         cd Cell2Fire
         echo "cleaning"
-        make clean -f makefile.macos-latest
+        make clean -f makefile.macos-latest-large
         echo "building"
-        make -f makefile.macos-latest
+        make -f makefile.macos-latest-large
         echo "end build"
         ls Cell2Fire*
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
@@ -44,4 +44,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2Fire/Cell2Fire.Darwin.arm64
+        path: Cell2Fire/Cell2Fire.Darwin.x86_64
