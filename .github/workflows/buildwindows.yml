@@ -60,7 +60,7 @@ jobs:
         # & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" Cell2Fire.sln /p:Configuration=Release
         cd Cell2Fire
         dir ..\vcpkg\installed\x64-windows-release\include
-        msbuild Cell2Fire.sln /p:Configuration=Debug
+        msbuild Cell2Fire.sln /p:Configuration=Release
 
     - name: Upload
       uses: actions/upload-artifact@v3
