@@ -9,18 +9,19 @@ permissions:
   contents: write
 
 jobs:
-  call_macos_build:
-      uses: ./.github/workflows/buildmacos.yml
+  # call_macos_build:
+  #     uses: ./.github/workflows/buildmacos.yml
 
-  call_ubuntu_build:
-      uses: ./.github/workflows/buildubuntu.yml
+  # call_ubuntu_build:
+  #     uses: ./.github/workflows/buildubuntu.yml
 
-        # call_windows_build:
-        #     uses: ./.github/workflows/buildwindows.yml
+  call_windows_build:
+      uses: ./.github/workflows/buildwindows.yml
 
   release:
     # needs: [call_ubuntu_build, call_macos_build, call_windows_build]
-    needs: [call_ubuntu_build, call_macos_build]
+    # needs: [call_ubuntu_build, call_macos_build]
+    needs: [call_windows_build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -32,11 +33,11 @@ jobs:
     - name: GitArchive
       run: |
         git archive --prefix=C2F/Cell2Fire/ \
-          --add-file=binaries/Cell2Fire.Linux.x86_64 \
-          --add-file=binaries/Cell2Fire.Darwin.arm64 \
+          --add-file=binaries/Cell2Fire.exe \
           --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
-          # --add-file=binaries/Cell2Fire.exe \
+          # --add-file=binaries/Cell2Fire.Linux.x86_64 \
+          # --add-file=binaries/Cell2Fire.Darwin.arm64 \
 
           # - name: ZipDataInstances
           #   run: |

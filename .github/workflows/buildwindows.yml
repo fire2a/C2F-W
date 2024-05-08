@@ -41,11 +41,15 @@ jobs:
         Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
         tar -xzf $fname -C include
 
-        # gdal
-        # Invoke-WebRequest -Uri https://github.com/OSGeo/gdal/releases/download/v3.8.4/gdal-3.8.4.tar.gz -OutFile gdal-3.8.4.tar.gz
-        # tar -xzf gdal-3.8.4.tar.gz -C include
+    - name: vcpkg build
+      uses: johnwason/vcpkg-action@v6
+      id: vcpkg
+      with:
+        pkgs: tiff
+        triplet: x64-windows-release
+        token: ${{ github.token }}
+        github-binarycache: true
 
-        echo "Bye"
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.3
@@ -55,7 +59,7 @@ jobs:
         # local using powershell
         # & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" Cell2Fire.sln /p:Configuration=Release
         cd Cell2Fire
-        msbuild Cell2Fire.sln /p:Configuration=Release
+        msbuild Cell2Fire.sln /p:Configuration=Debug
 
     - name: Upload
       uses: actions/upload-artifact@v3
