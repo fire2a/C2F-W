@@ -20,8 +20,18 @@ jobs:
     - name: Build
       run: |
         sudo apt install g++-12 libboost-all-dev libeigen3-dev libtiff-dev
-        find /usr -name "libtiff.so" 2>/dev/null
         cd Cell2Fire
+        # attempt to add libtiff.so to binaries lib
+        mkdir lib
+        # Find libtiff.so and check if it exists
+        afile=$(find /usr -name "libtiff.so" 2>/dev/null)
+        if [ -f "$afile" ]; then
+          # Copy the file only if it exists
+          cp "$afile" "lib/"
+        else
+          echo "libtiff.so not found in /usr"
+        fi
+        # build
         make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
