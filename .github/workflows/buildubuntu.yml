@@ -20,6 +20,7 @@ jobs:
     - name: Build
       run: |
         sudo apt install g++-12 libboost-all-dev libeigen3-dev libtiff-dev
+        find /usr -name "libtiff.so" 2>/dev/null
         cd Cell2Fire
         make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
