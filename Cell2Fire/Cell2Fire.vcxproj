@@ -113,7 +113,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\include\dirent-1.24\include;.\include\boost_1_84_0;.\include\eigen3;..\vcpkg\installed\x64-windows-release\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include\dirent-1.24\include;.\include\boost_1_84_0;.\include\eigen3;..\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
