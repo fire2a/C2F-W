@@ -15,16 +15,17 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Doit
       run: |
         # which gcc-12
         # which brew
-        brew install boost eigen llvm libopenmpt
-        # find /usr/local -name "Eigen" 2>/dev/null
-        # find /usr/local -name "boost" 2>/dev/null
-        # find /usr/local -name "llvm" 2>/dev/null
+        brew install boost eigen llvm libopenmpt libtiff
+        find /opt/homebrew -name "boost" 2>/dev/null
+        find /opt/homebrew -name "llvm" 2>/dev/null
+        find /opt/homebrew -name "Eigen" 2>/dev/null
+        find /opt/homebrew -name "tiffio.h" 2>/dev/null
         cd Cell2Fire
         make clean -f makefile.macos-latest
         make -f makefile.macos-latest
@@ -36,4 +37,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2Fire/Cell2Fire.Darwin.x86_64
+        path: Cell2Fire/Cell2Fire.Darwin.arm64

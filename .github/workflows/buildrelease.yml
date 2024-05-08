@@ -3,6 +3,7 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-\w+'
 
 permissions:
   contents: write
@@ -14,15 +15,16 @@ jobs:
   call_ubuntu_build:
       uses: ./.github/workflows/buildubuntu.yml
 
-  call_windows_build:
-      uses: ./.github/workflows/buildwindows.yml
+        # call_windows_build:
+        #     uses: ./.github/workflows/buildwindows.yml
 
   release:
-    needs: [call_ubuntu_build, call_macos_build, call_windows_build]
+    # needs: [call_ubuntu_build, call_macos_build, call_windows_build]
+    needs: [call_ubuntu_build, call_macos_build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Download
       uses: actions/download-artifact@v3
@@ -31,20 +33,21 @@ jobs:
       run: |
         git archive --prefix=C2F/Cell2Fire/ \
           --add-file=binaries/Cell2Fire.Linux.x86_64 \
-          --add-file=binaries/Cell2Fire.Darwin.x86_64 \
-          --add-file=binaries/Cell2Fire.exe \
+          --add-file=binaries/Cell2Fire.Darwin.arm64 \
           --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
+          # --add-file=binaries/Cell2Fire.exe \
 
-    - name: ZipDataInstances
-      run: |
-        cd data
-        zip -r ../Kitral.zip Kitral
-        zip -r ../CanadianFBP.zip CanadianFBP
-        zip -r ../ScottAndBurgan.zip ScottAndBurgan  
+          # - name: ZipDataInstances
+          #   run: |
+          #     cd data
+          #     zip -r ../Kitral.zip Kitral
+          #     zip -r ../CanadianFBP.zip CanadianFBP
+          #     zip -r ../ScottAndBurgan.zip ScottAndBurgan  
 
     - name: Create Release
       uses: ncipollo/release-action@v1.13.0
       with:
-        artifacts: "Cell2FireW_${{ github.ref_name }}.zip,Kitral.zip,CanadianFBP.zip,ScottAndBurgan.zip"
+        artifacts: "Cell2FireW_${{ github.ref_name }}.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
+        # artifacts: "Cell2FireW_${{ github.ref_name }}.zip,Kitral.zip,CanadianFBP.zip,ScottAndBurgan.zip"
