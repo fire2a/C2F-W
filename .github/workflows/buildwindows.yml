@@ -61,8 +61,8 @@ jobs:
         dir
         dir .\vcpkg
         dir .\vcpkg\installed
-        dir .\vcpkg\installed\x64-windows
-        dir .\vcpkg\installed\x64-windows\include
+        dir .\vcpkg\installed\x64-windows-release
+        dir .\vcpkg\installed\x64-windows-release\include
         cd Cell2Fire
         msbuild Cell2Fire.sln /p:Configuration=Debug
 
