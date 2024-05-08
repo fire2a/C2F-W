@@ -31,6 +31,7 @@ jobs:
         else
           echo "libtiff.so not found in /usr"
         fi
+        ls lib
         # build
         make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
