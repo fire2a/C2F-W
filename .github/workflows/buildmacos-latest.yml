@@ -1,4 +1,4 @@
-name: macos build
+name: macos-latest(arm64) build
 
 on:
   # push:
