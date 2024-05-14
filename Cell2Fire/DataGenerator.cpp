@@ -13,6 +13,15 @@
 #include <algorithm>
 #include <memory>
 
+inline char separator()
+{
+#if defined _WIN32 || defined __CYGWIN__
+	return '\\';
+#else
+	return '/';
+#endif
+}
+
 // Reads fbp_lookup_table.csv and creates dictionaries for the fuel types and cells' ColorsDict
 std::tuple<std::unordered_map<std::string, std::string>, std::unordered_map<std::string, std::tuple<float, float, float, float>>> Dictionary(const std::string& filename) {
 
@@ -437,7 +446,7 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
 void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids, const std::string& InFolder) 
 {
 
-    std::ofstream dataFile(InFolder + "/Data.csv");
+    std::ofstream dataFile(InFolder + separator() + "Data.csv");
     std::vector<std::string> Columns = {"fueltype", "lat", "lon", "elev", "ws", "waz", "ps", "saz", "cur", "cbd", "cbh", "ccf", "ftypeN", "fmc", "py",
                                         "jd", "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern"};
     if (dataFile.is_open()) {
@@ -470,18 +479,18 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     // Determine the lookup table based on the Simulator
     std::string FBPlookup;
     if (Simulator == "K") {
-        FBPlookup = InFolder + "/kitral_lookup_table.csv";
+        FBPlookup = InFolder + separator() + "kitral_lookup_table.csv";
     } else if (Simulator == "S") {
-        FBPlookup = InFolder + "/spain_lookup_table.csv";
+        FBPlookup = InFolder + separator() + "spain_lookup_table.csv";
     } else { // beta version
-        FBPlookup = InFolder + "/fbp_lookup_table.csv";
+        FBPlookup = InFolder + separator() + "fbp_lookup_table.csv";
     }
 
     // Call Dictionary function to read lookup table
     std::tie(FBPDict, ColorsDict) = Dictionary(FBPlookup);
 
     // Call ForestGrid function
-    std::string FGrid = InFolder + "/fuels.asc";
+    std::string FGrid = InFolder + separator() + "fuels.asc";
     std::vector<int> GFuelTypeN;
     std::vector<std::string> GFuelType;
     int FBPDicts, Cols;
@@ -542,7 +551,7 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     };
 
     for (const auto& name : filenames) {
-        std::string filePath = InFolder + "/" + name;
+        std::string filePath = InFolder + separator() + name;
 
         if (fileExists(filePath)) {
             if (name == "elevation.asc") {
