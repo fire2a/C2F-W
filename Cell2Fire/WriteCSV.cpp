@@ -266,6 +266,7 @@ void CSVWriter::printIgnitions(std::unordered_map<int,int> ignitionsHistory)
 	// Iterate through the map and print key-value pairs
 	for (i = 1; i < ignitionsHistory.size()+1; i++) {
 		ofs << i << "," << ignitionsHistory[i] << "\n";
+		//ofs << i << "," << ignitionsHistory[i-1] << "\n";
 	}
 
 	// Close file

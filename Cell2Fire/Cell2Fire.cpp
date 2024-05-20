@@ -43,6 +43,7 @@ inputs * df_ptr;
 weatherDF * wdf_ptr;
 weatherDF wdf[100000]; //hard to dynamic allocate memory since it changes from file to file, better to keep constant size;
 inputs * df;
+int currentSim = 0;
 std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;   
 std::vector<int> NFTypesCells;
@@ -773,6 +774,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	int loops = 0;
 	int microloops = 0;
 	this->noIgnition = false;
+	currentSim = currentSim+1;
 	std::default_random_engine generator2(args.seed * ep*this->nCells);// * time(NULL)); //creates a different generator solving cases when parallel running creates simulations at same time
 	std::unordered_map<int, Cells>::iterator it;
 	std::uniform_int_distribution<int> distribution(1, this->nCells);
@@ -1443,8 +1445,13 @@ void Cell2Fire::Results(){
 	}	
 
 	// Ignition Logfile
-	if (this->sim == args.TotalSims && this->args.IgnitionsLog){
-		std::cout << "WRITING CSV";
+	if (currentSim == args.TotalSims && this->args.IgnitionsLog){
+
+		for (i = 1; i < IgnitionHistory.size()+1; i++) {
+			std::cout << i << "," << IgnitionHistory[i] << "\n";
+		}
+
+		std::cout << "WRITING CSV" << endl;
 		std::string filename = "ignitions_log.csv";
 		CSVWriter igHistoryFolder("", "");
 		this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory"+separator() ;
