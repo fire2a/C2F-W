@@ -62,3 +62,10 @@ sudo make install
 git switch -c my-feature
 ```
 Other platform details at `.github/workflows/build\*.yml`
+
+## AWS with Docker
+
+```
+docker build . -t cell2fire
+docker run --env-file ./env.list -it cell2fire --input-instance-folder s3://bucket_name/key/ --sim K --output-folder s3://bucket_name/out_folder/ 
+```
