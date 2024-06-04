@@ -1447,14 +1447,16 @@ void Cell2Fire::Results(){
 	// Ignition Logfile
 	if (currentSim == args.TotalSims && this->args.IgnitionsLog){
 
-		for (i = 1; i < IgnitionHistory.size()+1; i++) {
-			std::cout << i << "," << IgnitionHistory[i] << "\n";
+		std::cout << "Writing csv..." << endl;
+		if (this->args.verbose) {
+			for (i = 1; i < IgnitionHistory.size()+1; i++) {
+				std::cout << i << "," << IgnitionHistory[i] << "\t";
+			}
 		}
 
-		std::cout << "WRITING CSV" << endl;
 		std::string filename = "ignitions_log.csv";
 		CSVWriter igHistoryFolder("", "");
-		this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory"+separator() ;
+		this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory"+separator();
 		igHistoryFolder.MakeDir(this->ignitionsFolder);
 		CSVWriter ignitionsFile(this->ignitionsFolder + filename);
 		ignitionsFile.printIgnitions(IgnitionHistory);
