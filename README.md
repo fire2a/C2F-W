@@ -1,16 +1,21 @@
 # Cell2Fire W
 A big-scale, grid, forest fire simulator; parallel and fast (c++) nevertheless with a friendly graphical user interface for QGIS.
 
+_Originally forked from Cell2Fire, thanks to the work of Cristobal Pais, Jaime Carrasco, David Martell, [David L. Woodruff](https://github.com/DLWoodruff), Andres Weintraub, et al._
+
 This fire spread simulator, supports 3 fire models:
 * Kitral, formerly: [C2F+K](https://github.com/fire2a/C2FK)
-* Scott&Burgan, formerly [C2F+S&B](https://github.com/fire2a/C2FSB), 
-* Canada (all based from) [Cell2Fire](https://github.com/cell2fire/Cell2Fire).
+* Scott&Burgan, formerly [C2F+S&B](https://github.com/fire2a/C2FSB) 
+* Canadian Forest Fire Behavior Prediction System, OG [Cell2Fire](https://github.com/cell2fire/Cell2Fire)
+  
+As Cell2Fire: i) the landscape is characterized as a grid, in which every cell has the same size, and the necessary information to simulate fire spread, i.e. fuel type, elevation and ignition probability, among others; ii) exploits parallel computation methods which allows users to run large-scale simulations in short periods of time; iii) the fires spread within each cell is assumed to be elliptical; and iv) it includes powerful statistical, graphical output, and spatial analysis features to facilitate the display and analysis of projected fire growth.
 
-As Cell2Fire, i) the landscape is characterized as a grid, in which every cell has the same size, and the necessary information to simulate fire spread, i.e. fuel type, elevation and ignition probability, among others; ii) exploits parallel computation methods which allows users to run large-scale simulations in short periods of time; iii) the fires spread within each cell is assumed to be elliptical; and iv) it includes powerful statistical, graphical output, and spatial analysis features to facilitate the display and analysis of projected fire growth.
+Installation, usage, specifications available by [reading the friendly manual here](https://fire2a.github.io/docs/). 
 
-Installation, usage, specifications available by [reading the friendly manual here](https://fdobad.github.io/docs/).
+[O leyendo el manual acá](https://fire2a.github.io/documentacion/)
 
 # Usage (TL;DR)
+
 - Easy: Use through QGIS GUI
 - Moderate: Download a release, unzip, and run the CLI
 - Collaborative: Clone & [compile](https://fire2a.github.io/docs/docs/Cell2Fire/README.html)
