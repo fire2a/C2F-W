@@ -1,10 +1,14 @@
 #!/bin/bash
 
 unzip -q target_results.zip 
-#zip -r target_results.zip target_results
+
+# recreate targets with tests
+# rm -rf target_results.zip
+# mv test_results target_results
+# zip -r target_results.zip target_results
 
 # run simulations from model, put them in test_results, compare to target_results
-PATH=../Cell2FireC:$PATH
+PATH=../Cell2Fire:$PATH
 
 set -x # enable debug tracing
 # run
@@ -22,7 +26,7 @@ for model in fbp kitral sb; do
         additional_args=""
         sim_code="K"
     fi
-    Cell2Fire.Linux.x86_64 --input-instance-folder model/${model} --output-folder test_results/${model} --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 $additional_args > test_results/${model}/log.txt 
+    Cell2Fire.Linux.x86_64 --input-instance-folder model/${model} --output-folder test_results/${model} --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > test_results/${model}/log.txt 
 done
 set +x # disable debug tracing
 

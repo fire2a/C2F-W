@@ -80,6 +80,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	bool out_trajectories = false;
 	bool no_output = false;
 	bool verbose_input = false;
+	bool iplog_input = false;
 	bool input_ignitions = false;
 	bool out_grids = false;
 	bool out_fl=false;
@@ -148,6 +149,12 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	if (cmdOptionExists(argv, argv + argc, "--verbose")) {
 		verbose_input = true;
 		printf("verbose: %d \n", verbose_input);
+	}
+
+	// --ignitionsLog
+	if (cmdOptionExists(argv, argv + argc, "--ignitionsLog")) {
+		iplog_input = true;
+		printf("Ignition Points Log: %d \n", iplog_input);
 	}
 
 	//--ignitions
@@ -488,7 +495,8 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	args_ptr->OutSurfConsumption = out_surf_consumption;
 	args_ptr->Trajectories = out_trajectories; 
 	args_ptr->NoOutput = no_output;
-	args_ptr->verbose = verbose_input; 
+	args_ptr->verbose = verbose_input;
+	args_ptr->IgnitionsLog = iplog_input; 
 	args_ptr->Ignitions = input_ignitions;
 	args_ptr->OutputGrids = out_grids; 
 	args_ptr->FinalGrid = out_finalgrid;
@@ -561,7 +569,8 @@ void printArgs(arguments args){
 	std::cout << "BBOTuning: " << args.BBOTuning << std::endl; 
 	std::cout << "Statistics: " << args.Stats << std::endl; 
 	std::cout << "noOutput: " << args.NoOutput << std::endl; 
-	std::cout << "verbose: " << args.verbose << std::endl; 
+	std::cout << "verbose: " << args.verbose << std::endl;
+	std::cout << "Ignition Points Log: " << args.IgnitionsLog << std::endl; 
 	std::cout << "seed: " << args.seed << std::endl; 
 	std::cout << "nthreads: " << args.nthreads << std::endl;
 

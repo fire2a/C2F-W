@@ -58,8 +58,8 @@ jobs:
         msbuild Cell2Fire.sln /p:Configuration=Release
 
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: binaries
+        name: binaries-Windows-x64
         path: Cell2Fire/x64/Release/Cell2Fire.exe
 
