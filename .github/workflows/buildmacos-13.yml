@@ -25,15 +25,20 @@ jobs:
         # clang --version
         # which gcc-12
         # which brew
-        brew install boost eigen llvm libomp gcc #@12
-        # echo "find gcc"
+        brew install boost eigen llvm libomp gcc@12
+        echo "find gcc"
         # find / -name "gcc" 2>/dev/null
+        find /usr/local/include -name "gcc" 2>/dev/null
+        find /usr/local/opt -name "gcc" 2>/dev/null
+        find /usr/local/Cellar -name "gcc" 2>/dev/null
         # echo "find boost"
         # find / -name "boost" 2>/dev/null
         # echo "find llvm"
         # find / -name "llvm" 2>/dev/null
         echo "find Eigen"
-        find / -name "Eigen" 2>/dev/null
+        find /usr/local/include -name "Eigen" 2>/dev/null
+        find /usr/local/opt -name "Eigen" 2>/dev/null
+        find /usr/local/Cellar -name "Eigen" 2>/dev/null
         cd Cell2Fire
         echo "cleaning"
         make clean -f makefile.macos-13
