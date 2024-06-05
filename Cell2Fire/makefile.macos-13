@@ -1,13 +1,7 @@
-﻿CPPFLAGS='-Wl,-ld_classic'
-# CC = g++-12
-# MPCC = g++-12
-CC = clang++
-MPCC = clang++
-OPENMP = -fopenmp
-CFLAGS = -std=c++14 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fopenmp $(CPPFLAGS)
-# CFLAGS = -std=c++14 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fopenmp $(CPPFLAGS) -mmacos-version-min=10.9
-# CFLAGS = -std=c++14 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fopenmp $(CPPFLAGS) -mmacosx-version-min=10.9
-LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
+﻿CC = /usr/local/opt/llvm/bin/clang++
+MPCC = /usr/local/opt/llvm/bin/clang++
+CFLAGS = -std=c++14 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fopenmp $(CPPFLAGS) -mmacosx-version-min=10.9 -I/usr/local/opt/llvm/include -I/usr/local/opt/libomp/include
+LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl -L/usr/local/opt/llvm/lib -L/usr/local/opt/libomp/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++
 TARGETS = Cell2Fire
 all:	$(TARGETS)
 Cell2Fire: Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o DataGenerator.o
