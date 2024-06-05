@@ -1447,8 +1447,9 @@ void Cell2Fire::Results(){
 	// Ignition Logfile
 	if (currentSim == args.TotalSims && this->args.IgnitionsLog){
 
-		std::cout << "Writing csv..." << endl;
+		std::cout << "Writing ignitions log csv..." << endl;
 		if (this->args.verbose) {
+			std::cout << "(simulation_id, cell_id): ";
 			for (i = 1; i < IgnitionHistory.size()+1; i++) {
 				std::cout << i << "," << IgnitionHistory[i] << "\t";
 			}
