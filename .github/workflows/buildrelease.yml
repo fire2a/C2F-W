@@ -22,8 +22,8 @@ jobs:
       uses: ./.github/workflows/buildwindows.yml
 
   release:
-    # needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
-    needs: [call_macos_build_13]
+    needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
+    #  needs: [call_macos_build_13]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
