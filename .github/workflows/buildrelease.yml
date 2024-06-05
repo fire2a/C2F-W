@@ -9,20 +9,21 @@ permissions:
   contents: write
 
 jobs:
-  call_ubuntu_build:
-      uses: ./.github/workflows/buildubuntu-latest.yml
+  # call_ubuntu_build:
+  #     uses: ./.github/workflows/buildubuntu-latest.yml
 
-  call_macos_build:
-      uses: ./.github/workflows/buildmacos-latest.yml
+  # call_macos_build:
+  #     uses: ./.github/workflows/buildmacos-latest.yml
 
   call_macos_build_13:
       uses: ./.github/workflows/buildmacos-13.yml
 
-  call_windows_build:
-      uses: ./.github/workflows/buildwindows.yml
+  # call_windows_build:
+  #     uses: ./.github/workflows/buildwindows.yml
 
   release:
-    needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
+    # needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
+    needs: [call_macos_build_13]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -38,10 +39,10 @@ jobs:
     - name: GitArchive
       run: |
         git archive --prefix=C2F/Cell2Fire/ \
-          --add-file=binaries/Cell2Fire.Linux.x86_64 \
+          #  --add-file=binaries/Cell2Fire.Linux.x86_64 \
           --add-file=binaries/Cell2Fire.Darwin.x86_64 \
-          --add-file=binaries/Cell2Fire.Darwin.arm64 \
-          --add-file=binaries/Cell2Fire.exe \
+          #  --add-file=binaries/Cell2Fire.Darwin.arm64 \
+          #  --add-file=binaries/Cell2Fire.exe \
           --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
 
