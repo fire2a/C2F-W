@@ -43,5 +43,5 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: binaries
+        name: binaries-Darwin-arm64
         path: Cell2Fire/Cell2Fire.Darwin.arm64
