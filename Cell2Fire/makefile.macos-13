@@ -1,5 +1,7 @@
-﻿DUMMY = false
+# hello world
+DUMMY = false
 CC = /usr/local/Cellar/gcc/14.1.0_1/bin/gcc-14
+﻿# CC = /usr/local/lib/gcc/12/gcc
 CFLAGS = -std=c++14 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fopenmp -mmacosx-version-min=109 -I/usr/local/opt/llvm/include -I/usr/local/opt/libomp/include
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl -L/usr/local/opt/llvm/lib -L/usr/local/opt/libomp/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++
 TARGETS = Cell2Fire
