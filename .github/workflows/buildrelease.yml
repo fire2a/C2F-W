@@ -53,3 +53,4 @@ jobs:
       with:
         artifacts: "Cell2FireW_${{ github.ref_name }}.zip,Kitral.zip,CanadianFBP.zip,ScottAndBurgan.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
+        draft: true
