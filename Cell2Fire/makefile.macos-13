@@ -1,13 +1,12 @@
-﻿CC = g++-12
-MPCC = g++-12
-# CC = /usr/local/opt/llvm/bin/clang++
-# MPCC = /usr/local/opt/llvm/bin/clang++
-CFLAGS = -std=c++14 -O3 -I /usr/local/include -I /usr/local/include/eigen3 -fopenmp -mmacosx-version-min=109 -I/usr/local/opt/llvm/include -I/usr/local/opt/libomp/include
+# hello world
+DUMMY = false
+CC = g++-12
+CFLAGS = -std=c++14 -O3 -I/usr/local/include -I/usr/local/include/eigen3 -fopenmp -I/usr/local/opt/llvm/include -I/usr/local/opt/libomp/include # -mmacosx-version-min=109
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl -L/usr/local/opt/llvm/lib -L/usr/local/opt/libomp/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++
 TARGETS = Cell2Fire
 all:	$(TARGETS)
 Cell2Fire: Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o DataGenerator.o
-	$(CC) -o $@ $(LIBS) Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o DataGenerator.o
+	$(CC) -o $@ Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o DataGenerator.o $(LIBS)
 Cell2Fire.o: Cell2Fire.cpp Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o WriteCSV.o DataGenerator.o
 	$(CC) -c $(CFLAGS) Cell2Fire.cpp
 Spotting.o: Spotting.cpp Spotting.h Cells.h
