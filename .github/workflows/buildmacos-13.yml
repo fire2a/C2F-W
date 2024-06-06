@@ -26,7 +26,8 @@ jobs:
         # which gcc-12
         # which brew
         g++-12 --version
-        brew install boost eigen llvm libomp gcc@12
+        make --version
+        brew install boost eigen llvm libomp
         echo "find gcc"
         echo $(which gcc)
         # find / -name "gcc" 2>/dev/null
