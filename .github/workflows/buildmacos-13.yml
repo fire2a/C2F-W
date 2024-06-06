@@ -1,9 +1,9 @@
 name: macos-13(x86_64) build
 
 on:
-  # push:
-  #   branches:
-  #     - buildwindows
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
   workflow_call:
 
