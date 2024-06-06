@@ -1,28 +1,28 @@
 # hello world
 DUMMY = false
 CC = g++-12
-CFLAGS = -std=c++14 -O3 -I/usr/local/include -I/usr/local/include/eigen3 -fopenmp -I/usr/local/opt/llvm/include -I/usr/local/opt/libomp/include # -mmacosx-version-min=109
+CFLAGS = -std=c++14 -O3 -I/usr/local/include -I/usr/local/include/eigen3 -fopenmp -I/usr/local/opt/llvm/include -I/usr/local/opt/libomp/include -mmacos_version_min=109
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl -L/usr/local/opt/llvm/lib -L/usr/local/opt/libomp/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++
 TARGETS = Cell2Fire
 all:	$(TARGETS)
 Cell2Fire: Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o DataGenerator.o
 	$(CC) -o $@ Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o DataGenerator.o $(LIBS)
 Cell2Fire.o: Cell2Fire.cpp Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o WriteCSV.o DataGenerator.o
-	$(CC) -c $(CFLAGS) Cell2Fire.cpp
+	$(CC) -c $(LIBS) $(CFLAGS) Cell2Fire.cpp
 Spotting.o: Spotting.cpp Spotting.h Cells.h
-	$(CC) -c $(CFLAGS) Spotting.cpp
+	$(CC) -c $(LIBS) $(CFLAGS) Spotting.cpp
 Cells.o: Cells.cpp Cells.h FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o
-	$(CC) -c $(CFLAGS) Cells.cpp
+	$(CC) -c $(LIBS) $(CFLAGS) Cells.cpp
 ReadCSV.o: ReadCSV.cpp ReadCSV.h 
-	$(CC) -c $(CFLAGS) ReadCSV.cpp
+	$(CC) -c $(LIBS) $(CFLAGS) ReadCSV.cpp
 ReadArgs.o: ReadArgs.cpp ReadArgs.h
-	$(CC) -c $(CFLAGS) ReadArgs.cpp
+	$(CC) -c $(LIBS) $(CFLAGS) ReadArgs.cpp
 Lightning.o: Lightning.cpp Lightning.h
-	$(CC) -c $(CFLAGS) Lightning.cpp
+	$(CC) -c $(LIBS) $(CFLAGS) Lightning.cpp
 Forest.o: Forest.cpp Forest.h
-	$(CC) -c $(CFLAGS) Forest.cpp
+	$(CC) -c $(LIBS) $(CFLAGS) Forest.cpp
 WriteCSV.o: WriteCSV.cpp WriteCSV.h
-	$(CC) -c $(CFLAGS) WriteCSV.cpp
+	$(CC) -c $(LIBS) $(CFLAGS) WriteCSV.cpp
 Ellipse.o: Ellipse.cpp Ellipse.h 
 	$(CC) -c $(LIBS) $(CFLAGS) Ellipse.cpp 
 FuelModelSpain.o: FuelModelSpain.cpp FuelModelSpain.h Cells.h
