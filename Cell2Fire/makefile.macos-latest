@@ -1,10 +1,10 @@
 ﻿# hello world
 DUMMY = false
 CC = g++-12
-INCLUDE=/opt/homebrew/include/
-OPT=/opt/homebrew/opt/
-CFLAGS = -std=c++14 -O3 -I $(INCLUDE) -I $(INCLUDE)eigen3 -fopenmp -I$(OPT)llvm/include -I$(OPT)libomp/include
-LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl -L$(OPT)llvm/lib -L$(OPT)libomp/lib -L$(OPT)llvm/lib/c++ -Wl,-rpath,$(OPT)llvm/lib,$(OPT)libomp/lib
+INCLUDE = /opt/homebrew/include/
+OPT = /opt/homebrew/opt/
+CFLAGS = -std=c++14 -O3 -I$(INCLUDE) -I$(INCLUDE)eigen3 -fopenmp -I$(OPT)llvm/include -I$(OPT)libomp/include
+LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl -L $(OPT)llvm/lib -L $(OPT)libomp/lib -L $(OPT)llvm/lib/c++ -Wl,-rpath,$(OPT)llvm/lib,$(OPT)libomp/lib
 TARGETS = Cell2Fire
 all:	$(TARGETS)
 Cell2Fire: Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o Ellipse.o DataGenerator.o
