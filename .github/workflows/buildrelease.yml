@@ -15,15 +15,15 @@ jobs:
   call_macos_build:
       uses: ./.github/workflows/buildmacos-latest.yml
 
-  # call_macos_build_13:
-  #     uses: ./.github/workflows/buildmacos-13.yml
+  call_macos_build_13:
+      uses: ./.github/workflows/buildmacos-13.yml
 
   call_windows_build:
       uses: ./.github/workflows/buildwindows.yml
 
   release:
-    needs: [call_ubuntu_build, call_macos_build, call_windows_build]
-    # needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
+    needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
+    # needs: [call_ubuntu_build, call_macos_build, call_windows_build]
     #  needs: [call_macos_build_13]
     runs-on: ubuntu-latest
     steps:
