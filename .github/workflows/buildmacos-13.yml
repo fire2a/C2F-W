@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   macos_build:
-    runs-on: macos-13
+    runs-on: macos-14-large
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -26,22 +26,7 @@ jobs:
         # which gcc-12
         # which brew
         g++-12 --version
-        make --version
         brew install boost eigen llvm libomp
-        echo "find gcc"
-        echo $(which gcc)
-        # find / -name "gcc" 2>/dev/null
-        # echo "find boost"
-        # find / -name "boost" 2>/dev/null
-        # echo "find llvm"
-        # find / -name "llvm" 2>/dev/null
-        # /usr/local/opt/llvm
-        # find /usr/local/include -name "llvm" 2>/dev/null
-        # find /usr/local/opt -name "llvm" 2>/dev/null
-        # find /usr/local/Cellar -name "llvm" 2>/dev/null
-        # find /opt/homebrew/include -name "llvm" 2>/dev/null
-        echo "find Eigen"
-        find /usr/local/include -name "eigen" 2>/dev/null
         cd Cell2Fire
         echo "cleaning"
         make clean -f makefile.macos-13
