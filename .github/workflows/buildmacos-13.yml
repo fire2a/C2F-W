@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   macos_build:
-    runs-on: macos-14-large
+    runs-on: macos-13
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -21,11 +21,11 @@ jobs:
       run: |
         echo "arch"
         arch
-        # echo "clang"
-        # clang --version
-        # which gcc-12
-        # which brew
         g++-12 --version
+        brew info boost
+        brew info eigen
+        brew info llvm
+        brew info libomp
         brew install boost eigen llvm libomp
         cd Cell2Fire
         echo "cleaning"
