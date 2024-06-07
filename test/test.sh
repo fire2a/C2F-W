@@ -4,8 +4,12 @@ unzip -q target_results.zip
 
 # recreate targets with tests
 # rm -rf target_results.zip
+# execute the for loop
 # mv test_results target_results
 # zip -r target_results.zip target_results
+# git add target_results.zip
+# git commit -m "Update target results"
+# git push
 
 # run simulations from model, put them in test_results, compare to target_results
 PATH=../Cell2Fire:$PATH
