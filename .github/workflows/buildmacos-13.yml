@@ -1,9 +1,9 @@
 name: macos-13(x86_64) build
 
 on:
-  # push:
-  #   branches:
-  #     - buildwindows
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
   workflow_call:
 
@@ -21,27 +21,8 @@ jobs:
       run: |
         echo "arch"
         arch
-        # echo "clang"
-        # clang --version
-        # which gcc-12
-        # which brew
         g++-12 --version
-        make --version
         brew install boost eigen llvm libomp
-        echo "find gcc"
-        echo $(which gcc)
-        # find / -name "gcc" 2>/dev/null
-        # echo "find boost"
-        # find / -name "boost" 2>/dev/null
-        # echo "find llvm"
-        # find / -name "llvm" 2>/dev/null
-        # /usr/local/opt/llvm
-        # find /usr/local/include -name "llvm" 2>/dev/null
-        # find /usr/local/opt -name "llvm" 2>/dev/null
-        # find /usr/local/Cellar -name "llvm" 2>/dev/null
-        # find /opt/homebrew/include -name "llvm" 2>/dev/null
-        echo "find Eigen"
-        find /usr/local/include -name "eigen" 2>/dev/null
         cd Cell2Fire
         echo "cleaning"
         make clean -f makefile.macos-13
