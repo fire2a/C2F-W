@@ -1,7 +1,7 @@
 # hello world
 DUMMY = false
 CC = g++-12
-CFLAGS = -std=c++14 -O3 -I/usr/local/include -I/usr/local/include/eigen3 -fopenmp -I/usr/local/opt/llvm/include -I/usr/local/opt/libomp/include -mmacos_version_min=109
+CFLAGS = -std=c++14 -O3 -I/usr/local/include -I/usr/local/include/eigen3 -fopenmp -I/usr/local/opt/llvm/include -I/usr/local/opt/libomp/include -mmacosx-version-min=109
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl -L/usr/local/opt/llvm/lib -L/usr/local/opt/libomp/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++
 TARGETS = Cell2Fire
 all:	$(TARGETS)
