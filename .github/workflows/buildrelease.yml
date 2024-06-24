@@ -39,10 +39,10 @@ jobs:
 
     - name: GitArchive
       run: |
-        # --add-file=binaries/Cell2Fire.Darwin.x86_64 \
         git archive --prefix=C2F/Cell2Fire/ \
           --add-file=binaries/Cell2Fire.Linux.x86_64 \
           --add-file=binaries/Cell2Fire.Darwin.arm64 \
+          --add-file=binaries/Cell2Fire.Darwin.x86_64 \
           --add-file=binaries/Cell2Fire.exe \
           --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
