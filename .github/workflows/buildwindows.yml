@@ -41,14 +41,16 @@ jobs:
         Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
         tar -xzf $fname -C include
 
-    - name: vcpkg build
-      uses: johnwason/vcpkg-action@v6
-      id: vcpkg
-      with:
-        pkgs: tiff
-        triplet: x64-windows
-        token: ${{ github.token }}
-        github-binarycache: true
+        # tiffio
+        cd include
+        git clone https://github.com/microsoft/vcpkg.git
+        cd .\vcpkg
+        .\bootstrap-vcpkg.bat
+        .\vcpkg integrate install
+        .\vcpkg install tiff
+        cd ..\..
+
+        echo "Bye"
 
 
     - name: Setup MSBuild
