@@ -61,7 +61,7 @@ jobs:
         # local using powershell
         # & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" Cell2Fire.sln /p:Configuration=Release
         cd Cell2Fire
-        dir ..\vcpkg\installed\x64-windows\include
+        dir .\include\vcpkg\installed\x64-windows\include
         msbuild Cell2Fire.sln /p:Configuration=Release
 
     - name: Upload
