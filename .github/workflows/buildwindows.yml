@@ -63,10 +63,15 @@ jobs:
         cd Cell2Fire
         dir .\include\vcpkg\installed\x64-windows\include
         msbuild Cell2Fire.sln /p:Configuration=Release
+      
+    - name: Copy DLLs to output directory
+      run: |
+        mkdir -p output\
+        copy .\include\vcpkg\installed\x64-windows\lib\*.dll Cell2Fire/x64/Release/
 
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: Cell2Fire/x64/Release/Cell2Fire.exe
+        path: Cell2Fire/x64/Release/
 
