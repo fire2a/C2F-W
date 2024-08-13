@@ -71,7 +71,7 @@ jobs:
         copy .\Cell2Fire\include\vcpkg\installed\x64-windows\lib\*.dll .\Cell2Fire\x64\Release/
 
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: binaries
         path: Cell2Fire/x64/Release/

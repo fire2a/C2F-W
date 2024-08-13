@@ -1,16 +1,21 @@
 # Cell2Fire W
 A big-scale, grid, forest fire simulator; parallel and fast (c++) nevertheless with a friendly graphical user interface for QGIS.
 
+_Originally forked from Cell2Fire, thanks to the work of Cristobal Pais, Jaime Carrasco, David Martell, [David L. Woodruff](https://github.com/DLWoodruff), Andres Weintraub, et al._
+
 This fire spread simulator, supports 3 fire models:
 * Kitral, formerly: [C2F+K](https://github.com/fire2a/C2FK)
-* Scott&Burgan, formerly [C2F+S&B](https://github.com/fire2a/C2FSB), 
-* Canada (all based from) [Cell2Fire](https://github.com/cell2fire/Cell2Fire).
+* Scott&Burgan, formerly [C2F+S&B](https://github.com/fire2a/C2FSB) 
+* Canadian Forest Fire Behavior Prediction System, OG [Cell2Fire](https://github.com/cell2fire/Cell2Fire)
+  
+As Cell2Fire: i) the landscape is characterized as a grid, in which every cell has the same size, and the necessary information to simulate fire spread, i.e. fuel type, elevation and ignition probability, among others; ii) exploits parallel computation methods which allows users to run large-scale simulations in short periods of time; iii) the fires spread within each cell is assumed to be elliptical; and iv) it includes powerful statistical, graphical output, and spatial analysis features to facilitate the display and analysis of projected fire growth.
 
-As Cell2Fire, i) the landscape is characterized as a grid, in which every cell has the same size, and the necessary information to simulate fire spread, i.e. fuel type, elevation and ignition probability, among others; ii) exploits parallel computation methods which allows users to run large-scale simulations in short periods of time; iii) the fires spread within each cell is assumed to be elliptical; and iv) it includes powerful statistical, graphical output, and spatial analysis features to facilitate the display and analysis of projected fire growth.
+Installation, usage, specifications available by [reading the friendly manual here](https://fire2a.github.io/docs/). 
 
-Installation, usage, specifications available by [reading the friendly manual here](https://fdobad.github.io/docs/).
+[O leyendo el manual acá](https://fire2a.github.io/documentacion/)
 
 # Usage (TL;DR)
+
 - Easy: Use through QGIS GUI
 - Moderate: Download a release, unzip, and run the CLI
 - Collaborative: Clone & [compile](https://fire2a.github.io/docs/docs/Cell2Fire/README.html)
@@ -33,7 +38,7 @@ Plugin repo: [fire2a/fire-analytics-qgis-processing-toolbox-plugin](https://gith
 
 ## Moderate: CLI 
 1. Download a release (Cell2FireW...zip) from the right vertical tab bar, unzip
-2. Download a prepared instance, also from the releases tab, choose your fuel model: Kitral, Scott&Burgan, or Canada
+2. Download a prepared instance, also from the releases tab, choose your fuel model: Kitral, Scott&Burgan, or Canada (--sim <K|S|C>)
 3. Open a terminal, type the following:
 ```
 # needs an empty directory to store the results
@@ -42,8 +47,8 @@ mkdir results
 # locate your binary
 cd C2F-W/Cell2Fire/
 
-# run idea 
-./Cell2Fire[.exe|Linux.x86-64|Darwin.x86-64] --input </path/to/instance> --output </path/to/empty/results> --sim <K|S|C> --nthreads 16 > log.txt
+# run idea
+./Cell2Fire[.exe|Linux.x86-64|Darwin.x86-64] --input-instance-folder </path/to/instance> --output-folder </path/to/empty/results> --sim <K|S|C> --nthreads 16 > log.txt
 
 # sample
 ./Cell2Fire.Linux.x86_64 --final-grid --output-messages --out-ros --sim S --nsims 2 --seed 123 --nthreads 3 --fmc 66 --scenario 2 --cros --weather rows --input-instance-folder /tmp/processing_cdcCGk/Vilopriu_2013 --output-folder /tmp/processing_cdcCGk/Vilopriu_2013/results | tee log.txt

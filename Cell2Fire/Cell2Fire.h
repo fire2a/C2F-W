@@ -81,6 +81,7 @@ class Cell2Fire {
 		 string cfbFolder;
 		 string flFolder;
 		 string historyFolder;
+		 string ignitionsFolder;
 	
 		 // Vectors
 		 std::vector<int> fire_period;
@@ -105,6 +106,7 @@ class Cell2Fire {
 		 std::vector<float>RateOfSpreads;
 		 std::vector<float>FlameLengths;
 		 std::vector<std::vector<int>> IgnitionSets;
+		 // std::vector<int> IgnitionHistory;
 
 		 // Sets
 		 std::unordered_set<int> availCells;				

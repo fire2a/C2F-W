@@ -17,6 +17,15 @@
 #include <limits>
 #include <cstdint>
 
+inline char separator()
+{
+#if defined _WIN32 || defined __CYGWIN__
+	return '\\';
+#else
+	return '/';
+#endif
+}
+
 // Reads fbp_lookup_table.csv and creates dictionaries for the fuel types and cells' ColorsDict
 std::tuple<std::unordered_map<std::string, std::string>, std::unordered_map<std::string, std::tuple<float, float, float, float>>> Dictionary(const std::string& filename) {
 
@@ -656,7 +665,7 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
 void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids, const std::string& InFolder) 
 {
 
-    std::ofstream dataFile(InFolder + "/Data.csv");
+    std::ofstream dataFile(InFolder + separator() + "Data.csv");
     std::vector<std::string> Columns = {"fueltype", "lat", "lon", "elev", "ws", "waz", "ps", "saz", "cur", "cbd", "cbh", "ccf", "ftypeN", "fmc", "py",
                                         "jd", "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern"};
     if (dataFile.is_open()) {
@@ -689,11 +698,11 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     // Determine the lookup table based on the Simulator
     std::string FBPlookup;
     if (Simulator == "K") {
-        FBPlookup = InFolder + "/kitral_lookup_table.csv";
+        FBPlookup = InFolder + separator() + "kitral_lookup_table.csv";
     } else if (Simulator == "S") {
-        FBPlookup = InFolder + "/spain_lookup_table.csv";
+        FBPlookup = InFolder + separator() + "spain_lookup_table.csv";
     } else { // beta version
-        FBPlookup = InFolder + "/fbp_lookup_table.csv";
+        FBPlookup = InFolder + separator() + "fbp_lookup_table.csv";
     }
 
     // Call Dictionary function to read lookup table
@@ -774,65 +783,34 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     };
 
     for (const auto& name : filenames) {
-        std::string filePath = InFolder + "/" + name;
+        std::string filePath = InFolder + separator() + name;
 
-        if (extension == ".tif") {
-            if (fileExists(filePath)) {
-                if (name == "elevation" + extension) {
-                    DataGridsTif(filePath, Elevation, NCells);
-                } else if (name == "saz" + extension) {
-                    DataGridsTif(filePath, SAZ, NCells);
-                } else if (name == "slope" + extension) {
-                    DataGridsTif(filePath, PS, NCells);
-                } else if (name == "cur" + extension) {
-                    DataGridsTif(filePath, Curing, NCells);
-                } else if (name == "cbd" + extension) {
-                    DataGridsTif(filePath, CBD, NCells);
-                } else if (name == "cbh" + extension) {
-                    DataGridsTif(filePath, CBH, NCells);
-                } else if (name == "ccf" + extension) {
-                    DataGridsTif(filePath, CCF, NCells);
-                } else if (name == "py" + extension) {
-                    DataGridsTif(filePath, PY, NCells);
-                } else if (name == "fmc" + extension) {
-                    DataGridsTif(filePath, FMC, NCells);
-                } else {
-                    // Handle the case where the file name doesn't match any condition
-                    // std::cout << "Unhandled file: " << name << std::endl;
-                }
-                
-            } 
-            else {
-                std::cout << "No " << name << " file, filling with NaN" << std::endl;
+        if (fileExists(filePath)) {
+            if (name == "elevation.asc") {
+                DataGrids(filePath, Elevation, NCells);
+            } else if (name == "saz.asc") {
+                DataGrids(filePath, SAZ, NCells);
+            } else if (name == "slope.asc") {
+                DataGrids(filePath, PS, NCells);
+            } else if (name == "cur.asc") {
+                DataGrids(filePath, Curing, NCells);
+            } else if (name == "cbd.asc") {
+                DataGrids(filePath, CBD, NCells);
+            } else if (name == "cbh.asc") {
+                DataGrids(filePath, CBH, NCells);
+            } else if (name == "ccf.asc") {
+                DataGrids(filePath, CCF, NCells);
+            } else if (name == "py.asc") {
+                DataGrids(filePath, PY, NCells);
+            } else if (name == "fmc.asc") {
+                DataGrids(filePath, FMC, NCells);
+            } else {
+                // Handle the case where the file name doesn't match any condition
+                // std::cout << "Unhandled file: " << name << std::endl;
             }
-        } else {
-            if (fileExists(filePath)) {
-                if (name == "elevation" + extension) {
-                    DataGrids(filePath, Elevation, NCells);
-                } else if (name == "saz" + extension) {
-                    DataGrids(filePath, SAZ, NCells);
-                } else if (name == "slope" + extension) {
-                    DataGrids(filePath, PS, NCells);
-                } else if (name == "cur" + extension) {
-                    DataGrids(filePath, Curing, NCells);
-                } else if (name == "cbd" + extension) {
-                    DataGrids(filePath, CBD, NCells);
-                } else if (name == "cbh" + extension) {
-                    DataGrids(filePath, CBH, NCells);
-                } else if (name == "ccf" + extension) {
-                    DataGrids(filePath, CCF, NCells);
-                } else if (name == "py" + extension) {
-                    DataGrids(filePath, PY, NCells);
-                } else if (name == "fmc" + extension) {
-                    DataGrids(filePath, FMC, NCells);
-                } else {
-                    // Handle the case where the file name doesn't match any condition
-                    // std::cout << "Unhandled file: " << name << std::endl;
-                }
-            } 
-            else {
-                std::cout << "No " << name << " file, filling with NaN" << std::endl;
-            }
+        } 
+        else {
+            std::cout << "No " << name << " file, filling with NaN" << std::endl;
         }
     }
 

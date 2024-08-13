@@ -1,0 +1,42 @@
+name: macos-13(x86_64) build
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  macos_build:
+    runs-on: macos-13
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Doit
+      run: |
+        echo "arch"
+        arch
+        g++-12 --version
+        brew install boost eigen llvm libomp
+        cd Cell2Fire
+        echo "cleaning"
+        make clean -f makefile.macos-13
+        echo "building"
+        make -f makefile.macos-13
+        echo "end build"
+        ls Cell2Fire*
+        ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
+        echo "extension $ext"
+        mv Cell2Fire Cell2Fire$ext
+        ls Cell2Fire*
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries-Darwin-x86_64
+        path: Cell2Fire/Cell2Fire.Darwin.x86_64

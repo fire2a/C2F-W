@@ -196,11 +196,10 @@ cython_debug/
 #.idea/
 
 .vs/
-Cell2Fire/x64
-Cell2Fire/include
 Cell2Fire/Cell2Fire
-Cell2Fire/Cell2Fire.exe
 Cell2Fire/Cell2Fire.Linux*
 Cell2Fire/Cell2Fire.Darwin*
+Cell2Fire/x64
+Cell2Fire/include
 test/test_results
 test/target_results
