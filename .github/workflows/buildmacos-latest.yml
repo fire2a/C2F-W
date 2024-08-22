@@ -21,7 +21,7 @@ jobs:
       run: |
         # which gcc-12
         # which brew
-        brew install boost eigen llvm libopenmpt
+        brew install boost eigen llvm libopenmpt libtiff
         echo "find boost"
         find /opt/homebrew -name "boost" 2>/dev/null
         echo "find llvm"
@@ -34,11 +34,15 @@ jobs:
         echo "building"
         make -f makefile.macos-latest
         echo "end build"
-        ls Cell2Fire*
+        ldd Cell2Fire
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
         echo "extension $ext"
         mv Cell2Fire Cell2Fire$ext
-        ls Cell2Fire*
+
+    - name: Test
+      run: |
+        cd test
+        bash test.sh
 
     - name: Upload
       uses: actions/upload-artifact@v4
