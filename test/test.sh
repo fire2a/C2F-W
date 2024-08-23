@@ -76,7 +76,9 @@ else
             echo "Files are not equal, $file1"
             echo $diff_output
             # exit at first different
-            rm -rf target_results
+            echo "run this command:"
+            echo "\trm -rf target_results"
+            echo "run this command: before running the test again"
             exit 1
         fi
     done
