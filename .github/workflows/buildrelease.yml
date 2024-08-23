@@ -12,19 +12,18 @@ jobs:
   call_ubuntu_build:
       uses: ./.github/workflows/buildubuntu-latest.yml
 
-  call_macos_build:
-      uses: ./.github/workflows/buildmacos-latest.yml
+  # call_macos_build:
+  #     uses: ./.github/workflows/buildmacos-latest.yml
 
-  call_macos_build_13:
-      uses: ./.github/workflows/buildmacos-13.yml
+  # call_macos_build_13:
+  #     uses: ./.github/workflows/buildmacos-13.yml
 
   call_windows_build:
       uses: ./.github/workflows/buildwindows.yml
 
   release:
-    needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
-    # needs: [call_ubuntu_build, call_macos_build, call_windows_build]
-    #  needs: [call_macos_build_13]
+    # needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
+    needs: [call_ubuntu_build, call_windows_build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -37,28 +36,32 @@ jobs:
         path: binaries
         merge-multiple: true
 
+    - name: ZipDataInstances
+      run: |
+        cd data
+        zip -r ../Kitral.zip Kitral
+        zip -r ../CanadianFBP.zip CanadianFBP
+        zip -r ../ScottAndBurgan.zip ScottAndBurgan  
+        cd ../Cell2Fire
+        zip -r ../Cell2Fire_win64_standalone.zip Cell2Fire.exe *.dll
+
     - name: GitArchive
       run: |
+        cd Cell2Fire
+        git rm *.dll Cell2Fire.pdb Cell2Fire.ilk
+        cd ..
+        git rm -r data output test
         git archive --prefix=C2F/Cell2Fire/ \
           --add-file=binaries/Cell2Fire.Linux.x86_64 \
-          --add-file=binaries/Cell2Fire.Darwin.arm64 \
-          --add-file=binaries/Cell2Fire.Darwin.x86_64 \
           --add-file=binaries/Cell2Fire.exe \
           --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
-          # --add-file=binaries/Cell2Fire.Linux.x86_64 \
           # --add-file=binaries/Cell2Fire.Darwin.arm64 \
-
-          # - name: ZipDataInstances
-          #   run: |
-          #     cd data
-          #     zip -r ../Kitral.zip Kitral
-          #     zip -r ../CanadianFBP.zip CanadianFBP
-          #     zip -r ../ScottAndBurgan.zip ScottAndBurgan  
+          # --add-file=binaries/Cell2Fire.Darwin.x86_64 \
 
     - name: Create Release
       uses: ncipollo/release-action@v1.14.0
       with:
-        artifacts: "Cell2FireW_${{ github.ref_name }}.zip"
+        artifacts: "Cell2FireW_${{ github.ref_name }}.zip,Kitral.zip,CanadianFBP.zip,ScottAndBurgan.zip,Cell2Fire_win64_standalone.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
         draft: true
