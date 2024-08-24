@@ -66,13 +66,13 @@ jobs:
         mkdir -p include
 
         # dirent
-        if ($env:cache_dirent != 'true') {
+        if ($env:cache_dirent -ne 'true') {
           Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.24.zip -OutFile dirent-1.24.zip
           Expand-Archive -Path .\dirent-1.24.zip -DestinationPath include
         }
 
         # eigen
-        if ($env:cache_eigen != 'true') {
+        if ($env:cache_eigen -ne 'true') {
           $project_id = 15462818
           $commit_sha = "776d86d8df175b7036467a0ef131bd34755f847d"
           $path = "Eigen"
@@ -83,14 +83,14 @@ jobs:
         }
 
         # boost
-        if ($env:cache_boost != 'true') {
+        if ($env:cache_boost -ne 'true') {
           $fname = "boost_1_84_0.tar.gz"
           Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
           tar -xzf $fname -C include
         }
 
         # tiffio
-        if ($env:cache_vcpkg != 'true') {
+        if ($env:cache_vcpkg -ne 'true') {
           cd include
           git clone https://github.com/microsoft/vcpkg.git
           cd .\vcpkg
