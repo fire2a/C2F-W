@@ -23,7 +23,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          Cell2Fire/include/vcpkg
+          vcpkg
         key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-
@@ -91,12 +91,12 @@ jobs:
 
         # tiffio
         if ($env:cache_vcpkg -ne 'true') {
-          git clone https://github.com/microsoft/vcpkg.git include/vcpkg
+          git clone https://github.com/microsoft/vcpkg.git vcpkg
         }
 
     - name: Setup vcpkg
       run: |
-        cd include\vcpkg
+        cd vcpkg
         .\bootstrap-vcpkg.bat
         .\vcpkg integrate install
         .\vcpkg install tiff
@@ -111,7 +111,7 @@ jobs:
       
     - name: Copy DLLs to output directory
       run: |
-        copy .\Cell2Fire\include\vcpkg\installed\x64-windows\lib\*.dll .\Cell2Fire\x64\Release/
+        copy .\vcpkg\installed\x64-windows\lib\*.dll .\Cell2Fire\x64\Release/
 
     - name: Upload
       uses: actions/upload-artifact@v4
