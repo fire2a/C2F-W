@@ -36,8 +36,18 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         pattern: binaries-*
-        path: binaries
-          # merge-multiple: true
+        path: Cell2Fire
+        merge-multiple: true
+          
+    - name: WindowsZip
+      run: |
+        cd Cell2Fire
+        zip ../Cell2FireW_${{ github.ref_name }}_Windows-x86_64_binary.zip Cell2Fire.exe *.dll
+        
+    - name: LinuxZip
+      run: |
+        cd Cell2Fire
+        zip ../Cell2FireW_${{ github.ref_name }}_Linux-x86_64_binary.zip Cell2Fire.Linux.x86_64
 
     - name: ZipDataInstances
       run: |
@@ -46,23 +56,12 @@ jobs:
         zip -r ../CanadianFBP.zip CanadianFBP
         zip -r ../ScottAndBurgan.zip ScottAndBurgan  
 
-    - name: WindowsZip
-      run: |
-        cd binaries/binaries-Windows-x86_64
-        dir
-        zip ../../Cell2Fire_win64_standalone.zip Cell2Fire.exe *.dll
-        git rm *.dll Cell2Fire.pdb Cell2Fire.ilk
-
     - name: GitArchive
       run: |
         git rm -r data output test
-        git archive --prefix=C2F/Cell2Fire/ \
-          --add-file=binaries/binaries-Linux-x86_64/Cell2Fire.Linux.x86_64 \
-          --add-file=binaries/binaries-Windows-x86_64/Cell2Fire.exe \
-          --prefix=C2F/ \
-          --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
-          # --add-file=binaries/Cell2Fire.Darwin.arm64 \
-          # --add-file=binaries/Cell2Fire.Darwin.x86_64 \
+        git add Cell2Fire/*
+        astash=`git stash create`
+        git archive --output="Cell2FireW_${{ github.ref_name }}.zip" $astash C2F
 
     - name: Create Draft Release for PR
       if: github.event_name == 'pull_request'
