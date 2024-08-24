@@ -45,14 +45,15 @@ jobs:
         zip -r ../Kitral.zip Kitral
         zip -r ../CanadianFBP.zip CanadianFBP
         zip -r ../ScottAndBurgan.zip ScottAndBurgan  
-        cd ../Cell2Fire
+
+    - name: WindowsZip
+      run: |
+        cd binaries
         zip -r ../Cell2Fire_win64_standalone.zip Cell2Fire.exe *.dll
+        git rm *.dll Cell2Fire.pdb Cell2Fire.ilk
 
     - name: GitArchive
       run: |
-        cd Cell2Fire
-        git rm *.dll Cell2Fire.pdb Cell2Fire.ilk
-        cd ..
         git rm -r data output test
         git archive --prefix=C2F/Cell2Fire/ \
           --add-file=binaries/Cell2Fire.Linux.x86_64 \
