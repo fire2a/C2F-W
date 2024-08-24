@@ -17,9 +17,21 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Cache apt packages
+      uses: actions/cache@v3
+      with:
+        path: /usr/local/lib
+        key: ${{ runner.os }}-apt-${{ hashFiles('**/Cell2Fire/**') }}
+        restore-keys: |
+          ${{ runner.os }}-apt-
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev
+
     - name: Build
       run: |
-        sudo apt install g++-12 libboost-all-dev libeigen3-dev libtiff-dev
         cd Cell2Fire
         # attempt to add libtiff.so to binaries lib
         mkdir lib
