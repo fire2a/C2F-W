@@ -37,7 +37,7 @@ jobs:
       with:
         pattern: binaries-*
         path: binaries
-        merge-multiple: true
+          # merge-multiple: true
 
     - name: ZipDataInstances
       run: |
@@ -49,6 +49,7 @@ jobs:
     - name: WindowsZip
       run: |
         cd binaries
+        dir
         zip -r ../Cell2Fire_win64_standalone.zip Cell2Fire.exe *.dll
         git rm *.dll Cell2Fire.pdb Cell2Fire.ilk
 
