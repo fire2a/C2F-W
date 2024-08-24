@@ -58,6 +58,14 @@ jobs:
         restore-keys: |
           dirent-${{ runner.os }}-
 
+    - name: Cache hits to env variables
+      run: |
+        echo "::set-env name=cache-vcpkg::${{ steps.cache-vcpkg.outputs.cache-hit }}"
+        echo "::set-env name=cache-boost::${{ steps.cache-boost.outputs.cache-hit }}"
+        echo "::set-env name=cache-eigen::${{ steps.cache-eigen.outputs.cache-hit }}"
+        echo "::set-env name=cache-dirent::${{ steps.cache-dirent.outputs.cache-hit }}"    
+        echo $env
+
     - name: Download dependencies
       if: steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-eigen.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true'
       run: |
