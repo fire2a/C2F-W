@@ -63,7 +63,7 @@ jobs:
       run: |
         echo "Hello"
         cd Cell2Fire
-        mkdir -p include
+        New-Item -ItemType Directory -Path "include" -Force
 
         # dirent
         if ($env:cache_dirent -ne 'true') {
