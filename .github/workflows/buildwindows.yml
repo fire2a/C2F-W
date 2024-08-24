@@ -13,61 +13,102 @@ permissions:
 jobs:
   windows_build:
     runs-on: windows-latest
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: download dependencies
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v3
+      with:
+        path: |
+          Cell2Fire/include/vcpkg
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-
+
+    - name: Cache Boost
+      id: cache-boost
+      uses: actions/cache@v3
+      with:
+        path: |
+          Cell2Fire/include/boost_1_84_0
+        key: boost-${{ runner.os }}-1.84.0
+        restore-keys: |
+          boost-${{ runner.os }}-
+
+    - name: Cache Eigen
+      id: cache-eigen
+      uses: actions/cache@v3
+      with:
+        path: |
+          Cell2Fire/include/eigen3
+        key: eigen-${{ runner.os }}-776d86d8df175b7036467a0ef131bd34755f847d
+        restore-keys: |
+          eigen-${{ runner.os }}-
+
+    - name: Cache Dirent
+      id: cache-dirent
+      uses: actions/cache@v3
+      with:
+        path: |
+          Cell2Fire/include/dirent-1.24
+        key: dirent-${{ runner.os }}-1.24
+        restore-keys: |
+          dirent-${{ runner.os }}-
+
+    - name: Download dependencies
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-eigen.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true'
       run: |
         echo "Hello"
         cd Cell2Fire
-        mkdir include
+        mkdir -p include
 
         # dirent
-        Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.24.zip -OutFile dirent-1.24.zip
-        Expand-Archive -Path .\dirent-1.24.zip -DestinationPath include
+        if ($env:cache_dirent != 'true') {
+          Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.24.zip -OutFile dirent-1.24.zip
+          Expand-Archive -Path .\dirent-1.24.zip -DestinationPath include
+        }
 
         # eigen
-        $project_id = 15462818
-        $commit_sha = "776d86d8df175b7036467a0ef131bd34755f847d"
-        $path = "Eigen"
-        $url = "https://gitlab.com/api/v4/projects/$project_id/repository/archive?sha=$commit_sha&path=$path"
-        Invoke-WebRequest -Uri $url -OutFile eigen.tar.gz
-        tar -xzf eigen.tar.gz
-        mv eigen-$commit_sha-$commit_sha-Eigen include\eigen3
+        if ($env:cache_eigen != 'true') {
+          $project_id = 15462818
+          $commit_sha = "776d86d8df175b7036467a0ef131bd34755f847d"
+          $path = "Eigen"
+          $url = "https://gitlab.com/api/v4/projects/$project_id/repository/archive?sha=$commit_sha&path=$path"
+          Invoke-WebRequest -Uri $url -OutFile eigen.tar.gz
+          tar -xzf eigen.tar.gz
+          mv eigen-$commit_sha-$commit_sha-Eigen include\eigen3
+        }
 
         # boost
-        $fname = "boost_1_84_0.tar.gz"
-        Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
-        tar -xzf $fname -C include
+        if ($env:cache_boost != 'true') {
+          $fname = "boost_1_84_0.tar.gz"
+          Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
+          tar -xzf $fname -C include
+        }
 
         # tiffio
-        cd include
-        git clone https://github.com/microsoft/vcpkg.git
-        cd .\vcpkg
-        .\bootstrap-vcpkg.bat
-        .\vcpkg integrate install
-        .\vcpkg install tiff
-        cd ..\..
-
-        echo "Bye"
-
+        if ($env:cache_vcpkg != 'true') {
+          cd include
+          git clone https://github.com/microsoft/vcpkg.git
+          cd .\vcpkg
+          .\bootstrap-vcpkg.bat
+          .\vcpkg integrate install
+          .\vcpkg install tiff
+        }
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
     - name: Build Solution
       run: |
-        # local using powershell
-        # & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" Cell2Fire.sln /p:Configuration=Release
         cd Cell2Fire
-        dir .\include\vcpkg\installed\x64-windows\include
         msbuild Cell2Fire.sln /p:Configuration=Release
       
     - name: Copy DLLs to output directory
       run: |
-        dir .
-        dir .\Cell2Fire\include\vcpkg\installed\x64-windows
         copy .\Cell2Fire\include\vcpkg\installed\x64-windows\lib\*.dll .\Cell2Fire\x64\Release/
 
     - name: Upload
@@ -75,4 +116,3 @@ jobs:
       with:
         name: binaries-Windows-x86_64
         path: Cell2Fire/x64/Release/
-

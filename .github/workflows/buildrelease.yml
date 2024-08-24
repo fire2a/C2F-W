@@ -48,17 +48,17 @@ jobs:
 
     - name: WindowsZip
       run: |
-        cd binaries
+        cd binaries/binaries-Windows-x86_64
         dir
-        zip -r ../Cell2Fire_win64_standalone.zip Cell2Fire.exe *.dll
+        zip ../../Cell2Fire_win64_standalone.zip Cell2Fire.exe *.dll
         git rm *.dll Cell2Fire.pdb Cell2Fire.ilk
 
     - name: GitArchive
       run: |
         git rm -r data output test
         git archive --prefix=C2F/Cell2Fire/ \
-          --add-file=binaries/Cell2Fire.Linux.x86_64 \
-          --add-file=binaries/Cell2Fire.exe \
+          --add-file=binaries/binaries-Linux-x86_64/Cell2Fire.Linux.x86_64 \
+          --add-file=binaries/binaries-Windows-x86_64/Cell2Fire.exe \
           --prefix=C2F/ \
           --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
           # --add-file=binaries/Cell2Fire.Darwin.arm64 \
