@@ -20,7 +20,7 @@ jobs:
 
     - name: Cache vcpkg
       id: cache-vcpkg
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           Cell2Fire/include/vcpkg
@@ -30,7 +30,7 @@ jobs:
 
     - name: Cache Boost
       id: cache-boost
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           Cell2Fire/include/boost_1_84_0
@@ -40,7 +40,7 @@ jobs:
 
     - name: Cache Eigen
       id: cache-eigen
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           Cell2Fire/include/eigen3
@@ -50,7 +50,7 @@ jobs:
 
     - name: Cache Dirent
       id: cache-dirent
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           Cell2Fire/include/dirent-1.24
@@ -91,13 +91,12 @@ jobs:
 
         # tiffio
         if ($env:cache_vcpkg -ne 'true') {
-          cd include
-          git clone https://github.com/microsoft/vcpkg.git
-          cd .\vcpkg
-          .\bootstrap-vcpkg.bat
-          .\vcpkg integrate install
-          .\vcpkg install tiff
+          git clone https://github.com/microsoft/vcpkg.git include/vcpkg
         }
+        cd include\vcpkg
+        .\bootstrap-vcpkg.bat
+        .\vcpkg integrate install
+        .\vcpkg install tiff
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
