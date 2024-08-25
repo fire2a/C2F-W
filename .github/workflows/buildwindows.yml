@@ -115,6 +115,10 @@ jobs:
         .\bootstrap-vcpkg.bat
         .\vcpkg integrate install
         .\vcpkg install tiff
+        dir installed\x64-windows\lib
+
+    - name: Stop
+      run: throw "Exiting!"
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
