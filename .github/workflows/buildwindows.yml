@@ -53,7 +53,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          vcpkg
+          Cell2Fire/include/vcpkg
         key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-
@@ -69,17 +69,24 @@ jobs:
         cd Cell2Fire
         New-Item -ItemType Directory -Path "include" -Force
 
+        Write-Host "Cache Boost: $CACHE_BOOST $($CACHE_BOOST -ne 'true')"
+        Write-Host "Cache Boost: $CACHE_VCPKG $($CACHE_VCPKG -ne 'true')"
+
         # boost
         if ($CACHE_BOOST -ne 'true') {
           $fname = "boost_1_84_0.tar.gz"
           Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
           tar -xzf $fname -C include
+        } else {
+          echo "Boost already cached"
         }
 
         # dirent
         if ($CACHE_DIRENT -ne 'true') {
           Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.24.zip -OutFile dirent-1.24.zip
           Expand-Archive -Path .\dirent-1.24.zip -DestinationPath include
+        } else {
+          echo "Dirent already cached"
         }
 
         # eigen
@@ -91,16 +98,20 @@ jobs:
           Invoke-WebRequest -Uri $url -OutFile eigen.tar.gz
           tar -xzf eigen.tar.gz
           mv eigen-$commit_sha-$commit_sha-Eigen include\eigen3
+        } else {
+          echo "Eigen already cached"
         }
 
         # tiffio
         if ($CACHE_VCPKG -ne 'true') {
-          git clone https://github.com/microsoft/vcpkg.git vcpkg
+          git clone https://github.com/microsoft/vcpkg.git include\vcpkg
+        } else {
+          echo "vcpkg already cached"
         }
 
     - name: Setup vcpkg
       run: |
-        cd vcpkg
+        cd Cell2Fire\include\vcpkg
         .\bootstrap-vcpkg.bat
         .\vcpkg integrate install
         .\vcpkg install tiff
