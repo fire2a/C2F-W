@@ -17,19 +17,14 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: g++-12 libboost-all-dev libeigen3-dev libtiff-dev
-        execute_install_scripts: true
-        version: 1.0
-
     - name: Install dependencies
-      if: false
       run: |
         sudo apt update
         sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev
         dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_apt_versions.txt
-        echo "::warning:: apt package versions diff: $(diff new_apt_versions.txt apt_versions.txt)"
+        if [ -n "$(diff new_apt_versions.txt apt_versions.txt)" ]; then
+          printf "::warning:: apt package versions diff:\n$(diff --side-by-side --suppress-common-lines new_apt_versions.txt apt_versions.txt)"
+        fi
 
     - name: attempt to add libtiff.so to binaries lib
       if: false
