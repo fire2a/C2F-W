@@ -58,37 +58,20 @@ jobs:
         restore-keys: |
           dirent-${{ runner.os }}-
 
-    - name: Cache hits to env variables
-      run: |
-        echo "cache_dirent=${{ steps.cache-dirent.outputs.cache-hit }}" >> $GITHUB_ENV
-        echo "cache_eigen=${{ steps.cache-eigen.outputs.cache-hit }}" >> $GITHUB_ENV
-        echo "cache_boost=${{ steps.cache-boost.outputs.cache-hit }}" >> $GITHUB_ENV
-        echo "cache_vcpkg=${{ steps.cache-vcpkg.outputs.cache-hit }}" >> $GITHUB_ENV
-        echo "dirent : ${env:cache_dirent}"
-        echo "eigen : ${env:cache_eigen}"
-        echo "boost : ${env:cache_boost}"
-        echo "vcpkg : ${env:cache_vcpkg}"
-
     - name: Download dependencies
       if: steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-eigen.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true'
       run: |
-        echo "Hello"
         cd Cell2Fire
         New-Item -ItemType Directory -Path "include" -Force
-        ls include
-        echo "dirent : ${env:cache_dirent}"
-        echo "eigen : ${env:cache_eigen}"
-        echo "boost : ${env:cache_boost}"
-        echo "vcpkg : ${env:cache_vcpkg}"
 
         # dirent
-        if ($env:cache_dirent -ne 'true') {
+        if (${{ steps.cache-dirent.outputs.cache-hit }} -ne 'true') {
           Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.24.zip -OutFile dirent-1.24.zip
           Expand-Archive -Path .\dirent-1.24.zip -DestinationPath include
         }
 
         # eigen
-        if ($env:cache_eigen -ne 'true') {
+        if (${{ steps.cache-eigen.outputs.cache-hit }} -ne 'true') {
           $project_id = 15462818
           $commit_sha = "776d86d8df175b7036467a0ef131bd34755f847d"
           $path = "Eigen"
@@ -99,14 +82,14 @@ jobs:
         }
 
         # boost
-        if ($env:cache_boost -ne 'true') {
+        if (${{ steps.cache-boost.outputs.cache-hit }} -ne 'true') {
           $fname = "boost_1_84_0.tar.gz"
           Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
           tar -xzf $fname -C include
         }
 
         # tiffio
-        if ($env:cache_vcpkg -ne 'true') {
+        if (${{ steps.cache-vcpkg.outputs.cache-hit }} -ne 'true') {
           git clone https://github.com/microsoft/vcpkg.git vcpkg
         }
 
@@ -125,12 +108,14 @@ jobs:
         cd Cell2Fire
         msbuild Cell2Fire.sln /p:Configuration=Release
       
-    - name: Copy DLLs to output directory
+    - name: Gather output
       run: |
-        copy .\vcpkg\installed\x64-windows\lib\*.dll .\Cell2Fire\x64\Release/
+        mkdir binaries
+        copy Cell2Fire\include\vcpkg\installed\x64-windows\lib\*.dll binaries
+        copy Cell2Fire\x64\Release\Cell2Fire.exe binaries
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: binaries-Windows-x86_64
-        path: Cell2Fire/x64/Release/
+        path: binaries
