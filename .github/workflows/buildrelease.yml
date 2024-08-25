@@ -42,12 +42,12 @@ jobs:
     - name: WindowsZip
       run: |
         cd Cell2Fire
-        zip ../Cell2FireW_${{ github.ref_name }}_Windows-x86_64_binary.zip Cell2Fire.exe *.dll
+        zip ../Cell2FireW-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
         
     - name: LinuxZip
       run: |
         cd Cell2Fire
-        zip ../Cell2FireW_${{ github.ref_name }}_Linux-x86_64_binary.zip Cell2Fire.Linux.x86_64
+        zip ../Cell2FireW-Linux-x86_64-binary.zip Cell2Fire.Linux.x86_64
 
     - name: ZipDataInstances
       run: |
@@ -56,12 +56,21 @@ jobs:
         zip -r ../CanadianFBP.zip CanadianFBP
         zip -r ../ScottAndBurgan.zip ScottAndBurgan  
 
-    - name: GitArchive
+    - name: Prepare archive
       run: |
         git rm -r data output test
         git add Cell2Fire/*
+
+    - name: GitArchive for Release
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         astash=`git stash create`
         git archive --output="Cell2FireW_${{ github.ref_name }}.zip" $astash C2F
+
+    - name: GitArchive for PR
+      if: github.event_name == 'pull_request'
+      run: |
+        astash=`git stash create`
+        git archive --output="Cell2FireW_${{ github.sha }}.zip" $astash C2F
 
     - name: Create Draft Release for PR
       if: github.event_name == 'pull_request'
@@ -84,4 +93,3 @@ jobs:
         tag: ${{ github.ref_name }}
         name: "Release ${{ github.ref_name }}"
         body: "This is the release for tag ${{ github.ref_name }}."
-
