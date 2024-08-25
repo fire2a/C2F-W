@@ -16,21 +16,24 @@ PATH=../Cell2Fire:$PATH
 
 set -x # enable debug tracing
 # run
-for model in fbp kitral sb; do
-    echo running ${model}
-    mkdir -p test_results/${model}
-    rm -rf test_results/${model}/*
-    if [ "$model" == "fbp" ]; then
-        additional_args="--cros"
-        sim_code="C"
-    elif [ "$model" == "sb" ]; then
-        additional_args="--scenario 1"
-        sim_code="S"
-    elif [ "$model" == "kitral" ]; then
-        additional_args=""
-        sim_code="K"
-    fi
-    Cell2Fire.Linux.x86_64 --input-instance-folder model/${model} --output-folder test_results/${model} --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > test_results/${model}/log.txt 
+for format in asc tif; do
+    for model in fbp kitral sb; do
+        echo running $model-$format
+        output_folder=test_results/$model-$format
+        mkdir -p $output_folder
+        rm -rf $output_folder/*
+        if [ "$model" == "fbp" ]; then
+            additional_args="--cros"
+            sim_code="C"
+        elif [ "$model" == "sb" ]; then
+            additional_args="--scenario 1"
+            sim_code="S"
+        elif [ "$model" == "kitral" ]; then
+            additional_args=""
+            sim_code="K"
+        fi
+        Cell2Fire.Linux.x86_64 --input-instance-folder model/$model-$format --output-folder $output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > test_results/$model-$format/log.txt
+    done
 done
 set +x # disable debug tracing
 

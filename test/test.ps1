@@ -8,25 +8,27 @@ $env:PATH = "../Cell2Fire;$env:PATH"
 $DebugPreference = "Continue"
 
 # Run simulations
-foreach ($model in "fbp", "kitral", "sb") {
-    Write-Output "running $model"
-    $outputDir = "test_results/$model"
-    New-Item -ItemType Directory -Force -Path $outputDir
-    Remove-Item -Recurse -Force -Path "$outputDir/*"
-
-    if ($model -eq "fbp") {
-        $additionalArgs = "--cros"
-        $simCode = "C"
-    } elseif ($model -eq "sb") {
-        $additionalArgs = "--scenario 1"
-        $simCode = "S"
-    } elseif ($model -eq "kitral") {
-        $additionalArgs = ""
-        $simCode = "K"
+foreach ($format in "asc", "tif") {
+    foreach ($model in "fbp", "kitral", "sb") {
+        Write-Output "running $model-$format"
+        $outputDir = "test_results/$model-$format"
+        New-Item -ItemType Directory -Force -Path $outputDir
+        Remove-Item -Recurse -Force -Path "$outputDir/*"
+    
+        if ($model -eq "fbp") {
+            $additionalArgs = "--cros"
+            $simCode = "C"
+        } elseif ($model -eq "sb") {
+            $additionalArgs = "--scenario 1"
+            $simCode = "S"
+        } elseif ($model -eq "kitral") {
+            $additionalArgs = ""
+            $simCode = "K"
+        }
+    
+        $command = "Cell2Fire.exe --input-instance-folder model/$model-$format --output-folder $outputDir --nsims 113 --output-messages --grids --out-ros --out-intensity --sim $simCode --seed 123 $additionalArgs"
+        Start-Process -FilePath "pwsh" -ArgumentList "-Command $command" -RedirectStandardOutput "$outputDir/log.txt" -NoNewWindow -Wait
     }
-
-    $command = "Cell2Fire.exe --input-instance-folder model/$model --output-folder $outputDir --nsims 113 --output-messages --grids --out-ros --out-intensity --sim $simCode --seed 123 $additionalArgs"
-    Start-Process -FilePath "pwsh" -ArgumentList "-Command $command" -RedirectStandardOutput "$outputDir/log.txt" -NoNewWindow -Wait
 }
 
 # Disable debug tracing
