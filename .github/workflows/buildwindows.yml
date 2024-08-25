@@ -4,8 +4,8 @@ on:
   pull_request:
     branches:
       - main
-        # workflow_dispatch:
-        # workflow_call:
+  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: write
@@ -114,11 +114,9 @@ jobs:
         cd Cell2Fire\include\vcpkg
         .\bootstrap-vcpkg.bat
         .\vcpkg integrate install
-        .\vcpkg install tiff --recurse --editable
-        Write-Host "Listing all files in installed\x64-windows:"
-        Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
-        dir installed\x64-windows\bin
-        dir installed\x64-windows\lib
+        .\vcpkg install tiff # --recurse --editable
+        # Write-Host "Listing all files in installed\x64-windows:"
+        # Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
 
         # - name: Stop
         #   run: throw "Exiting!"
@@ -130,15 +128,11 @@ jobs:
       run: |
         cd Cell2Fire
         msbuild Cell2Fire.sln /p:Configuration=Release
-        Write-Host "Listing all files in installed\x64-windows:"
-        Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
-        dir installed\x64-windows\bin
-        dir installed\x64-windows\lib
       
     - name: Gather output
       run: |
         mkdir binaries
-        copy Cell2Fire\include\vcpkg\installed\x64-windows\lib\*.dll binaries
+        copy Cell2Fire\x64\Release\*.dll binaries
         copy Cell2Fire\x64\Release\Cell2Fire.exe binaries
 
     - name: Upload
