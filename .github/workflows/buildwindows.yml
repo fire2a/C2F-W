@@ -18,16 +18,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Cache vcpkg
-      id: cache-vcpkg
-      uses: actions/cache@v4
-      with:
-        path: |
-          vcpkg
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
-        restore-keys: |
-          vcpkg-${{ runner.os }}-
-
     - name: Cache Boost
       id: cache-boost
       uses: actions/cache@v4
@@ -37,16 +27,6 @@ jobs:
         key: boost-${{ runner.os }}-1.84.0
         restore-keys: |
           boost-${{ runner.os }}-
-
-    - name: Cache Eigen
-      id: cache-eigen
-      uses: actions/cache@v4
-      with:
-        path: |
-          Cell2Fire/include/eigen3
-        key: eigen-${{ runner.os }}-776d86d8df175b7036467a0ef131bd34755f847d
-        restore-keys: |
-          eigen-${{ runner.os }}-
 
     - name: Cache Dirent
       id: cache-dirent
@@ -58,20 +38,52 @@ jobs:
         restore-keys: |
           dirent-${{ runner.os }}-
 
+    - name: Cache Eigen
+      id: cache-eigen
+      uses: actions/cache@v4
+      with:
+        path: |
+          Cell2Fire/include/eigen3
+        key: eigen-${{ runner.os }}-776d86d8df175b7036467a0ef131bd34755f847d
+        restore-keys: |
+          eigen-${{ runner.os }}-
+
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v4
+      with:
+        path: |
+          vcpkg
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-
+
     - name: Download dependencies
       if: steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-eigen.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true'
+      env:
+        CACHE_BOOST: ${{ steps.cache-boost.outputs.cache-hit }}
+        CACHE_DIRENT: ${{ steps.cache-dirent.outputs.cache-hit }}
+        CACHE_EIGEN: ${{ steps.cache-eigen.outputs.cache-hit }}
+        CACHE_VCPKG: ${{ steps.cache-vcpkg.outputs.cache-hit }}
       run: |
         cd Cell2Fire
         New-Item -ItemType Directory -Path "include" -Force
 
+        # boost
+        if ($CACHE_BOOST -ne 'true') {
+          $fname = "boost_1_84_0.tar.gz"
+          Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
+          tar -xzf $fname -C include
+        }
+
         # dirent
-        if (${{ steps.cache-dirent.outputs.cache-hit }} -ne 'true') {
+        if ($CACHE_DIRENT -ne 'true') {
           Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.24.zip -OutFile dirent-1.24.zip
           Expand-Archive -Path .\dirent-1.24.zip -DestinationPath include
         }
 
         # eigen
-        if (${{ steps.cache-eigen.outputs.cache-hit }} -ne 'true') {
+        if ($CACHE_EIGEN -ne 'true') {
           $project_id = 15462818
           $commit_sha = "776d86d8df175b7036467a0ef131bd34755f847d"
           $path = "Eigen"
@@ -81,15 +93,8 @@ jobs:
           mv eigen-$commit_sha-$commit_sha-Eigen include\eigen3
         }
 
-        # boost
-        if (${{ steps.cache-boost.outputs.cache-hit }} -ne 'true') {
-          $fname = "boost_1_84_0.tar.gz"
-          Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
-          tar -xzf $fname -C include
-        }
-
         # tiffio
-        if (${{ steps.cache-vcpkg.outputs.cache-hit }} -ne 'true') {
+        if ($CACHE_VCPKG -ne 'true') {
           git clone https://github.com/microsoft/vcpkg.git vcpkg
         }
 
