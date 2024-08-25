@@ -33,6 +33,15 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Set Release Tag
+      id: set_tag
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          echo "RELEASE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+        else
+          echo "RELEASE_TAG=${{ github.ref }}" >> $GITHUB_ENV
+        fi
+
     - name: Download All Artifacts
       uses: actions/download-artifact@v4
       with:
@@ -40,58 +49,48 @@ jobs:
         path: Cell2Fire
         merge-multiple: true
           
-    - name: WindowsZip
+    - name: Binary Windows Zip
       run: |
         cd Cell2Fire
-        zip ../Cell2FireW-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
+        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
         
-    - name: LinuxZip
+    - name: Binary Linux Zip
       run: |
         cd Cell2Fire
-        zip ../Cell2FireW-Linux-x86_64-binary.zip Cell2Fire.Linux.x86_64
+        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Linux-x86_64-binary.zip Cell2Fire.Linux.x86_64
 
     - name: ZipDataInstances
       run: |
         cd data
-        zip -r ../Kitral.zip Kitral
-        zip -r ../CanadianFBP.zip CanadianFBP
-        zip -r ../ScottAndBurgan.zip ScottAndBurgan  
+        zip -r ../Kitral-asc.zip Kitral/*-asc
+        zip -r ../Kitral-tif.zip Kitral/*-tif
+        zip -r ../CanadianFBP-asc.zip CanadianFBP/*-asc
+        zip -r ../CanadianFBP-tif.zip CanadianFBP/*-tif
+        zip -r ../ScottAndBurgan-asc.zip ScottAndBurgan/*-asc  
+        zip -r ../ScottAndBurgan-tif.zip ScottAndBurgan/*-tif  
 
-    - name: Prepare archive
+    - name: GitArchive
       run: |
         git rm -r data output test
         git add -f Cell2Fire/*
-
-    - name: GitArchive for Release
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-      run: |
         astash=`git stash create`
-        git archive --prefix=C2F/ --output="Cell2FireW_${{ github.ref_name }}.zip" $astash
-
-    - name: GitArchive for PR
-      if: github.event_name == 'pull_request'
-      run: |
-        astash=`git stash create`
-        git archive --prefix=C2F/ --output="Cell2FireW_${{ github.sha }}.zip" $astash
+        git archive --prefix=C2F/ --output="Cell2FireW_${{ env.RELEASE_TAG }}.zip" $astash
 
     - name: Create Draft Release for PR
-      if: github.event_name == 'pull_request'
       uses: ncipollo/release-action@v1.14.0
       with:
-        artifacts: "Cell2FireW_${{ github.sha }}.zip,Kitral.zip,CanadianFBP.zip,ScottAndBurgan.zip,Cell2FireW-Linux-x86_64-binary.zip,Cell2FireW-Windows-x86_64-binary.zip"
+        artifacts: |
+          Cell2FireW_${{ env.RELEASE_TAG }}.zip,
+          Cell2FireW_${{ env.RELEASE_TAG }}-Linux-x86_64-binary.zip,
+          Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip,
+          Kitral-asc.zip,
+          Kitral-tif.zip,
+          CanadianFBP-asc.zip,
+          CanadianFBP-tif.zip,
+          ScottAndBurgan-asc.zip,
+          ScottAndBurgan-tif.zip
         token: ${{ secrets.GITHUB_TOKEN }}
         draft: true
-        tag: ${{ github.sha }}
-        name: "Draft Release for PR #${{ github.event.pull_request.number }}"
-        body: "This is a draft release for pull request #${{ github.event.pull_request.number }}."
-
-    - name: Create Release for Tag
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-      uses: ncipollo/release-action@v1.14.0
-      with:
-        artifacts: "Cell2FireW_${{ github.ref_name }}.zip,Kitral.zip,CanadianFBP.zip,ScottAndBurgan.zip,Cell2FireW-Linux-x86_64-binary.zip,Cell2FireW-Windows-x86_64-binary.zip"
-        token: ${{ secrets.GITHUB_TOKEN }}
-        draft: true
-        tag: ${{ github.ref_name }}
-        name: "Release ${{ github.ref_name }}"
-        body: "This is the release for tag ${{ github.ref_name }}."
+        tag: ${{ env.RELEASE_TAG }}
+        name: "Draft Release #${{ env.RELEASE_TAG }}"
+        body: "This is a draft release for #${{ env.RELEASE_TAG }}."
