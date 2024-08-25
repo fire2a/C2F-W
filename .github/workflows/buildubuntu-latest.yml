@@ -17,20 +17,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Cache apt packages
-      uses: actions/cache@v3
-      with:
-        path: /usr/local/lib
-        key: ${{ runner.os }}-apt-${{ hashFiles('apt_versions.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-apt-
-
     - name: Install dependencies
       run: |
         sudo apt update
         sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev
-        dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > apt_versions.txt
-        echo "::warning:: apt package versions $(cat apt_versions.txt)"
+        dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_apt_versions.txt
+        echo "::warning:: apt package versions diff: $(diff new_apt_versions.txt apt_versions.txt)"
 
     - name: attempt to add libtiff.so to binaries lib
       if: false
@@ -56,7 +48,6 @@ jobs:
         ldd Cell2Fire
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
         mv Cell2Fire Cell2Fire$ext
-        # ls Cell2Fire*
 
     - name: Test
       run: |

@@ -64,6 +64,10 @@ jobs:
         echo "cache_eigen=${{ steps.cache-eigen.outputs.cache-hit }}" >> $GITHUB_ENV
         echo "cache_boost=${{ steps.cache-boost.outputs.cache-hit }}" >> $GITHUB_ENV
         echo "cache_vcpkg=${{ steps.cache-vcpkg.outputs.cache-hit }}" >> $GITHUB_ENV
+        echo "dirent : ${cache_dirent}"
+        echo "eigen : ${cache_eigen}"
+        echo "boost : ${cache_boost}"
+        echo "vcpkg : ${cache_vcpkg}"
 
     - name: Download dependencies
       if: steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-eigen.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true'
@@ -71,6 +75,11 @@ jobs:
         echo "Hello"
         cd Cell2Fire
         New-Item -ItemType Directory -Path "include" -Force
+        ls include
+        echo "dirent : ${cache_dirent}"
+        echo "eigen : ${cache_eigen}"
+        echo "boost : ${cache_boost}"
+        echo "vcpkg : ${cache_vcpkg}"
 
         # dirent
         if ($cache_dirent -ne 'true') {
