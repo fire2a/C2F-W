@@ -64,6 +64,7 @@ jobs:
 
     - name: GitArchive for Release
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      run: |
         astash=`git stash create`
         git archive --output="Cell2FireW_${{ github.ref_name }}.zip" $astash C2F
 
