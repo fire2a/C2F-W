@@ -114,7 +114,10 @@ jobs:
         cd Cell2Fire\include\vcpkg
         .\bootstrap-vcpkg.bat
         .\vcpkg integrate install
-        .\vcpkg install tiff
+        .\vcpkg install tiff --recurse --editable
+        Write-Host "Listing all files in installed\x64-windows:"
+        Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
+        dir installed\x64-windows\bin
         dir installed\x64-windows\lib
 
     - name: Stop
