@@ -61,7 +61,7 @@ mv Cell2Fire Cell2Fire$ext
 ```
 git clone
 cd C2F-W/Cell2Fire
-sudo apt install g++-12 libboost-all-dev libeigen3-dev
+sudo apt install g++-12 libboost-all-dev libeigen3-dev libtiff-dev
 make
 sudo make install
 git switch -c my-feature

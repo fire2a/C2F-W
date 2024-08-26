@@ -1,9 +1,9 @@
 name: ubuntu build
 
 on:
-  # push:
-  #   branches:
-  #     - buildwindows
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
   workflow_call:
 
@@ -17,15 +17,39 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev
+        dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_apt_versions.txt
+        if [ -n "$(diff new_apt_versions.txt apt_versions.txt)" ]; then
+          echo "::warning:: apt packages versions diff:$(diff --side-by-side --suppress-common-lines new_apt_versions.txt apt_versions.txt)"
+        fi
+
+    - name: attempt to add libtiff.so to binaries lib
+      if: false
+      run: |
+        cd Cell2Fire
+        # 
+        mkdir lib
+        # Find libtiff.so and check if it exists
+        afile=$(find /usr -name "libtiff.so" 2>/dev/null)
+        if [ -f "$afile" ]; then
+          # Copy the file only if it exists
+          cp "$afile" "lib/"
+        else
+          echo "libtiff.so not found in /usr"
+        fi
+        ls lib
+
     - name: Build
       run: |
-        sudo apt install g++-12 libboost-all-dev libeigen3-dev
         cd Cell2Fire
         make clean -f makefile.ubuntu-latest
         make -f makefile.ubuntu-latest
+        ldd Cell2Fire
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
         mv Cell2Fire Cell2Fire$ext
-        # ls Cell2Fire*
 
     - name: Test
       run: |

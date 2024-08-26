@@ -11,6 +11,10 @@
 #include <array>
 #include <algorithm>
 #include <memory>
+#include "tiffio.h"
+#include <cassert>
+#include <limits>
+#include <cstdint>
 
 std::tuple<std::unordered_map<std::string, std::string>, std::unordered_map<std::string, std::tuple<float, float, float, float>>> Dictionary(const std::string& filename);
 

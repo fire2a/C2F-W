@@ -1,9 +1,13 @@
 name: build and release
 on:
+  pull_request:
+    branches:
+      - main
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
       - 'v[0-9]+.[0-9]+.[0-9]+-\w+'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,51 +16,82 @@ jobs:
   call_ubuntu_build:
       uses: ./.github/workflows/buildubuntu-latest.yml
 
-  call_macos_build:
-      uses: ./.github/workflows/buildmacos-latest.yml
+  # call_macos_build:
+  #     uses: ./.github/workflows/buildmacos-latest.yml
 
-  call_macos_build_13:
-      uses: ./.github/workflows/buildmacos-13.yml
+  # call_macos_build_13:
+  #     uses: ./.github/workflows/buildmacos-13.yml
 
   call_windows_build:
       uses: ./.github/workflows/buildwindows.yml
 
   release:
-    needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
-    # needs: [call_ubuntu_build, call_macos_build, call_windows_build]
-    #  needs: [call_macos_build_13]
+    # needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
+    needs: [call_ubuntu_build, call_windows_build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Set Release Tag
+      id: set_tag
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          echo "RELEASE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+        else
+          echo "RELEASE_TAG=${{ github.ref }}" >> $GITHUB_ENV
+        fi
+
     - name: Download All Artifacts
       uses: actions/download-artifact@v4
       with:
         pattern: binaries-*
-        path: binaries
+        path: Cell2Fire
         merge-multiple: true
-
-    - name: GitArchive
+          
+    - name: Binary Windows Zip
       run: |
-        git archive --prefix=C2F/Cell2Fire/ \
-          --add-file=binaries/Cell2Fire.Linux.x86_64 \
-          --add-file=binaries/Cell2Fire.Darwin.arm64 \
-          --add-file=binaries/Cell2Fire.Darwin.x86_64 \
-          --add-file=binaries/Cell2Fire.exe \
-          --prefix=C2F/ \
-          --output="Cell2FireW_${{ github.ref_name }}.zip" HEAD
+        cd Cell2Fire
+        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
+        
+    - name: Binary Linux Zip
+      run: |
+        cd Cell2Fire
+        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Linux-x86_64-binary.zip Cell2Fire.Linux.x86_64
 
-    - name: ZipDataInstances
+    - name: Zip Data Instances
       run: |
         cd data
-        zip -r ../Kitral.zip Kitral
-        zip -r ../CanadianFBP.zip CanadianFBP
-        zip -r ../ScottAndBurgan.zip ScottAndBurgan  
+        for format in asc tif; do
+          for fuel_model in CanadianFBP Kitral ScottAndBurgan; do
+            if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
+                echo "found $fuel_model $format"
+                zip -r ../$fuel_model-$format.zip $fuel_model/*-$format
+            fi
+          done
+        done
 
-    - name: Create Release
+    - name: Git Archive
+      run: |
+        git rm -r data output test
+        git add -f Cell2Fire/*
+        astash=`git stash create`
+        git archive --prefix=C2F/ --output="Cell2FireW_${{ env.RELEASE_TAG }}.zip" $astash
+
+    - name: Create Draft Release
       uses: ncipollo/release-action@v1.14.0
       with:
-        artifacts: "Cell2FireW_${{ github.ref_name }}.zip,Kitral.zip,CanadianFBP.zip,ScottAndBurgan.zip"
+        artifacts: |
+          Cell2FireW_${{ env.RELEASE_TAG }}.zip
+          Cell2FireW_${{ env.RELEASE_TAG }}-Linux-x86_64-binary.zip
+          Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
+          Kitral-asc.zip
+          Kitral-tif.zip
+          CanadianFBP-asc.zip
+          ScottAndBurgan-asc.zip
+          ScottAndBurgan-tif.zip
         token: ${{ secrets.GITHUB_TOKEN }}
         draft: true
+        tag: ${{ env.RELEASE_TAG }}
+        name: "Draft Release #${{ env.RELEASE_TAG }}"
+        body: "This is a draft release for #${{ env.RELEASE_TAG }}."

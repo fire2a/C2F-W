@@ -111,7 +111,7 @@ void CSVGrid(int rows, int cols, int gridNumber, std::string gridFolder, std::ve
 															Constructor 
 *******************************************************************************/
 Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv", ","), 
-														  CSVForest(_args.InFolder + "fuels.asc", " ")
+														  CSVForest(_args.InFolder + "fuels", " ")
 														  {
 	// Aux
 	int i;

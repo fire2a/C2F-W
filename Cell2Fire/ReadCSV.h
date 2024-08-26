@@ -3,6 +3,7 @@
 
 #include "Cells.h"
 #include "ReadArgs.h"
+#include "DataGenerator.h"
 
 #include <iostream>
 #include <fstream>
@@ -13,6 +14,7 @@
 #include <boost/algorithm/string.hpp>
 #include <unordered_map>
 #include <unordered_set>
+#include "tiffio.h"
 
  
 

@@ -1,0 +1,5 @@
+g++-12 12.3.0-1ubuntu1~22.04
+libboost-all-dev 1.74.0.3ubuntu7
+libeigen3-dev 3.4.0-2ubuntu2
+libtiff-dev:amd64 4.3.0-6ubuntu0.9
+

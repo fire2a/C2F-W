@@ -12,6 +12,10 @@
 #include <array>
 #include <algorithm>
 #include <memory>
+#include "tiffio.h"
+#include <cassert>
+#include <limits>
+#include <cstdint>
 
 inline char separator()
 {
@@ -143,7 +147,6 @@ ForestGrid(const std::string& filename, const std::unordered_map<std::string, st
 
     std::istringstream iss(line);
     std::string token;
-
     while (iss >> token) {
         if (Dictionary.find(token) == Dictionary.end()) {
             gridcell1.push_back("NF");
@@ -229,6 +232,222 @@ void DataGrids(const std::string& filename, std::vector<float>& data, int nCells
     
 }
 
+std::tuple<std::vector<int>, std::vector<std::string>, int, int, float>
+ForestGridTif(const std::string& filename, const std::unordered_map<std::string, std::string>& Dictionary) {
+    /*
+    Reads fuel data from a .tif
+    Args:
+       filename (std::string): Name of .tif file.
+       Dictionary (std::unordered_map<std::string, std::string>&): Reference to fuels dictionary
+
+    Returns:
+        Fuel vectors, number of cells y cell size (tuple[std::vector<int>, std::vector<std::string>)
+    */
+    // Tries to open file
+    std::cout << filename << '\n';
+    TIFF* fuelsDataset = TIFFOpen(filename.c_str(), "r");
+    if (!fuelsDataset) {
+        throw std::runtime_error("Error: Could not open file '" + filename + "'");
+    }
+
+    int cells = 0;
+    int tFBPDicts = 0;
+    int tcols = 0;
+    // Vectors with fuel information in different formats
+    std::vector<std::string> gridcell1;
+    std::vector<std::string> gridcell2;
+    std::vector<int> gridcell3;
+    std::vector<std::string> gridcell4;
+    std::vector<std::vector<std::string>> grid;
+    std::vector<std::vector<std::string>> grid2;
+    // Get Raster dimentions
+    uint32_t nXSize, nYSize;
+    uint16_t data_type;
+    uint16_t samplesPerPixel;
+    TIFFGetField(fuelsDataset, TIFFTAG_IMAGEWIDTH, &nXSize);
+    TIFFGetField(fuelsDataset, TIFFTAG_IMAGELENGTH, &nYSize);
+    TIFFGetField(fuelsDataset, TIFFTAG_SAMPLEFORMAT, &data_type);
+    TIFFGetField(fuelsDataset, TIFFTAG_SAMPLESPERPIXEL, &samplesPerPixel);
+    tsize_t scan_size = TIFFRasterScanlineSize(fuelsDataset);
+    std::cout << scan_size << '\n';
+    std::cout << nXSize << '\n';
+    std::cout << data_type << '\n';
+    int n_bits = (scan_size / nXSize) * 8;
+    std::cout << n_bits << '\n';
+    double* modelPixelScale;
+    uint32_t  count;
+    //TIFFGetField(tiff, 33424, &count, &data);
+    TIFFGetField(fuelsDataset, 33550, &count, &modelPixelScale);
+    // Gets cell size
+    double cellSizeX {modelPixelScale[0]};
+    double cellSizeY {modelPixelScale[1]};
+    const double epsilon = std::numeric_limits<double>::epsilon();
+    if (fabs(cellSizeX - cellSizeY) > epsilon) {
+        throw std::runtime_error("Error: Cells are not square in: '" + filename + "'");
+    }
+    // Read raster data
+    // Allocate memory for one row of pixel data
+    void *buf;
+    if (n_bits == 64){
+        buf = (double*)_TIFFmalloc(nXSize * sizeof(double));
+    }
+    else if (n_bits == 32) {
+        buf = (int32_t*)_TIFFmalloc(nXSize * sizeof(int32_t));
+    } 
+    else {
+        throw std::runtime_error("Error: file type is not supported: '" + filename + "'");
+    }
+    
+    if (!buf) {
+        TIFFClose(fuelsDataset);
+        throw std::runtime_error("Could not allocate memory");
+    }
+    // For each row
+    for (int i = 0; i < nYSize; i++) {
+        // Read pixel values for the current row
+        if (TIFFReadScanline(fuelsDataset, buf, i) != 1) {
+            _TIFFfree(buf);
+            TIFFClose(fuelsDataset);
+            throw std::runtime_error("Read error on row " + std::to_string(i));
+        }
+        // For each column
+        float pixelValue;
+        std::string token; 
+        for (int j = 0; j < nXSize; j++) {
+            if (n_bits == 64){
+                double *values = (double *) buf;
+                pixelValue = ((double *) buf)[j];
+                token = std::to_string(static_cast<int>( ((double *) buf)[j]));
+            } 
+            else {
+                float *values = (float *) buf;
+                pixelValue = ((int32_t *) buf)[j];
+                token = std::to_string(static_cast<int>( ((int32_t *) buf)[j]));
+            }
+            // Access the pixel value at position (i, j)
+            //std::cout << token << '\n';
+            //std::cout << pixelValue << '\n';
+            if (pixelValue != pixelValue || Dictionary.find(token) == Dictionary.end()) {
+                    // If fuel not in Dictionary:
+                    gridcell1.push_back("NF");
+                    
+                    gridcell2.push_back("NF");
+                    
+                    gridcell3.push_back(0);
+                    gridcell4.push_back("NF");
+            } else {
+                    
+                    gridcell1.push_back(token);
+                    gridcell2.push_back(Dictionary.at(token));
+                    gridcell3.push_back(std::stoi(token));
+                    gridcell4.push_back(Dictionary.at(token));
+            }
+            tcols = std::max(tcols, static_cast<int>(gridcell1.size()));
+            
+        } 
+        grid.push_back(gridcell1);
+        grid2.push_back(gridcell2);
+        gridcell1.clear();
+        gridcell2.clear(); 
+    }
+    std::vector<std::array<int, 2>> CoordCells;
+    CoordCells.reserve(grid.size() * tcols);
+    int n = 1;
+    tcols += 1;
+    return std::make_tuple(gridcell3, gridcell4, grid.size(), tcols - 1, cellSizeX);
+}
+
+// Function to read grid data from ASCII file
+
+void DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells) {
+        /*
+        Reads fuel data from a .tif
+        Args:
+        filename (std::string): Name of .tif file.
+        Dictionary (std::unordered_map<std::string, std::string>&): Reference to fuels dictionary
+
+        Returns:
+            Fuel vectors, number of cells y cell size (tuple[std::vector<int>, std::vector<std::string>)
+        */
+    // Tries to open file
+    std::cout << filename << '\n';
+    TIFF* fuelsDataset = TIFFOpen(filename.c_str(), "r");
+    if (!fuelsDataset) {
+        throw std::runtime_error("Error: Could not open file '" + filename + "'");
+    }
+
+    std::vector<std::string> filelines;
+    // Get cell side
+    double* modelPixelScale;
+    uint32_t  count;
+    //TIFFGetField(tiff, 33424, &count, &data);
+    TIFFGetField(fuelsDataset, 33550, &count, &modelPixelScale);
+    // Gets cell size
+    double cellSizeX {modelPixelScale[0]};
+    double cellSizeY {modelPixelScale[1]};
+    const double epsilon = std::numeric_limits<double>::epsilon();
+    if (fabs(cellSizeX - cellSizeY) > epsilon) {
+        throw std::runtime_error("Error: Cells are not square in: '" + filename + "'");
+    }
+    double cellsize;
+    cellsize = cellSizeX;
+    // Get Raster dimentions
+    uint32_t nXSize, nYSize;
+    TIFFGetField(fuelsDataset, TIFFTAG_IMAGEWIDTH, &nXSize);
+    TIFFGetField(fuelsDataset, TIFFTAG_IMAGELENGTH, &nYSize);
+    tsize_t scan_size = TIFFRasterScanlineSize(fuelsDataset);
+    int n_bits = (scan_size / nXSize) * 8;
+    int aux = 0;
+    // Read raster data
+    // Allocate memory for one row of pixel data
+    void *buf;
+    if (n_bits == 64){
+        buf = (double*)_TIFFmalloc(nXSize * sizeof(double));
+    }
+    else if (n_bits == 32) {
+        buf = (float*)_TIFFmalloc(nXSize * sizeof(float));
+    } 
+    else {
+        throw std::runtime_error("Error: file type is not supported: '" + filename + "'");
+    }
+    if (!buf) {
+        TIFFClose(fuelsDataset);
+        throw std::runtime_error("Could not allocate memory");
+    }
+    // For each row
+    // For each column
+    float pixelValue;
+    for (int i = 0; i < nYSize; i++) {
+        // Read pixel values for the current row
+        if (TIFFReadScanline(fuelsDataset, buf, i) != 1) {
+            _TIFFfree(buf);
+            TIFFClose(fuelsDataset);
+            throw std::runtime_error("Read error on row " + std::to_string(i));
+        }
+        // For each column
+        for (int j = 0; j < nXSize; j++) {
+            // Access the pixel value at position (i, j)
+            if (n_bits == 64){
+                double *values = (double *) buf;
+                pixelValue = ((double *) buf)[j];
+            } 
+            else {
+                float *values = (float *) buf;
+                pixelValue = ((int32_t *) buf)[j];
+            }
+            if (pixelValue == pixelValue){
+                //std::cout << token << '\n';
+                data[aux] = pixelValue;
+            } else {
+                data[aux] = pixelValue;
+            }
+            aux++;
+            if (aux == nCells) {
+                return;  // Stop reading if we've filled the data vector
+            }
+            }
+    }
+}
 
 std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::vector<std::string>& GFuelType, const std::vector<int>& GFuelTypeN,
                  const std::vector<float>& Elevation, const std::vector<float>& PS,
@@ -477,25 +696,47 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     std::unordered_map<std::string, std::tuple<float, float, float, float>> ColorsDict;
 
     // Determine the lookup table based on the Simulator
-    std::string FBPlookup;
+    std::string lookupTable;
     if (Simulator == "K") {
-        FBPlookup = InFolder + separator() + "kitral_lookup_table.csv";
+        lookupTable = InFolder + separator() + "kitral_lookup_table.csv";
     } else if (Simulator == "S") {
-        FBPlookup = InFolder + separator() + "spain_lookup_table.csv";
-    } else { // beta version
-        FBPlookup = InFolder + separator() + "fbp_lookup_table.csv";
+        lookupTable = InFolder + separator() + "spain_lookup_table.csv";
+    } else if (Simulator == "C") {
+        lookupTable = InFolder + separator() + "fbp_lookup_table.csv";
+    } else { 
+	std::cerr << "Error: Simulator not recognized:" << Simulator  << std::endl;
+	exit(1);
+    }
+
+    // Check if the lookup table exists
+    if (!fileExists(lookupTable)) {
+	std::cerr << "Error: Lookup table '" << lookupTable << "' not found" << std::endl;
+	return;
     }
 
     // Call Dictionary function to read lookup table
-    std::tie(FBPDict, ColorsDict) = Dictionary(FBPlookup);
+    std::tie(FBPDict, ColorsDict) = Dictionary(lookupTable);
 
     // Call ForestGrid function
-    std::string FGrid = InFolder + separator() + "fuels.asc";
+    //If fuels.tif exists, then .tif's are used, otherwise .asc
+    std::string extension;
+    if(fileExists(InFolder + separator() + "fuels.tif")){
+        extension = ".tif";
+    } else {
+        extension = ".asc";
+    }
+    std::cout << "Using " << extension << '\n';
+    // Call ForestGrid function
+    std::string FGrid = InFolder + "fuels" + extension;
     std::vector<int> GFuelTypeN;
     std::vector<std::string> GFuelType;
     int FBPDicts, Cols;
     float CellSide;
-    std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGrid(FGrid, FBPDict);
+    if(extension == ".tif"){
+        std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGridTif(FGrid, FBPDict);
+    } else{
+        std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGrid(FGrid, FBPDict);
+    }
 
     // FOR DEBUGING ----------------------------------------------------------
     /*
@@ -546,8 +787,8 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     std::vector<float> FMC(NCells, static_cast<float>(std::nanf("")));
 
     std::vector<std::string> filenames = {
-        "elevation.asc", "saz.asc", "slope.asc", "cur.asc",
-        "cbd.asc", "cbh.asc", "ccf.asc", "py.asc", "fmc.asc"
+        "elevation" + extension, "saz" + extension, "slope" + extension, "cur" + extension,
+        "cbd" + extension, "cbh" + extension, "ccf" + extension, "py" + extension, "fmc" + extension
     };
 
     for (const auto& name : filenames) {

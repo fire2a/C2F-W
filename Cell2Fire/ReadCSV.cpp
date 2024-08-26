@@ -1,6 +1,7 @@
 #include "ReadCSV.h"
 #include "Cells.h"
 #include "ReadArgs.h"
+#include "DataGenerator.h"
 
 #include <iostream>
 #include <fstream>
@@ -11,6 +12,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <boost/algorithm/string.hpp>
+#include "tiffio.h"
  
 /*
  * Constructur
@@ -26,10 +28,26 @@ CSVReader::CSVReader(std::string filename, std::string delm){
 * in vector of vector of strings.
 */
 std::vector<std::vector<std::string>> CSVReader::getData() {
+	/*
+	Check wheather fuels.tif or .asc is in InFolder and add corresponding extension
+	*/
+	std::string extension;
+	
+	if(fileExists(this->fileName + ".tif")){
+        extension = ".tif";
+    } else if (fileExists(this->fileName + ".asc")) {
+        extension = ".asc";
+    }
+	else {
+		extension = "";
+	}
+	this->fileName = this->fileName + extension;
+	std::cout << this->fileName << '\n';
 	std::ifstream file(this->fileName);
 	std::vector<std::vector<std::string>> dataList;
 	std::string line = "";
 	// Iterate through each line and split the content using delimeter
+	
 	if (this->fileName.substr(this->fileName.find_last_of(".") + 1) == "asc") {
 		int header = 0;
 		while (getline(file, line)) {
@@ -52,6 +70,87 @@ std::vector<std::vector<std::string>> CSVReader::getData() {
 
 		}
 	}
+	else if (this->fileName.substr(this->fileName.find_last_of(".") + 1) == "tif")
+	{
+		TIFF* fuelsDataset = TIFFOpen(this->fileName.c_str(), "r");
+		uint32_t nXSize, nYSize;
+		TIFFGetField(fuelsDataset, TIFFTAG_IMAGEWIDTH, &nXSize);
+		TIFFGetField(fuelsDataset, TIFFTAG_IMAGELENGTH, &nYSize);
+		double* modelPixelScale;
+		uint32_t  count;
+		//TIFFGetField(tiff, 33424, &count, &data);
+		TIFFGetField(fuelsDataset, 33550, &count, &modelPixelScale);
+		// Gets cell size
+		double cellSizeX {modelPixelScale[0]};
+		double cellSizeY {modelPixelScale[1]};
+		const double epsilon = std::numeric_limits<double>::epsilon();
+		tsize_t scan_size = TIFFRasterScanlineSize(fuelsDataset);
+		int n_bits = (scan_size / nXSize) * 8;
+		if (fabs(cellSizeX - cellSizeY) > epsilon) {
+        	throw std::runtime_error("Error: Cells are not square in: '" + fileName + "'");
+    	}
+		double *positions;
+		TIFFGetField(fuelsDataset, 33922, &count, &positions);
+		double xllcorner {positions[3]};
+		double yllcorner {positions[4]};
+		std::vector<std::string> vec;
+		vec.push_back("ncols");
+		vec.push_back(std::to_string(nXSize));
+		dataList.push_back(vec);
+		std::vector<std::string> vec2;
+		vec2.push_back("nrows");
+		vec2.push_back(std::to_string(nYSize));
+		dataList.push_back(vec2);
+		std::vector<std::string> vec3;
+		vec3.push_back("xllcorner");
+		vec3.push_back(std::to_string(int (xllcorner)));
+		dataList.push_back(vec3);
+		std::vector<std::string> vec4;
+		vec4.push_back("yllcorner");
+		vec4.push_back(std::to_string(int (yllcorner)));
+		dataList.push_back(vec4);
+		std::vector<std::string> vec5;
+		vec5.push_back("cellsize");
+		vec5.push_back(std::to_string(cellSizeX));
+		dataList.push_back(vec5);
+		void *buf;
+		if (n_bits == 64){
+			buf = (double*)_TIFFmalloc(nXSize * sizeof(double));
+		}
+		else if (n_bits == 32) {
+			buf = (int32_t*)_TIFFmalloc(nXSize * sizeof(int32_t));
+		} 
+		else {
+			throw std::runtime_error("Error: file type is not supported: '" + fileName + "'");
+		}
+		if (!buf) {
+			TIFFClose(fuelsDataset);
+			throw std::runtime_error("Could not allocate memory");
+		}
+		// For each row
+		for (int i = 0; i < nYSize; i++) {
+			std::vector<std::string> vec_rows;
+			// Read pixel values for the current row
+			if (TIFFReadScanline(fuelsDataset, buf, i) != 1) {
+				_TIFFfree(buf);
+				TIFFClose(fuelsDataset);
+				throw std::runtime_error("Read error on row " + std::to_string(i));
+			}
+			// For each column
+        	std::string token; 
+			for (int j = 0; j < nXSize; j++) {
+				// Access the pixel value at position (i, j)
+				if (n_bits == 64){
+					token = std::to_string(static_cast<int>( ((double *) buf)[j]));
+				} 
+				else {
+					token = std::to_string(static_cast<int>( ((int32_t *) buf)[j]));
+				}
+				vec_rows.push_back(token);
+			}
+			dataList.push_back(vec_rows);
+		}
+	}	
 
 	else {
 		while (getline(file, line)) {
