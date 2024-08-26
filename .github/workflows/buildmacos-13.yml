@@ -61,10 +61,10 @@ jobs:
     - name: Test
       run: |
         cd test
-        bash test.zsh ${{ env.extension }}
+        bash test.sh ${{ env.extension }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: binaries-Darwin-x86_64
-        path: Cell2Fire/Cell2Fire.Darwin.x86_64
+        name: binaries${{ env.extension }}
+        path: Cell2Fire/Cell2Fire${{ env.extension }}
