@@ -711,7 +711,7 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     // Call ForestGrid function
     //If fuels.tif exists, then .tif's are used, otherwise .asc
     std::string extension;
-    if(fileExists(InFolder + "/" + "fuels.tif")){
+    if(fileExists(InFolder + separator() + "fuels.tif")){
         extension = ".tif";
     } else {
         extension = ".asc";
