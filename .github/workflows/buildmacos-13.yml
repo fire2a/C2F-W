@@ -60,7 +60,7 @@ jobs:
     - name: Test
       run: |
         cd test
-        bash test.zsh ${{ env.extension }}
+        zsh test.zsh ${{ env.extension }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
