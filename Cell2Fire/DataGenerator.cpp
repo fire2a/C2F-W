@@ -696,17 +696,26 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     std::unordered_map<std::string, std::tuple<float, float, float, float>> ColorsDict;
 
     // Determine the lookup table based on the Simulator
-    std::string FBPlookup;
+    std::string lookupTable;
     if (Simulator == "K") {
-        FBPlookup = InFolder + separator() + "kitral_lookup_table.csv";
+        lookupTable = InFolder + separator() + "kitral_lookup_table.csv";
     } else if (Simulator == "S") {
-        FBPlookup = InFolder + separator() + "spain_lookup_table.csv";
-    } else { // beta version
-        FBPlookup = InFolder + separator() + "fbp_lookup_table.csv";
+        lookupTable = InFolder + separator() + "spain_lookup_table.csv";
+    } else if (Simulator == "C") {
+        lookupTable = InFolder + separator() + "fbp_lookup_table.csv";
+    } else { 
+	std::cerr << "Error: Simulator not recognized:" << Simulator  << std::endl;
+	exit(1);
+    }
+
+    // Check if the lookup table exists
+    if (!fileExists(lookupTable)) {
+	std::cerr << "Error: Lookup table '" << lookupTable << "' not found" << std::endl;
+	return;
     }
 
     // Call Dictionary function to read lookup table
-    std::tie(FBPDict, ColorsDict) = Dictionary(FBPlookup);
+    std::tie(FBPDict, ColorsDict) = Dictionary(lookupTable);
 
     // Call ForestGrid function
     //If fuels.tif exists, then .tif's are used, otherwise .asc
