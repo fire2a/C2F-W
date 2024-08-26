@@ -29,11 +29,11 @@ jobs:
         arch
         g++-12 --version
         echo "find boost"
-        find /opt/homebrew -name "boost" 2>/dev/null
+        find /usr/local/opt -name "boost" 2>/dev/null
         echo "find llvm"
-        find /opt/homebrew -name "llvm" 2>/dev/null
+        find /usr/local/opt -name "llvm" 2>/dev/null
         echo "find Eigen"
-        find /opt/homebrew -name "Eigen" 2>/dev/null
+        find /usr/local/opt -name "Eigen" 2>/dev/null
         packages=("gcc" "boost" "eigen" "llvm" "libomp" "libtiff")
         for package in "${packages[@]}"; do
           version=$(brew info --json=v1 "$package" | jq -r '.[0].installed[0].version')
