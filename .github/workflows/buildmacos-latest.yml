@@ -17,24 +17,41 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Doit
+    - name: Brew Packages
       run: |
-        # which gcc-12
-        # which brew
+        brew update
+        brew install gcc@12
         brew install boost eigen llvm libopenmpt libtiff
+
+    - name: Describe & Find Packages
+      run: |
+        echo "arch"
+        arch
+        g++-12 --version
         echo "find boost"
         find /opt/homebrew -name "boost" 2>/dev/null
         echo "find llvm"
         find /opt/homebrew -name "llvm" 2>/dev/null
         echo "find Eigen"
         find /opt/homebrew -name "Eigen" 2>/dev/null
+        packages=("gcc" "boost" "eigen" "llvm" "libomp" "libtiff")
+        for package in "${packages[@]}"; do
+          version=$(brew info --json=v1 "$package" | jq -r '.[0].installed[0].version')
+          if [[ -n "$version" ]]; then
+            echo "$package $version"
+          fi
+        done
+
+    - name: Build
+      run: |
         cd Cell2Fire
-        echo "cleaning"
+        echo "clean"
         make clean -f makefile.macos-latest
-        echo "building"
+        echo "build"
         make -f makefile.macos-latest
-        echo "end build"
+        echo "linkage"
         otool -L Cell2Fire
+        echo "rename"
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
         echo "extension $ext"
         mv Cell2Fire Cell2Fire$ext
