@@ -59,24 +59,26 @@ jobs:
         cd Cell2Fire
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Linux-x86_64-binary.zip Cell2Fire.Linux.x86_64
 
-    - name: ZipDataInstances
+    - name: Zip Data Instances
       run: |
         cd data
-        zip -r ../Kitral-asc.zip Kitral/*-asc
-        zip -r ../Kitral-tif.zip Kitral/*-tif
-        zip -r ../CanadianFBP-asc.zip CanadianFBP/*-asc
-        zip -r ../CanadianFBP-tif.zip CanadianFBP/*-tif
-        zip -r ../ScottAndBurgan-asc.zip ScottAndBurgan/*-asc  
-        zip -r ../ScottAndBurgan-tif.zip ScottAndBurgan/*-tif  
+        for format in asc tif; do
+          for fuel_model in CanadianFBP Kitral ScottAndBurgan; do
+            if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
+                echo "found $fuel_model $format"
+                zip -r ../$fuel_model-$format.zip $fuel_model/*-$format
+            fi
+          done
+        done
 
-    - name: GitArchive
+    - name: Git Archive
       run: |
         git rm -r data output test
         git add -f Cell2Fire/*
         astash=`git stash create`
         git archive --prefix=C2F/ --output="Cell2FireW_${{ env.RELEASE_TAG }}.zip" $astash
 
-    - name: Create Draft Release for PR
+    - name: Create Draft Release
       uses: ncipollo/release-action@v1.14.0
       with:
         artifacts: |
@@ -86,7 +88,6 @@ jobs:
           Kitral-asc.zip,
           Kitral-tif.zip,
           CanadianFBP-asc.zip,
-          CanadianFBP-tif.zip,
           ScottAndBurgan-asc.zip,
           ScottAndBurgan-tif.zip
         token: ${{ secrets.GITHUB_TOKEN }}
