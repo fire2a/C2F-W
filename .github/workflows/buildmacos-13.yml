@@ -53,13 +53,14 @@ jobs:
         otool -L Cell2Fire
         echo "rename"
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
+        echo "extension=$ext" >> $GITHUB_ENV
         echo "extension $ext"
         mv Cell2Fire Cell2Fire$ext
 
     - name: Test
       run: |
         cd test
-        bash test.sh
+        bash test.zsh ${{ env.extension }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
