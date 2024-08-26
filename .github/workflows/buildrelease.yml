@@ -39,7 +39,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "pull_request" ]]; then
           echo "RELEASE_TAG=${{ github.sha }}" >> $GITHUB_ENV
         else
-          echo "RELEASE_TAG=${{ github.ref }}" >> $GITHUB_ENV
+          echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
         fi
 
     - name: Download All Artifacts
