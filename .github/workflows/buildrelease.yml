@@ -82,13 +82,13 @@ jobs:
       uses: ncipollo/release-action@v1.14.0
       with:
         artifacts: |
-          Cell2FireW_${{ env.RELEASE_TAG }}.zip,
-          Cell2FireW_${{ env.RELEASE_TAG }}-Linux-x86_64-binary.zip,
-          Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip,
-          Kitral-asc.zip,
-          Kitral-tif.zip,
-          CanadianFBP-asc.zip,
-          ScottAndBurgan-asc.zip,
+          Cell2FireW_${{ env.RELEASE_TAG }}.zip
+          Cell2FireW_${{ env.RELEASE_TAG }}-Linux-x86_64-binary.zip
+          Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
+          Kitral-asc.zip
+          Kitral-tif.zip
+          CanadianFBP-asc.zip
+          ScottAndBurgan-asc.zip
           ScottAndBurgan-tif.zip
         token: ${{ secrets.GITHUB_TOKEN }}
         draft: true
