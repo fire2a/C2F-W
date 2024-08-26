@@ -37,10 +37,13 @@ Full guide, how to [fire2a.io/docs](https://fire2a.github.io/docs/)
 Plugin repo: [fire2a/fire-analytics-qgis-processing-toolbox-plugin](https://github.com/fire2a/fire-analytics-qgis-processing-toolbox-plugin) repo
 
 ## Moderate: CLI 
-1. Download a release (Cell2FireW...zip) from the right vertical tab bar, unzip
-2. Download a prepared instance, also from the releases tab, choose your fuel model: Kitral, Scott&Burgan, or Canada (--sim <K|S|C>)
+Go to releases (right vertical tab bar):
+1. Download the latest (not-draft) version (Cell2FireW_v<X.Y.Z>.zip)
+2. Download a prepared instance, choosing:
+   - fuel model: Kitral, Scott&Burgan, or Canada (--sim <K|S|C>)
+   - raster format: tif or asc
 3. Open a terminal, type the following:
-```
+```bash
 # needs an empty directory to store the results
 mkdir results 
 
@@ -48,7 +51,7 @@ mkdir results
 cd C2F-W/Cell2Fire/
 
 # run idea
-./Cell2Fire[.exe|Linux.x86-64|Darwin.x86-64] --input-instance-folder </path/to/instance> --output-folder </path/to/empty/results> --sim <K|S|C> --nthreads 16 > log.txt
+./Cell2Fire[.exe|Linux.x86-64|Darwin.[x86-64|arm64]] --input-instance-folder </path/to/instance> --output-folder </path/to/empty/results> --sim <K|S|C> --nthreads 16 > log.txt
 
 # sample
 ./Cell2Fire.Linux.x86_64 --final-grid --output-messages --out-ros --sim S --nsims 2 --seed 123 --nthreads 3 --fmc 66 --scenario 2 --cros --weather rows --input-instance-folder /tmp/processing_cdcCGk/Vilopriu_2013 --output-folder /tmp/processing_cdcCGk/Vilopriu_2013/results | tee log.txt
@@ -58,12 +61,17 @@ ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine(
 mv Cell2Fire Cell2Fire$ext
 ```
 ## Collaborative: compile it
-```
+```bash
+# dependencies
+sudo apt install g++-12 libboost-all-dev libeigen3-dev libtiff-dev
+
 git clone
 cd C2F-W/Cell2Fire
-sudo apt install g++-12 libboost-all-dev libeigen3-dev libtiff-dev
-make
-sudo make install
+
+# choose your makefile with the option flag: -f makefile.<platform>
+make 
+sudo make install  # optional: copies Cell2Fire to /usr/local/bin
+
 git switch -c my-feature
 ```
 Other platform details at `.github/workflows/build\*.yml`
