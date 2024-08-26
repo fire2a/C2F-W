@@ -23,11 +23,11 @@ jobs:
         sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev
         dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_apt_versions.txt
         if [ -n "$(diff new_apt_versions.txt apt_versions.txt)" ]; then
-          echo "::warning:: apt packages versions diff:$(diff --side-by-side --suppress-common-lines new_apt_versions.txt apt_versions.txt)"
+          echo "::warning:: apt packages versions diff: $(diff new_apt_versions.txt apt_versions.txt)"
+          echo "$(diff --side-by-side --suppress-common-lines new_apt_versions.txt apt_versions.txt)"
         fi
 
     - name: attempt to add libtiff.so to binaries lib
-      if: false
       run: |
         cd Cell2Fire
         # 
