@@ -21,7 +21,8 @@ jobs:
       run: |
         brew update
         brew install gcc@12
-        brew install boost eigen llvm libopenmpt libtiff
+        brew install boost eigen llvm libtiff
+        # brew install boost eigen llvm libopenmpt libtiff
 
     - name: Describe & Find Packages
       run: |
@@ -34,7 +35,7 @@ jobs:
         find /opt/homebrew -name "llvm" 2>/dev/null
         echo "find Eigen"
         find /opt/homebrew -name "Eigen" 2>/dev/null
-        packages=("gcc" "boost" "eigen" "llvm" "libomp" "libtiff")
+        packages=("gcc" "boost" "eigen" "llvm" "libopenmpt" "libomp" "libtiff")
         for package in "${packages[@]}"; do
           version=$(brew info --json=v1 "$package" | jq -r '.[0].installed[0].version')
           if [[ -n "$version" ]]; then
@@ -60,7 +61,7 @@ jobs:
     - name: Test
       run: |
         cd test
-        zsh test.zsh ${{ env.extension }}
+        bash test.zsh ${{ env.extension }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
