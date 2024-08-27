@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         apt update
-        apt install -y g++-12 make libboost-all-dev libeigen3-dev libtiff-dev
+        apt install -y g++-12 make lsb-release libboost-all-dev libeigen3-dev libtiff-dev
 
     - name: Get Environment
       id: get_env
@@ -27,8 +27,8 @@ jobs:
         echo "DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )" >> $GITHUB_ENV
         echo "CODENAME=$( lsb_release --short --codename 2>/dev/null )" >> $GITHUB_ENV
         echo "MACHINE=$( uname --machine 2>/dev/null )" >> $GITHUB_ENV
-        echo ${{ env.CODENAME }},${{ env.MACHINE }},${{ env.DISTRIBUTION }}
-        echo ${{ env }}
+        echo "A ${{ env.CODENAME }},${{ env.MACHINE }},${{ env.DISTRIBUTION }}"
+        echo "B $CODENAME,$MACHINE,$DISTRIBUTION"
         # - name: Stop
         #   run: throw "Exiting!"
 
@@ -42,10 +42,11 @@ jobs:
         make
         ldd Cell2Fire
         mv Cell2Fire Cell2Fire.${{ env.DISTRIBUTION }}.${{ env.CODENAME }}.${{ env.MACHINE }}
-        #- name: Test
-        #  run: |
-        #    cd test
-        #    bash test.sh
+
+    - name: Test
+      run: |
+        cd test
+        bash test.sh
 
     - name: Upload
       uses: actions/upload-artifact@v4
