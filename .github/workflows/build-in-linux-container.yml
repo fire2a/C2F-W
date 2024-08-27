@@ -59,8 +59,12 @@ jobs:
         run: |
           DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
           CODENAME=$( lsb_release --short --codename 2>/dev/null )
+          if [ "${{ matrix.system }}" = "fedora:latest" ]; then
+            CODENAME=latest
+          fi
           MACHINE=$( uname --machine 2>/dev/null )
           echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+
 
       - name: Build
         run: |
