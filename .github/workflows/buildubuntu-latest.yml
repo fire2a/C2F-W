@@ -14,9 +14,6 @@ jobs:
   ubuntu_build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
     - name: Install dependencies
       run: |
         sudo apt update
@@ -24,34 +21,30 @@ jobs:
         dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_apt_versions.txt
         if [ -n "$(diff new_apt_versions.txt apt_versions.txt)" ]; then
           echo "::warning:: apt packages versions diff: $(diff new_apt_versions.txt apt_versions.txt)"
-          diff --side-by-side --suppress-common-lines new_apt_versions.txt apt_versions.txt
+          diff --side-by-side --suppress-common-lines new_apt_versions.txt apt_versions.txt 2>/dev/null
         fi
 
-    - name: attempt to add libtiff.so to binaries lib
+    - name: Get Environment
+      id: get_env
       run: |
-        find /lib -name "libtiff.so" 2>/dev/null
-        find /usr -name "libtiff.so" 2>/dev/null
-        cd Cell2Fire
-        # 
-        mkdir lib
-        # Find libtiff.so and check if it exists
-        afile=$(find /usr -name "libtiff.so" 2>/dev/null)
-        if [ -f "$afile" ]; then
-          # Copy the file only if it exists
-          cp "$afile" "lib/"
-        else
-          echo "libtiff.so not found in /usr"
-        fi
-        ls lib
+        echo "DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )" >> $GITHUB_ENV
+        echo "CODENAME=$( lsb_release --short --codename 2>/dev/null )" >> $GITHUB_ENV
+        echo "MACHINE=$( uname --machine 2>/dev/null )" >> $GITHUB_ENV
+        echo "A ${{ env.CODENAME }},${{ env.MACHINE }},${{ env.DISTRIBUTION }}"
+        echo "B $CODENAME,$MACHINE,$DISTRIBUTION"
+        # - name: Stop
+        #   run: throw "Exiting!"
+
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Build
       run: |
         cd Cell2Fire
         make clean
-        make 
+        make
         ldd Cell2Fire
-        ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
-        mv Cell2Fire Cell2Fire$ext
+        mv Cell2Fire Cell2Fire.${{ env.DISTRIBUTION }}.${{ env.CODENAME }}.${{ env.MACHINE }}
 
     - name: Test
       run: |
@@ -61,5 +54,5 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: binaries-Linux-x86_64
-        path: Cell2Fire/Cell2Fire.Linux.x86_64
+        name: binaries-${{ env.DISTRIBUTION }}-${{ env.CODENAME }}-${{ env.MACHINE }}
+        path: Cell2Fire/Cell2Fire.${{ env.DISTRIBUTION }}.${{ env.CODENAME }}.${{ env.MACHINE }}
