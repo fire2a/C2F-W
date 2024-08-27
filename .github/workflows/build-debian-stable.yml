@@ -25,6 +25,9 @@ jobs:
         echo "MACHINE=$( python3 -c 'import platform; print(platform.machine())'" >> $GITHUB_ENV
 	echo "$ID,$CODENAME,$SYSTEM,$MACHINE"
 
+    - name: Stop
+      run: throw "Exiting!"
+
     - name: Checkout code
       uses: actions/checkout@v2
 
