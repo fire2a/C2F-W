@@ -13,6 +13,7 @@ permissions:
 jobs:
   ubuntu_build:
     runs-on: ubuntu-latest
+
     steps:
     - name: Install dependencies
       run: |
@@ -49,7 +50,7 @@ jobs:
     - name: Test
       run: |
         cd test
-        bash test.sh
+        bash test.sh .${{ env.DISTRIBUTION }}.${{ env.CODENAME }}.${{ env.MACHINE }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
