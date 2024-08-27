@@ -27,7 +27,7 @@ jobs:
         run: |
           if [ "${{ matrix.system }}" = "fedora:latest" ]; then
             # dnf update -y
-            dnf install -y gcc-c++ make lsb-release unzip diff boost-devel eigen3-devel libtiff-devel
+            dnf install -y gcc-c++ make lsb-release unzip diffutils boost-devel eigen3-devel libtiff-devel
           elif [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
             apt update
             apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
