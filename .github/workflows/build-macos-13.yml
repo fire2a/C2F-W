@@ -1,4 +1,4 @@
-name: macos-latest(arm64) build
+name: build macos-13(x86_64)
 
 on:
   # pull_request:
@@ -12,27 +12,22 @@ permissions:
 
 jobs:
   macos_build:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
     - name: Doit
       run: |
-        # which gcc-12
-        # which brew
-        brew install boost eigen llvm libopenmpt libtiff
-        echo "find boost"
-        find /opt/homebrew -name "boost" 2>/dev/null
-        echo "find llvm"
-        find /opt/homebrew -name "llvm" 2>/dev/null
-        echo "find Eigen"
-        find /opt/homebrew -name "Eigen" 2>/dev/null
+        echo "arch"
+        arch
+        g++-12 --version
+        brew install boost eigen llvm libomp libtiff
         cd Cell2Fire
         echo "cleaning"
-        make clean -f makefile.macos-latest
+        make clean -f makefile.macos-13
         echo "building"
-        make -f makefile.macos-latest
+        make -f makefile.macos-13
         echo "end build"
         ldd Cell2Fire
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
@@ -47,5 +42,5 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: binaries-Darwin-arm64
-        path: Cell2Fire/Cell2Fire.Darwin.arm64
+        name: binaries-Darwin-x86_64
+        path: Cell2Fire/Cell2Fire.Darwin.x86_64

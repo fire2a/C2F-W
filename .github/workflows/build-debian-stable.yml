@@ -1,4 +1,4 @@
-name: debian stable build
+name: build debian stable
 
 on:
   pull_request:

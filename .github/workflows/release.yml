@@ -1,4 +1,4 @@
-name: build and release
+name: release
 on:
   pull_request:
     branches:
@@ -13,21 +13,24 @@ permissions:
   contents: write
 
 jobs:
-  call_ubuntu_build:
-      uses: ./.github/workflows/buildubuntu-latest.yml
+  build_ubuntu_latest:
+      uses: ./.github/workflows/build-ubuntu-latest.yml
 
-  # call_macos_build:
-  #     uses: ./.github/workflows/buildmacos-latest.yml
+  build_debian_stable:
+      uses: ./.github/workflows/build-debian-stable.yml
 
-  # call_macos_build_13:
-  #     uses: ./.github/workflows/buildmacos-13.yml
+  # build_macos_latest:
+  #     uses: ./.github/workflows/build-macos-latest.yml
 
-  call_windows_build:
-      uses: ./.github/workflows/buildwindows.yml
+  # build_macos_13:
+  #     uses: ./.github/workflows/build-macos-13.yml
+
+  build_windows:
+      uses: ./.github/workflows/build-windows.yml
 
   release:
-    # needs: [call_ubuntu_build, call_macos_build, call_macos_build_13, call_windows_build]
-    needs: [call_ubuntu_build, call_windows_build]
+    # needs: [build_ubuntu_latest, build_debian_stable, build_windows, build_macos_latest, build_macos_13]
+    needs: [build_ubuntu_latest, build_debian_stable, build_windows]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -45,19 +48,16 @@ jobs:
     - name: Download All Artifacts
       uses: actions/download-artifact@v4
       with:
-        pattern: binaries-*
+        pattern: binaries*
         path: Cell2Fire
         merge-multiple: true
           
-    - name: Binary Windows Zip
+    - name: Zip Binaries
       run: |
         cd Cell2Fire
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
-        
-    - name: Binary Linux Zip
-      run: |
-        cd Cell2Fire
-        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Linux-x86_64-binary.zip Cell2Fire.Linux.x86_64
+        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip Cell2Fire.Debian.bookworm.x86_64
+        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.jammy.x86_64-binary.zip Cell2Fire.Ubuntu.jammy.x86_64
 
     - name: Zip Data Instances
       run: |
@@ -83,8 +83,9 @@ jobs:
       with:
         artifacts: |
           Cell2FireW_${{ env.RELEASE_TAG }}.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-Linux-x86_64-binary.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
+          Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip
+          Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.jammy.x86_64-binary.zip
           Kitral-asc.zip
           Kitral-tif.zip
           CanadianFBP-asc.zip
