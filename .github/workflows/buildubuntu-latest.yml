@@ -30,6 +30,7 @@ jobs:
     - name: attempt to add libtiff.so to binaries lib
       run: |
         find /lib -name "libtiff.so" 2>/dev/null
+        find /usr -name "libtiff.so" 2>/dev/null
         cd Cell2Fire
         # 
         mkdir lib
