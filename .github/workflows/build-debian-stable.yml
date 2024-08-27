@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     container: debian:stable-slim
 
+    steps:
     - name: Install dependencies
       run: |
         apt-get update
         sudo apt install -y g++-12 make libboost-all-dev libeigen3-dev libtiff-dev
 
-    steps:
     - name: Get Environment
       id: get_env
       run: |
