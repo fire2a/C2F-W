@@ -16,10 +16,21 @@ jobs:
     container: debian:stable-slim
 
     steps:
-    - name: Install dependencies
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
       run: |
         apt update
         apt install -y g++-12 make lsb-release libboost-all-dev libeigen3-dev libtiff-dev
+
+    - name: Check Packages Versions
+      run: |
+        dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs_debian.txt
+        if [ -n "$(diff new_pkgs_debian.txt pkgs_debian.txt)" ]; then
+          echo "::warning:: apt packages versions diff! $(diff new_pkgs_debian.txt pkgs_debian.txt)"
+          echo $(diff --side-by-side --suppress-common-lines new_pkgs_debian.txt pkgs_debian.txt || true)
+        fi
 
     - name: Get Environment
       id: get_env
@@ -28,12 +39,6 @@ jobs:
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
         echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
-        
-        # - name: Stop
-        #   run: throw "Exiting!"
-
-    - name: Checkout code
-      uses: actions/checkout@v4
 
     - name: Build
       run: |
@@ -43,13 +48,13 @@ jobs:
         ldd Cell2Fire
         mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
 
-        # - name: Test
-        #   run: |
-        #     cd test
-        #     bash test.sh ${{ env.SUFFIX }}
+    - name: Test
+      run: |
+        cd test
+        bash test.sh ${{ env.SUFFIX }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: binaries.${{ env.SUFFIX }}
+        name: binaries${{ env.SUFFIX }}
         path: Cell2Fire/Cell2Fire${{ env.SUFFIX }}

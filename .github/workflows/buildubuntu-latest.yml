@@ -15,14 +15,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install dependencies
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
       run: |
         sudo apt update
         sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev
-        dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_apt_versions.txt
-        if [ -n "$(diff new_apt_versions.txt apt_versions.txt)" ]; then
-          echo "::warning:: apt packages versions diff: $(diff new_apt_versions.txt apt_versions.txt)"
-          diff --side-by-side --suppress-common-lines new_apt_versions.txt apt_versions.txt 2>/dev/null
+
+    - name: Check Packages Versions
+      run: |
+        dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs_ubuntu.txt
+        if [ -n "$(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)" ]; then
+          echo "::warning:: apt packages versions diff! $(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)"
+          echo $(diff --side-by-side --suppress-common-lines new_pkgs_ubuntu.txt pkgs_ubuntu.txt || true)
         fi
 
     - name: Get Environment
@@ -32,12 +38,6 @@ jobs:
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
         echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
-        
-        # - name: Stop
-        #   run: throw "Exiting!"
-
-    - name: Checkout code
-      uses: actions/checkout@v4
 
     - name: Build
       run: |
@@ -47,13 +47,13 @@ jobs:
         ldd Cell2Fire
         mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
 
-        # - name: Test
-        #   run: |
-        #     cd test
-        #     bash test.sh ${{ env.SUFFIX }}
+    - name: Test
+      run: |
+        cd test
+        bash test.sh ${{ env.SUFFIX }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: binaries.${{ env.SUFFIX }}
+        name: binaries${{ env.SUFFIX }}
         path: Cell2Fire/Cell2Fire${{ env.SUFFIX }}
