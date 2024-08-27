@@ -1,15 +1,13 @@
+---
 name: debian stable build
-
 on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
-  workflow_call:
-
+  workflow_dispatch: null
+  workflow_call: null
 permissions:
   contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
