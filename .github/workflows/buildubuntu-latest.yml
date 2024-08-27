@@ -28,7 +28,10 @@ jobs:
         dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs_ubuntu.txt
         if [ -n "$(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)" ]; then
           echo "::warning:: apt packages versions diff! $(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)"
-          echo $(diff --side-by-side --suppress-common-lines new_pkgs_ubuntu.txt pkgs_ubuntu.txt || true)
+          diff_output=$(diff --side-by-side --suppress-common-lines new_pkgs_ubuntu.txt pkgs_ubuntu.txt || true)
+          echo "$diff_output" | while IFS= read -r line; do
+            echo "$line"
+          done
         fi
 
     - name: Get Environment
