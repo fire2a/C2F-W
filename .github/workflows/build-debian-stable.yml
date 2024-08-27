@@ -1,15 +1,17 @@
----
 name: debian stable build
+
 on:
   pull_request:
     branches:
       - main
-  workflow_dispatch: null
-  workflow_call: null
+  workflow_dispatch:
+  workflow_call:
+
 permissions:
   contents: write
+
 jobs:
-  build:
+  debian_build:
     runs-on: ubuntu-latest
     container: debian:stable-slim
 
