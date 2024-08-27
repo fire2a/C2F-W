@@ -29,7 +29,6 @@ jobs:
         echo "MACHINE=$( uname --machine 2>/dev/null )" >> $GITHUB_ENV
         echo ${{ env.CODENAME }},${{ env.MACHINE }},${{ env.DISTRIBUTION }}
         echo ${{ env }}
-
         # - name: Stop
         #   run: throw "Exiting!"
 
@@ -43,7 +42,6 @@ jobs:
         make
         ldd Cell2Fire
         mv Cell2Fire Cell2Fire.${{ env.DISTRIBUTION }}.${{ env.CODENAME }}.${{ env.MACHINE }}
-
         #- name: Test
         #  run: |
         #    cd test
