@@ -13,7 +13,7 @@ permissions:
 jobs:
   debian_build:
     runs-on: ubuntu-latest
-    container: stable-slim
+    container: debian:stable-slim
 
     steps:
     - name: Install dependencies
