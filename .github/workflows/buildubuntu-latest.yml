@@ -24,7 +24,7 @@ jobs:
         dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_apt_versions.txt
         if [ -n "$(diff new_apt_versions.txt apt_versions.txt)" ]; then
           echo "::warning:: apt packages versions diff: $(diff new_apt_versions.txt apt_versions.txt)"
-          echo "$(diff --side-by-side --suppress-common-lines new_apt_versions.txt apt_versions.txt)"
+          diff --side-by-side --suppress-common-lines new_apt_versions.txt apt_versions.txt
         fi
 
     - name: attempt to add libtiff.so to binaries lib
@@ -47,8 +47,8 @@ jobs:
     - name: Build
       run: |
         cd Cell2Fire
-        make clean -f makefile.ubuntu-latest
-        make -f makefile.ubuntu-latest
+        make clean
+        make 
         ldd Cell2Fire
         ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
         mv Cell2Fire Cell2Fire$ext

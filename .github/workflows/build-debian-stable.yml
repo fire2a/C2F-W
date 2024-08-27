@@ -1,0 +1,54 @@
+name: debian stable build
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: debian:stable-slim
+
+    steps:
+    - name: Get Environment
+      id: get_env
+      run: |
+        echo `ID=$( python3 -c "import platform; print(platform.freedesktop_os_release()['ID']"` >> $GITHUB_ENV
+        echo `CODENAME=$( python3 -c "import platform; print(platform.freedesktop_os_release()['VERSION_CODENAME']"` >> $GITHUB_ENV
+        echo "SYSTEM=$( python3 -c 'import platform; print(platform.system())'" >> $GITHUB_ENV
+        echo "MACHINE=$( python3 -c 'import platform; print(platform.machine())'" >> $GITHUB_ENV
+	echo "$ID,$CODENAME,$SYSTEM,$MACHINE"
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        apt-get update
+        sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev
+
+    - name: Build
+      run: |
+        cd Cell2Fire
+        make clean
+        make
+        ldd Cell2Fire
+        ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
+        mv Cell2Fire Cell2Fire.DebianBookworm$ext
+
+    - name: Test
+      run: |
+        cd test
+        bash test.sh
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries-Linux-x86_64
+        path: Cell2Fire/Cell2Fire.DebianBookworm.Linux.x86_64
