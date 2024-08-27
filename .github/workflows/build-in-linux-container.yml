@@ -25,17 +25,17 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          if [ "${{ matrix.system }}" == "fedora:latest" ]; then
+          if [ "${{ matrix.system }}" = "fedora:latest" ]; then
             dnf update -y
             dnf install -y gcc-c++ make lsb-release unzip boost-devel eigen3-devel libtiff-devel
-          elif [ "${{ matrix.system }}" == "debian:stable-slim" ]; then
+          elif [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
             apt update
             apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
           fi
 
       - name: Check Packages Versions
         run: |
-          if [ "${{ matrix.system }}" == "fedora:latest" ]; then
+          if [ "${{ matrix.system }}" = "fedora:latest" ]; then
             rpm -qa --queryformat '%{NAME} %{VERSION}\n' gcc-c++ boost-devel eigen3-devel libtiff-devel > new_pkgs_fedora.txt
             if [ -n "$(diff new_pkgs_fedora.txt pkgs_fedora.txt)" ]; then
               echo "::warning:: dnf packages versions diff! $(diff new_pkgs_fedora.txt pkgs_fedora.txt)"
@@ -44,7 +44,7 @@ jobs:
                 echo "$line"
               done
             fi
-          elif [ "${{ matrix.system }}" == "debian:stable-slim" ]; then
+          elif [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
             dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs_debian.txt
             if [ -n "$(diff new_pkgs_debian.txt pkgs_debian.txt)" ]; then
               echo "::warning:: apt packages versions diff! $(diff new_pkgs_debian.txt pkgs_debian.txt)"
