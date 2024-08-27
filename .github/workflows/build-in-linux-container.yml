@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        system: [fedora:latest, debian:stable-slim]
+        system: ["fedora:latest", "debian:stable-slim"]
 
     container: ${{ matrix.system }}
 
