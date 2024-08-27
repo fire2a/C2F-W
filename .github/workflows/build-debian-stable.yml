@@ -19,11 +19,13 @@ jobs:
     - name: Get Environment
       id: get_env
       run: |
-        echo `ID=$( python3 -c "import platform; print(platform.freedesktop_os_release()['ID']"` >> $GITHUB_ENV
-        echo `CODENAME=$( python3 -c "import platform; print(platform.freedesktop_os_release()['VERSION_CODENAME']"` >> $GITHUB_ENV
-        echo "SYSTEM=$( python3 -c 'import platform; print(platform.system())'" >> $GITHUB_ENV
-        echo "MACHINE=$( python3 -c 'import platform; print(platform.machine())'" >> $GITHUB_ENV
-	echo "$ID,$CODENAME,$SYSTEM,$MACHINE"
+        echo "ID=$(python3 -c \"import platform; print(platform.freedesktop_os_release()['ID'])\")" >> $GITHUB_ENV
+        echo "CODENAME=$( python3 -c \"import platform; print(platform.freedesktop_os_release()['VERSION_CODENAME'])\")" >> $GITHUB_ENV
+        echo "SYSTEM=$( python3 -c 'import platform; print(platform.system())')" >> $GITHUB_ENV
+        echo "MACHINE=$( python3 -c 'import platform; print(platform.machine())')" >> $GITHUB_ENV
+        echo "$ID,$CODENAME,$SYSTEM,$MACHINE"
+        echo ${{ env.CODENAME }}
+        echo ${{ env }}
 
     - name: Stop
       run: throw "Exiting!"
