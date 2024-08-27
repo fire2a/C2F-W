@@ -1,4 +1,4 @@
-name: windows build
+name: build windows
 
 on:
   pull_request:
@@ -117,9 +117,6 @@ jobs:
         .\vcpkg install tiff # --recurse --editable
         # Write-Host "Listing all files in installed\x64-windows:"
         # Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
-
-        # - name: Stop
-        #   run: throw "Exiting!"
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
