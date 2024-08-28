@@ -44,15 +44,18 @@ jobs:
         echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
     - name: Build
+      # continue-on-error: true
       run: |
         cd Cell2Fire
         make clean
         make 
-        ldd Cell2Fire
-        mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
+        mkdir ~/binaries
+        ldd Cell2Fire > ~/binaries/ldd.txt
+        mv Cell2Fire ~/binaries/Cell2Fire${{ env.SUFFIX }}
         make clean
-        make -f makefile.static
-        ldd Cell2Fire
+        make -f makefile.static 2>> ~/binaries/make_static_error.log
+        ldd Cell2Fire >> ~/binaries/ldd.txt
+        mv Cell2Fire ~/binaries
 
     - name: Test
       run: |
@@ -63,7 +66,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: binaries
-        path: Cell2Fire/Cell2Fire*
+        path: binaries
 
   test:
     needs: build
