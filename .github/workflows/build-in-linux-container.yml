@@ -30,7 +30,8 @@ jobs:
             dnf check-update
             dnf install -y gcc-c++ make lsb-release unzip diffutils boost-devel eigen3-devel libtiff-devel
           elif [ "${{ matrix.system }}" = "rockylinux:8.9-minimal" ]; then
-            # microdnf update
+            microdnf install -y epel-release
+            microdnf config-manager --set-enabled devel
             microdnf install -y gcc-c++ make redhat-lsb-core unzip diffutils tar boost-devel eigen3-devel libtiff-devel
           fi
 
