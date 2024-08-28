@@ -21,9 +21,6 @@ jobs:
     container: ${{ matrix.system }}
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
       - name: Install Dependencies
         run: |
           if [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
@@ -37,6 +34,9 @@ jobs:
             dnf install -y gcc-c++ make redhat-lsb-core unzip diffutils tar boost-devel eigen3-devel libtiff-devel
           fi
 
+      - name: Checkout Code
+        uses: actions/checkout@v4
+  
       - name: Check Packages Versions
         run: |
           if [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
