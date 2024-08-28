@@ -53,7 +53,7 @@ jobs:
         ldd Cell2Fire > ~/binaries/ldd.txt
         mv Cell2Fire ~/binaries/Cell2Fire${{ env.SUFFIX }}
         make clean
-        make -f makefile.static 2>> ~/binaries/make_static_error.log
+        capture_warn = $(make -f makefile.static 2>> ~/binaries/ldd.txt)
         ldd Cell2Fire >> ~/binaries/ldd.txt
         mv Cell2Fire ~/binaries
 
