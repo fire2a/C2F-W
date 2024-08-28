@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  ubuntu_build:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,11 +21,11 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt update
-        sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev
+        sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
 
     - name: Check Packages Versions
       run: |
-        dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev > new_pkgs_ubuntu.txt
+        dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev > new_pkgs_ubuntu.txt
         cat new_pkgs_ubuntu.txt
         # if [ -n "$(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)" ]; then
         #   echo "::warning:: apt packages versions diff! $(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)"
@@ -66,6 +66,7 @@ jobs:
         path: Cell2Fire/Cell2Fire*
 
   test:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
