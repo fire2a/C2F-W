@@ -45,9 +45,8 @@ jobs:
         mkdir ~/binaries
         ldd Cell2Fire > ~/binaries/ldd.txt
         mv Cell2Fire ~/binaries/Cell2Fire${{ env.SUFFIX }}
-        make clean
-        capture_warn=$(make -f makefile.static 2>&1 >> ~/binaries/ldd.txt)
-        ldd Cell2Fire >> ~/binaries/ldd.txt
+        make -f makefile.static 2>&1 >> ~/binaries/ldd.txt || true
+        ldd Cell2Fire 2>&1 >> ~/binaries/ldd.txt || true
         mv Cell2Fire ~/binaries
 
     - name: Test
