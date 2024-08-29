@@ -35,8 +35,7 @@ jobs:
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
         echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
-      outputs:
-          suffix: ${{ steps.get_env.outputs.SUFFIX }}
+
 
     - name: BuildSuffix
       run: |
@@ -92,7 +91,8 @@ jobs:
       continue-on-error: true
       run: |
         cd test
-        bash test.sh ${{ needs.build.outputs.suffix }}
+        bash test.sh ${{ env.SUFFIX }}
+
 
     - name: PrepareSuffix
       run: |
@@ -102,4 +102,4 @@ jobs:
     - name: TestSuffix
       run: |
         cd test
-        bash test.sh ${{ needs.build.outputs.suffix }}
+        bash test.sh ${{ env.SUFFIX }}
