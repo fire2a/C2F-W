@@ -61,7 +61,7 @@ jobs:
     - name: BuildStatic
       run: |
         cd Cell2Fire
-        mkdir binaries
+        mkdir binaries-manylinux
         make clean
         make -f makefile.static 2>&1 >> binaries-manylinux/ldd_manylinux.txt || true
         ldd Cell2Fire 2>&1 >> binaries-manylinux/ldd_manylinux.txt || true
