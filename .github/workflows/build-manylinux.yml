@@ -42,13 +42,11 @@ jobs:
         cd Cell2Fire
         make clean
         make
-        chmod +x Cell2Fire
         mkdir binaries
-        ldd Cell2Fire > binaries/ldd.txt
+        ldd Cell2Fire > binaries/ldd1.txt
         mv Cell2Fire binaries/Cell2Fire${{ env.SUFFIX }}
-        make -f makefile.static 2>&1 >> binaries/ldd.txt || true
-        chmod +x Cell2Fire
-        ldd Cell2Fire 2>&1 >> binaries/ldd.txt || true
+        make -f makefile.static 2>&1 >> binaries/ldd2.txt || true
+        ldd Cell2Fire 2>&1 >> binaries/ldd3.txt || true
         mv Cell2Fire binaries
         ls binaries
 
@@ -72,6 +70,10 @@ jobs:
       with:
         name: binaries
         path: Cell2Fire
+
+    - name: chmod
+      run: |
+        chmod +x Cell2Fire/Cell2Fire*
 
     - name: TestManyLinux
       run: |
