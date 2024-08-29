@@ -86,8 +86,8 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        sudo apt update
-        sudo apt install -y unzip 
+        apt update
+        apt install -y unzip 
 
     - name: Download Artifacts
       uses: actions/download-artifact@v4
