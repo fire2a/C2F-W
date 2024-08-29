@@ -61,6 +61,7 @@ jobs:
           Cell2Fire/Cell2Fire${{ env.SUFFIX }}
 
   test:
+    needs: build
     runs-on: ubuntu-latest
     container: debian:stable-slim
 
@@ -70,7 +71,8 @@ jobs:
       if: false
       run: |
         apt update
-        apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
+        apt install -y lsb-release unzip
+        # apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
 
     - name: Get Environment
       id: get_env
