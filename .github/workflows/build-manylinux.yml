@@ -87,8 +87,8 @@ jobs:
     - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
-        name: binaries*
         path: Cell2Fire
+        pattern: binaries*
 
     - name: chmod
       run: |
