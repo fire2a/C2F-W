@@ -57,6 +57,7 @@ jobs:
     - name: Zip Binaries
       run: |
         cd Cell2Fire
+        ls
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip Cell2Fire ldd_manylinux.txt
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip Cell2Fire.Debian.bookworm.x86_64 ldd.Debian.bookworm.x86_64.txt
