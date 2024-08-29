@@ -1,9 +1,9 @@
 name: build debian stable
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
   workflow_call:
 
@@ -72,7 +72,7 @@ jobs:
     - name: Install Dependencies
       run: |
         apt update
-        apt install -y lsb-release unzip
+        apt install -y lsb-release unzip libtiff6
         # apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
 
     - name: Get Environment
