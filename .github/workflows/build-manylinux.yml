@@ -1,14 +1,14 @@
 name: build manylinux
 
-env:
-  do_dynamic: false
-
 on:
   pull_request:
     branches:
       - main
   workflow_dispatch:
   workflow_call:
+
+env:
+  do_dynamic: false
 
 permissions:
   contents: write
@@ -52,7 +52,6 @@ jobs:
 
     - name: Upload
       if: ${{ env.do_dynamic }} == 'true'
-      run: |
       uses: actions/upload-artifact@v4
       with:
         name: binaries-$suffix
