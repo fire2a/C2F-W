@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   build:
+    if: false
     runs-on: ubuntu-latest
     container: debian:stable-slim
 
@@ -61,14 +62,13 @@ jobs:
           Cell2Fire/Cell2Fire${{ env.SUFFIX }}
 
   test:
-    needs: build
+    # needs: build
     runs-on: ubuntu-latest
     container: debian:stable-slim
 
     steps:
 
     - name: Install Dependencies
-      if: false
       run: |
         apt update
         apt install -y lsb-release unzip
