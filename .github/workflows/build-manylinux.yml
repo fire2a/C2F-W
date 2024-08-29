@@ -42,18 +42,20 @@ jobs:
         cd Cell2Fire
         make clean
         make 
-        mkdir ~/binaries
-        ldd Cell2Fire > ~/binaries/ldd.txt
-        mv Cell2Fire ~/binaries/Cell2Fire${{ env.SUFFIX }}
-        make -f makefile.static 2>&1 >> ~/binaries/ldd.txt || true
-        ldd Cell2Fire 2>&1 >> ~/binaries/ldd.txt || true
-        mv Cell2Fire ~/binaries
+        mkdir binaries
+        ldd Cell2Fire > binaries/ldd.txt
+        mv Cell2Fire binaries/Cell2Fire${{ env.SUFFIX }}
+        make -f makefile.static 2>&1 >> binaries/ldd.txt || true
+        ldd Cell2Fire 2>&1 >> binaries/ldd.txt || true
+        mv Cell2Fire binaries
+        ls binaries
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: binaries
-        path: binaries
+        path: Cell2Fire/binaries
+        if-no-files-found: error
 
   test:
     needs: build
