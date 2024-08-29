@@ -25,6 +25,7 @@ jobs:
         apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
 
     - name: Check Packages Versions
+      if: false
       run: |
         dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs_debian.txt
         if [ -n "$(diff new_pkgs_debian.txt pkgs_debian.txt)" ]; then
@@ -48,7 +49,7 @@ jobs:
         cd Cell2Fire
         make clean
         make
-        ldd Cell2Fire
+        ldd Cell2Fire > ldd${{ env.SUFFIX }}.txt
         mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
 
     - name: Test

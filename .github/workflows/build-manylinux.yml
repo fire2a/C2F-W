@@ -8,7 +8,7 @@ on:
   workflow_call:
 
 env:
-  do_dynamic: false
+  do_dynamic: true
 
 permissions:
   contents: write
@@ -46,7 +46,7 @@ jobs:
         mkdir binaries-$suffix
         make clean
         make
-        ldd Cell2Fire > binaries-$suffix/ldd_$suffix.txt
+        ldd Cell2Fire > binaries-$suffix/ldd$suffix.txt
         mv Cell2Fire binaries-$suffix/Cell2Fire$suffix
         ls binaries-manylinux
 
@@ -116,7 +116,7 @@ jobs:
         bash test.sh $suffix
 
     - name: PrepareSuffix
-      if: env.do_dynamic
+      if: env.do_dynamic == true
       run: |
         sudo apt update
         sudo apt install -y libtiff5 libstdc++6 libgomp1 libgcc1
