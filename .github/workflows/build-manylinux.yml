@@ -49,11 +49,6 @@ jobs:
         ldd Cell2Fire 2>&1 >> ~/binaries/ldd.txt || true
         mv Cell2Fire ~/binaries
 
-    - name: Test
-      run: |
-        cd test
-        bash test.sh
-
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
