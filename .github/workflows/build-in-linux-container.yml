@@ -45,7 +45,7 @@ jobs:
   
       - name: Check Packages Versions
         run: |
-          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs.txt
+          dpkg-query -W -f='${binary:Package} ${Version}\n' g++ libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs.txt
           cat new_pkgs.txt
           # if [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
           #   dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs_debian.txt
