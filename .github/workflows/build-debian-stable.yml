@@ -61,7 +61,7 @@ jobs:
           Cell2Fire/Cell2Fire${{ env.SUFFIX }}
 
   test:
-    # needs: build
+    needs: build
     runs-on: ubuntu-latest
     container: debian:stable-slim
 
