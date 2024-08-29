@@ -14,9 +14,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    ouputs:
-      suffix: ${{ steps.get_env.outputs.suffix }}
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -32,12 +29,11 @@ jobs:
         cat new_pkgs_ubuntu.txt
 
     - name: Get Environment
-      id: get_env
       run: |
         DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
-        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}""
 
     - name: BuildSuffix
       run: |
@@ -46,7 +42,7 @@ jobs:
         make
         mkdir binaries
         ldd Cell2Fire > binaries/ldd1.txt
-        mv Cell2Fire binaries/Cell2Fire${{ steps.get_env.outputs.suffix }}
+        mv Cell2Fire binaries/Cell2Fire$suffix
         ls binaries
         
     - name: BuildStatic
@@ -71,6 +67,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
     - name: Checkout Code
       uses: actions/checkout@v4
 
@@ -90,13 +87,18 @@ jobs:
         cd test
         bash test.sh
 
+    - name: Get Environment
+      run: |
+        DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
+        CODENAME=$( lsb_release --short --codename 2>/dev/null )
+        MACHINE=$( uname --machine 2>/dev/null )
+        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}""
+
     - name: TestSuffixFail
       continue-on-error: true
       run: |
         cd test
         bash test.sh $suffix
-      env:
-        suffix: ${{ needs.build.outputs.suffix }}
 
     - name: PrepareSuffix
       run: |
@@ -107,5 +109,3 @@ jobs:
       run: |
         cd test
         bash test.sh $suffix
-      env:
-        suffix: ${{ needs.build.outputs.suffix }}
