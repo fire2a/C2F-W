@@ -87,11 +87,14 @@ jobs:
     - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
-        path: Cell2Fire
         pattern: binaries*
+        path: Cell2Fire
+        merge-multiple: true
 
     - name: chmod
       run: |
+        ls
+        ls Cell2Fire
         ls Cell2Fire/Cell2Fire*
         chmod +x Cell2Fire/Cell2Fire*
 
