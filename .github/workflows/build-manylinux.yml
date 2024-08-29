@@ -115,7 +115,7 @@ jobs:
         bash test.sh $suffix
 
     - name: PrepareSuffix
-      if: env.do_dynamic == true
+ccaa     if: env.do_dynamic == true
       run: |
         sudo apt update
         sudo apt install -y libtiff5 libstdc++6 libgomp1 libgcc1
