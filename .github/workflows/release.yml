@@ -43,8 +43,11 @@ jobs:
       run: |
         if [[ "${{ github.event_name }}" == "pull_request" ]]; then
           echo "RELEASE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+          echo "TAG_DESCRIPTION=${{ github.sha }}" >> $GITHUB_ENV
         else
           echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+          TAG_NAME=$(git describe --tags)
+          echo "TAG_DESCRIPTION=$(git tag -n99 $TAG_NAME | sed -n '2p')" >> $GITHUB_ENV
         fi
 
     - name: Download All Artifacts
@@ -83,6 +86,7 @@ jobs:
         astash=`git stash create`
         git archive --prefix=C2F/ --output="Cell2FireW_${{ env.RELEASE_TAG }}.zip" $astash
 
+
     - name: Create Draft Release
       uses: ncipollo/release-action@v1.14.0
       with:
@@ -100,5 +104,5 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         draft: true
         tag: ${{ env.RELEASE_TAG }}
-        name: "Draft Release #${{ env.RELEASE_TAG }}"
-        body: "This is a draft release for #${{ env.RELEASE_TAG }}."
+        name: "C2F-W: ${{ env.RELEASE_TAG }}"
+        body: ${{ env.TAG_DESCRIPTION}}
