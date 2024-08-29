@@ -92,6 +92,7 @@ jobs:
 
     - name: chmod
       run: |
+        ls Cell2Fire/Cell2Fire*
         chmod +x Cell2Fire/Cell2Fire*
 
     - name: TestManyLinux
