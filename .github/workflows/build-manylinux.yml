@@ -37,7 +37,7 @@ jobs:
         DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
-        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+        echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
     - name: BuildSuffix
       if: ${{ env.do_dynamic == 'true' }}
@@ -45,17 +45,17 @@ jobs:
         cd Cell2Fire
         make clean
         make
-        ldd Cell2Fire > ldd$suffix.txt
-        mv Cell2Fire Cell2Fire$suffix
+        ldd Cell2Fire > ldd${{ env.SUFFIX }}.txt
+        mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
 
     - name: Upload
       if: ${{ env.do_dynamic == 'true' }}
       uses: actions/upload-artifact@v4
       with:
-        name: binaries$suffix
+        name: binaries${{ env.SUFFIX }}
         path: |
-          Cell2Fire/ldd$suffix.txt
-          Cell2Fire/Cell2Fire$suffix
+          Cell2Fire/ldd${{ env.SUFFIX }}.txt
+          Cell2Fire/Cell2Fire${{ env.SUFFIX }}
         if-no-files-found: error
         
     - name: BuildStatic
@@ -77,6 +77,7 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
+    container: ubuntu-latest
 
     steps:
 
@@ -101,18 +102,19 @@ jobs:
 
     - name: Get Environment
       if: ${{ env.do_dynamic == 'true' }}
+      id: get_env
       run: |
         DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
-        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+        echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
     - name: TestSuffixFail
       if: ${{ env.do_dynamic == 'true' }}
       continue-on-error: true
       run: |
         cd test
-        bash test.sh $suffix
+        bash test.sh ${{ env.SUFFIX }}
 
     - name: PrepareSuffix
       if: ${{ env.do_dynamic == 'true' }}
@@ -124,4 +126,4 @@ jobs:
       if: ${{ env.do_dynamic == 'true' }}
       run: |
         cd test
-        bash test.sh $suffix
+        bash test.sh ${{ env.SUFFIX }}
