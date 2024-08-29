@@ -63,8 +63,8 @@ jobs:
         cd Cell2Fire
         mkdir binaries-manylinux
         make clean
-        make -f makefile.static 2>&1 >> binaries-manylinux/ldd_manylinux.txt || true
-        ldd Cell2Fire 2>&1 >> binaries-manylinux/ldd_manylinux.txt || true
+        make -f makefile.static >> binaries-manylinux/ldd_manylinux.txt 2>&1 || true
+        ldd Cell2Fire >> binaries-manylinux/ldd_manylinux.txt 2>&1 || true
         mv Cell2Fire binaries-manylinux
         ls binaries-manylinux
 
@@ -93,9 +93,6 @@ jobs:
 
     - name: chmod
       run: |
-        ls
-        ls Cell2Fire
-        ls Cell2Fire/Cell2Fire*
         chmod +x Cell2Fire/Cell2Fire*
 
     - name: TestManyLinux

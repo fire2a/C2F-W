@@ -1,3 +1,0 @@
-
-# -ldl /usr/lib/x86_64-linux-gnu/libtiff.a -ljpeg
-LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff -ldl /usr/lib/x86_64-linux-gnu/libtiff.a -ljpeg

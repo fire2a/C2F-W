@@ -1,4 +1,0 @@
-g++-12 12.2.0-14
-libboost-all-dev 1.74.0.3
-libeigen3-dev 3.4.0-4
-libtiff-dev:amd64 4.5.0-6+deb12u1
