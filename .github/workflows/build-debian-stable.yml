@@ -12,7 +12,6 @@ permissions:
 
 jobs:
   build:
-    if: false
     runs-on: ubuntu-latest
     container: debian:stable-slim
 
