@@ -74,6 +74,7 @@ jobs:
     - name: Git Archive
       run: |
         git rm -r data output test
+        git rm -f *.pdf
         git add -f Cell2Fire/*
         astash=`git stash create`
         git archive --prefix=C2F/ --output="Cell2FireW_${{ env.RELEASE_TAG }}.zip" $astash
