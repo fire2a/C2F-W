@@ -33,7 +33,7 @@ jobs:
         DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
-        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}""
+        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
     - name: BuildSuffix
       run: |
@@ -92,7 +92,7 @@ jobs:
         DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
-        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}""
+        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
     - name: TestSuffixFail
       continue-on-error: true
