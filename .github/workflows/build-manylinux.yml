@@ -13,6 +13,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    ouputs:
+      suffix: ${{ steps.get_env.outputs.suffix }}
 
     steps:
     - name: Checkout Code
@@ -34,8 +36,7 @@ jobs:
         DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
-        echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
-
+        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_OUTPUT
 
     - name: BuildSuffix
       run: |
@@ -44,7 +45,8 @@ jobs:
         make
         mkdir binaries
         ldd Cell2Fire > binaries/ldd1.txt
-        mv Cell2Fire binaries/Cell2Fire${{ env.SUFFIX }}
+        mv Cell2Fire binaries/Cell2Fire${{ steps.get_env.outputs.suffix }}
+        ls binaries
         
     - name: BuildStatic
       if: false
@@ -91,8 +93,9 @@ jobs:
       continue-on-error: true
       run: |
         cd test
-        bash test.sh ${{ env.SUFFIX }}
-
+        bash test.sh $suffix
+      env:
+        suffix: ${{ needs.build.outputs.suffix }}
 
     - name: PrepareSuffix
       run: |
@@ -102,4 +105,6 @@ jobs:
     - name: TestSuffix
       run: |
         cd test
-        bash test.sh ${{ env.SUFFIX }}
+        bash test.sh $suffix
+      env:
+        suffix: ${{ needs.build.outputs.suffix }}
