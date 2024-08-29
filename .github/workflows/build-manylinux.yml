@@ -35,9 +35,10 @@ jobs:
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
         echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+      outputs:
+          suffix: ${{ steps.get_env.outputs.SUFFIX }}
 
-    - name: Build
-      # continue-on-error: true
+    - name: BuildSuffix
       run: |
         cd Cell2Fire
         make clean
@@ -45,6 +46,12 @@ jobs:
         mkdir binaries
         ldd Cell2Fire > binaries/ldd1.txt
         mv Cell2Fire binaries/Cell2Fire${{ env.SUFFIX }}
+        
+    - name: BuildStatic
+      if: false
+      run: |
+        cd Cell2Fire
+        make clean
         make -f makefile.static 2>&1 >> binaries/ldd2.txt || true
         ldd Cell2Fire 2>&1 >> binaries/ldd3.txt || true
         mv Cell2Fire binaries
@@ -76,11 +83,23 @@ jobs:
         chmod +x Cell2Fire/Cell2Fire*
 
     - name: TestManyLinux
+      if: false
       run: |
         cd test
         bash test.sh
 
+    - name: TestSuffixFail
+      continue-on-error: true
+      run: |
+        cd test
+        bash test.sh ${{ needs.build.outputs.suffix }}
+
+    - name: PrepareSuffix
+      run: |
+        sudo apt update
+        sudo apt install -y libtiff5 libstdc++6 libgomp1 libgcc1
+
     - name: TestSuffix
       run: |
         cd test
-        bash test.sh ${{ env.SUFFIX }}
+        bash test.sh ${{ needs.build.outputs.suffix }}
