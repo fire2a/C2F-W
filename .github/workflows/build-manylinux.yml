@@ -1,5 +1,8 @@
 name: build manylinux
 
+env:
+  do_dynamic: false
+
 on:
   pull_request:
     branches:
@@ -10,10 +13,10 @@ on:
 permissions:
   contents: write
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -29,6 +32,7 @@ jobs:
         cat new_pkgs_ubuntu.txt
 
     - name: Get Environment
+      if: ${{ env.do_dynamic }}
       run: |
         DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
@@ -36,29 +40,29 @@ jobs:
         echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
     - name: BuildSuffix
+      if: ${{ env.do_dynamic }}
       run: |
         cd Cell2Fire
         make clean
         make
         mkdir binaries
-        ldd Cell2Fire > binaries/ldd1.txt
+        ldd Cell2Fire > binaries/ldd_$suffix.txt
         mv Cell2Fire binaries/Cell2Fire$suffix
         ls binaries
         
     - name: BuildStatic
-      if: false
       run: |
         cd Cell2Fire
         make clean
-        make -f makefile.static 2>&1 >> binaries/ldd2.txt || true
-        ldd Cell2Fire 2>&1 >> binaries/ldd3.txt || true
+        make -f makefile.static 2>&1 >> binaries/ldd_manylinux.txt || true
+        ldd Cell2Fire 2>&1 >> binaries/ldd_manylinux.txt || true
         mv Cell2Fire binaries
         ls binaries
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: binaries
+        name: binaries-manylinux
         path: Cell2Fire/binaries
         if-no-files-found: error
 
@@ -74,7 +78,7 @@ jobs:
     - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
-        name: binaries
+        name: binaries-manylinux
         path: Cell2Fire
 
     - name: chmod
@@ -82,12 +86,12 @@ jobs:
         chmod +x Cell2Fire/Cell2Fire*
 
     - name: TestManyLinux
-      if: false
       run: |
         cd test
         bash test.sh
 
     - name: Get Environment
+      if: ${{ env.do_dynamic }}
       run: |
         DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
@@ -95,17 +99,20 @@ jobs:
         echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
     - name: TestSuffixFail
+      if: ${{ env.do_dynamic }}
       continue-on-error: true
       run: |
         cd test
         bash test.sh $suffix
 
     - name: PrepareSuffix
+      if: ${{ env.do_dynamic }}
       run: |
         sudo apt update
         sudo apt install -y libtiff5 libstdc++6 libgomp1 libgcc1
 
     - name: TestSuffix
+      if: ${{ env.do_dynamic }}
       run: |
         cd test
         bash test.sh $suffix
