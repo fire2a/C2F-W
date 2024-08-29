@@ -41,11 +41,13 @@ jobs:
       run: |
         cd Cell2Fire
         make clean
-        make 
+        make
+        chmod +x Cell2Fire
         mkdir binaries
         ldd Cell2Fire > binaries/ldd.txt
         mv Cell2Fire binaries/Cell2Fire${{ env.SUFFIX }}
         make -f makefile.static 2>&1 >> binaries/ldd.txt || true
+        chmod +x Cell2Fire
         ldd Cell2Fire 2>&1 >> binaries/ldd.txt || true
         mv Cell2Fire binaries
         ls binaries
