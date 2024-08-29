@@ -67,6 +67,8 @@ jobs:
     container: debian:stable-slim
 
     steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Install Dependencies
       run: |
