@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  debian_build:
+  build:
     runs-on: ubuntu-latest
     container: debian:stable-slim
 
@@ -52,13 +52,47 @@ jobs:
         ldd Cell2Fire > ldd${{ env.SUFFIX }}.txt
         mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
 
-    - name: Test
-      run: |
-        cd test
-        bash test.sh ${{ env.SUFFIX }}
-
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: binaries${{ env.SUFFIX }}
-        path: Cell2Fire/Cell2Fire${{ env.SUFFIX }}
+        path: |
+          Cell2Fire/ldd${{ env.SUFFIX }}.txt
+          Cell2Fire/Cell2Fire${{ env.SUFFIX }}
+
+  test:
+    runs-on: ubuntu-latest
+    container: debian:stable-slim
+
+    steps:
+
+    - name: Install Dependencies
+      if: false
+      run: |
+        apt update
+        apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
+
+    - name: Get Environment
+      id: get_env
+      run: |
+        DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
+        CODENAME=$( lsb_release --short --codename 2>/dev/null )
+        MACHINE=$( uname --machine 2>/dev/null )
+        echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: binaries${{ env.SUFFIX }}
+        path: Cell2Fire
+        merge-multiple: true
+
+    - name: chmod
+      run: |
+        ls Cell2Fire
+        chmod +x Cell2Fire/Cell2Fire*
+
+    - name: Test
+      run: |
+        cd test
+        bash test.sh ${{ env.SUFFIX }}

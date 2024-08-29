@@ -43,36 +43,35 @@ jobs:
       if: env.do_dynamic == true
       run: |
         cd Cell2Fire
-        mkdir binaries-$suffix
         make clean
         make
-        ldd Cell2Fire > binaries-$suffix/ldd$suffix.txt
-        mv Cell2Fire binaries-$suffix/Cell2Fire$suffix
-        ls binaries-manylinux
+        ldd Cell2Fire > ldd$suffix.txt
+        mv Cell2Fire Cell2Fire$suffix
 
     - name: Upload
       if: env.do_dynamic == true
       uses: actions/upload-artifact@v4
       with:
-        name: binaries-$suffix
-        path: Cell2Fire/binaries-$suffix
+        name: binaries$suffix
+        path: |
+          Cell2Fire/ldd$suffix.txt
+          Cell2Fire/Cell2Fire$suffix
         if-no-files-found: error
         
     - name: BuildStatic
       run: |
         cd Cell2Fire
-        mkdir binaries-manylinux
         make clean
-        make -f makefile.static >> binaries-manylinux/ldd_manylinux.txt 2>&1 || true
-        ldd Cell2Fire >> binaries-manylinux/ldd_manylinux.txt 2>&1 || true
-        mv Cell2Fire binaries-manylinux
-        ls binaries-manylinux
+        make -f makefile.static > ldd_manylinux.txt 2>&1 || true
+        ldd Cell2Fire > ldd_manylinux.txt 2>&1 || true
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: binaries-manylinux-x86_64
-        path: Cell2Fire/binaries-manylinux
+        path: |
+          Cell2Fire/ldd_manylinux.txt
+          Cell2Fire/Cell2Fire
         if-no-files-found: error
 
   test:
