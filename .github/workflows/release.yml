@@ -1,4 +1,5 @@
 name: release
+
 on:
   pull_request:
     branches:
@@ -13,11 +14,8 @@ permissions:
   contents: write
 
 jobs:
-  build_ubuntu_latest:
-      uses: ./.github/workflows/build-ubuntu-latest.yml
-
-  build_debian_stable:
-      uses: ./.github/workflows/build-debian-stable.yml
+  build_manylinux:
+      uses: ./.github/workflows/build-manylinux.yml
 
   # build_macos_latest:
   #     uses: ./.github/workflows/build-macos-latest.yml
@@ -30,8 +28,9 @@ jobs:
 
   release:
     # needs: [build_ubuntu_latest, build_debian_stable, build_windows, build_macos_latest, build_macos_13]
-    needs: [build_ubuntu_latest, build_debian_stable, build_windows]
+    needs: [build_manylinux, build_windows]
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -56,8 +55,9 @@ jobs:
       run: |
         cd Cell2Fire
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
-        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip Cell2Fire.Debian.bookworm.x86_64
-        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.jammy.x86_64-binary.zip Cell2Fire.Ubuntu.jammy.x86_64
+        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip Cell2Fire ldd_manylinux.txt
+        # zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip Cell2Fire.Debian.bookworm.x86_64
+        # zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.jammy.x86_64-binary.zip Cell2Fire.Ubuntu.jammy.x86_64
 
     - name: Zip Data Instances
       run: |
@@ -84,8 +84,7 @@ jobs:
         artifacts: |
           Cell2FireW_${{ env.RELEASE_TAG }}.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.jammy.x86_64-binary.zip
+          Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip
           Kitral-asc.zip
           Kitral-tif.zip
           CanadianFBP-asc.zip

@@ -1,0 +1,128 @@
+name: build manylinux
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  do_dynamic: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
+
+    - name: Check Packages Versions
+      run: |
+        dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev > new_pkgs_ubuntu.txt
+        cat new_pkgs_ubuntu.txt
+
+    - name: Get Environment
+      if: env.do_dynamic == true
+      run: |
+        DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
+        CODENAME=$( lsb_release --short --codename 2>/dev/null )
+        MACHINE=$( uname --machine 2>/dev/null )
+        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+
+    - name: BuildSuffix
+      if: env.do_dynamic == true
+      run: |
+        cd Cell2Fire
+        mkdir binaries-$suffix
+        make clean
+        make
+        ldd Cell2Fire > binaries-$suffix/ldd_$suffix.txt
+        mv Cell2Fire binaries-$suffix/Cell2Fire$suffix
+        ls binaries-manylinux
+
+    - name: Upload
+      if: env.do_dynamic == true
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries-$suffix
+        path: Cell2Fire/binaries-$suffix
+        if-no-files-found: error
+        
+    - name: BuildStatic
+      run: |
+        cd Cell2Fire
+        mkdir binaries-manylinux
+        make clean
+        make -f makefile.static >> binaries-manylinux/ldd_manylinux.txt 2>&1 || true
+        ldd Cell2Fire >> binaries-manylinux/ldd_manylinux.txt 2>&1 || true
+        mv Cell2Fire binaries-manylinux
+        ls binaries-manylinux
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries-manylinux-x86_64
+        path: Cell2Fire/binaries-manylinux
+        if-no-files-found: error
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: binaries*
+        path: Cell2Fire
+        merge-multiple: true
+
+    - name: chmod
+      run: |
+        chmod +x Cell2Fire/Cell2Fire*
+
+    - name: TestManyLinux
+      run: |
+        cd test
+        bash test.sh
+
+    - name: Get Environment
+      if: env.do_dynamic == true
+      run: |
+        DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
+        CODENAME=$( lsb_release --short --codename 2>/dev/null )
+        MACHINE=$( uname --machine 2>/dev/null )
+        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+
+    - name: TestSuffixFail
+      if: env.do_dynamic == true
+      continue-on-error: true
+      run: |
+        cd test
+        bash test.sh $suffix
+
+    - name: PrepareSuffix
+      if: env.do_dynamic
+      run: |
+        sudo apt update
+        sudo apt install -y libtiff5 libstdc++6 libgomp1 libgcc1
+
+    - name: TestSuffix
+      if: env.do_dynamic == true
+      run: |
+        cd test
+        bash test.sh $suffix

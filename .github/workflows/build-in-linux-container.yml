@@ -1,0 +1,103 @@
+name: Build linux docker
+
+on:
+  # pull_request:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        system: ["rockylinux:8.9-minimal"]
+        # system: ["fedora:latest", "debian:stable-slim", "rockylinux:8.9-minimal"]
+
+    container: ${{ matrix.system }}
+
+    steps:
+      - name: Install Dependencies
+        run: |
+          if [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
+            apt update
+            apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
+          elif [ "${{ matrix.system }}" = "fedora:latest" ]; then
+            dnf check-update
+            dnf install -y gcc-c++ make lsb-release unzip diffutils boost-devel eigen3-devel libtiff-devel
+          elif [ "${{ matrix.system }}" = "rockylinux:8.9-minimal" ]; then
+            microdnf install -y epel-release
+            microdnf install -y 'dnf-command(config-manager)'
+            microdnf config-manager --set-enabled crb
+            microdnf config-manager --set-enabled devel
+            microdnf install -y gcc-c++ make redhat-lsb-core unzip diffutils tar boost-devel eigen3-devel libtiff-devel
+          fi
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+  
+      - name: Check Packages Versions
+        run: |
+          if [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
+            dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs_debian.txt
+            if [ -n "$(diff new_pkgs_debian.txt pkgs_debian.txt)" ]; then
+              echo "::warning:: apt packages versions diff! $(diff new_pkgs_debian.txt pkgs_debian.txt)"
+              diff_output=$(diff --side-by-side --suppress-common-lines new_pkgs_debian.txt pkgs_debian.txt || true)
+            fi
+          elif [ "${{ matrix.system }}" = "fedora:latest" ]; then
+            rpm -qa --queryformat '%{NAME} %{VERSION}\n' gcc-c++ boost-devel eigen3-devel libtiff-devel > new_pkgs_fedora.txt
+              if [ -n "$(diff new_pkgs_fedora.txt pkgs_fedora.txt)" ]; then
+                echo "::warning:: dnf packages versions diff! $(diff new_pkgs_fedora.txt pkgs_fedora.txt)"
+                diff_output=$(diff --side-by-side --suppress-common-lines new_pkgs_fedora.txt pkgs_fedora.txt || true)
+            fi
+          elif [ "${{ matrix.system }}" = "rockylinux:8.9-minimal" ]; then
+            rpm -qa --queryformat '%{NAME} %{VERSION}\n' gcc-c++ boost-devel eigen3-devel libtiff-devel > new_pkgs_rocky.txt
+            if [ -n "$(diff new_pkgs_rocky.txt pkgs_rocky.txt)" ]; then
+              echo "::warning:: dnf packages versions diff! $(diff new_pkgs_rocky.txt pkgs_rocky.txt)"
+              diff_output=$(diff --side-by-side --suppress-common-lines new_pkgs_rocky.txt pkgs_rocky.txt || true)
+            fi
+          fi
+          echo "$diff_output" | while IFS= read -r line; do
+            echo "$line"
+            done
+          echo "::warning:: $(g++ --version)"
+
+
+      - name: Get Environment
+        id: get_env
+        run: |
+          DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
+          CODENAME=$( lsb_release --short --codename 2>/dev/null )
+          if [ "${{ matrix.system }}" = "fedora:latest" ]; then
+          CODENAME=latest
+          fi
+          MACHINE=$( uname --machine 2>/dev/null )
+          echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+
+
+      - name: Build
+        run: |
+          cd Cell2Fire
+          if [ "${{ matrix.system }}" = "fedora:latest" ]; then
+            sed -i -e 's/CXX = g++-12/CXX = g++/' makefile
+            head makefile
+          fi
+          make clean
+          make
+          ldd Cell2Fire
+          mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
+
+      - name: Test
+        run: |
+          cd test
+          bash test.sh ${{ env.SUFFIX }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries${{ env.SUFFIX }}
+          path: Cell2Fire/Cell2Fire${{ env.SUFFIX }}
