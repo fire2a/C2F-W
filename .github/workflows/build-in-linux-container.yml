@@ -28,7 +28,7 @@ jobs:
           # g++ --version | awk 'NR==1 {print $3}' | cut -d. -f1
           # if [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
           apt update
-          apt install -y make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
+          apt install -y g++ make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
           # apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
           # elif [ "${{ matrix.system }}" = "fedora:latest" ]; then
           #   dnf check-update
