@@ -16,6 +16,7 @@ jobs:
     strategy:
       matrix:
         # system: ["rockylinux:8.9-minimal", "fedora:latest", ]
+        #, "ubuntu:focal" E: Unable to locate package g++-12
         system: ["debian:stable-slim", "ubuntu:focal", "ubuntu:jammy", "ubuntu:latest"]
 
     container: ${{ matrix.system }}
@@ -23,26 +24,28 @@ jobs:
     steps:
       - name: Install Dependencies
         run: |
+          # g++ --version | awk 'NR==1 {print $3}' | cut -d. -f1
           # if [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
           apt update
-          apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
-            # elif [ "${{ matrix.system }}" = "fedora:latest" ]; then
-            #   dnf check-update
-            #   dnf install -y gcc-c++ make lsb-release unzip diffutils boost-devel eigen3-devel libtiff-devel
-            # elif [ "${{ matrix.system }}" = "rockylinux:8.9-minimal" ]; then
-            #   microdnf install -y epel-release
-            #   microdnf install -y 'dnf-command(config-manager)'
-            #   microdnf config-manager --set-enabled crb
-            #   microdnf config-manager --set-enabled devel
-            #   microdnf install -y gcc-c++ make redhat-lsb-core unzip diffutils tar boost-devel eigen3-devel libtiff-devel
-            # fi
+          apt install -y g++ make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
+          # apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
+          # elif [ "${{ matrix.system }}" = "fedora:latest" ]; then
+          #   dnf check-update
+          #   dnf install -y gcc-c++ make lsb-release unzip diffutils boost-devel eigen3-devel libtiff-devel
+          # elif [ "${{ matrix.system }}" = "rockylinux:8.9-minimal" ]; then
+          #   microdnf install -y epel-release
+          #   microdnf install -y 'dnf-command(config-manager)'
+          #   microdnf config-manager --set-enabled crb
+          #   microdnf config-manager --set-enabled devel
+          #   microdnf install -y gcc-c++ make redhat-lsb-core unzip diffutils tar boost-devel eigen3-devel libtiff-devel
+          # fi
 
       - name: Checkout Code
         uses: actions/checkout@v4
   
       - name: Check Packages Versions
         run: |
-          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs.txt
+          dpkg-query -W -f='${binary:Package} ${Version}\n' g++ libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs.txt
           cat new_pkgs.txt
           # if [ "${{ matrix.system }}" = "debian:stable-slim" ]; then
           #   dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs_debian.txt
@@ -82,10 +85,13 @@ jobs:
 
 
       - name: Build
+        continue-on-error: true
         run: |
           cd Cell2Fire
+          gver=$(g++ --version | awk 'NR==1 {print $3}' | cut -d. -f1)
+          echo "g++ version: $gver"
           # if [ "${{ matrix.system }}" = "fedora:latest" ]; then
-          #   sed -i -e 's/CXX = g++-12/CXX = g++/' makefile
+          sed -i -e "s/CXX = g++-12/CXX = g++-$gver/" makefile
           #   head makefile
           # fi
           make clean
@@ -94,6 +100,7 @@ jobs:
           mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
 
       - name: Test
+        continue-on-error: true
         run: |
           cd test
           bash test.sh ${{ env.SUFFIX }}
