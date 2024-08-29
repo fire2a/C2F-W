@@ -10,12 +10,12 @@ on:
 permissions:
   contents: write
 
+ouputs:
+  suffix: ${{ jobs.build.steps.get_env.outputs.suffix }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    ouputs:
-      suffix: ${{ steps.get_env.outputs.suffix }}
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
         DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
         CODENAME=$( lsb_release --short --codename 2>/dev/null )
         MACHINE=$( uname --machine 2>/dev/null )
-        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_OUTPUT
+        echo "suffix=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> "$GITHUB_OUTPUT"
 
     - name: BuildSuffix
       run: |
