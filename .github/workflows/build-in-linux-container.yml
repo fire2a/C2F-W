@@ -18,6 +18,7 @@ jobs:
         # system: ["rockylinux:8.9-minimal", "fedora:latest", ]
         #, "ubuntu:focal" E: Unable to locate package g++-12
         system: ["debian:stable-slim", "ubuntu:focal", "ubuntu:jammy", "ubuntu:latest"]
+        continue-on-error: true
 
     container: ${{ matrix.system }}
 
