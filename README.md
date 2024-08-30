@@ -1,4 +1,13 @@
 # Cell2Fire W
+
+![build & test debian-stable](https://github.com/fire2a/C2F-W/actions/workflows/build-debian-stable.yml/badge.svg)
+![build & test manylinux & ubuntu-jammy](https://github.com/fire2a/C2F-W/actions/workflows/build-manylinux.yml/badge.svg)
+![build & test windows](https://github.com/fire2a/C2F-W/actions/workflows/build-windows.yml/badge.svg)
+![build & test Darwin-x86_64](https://github.com/fire2a/C2F-W/actions/workflows/build-macos-13.yml/badge.svg)
+![build & test Darwin-arm64](https://github.com/fire2a/C2F-W/actions/workflows/build-macos-latest.yml/badge.svg)
+![release](https://github.com/fire2a/C2F-W/actions/workflows/release.yml/badge.svg)
+![License](https://img.shields.io/github/license/fire2a/C2F-W.svg)
+
 A big-scale, grid, forest fire simulator; parallel and fast (c++) nevertheless with a friendly graphical user interface for QGIS.
 
 _Originally forked from [Cell2Fire](https://github.com/cell2fire/Cell2Fire), thanks to the work of Cristobal Pais, Jaime Carrasco, David Martell, [David L. Woodruff](https://github.com/DLWoodruff), Andres Weintraub, et al._
