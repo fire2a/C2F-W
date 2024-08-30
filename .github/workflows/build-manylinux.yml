@@ -21,7 +21,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Install Dependencies
+    - name: Install Build Dependencies
       run: |
         sudo apt update
         sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
@@ -39,7 +39,7 @@ jobs:
         MACHINE=$( uname --machine 2>/dev/null )
         echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
-    - name: BuildSuffix
+    - name: Build Suffix
       if: ${{ env.do_dynamic == 'true' }}
       run: |
         cd Cell2Fire
@@ -48,7 +48,7 @@ jobs:
         ldd Cell2Fire > ldd${{ env.SUFFIX }}.txt
         mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
 
-    - name: Upload
+    - name: Upload Suffix
       if: ${{ env.do_dynamic == 'true' }}
       uses: actions/upload-artifact@v4
       with:
@@ -58,14 +58,14 @@ jobs:
           Cell2Fire/Cell2Fire${{ env.SUFFIX }}
         if-no-files-found: error
         
-    - name: BuildStatic
+    - name: Build Static
       run: |
         cd Cell2Fire
         make clean
         make -f makefile.static > ldd_manylinux.txt 2>&1 || true
         ldd Cell2Fire > ldd_manylinux.txt 2>&1 || true
 
-    - name: Upload
+    - name: Upload Static
       uses: actions/upload-artifact@v4
       with:
         name: binaries-manylinux-x86_64
@@ -77,12 +77,17 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
-    container: ubuntu-latest
+    container: ubuntu:jammy
 
     steps:
 
     - name: Checkout Code
       uses: actions/checkout@v4
+
+    - name: Install Base Dependencies
+      run: |
+        apt update
+        apt install -y unzip lsb-release
 
     - name: Download Artifacts
       uses: actions/download-artifact@v4
@@ -95,7 +100,7 @@ jobs:
       run: |
         chmod +x Cell2Fire/Cell2Fire*
 
-    - name: TestManyLinux
+    - name: Test ManyLinux
       run: |
         cd test
         bash test.sh
@@ -109,20 +114,13 @@ jobs:
         MACHINE=$( uname --machine 2>/dev/null )
         echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
-    - name: TestSuffixFail
-      if: ${{ env.do_dynamic == 'true' }}
-      continue-on-error: true
-      run: |
-        cd test
-        bash test.sh ${{ env.SUFFIX }}
-
-    - name: PrepareSuffix
+    - name: Install Runtime Dependencies
       if: ${{ env.do_dynamic == 'true' }}
       run: |
-        sudo apt update
-        sudo apt install -y libtiff5 libstdc++6 libgomp1 libgcc1
+        apt update
+        apt install -y libtiff5 libstdc++6 libgomp1 libgcc1
 
-    - name: TestSuffix
+    - name: Test Suffix
       if: ${{ env.do_dynamic == 'true' }}
       run: |
         cd test

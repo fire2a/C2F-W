@@ -1,7 +1,7 @@
 # Cell2Fire W
 A big-scale, grid, forest fire simulator; parallel and fast (c++) nevertheless with a friendly graphical user interface for QGIS.
 
-_Originally forked from Cell2Fire, thanks to the work of Cristobal Pais, Jaime Carrasco, David Martell, [David L. Woodruff](https://github.com/DLWoodruff), Andres Weintraub, et al._
+_Originally forked from [Cell2Fire](https://github.com/cell2fire/Cell2Fire), thanks to the work of Cristobal Pais, Jaime Carrasco, David Martell, [David L. Woodruff](https://github.com/DLWoodruff), Andres Weintraub, et al._
 
 This fire spread simulator, supports 3 fire models:
 * Kitral, formerly: [C2F+K](https://github.com/fire2a/C2FK)
@@ -16,9 +16,9 @@ Installation, usage, specifications available by [reading the friendly manual he
 
 # Usage (TL;DR)
 
-- Easy: Use through QGIS GUI
-- Moderate: Download a release, unzip, and run the CLI
-- Collaborative: Clone & [compile](https://fire2a.github.io/docs/docs/Cell2Fire/README.html)
+- [Easy](https://fire2a.github.io/docs/docs/qgis-toolbox/README.html#usage-alternatives): Use through QGIS desktop application
+- [Moderate: CLI](#moderate-cli): Download a release, unzip, and run the CLI
+- [Collaborative](##collaborative): Clone & [compile](https://fire2a.github.io/docs/docs/Cell2Fire/README.html)
 
 # Output examples
 ## Previncat's Zone 60 (Catalonian Instance): forest and a simulated fire spread with its corresponding scar and growth propagation tree. 
@@ -38,40 +38,56 @@ Plugin repo: [fire2a/fire-analytics-qgis-processing-toolbox-plugin](https://gith
 
 ## Moderate: CLI 
 Go to releases (right vertical tab bar):
-1. Download the latest (not-draft) version (Cell2FireW_v<X.Y.Z>.zip)
-2. Download a prepared instance, choosing:
-   - fuel model: Kitral, Scott&Burgan, or Canada (--sim <K|S|C>)
-   - raster format: tif or asc
+1. Download the latest (non-draft) release version of the binary, choose platform:
+
+    - Microsoft Windows (10 or 11) also includes .dll dependencies  
+        `Cell2FireW_v<x.y.z>-Windows-x86_64-binary.zip`
+    - Linux, targeting distribution-codename and dependent runtime libraries:  
+        `Cell2FireW_v<x.y.z>-Debian.bookworm.x86_64-binary.zip` needs `apt install libtiff6 libgomp1`  
+        `Cell2FireW_v<x.y.z>-Ubuntu.jammy.x86_64-binary.zip` needs `apt install libtiff5 libstdc++6 libgomp1 libgcc1`  
+    - Most other linuxes, no dependencies. _Although it may not run parallel!_  
+        `Cell2FireW_v<x.y.z>-manylinux-x86_64-binary.zip`  
+    - Contains them all and more, is meant for the QGIS plugin    
+        `Cell2FireW_v<x.y.z>.zip` 
+
+2. Jumpstart into downloading a prepared instance, choosing:
+
+   - Fuel model: `Kitral`, `Scott&Burgan`, or `FBP-Canada` (--sim <K|S|C>)
+   - Raster format: GeoTiff`.tif` or AIIGrid`.asc`
+
 3. Open a terminal, type the following:
 ```bash
+# [once] make it executable
+chmod +x </path/to/Cell2FireW/binary>/Cell2Fire[.suffix]
+# [optional] make it accessible from other directories
+export PATH=$PATH:/path/to/Cell2FireW/binar/Cell2Fire[.suffix]
+
 # needs an empty directory to store the results
 mkdir results 
 
-# locate your binary
-cd C2F-W/Cell2Fire/
-
 # run idea
-./Cell2Fire[.exe|Linux.x86-64|Darwin.[x86-64|arm64]] --input-instance-folder </path/to/instance> --output-folder </path/to/empty/results> --sim <K|S|C> --nthreads 16 > log.txt
+Cell2Fire[.exe|Debian.boookworm|...] --input-instance-folder </path/to/instance> --output-folder </path/to/empty/results> --sim <K|S|C> --nthreads 16 > log.txt
 
-# sample
-./Cell2Fire.Linux.x86_64 --final-grid --output-messages --out-ros --sim S --nsims 2 --seed 123 --nthreads 3 --fmc 66 --scenario 2 --cros --weather rows --input-instance-folder /tmp/processing_cdcCGk/Vilopriu_2013 --output-folder /tmp/processing_cdcCGk/Vilopriu_2013/results | tee log.txt
+# example
+Cell2Fire --final-grid --output-messages --out-ros --sim S --nsims 2 --seed 123 --nthreads 3 --fmc 66 --scenario 2 --cros --weather rows --input-instance-folder /tmp/processing_cdcCGk/Vilopriu_2013 --output-folder /tmp/processing_cdcCGk/Vilopriu_2013/results | tee log.txt
 
-# note: binaries are named like this:
-ext=`python3 -c "import platform;print(f'.{platform.system()}.{platform.machine()}')"`
-mv Cell2Fire Cell2Fire$ext
+# check the results: to convert to tiff or see the results in QGIS, use the plugin
 ```
-## Collaborative: compile it
+## Collaborative
+Compile it
 ```bash
 # dependencies
 sudo apt install g++-12 libboost-all-dev libeigen3-dev libtiff-dev
 
-git clone
+# fork & clone 
+git clone git@github.com:<YOU>/C2F-W.git
 cd C2F-W/Cell2Fire
 
-# choose your makefile with the option flag: -f makefile.<platform>
+# compile
 make 
-sudo make install  # optional: copies Cell2Fire to /usr/local/bin
+# there area other makefiles for other platforms, e.g. makefile.macos
 
-git switch -c my-feature
+# [optional] copies Cell2Fire to /usr/local/bin
+sudo make install  
 ```
-Other platform details at `.github/workflows/build\*.yml`
+Other platform details at `.github/workflows/build-*.yml` and `makefile.*`
