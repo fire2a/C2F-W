@@ -1,9 +1,9 @@
 name: build debian stable
 
 on:
-  pull_request:
-    branches:
-      - main
+  # pull_request:
+  #   branches:
+  #     - main
   workflow_dispatch:
   workflow_call:
 

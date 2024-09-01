@@ -20,7 +20,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        brew install g++@12 eigen3 libomp boost libtiff # llvm 
+        brew install gcc@12 eigen3 libomp boost libtiff # llvm 
 
     - name: Check Packages Versions
       if: false
