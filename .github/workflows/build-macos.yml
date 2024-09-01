@@ -33,6 +33,17 @@ jobs:
     - name: Install Dependencies
       run: |
         brew install gcc@12 eigen boost # libomp libtiff llvm 
+        ls $HOMEBREW_PREFIX/opt/libtiff/lib
+        for file in (tif_zstd tif_zip tif_pixarg tif_jpeg  tif_jpeg_12  tifjpeg  tif_lzma ); do
+          echo "file: $file"
+          find $HOMEBREW_PREFIX/opt -name $file
+        done
+
+    - name: Stop running
+      if: true
+      run: |
+        echo "Stop running"
+        exit 1
 
     - name: Build
       run: |
