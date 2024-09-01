@@ -31,27 +31,6 @@ jobs:
       run: |
         brew install gcc@12 eigen # libomp boost libtiff llvm 
 
-        #- name: Check Packages Versions
-        #  if: false
-        #  run: |
-        #    dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs_debian.txt
-        #    if [ -n "$(diff new_pkgs_debian.txt pkgs_debian.txt)" ]; then
-        #      echo "::warning:: apt packages versions diff! $(diff new_pkgs_debian.txt pkgs_debian.txt)"
-        #      diff_output=$(diff --side-by-side --suppress-common-lines new_pkgs_debian.txt pkgs_debian.txt || true)
-        #      echo "$diff_output" | while IFS= read -r line; do
-        #        echo "$line"
-        #      done
-        #    fi
-
-        #- name: Get Environment
-        #  if: false
-        #  id: get_env
-        #  run: |
-        #    DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
-        #    CODENAME=$( lsb_release --short --codename 2>/dev/null )
-        #    MACHINE=$( uname --machine 2>/dev/null )
-        #    echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
-
     - name: Build
       run: |
         cd Cell2Fire
@@ -60,13 +39,13 @@ jobs:
         otool -L Cell2Fire > otool_${{ matrix.runner }}.txt
         mv Cell2Fire Cell2Fire_${{ matrix.runner }}
 
-        #- name: Upload
-        #  uses: actions/upload-artifact@v4
-        #  with:
-        #    name: binaries${{ env.SUFFIX }}
-        #    path: |
-        #      Cell2Fire/otool_${{ matrix.runner }}.txt
-        #      Cell2Fire/Cell2Fire_${{ matrix.runner }}
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries_${{ matrix.runner }}
+        path: |
+          Cell2Fire/otool_${{ matrix.runner }}.txt
+          Cell2Fire/Cell2Fire_${{ matrix.runner }}
 
         #test:
         #needs: build
