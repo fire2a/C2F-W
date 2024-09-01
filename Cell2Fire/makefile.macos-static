@@ -21,6 +21,16 @@ OPT := $(HOMEBREW_PREFIX)/opt
 # Compiler and linker flags
 CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I$(INCLUDE) -I$(INCLUDE)/eigen3 -I$(INCLUDE)/boost
 LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -static-libgcc -static-libstdc++ -lm -lpthread -ldl $(OPT)/libtiff/lib
+LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -static-libgcc -static-libstdc++ -lm -lpthread -ldl \
+          $(OPT)/libtiff/lib/libtiff.a \
+          $(OPT)/libjpeg/lib/libjpeg.a \
+          $(OPT)/libjbig/lib/libjbig.a \
+          $(OPT)/liblzma/lib/liblzma.a \
+          $(OPT)/libzstd/lib/libzstd.a \
+          $(OPT)/libwebp/lib/libwebp.a \
+          $(OPT)/libdeflate/lib/libdeflate.a \
+          $(OPT)/zlib/lib/libz.a \
+          $(OPT)/lerc/lib/libLerc.a
 
 # Source files
 SRCS = Cell2Fire.cpp Cells.cpp FuelModelSpain.cpp FuelModelKitral.cpp FuelModelFBP.cpp Spotting.cpp ReadCSV.cpp ReadArgs.cpp Lightning.cpp WriteCSV.cpp Ellipse.cpp DataGenerator.cpp
