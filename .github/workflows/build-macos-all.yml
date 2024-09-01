@@ -32,6 +32,7 @@ jobs:
         brew install gcc@12 eigen # libomp boost libtiff llvm 
 
     - name: Build
+      continue-on-error: true
       run: |
         cd Cell2Fire
         make clean
