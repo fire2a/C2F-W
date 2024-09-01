@@ -34,7 +34,8 @@ jobs:
       run: |
         brew install gcc@12 eigen boost # libomp libtiff llvm 
         ls $HOMEBREW_PREFIX/opt/libtiff/lib
-        for file in (tif_zstd tif_zip tif_pixarg tif_jpeg  tif_jpeg_12  tifjpeg  tif_lzma ); do
+        alist = ("tiff_zstd" "tiff_zip" "tiff_pixarg" "tiff_jpeg"  "tiff_jpeg_12"  "tiffjpeg"  "tiff_lzma")
+        for file in "${!alist[@]}"; do
           echo "file: $file"
           find $HOMEBREW_PREFIX/opt -name $file
         done
