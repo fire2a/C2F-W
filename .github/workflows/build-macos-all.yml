@@ -1,9 +1,9 @@
 name: build macos-12(x86_64)
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
   workflow_call:
 
@@ -12,15 +12,24 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-12
+    strategy:
+      matrix:
+        runner: ["macos-12", "macos-13", "macos-13-arm64", "macos-14", "macos-14-arm64"]
+    runs-on: ${{ matrix.runner }}
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      # - name: Checkout Code
+      #   uses: actions/checkout@v4
+
+    - name: Check Runner
+      run: |
+        arch
+        brew config
 
     - name: Install Dependencies
       run: |
         brew install gcc@12 eigen # libomp boost libtiff llvm 
+        exit 1 
 
     - name: Check Packages Versions
       if: false
@@ -48,15 +57,16 @@ jobs:
         cd Cell2Fire
         make clean
         make -f makefile.macos-12
-        otool -L Cell2Fire > otool.txt
+        otool -L Cell2Fire > otool_${{ matrix.runner }}.txt
+        mv Cell2Fire Cell2Fire_${{ matrix.runner }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: binaries${{ env.SUFFIX }}
         path: |
-          Cell2Fire/otool.txt
-          Cell2Fire/Cell2Fire
+          Cell2Fire/otool_${{ matrix.runner }}.txt
+          Cell2Fire/Cell2Fire_${{ matrix.runner }}
 
   test:
     needs: build
