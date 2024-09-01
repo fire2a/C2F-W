@@ -6,10 +6,17 @@ CXX = g++-12
 # BASE ?=/opt/homebrew
 
 # Capture the output of the `arch` command
-BASE := $(shell echo $HOMEBREW_PREFIX)
+ARCH := $(shell arch)
 
-INCLUDE=$(BASE)/include
-OPT=$(BASE)/opt
+# Set HOMEBREW_PREFIX based on the architecture
+ifeq ($(ARCH), arm64)
+    HOMEBREW_PREFIX := /opt/homebrew
+else
+    HOMEBREW_PREFIX := /usr/local
+endif
+
+INCLUDE := $(HOMEBREW_PREFIX)/include
+OPT := $(HOMEBREW_PREFIX)/opt
 
 # Compiler and linker flags
 CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I $(INCLUDE) -I $(INCLUDE)/eigen3 -I $(INCLUDE)/boost
