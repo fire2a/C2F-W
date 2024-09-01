@@ -1,0 +1,100 @@
+name: build macos-12(x86_64)
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-12
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        brew install g++@12 eigen3 libomp boost libtiff # llvm 
+
+    - name: Check Packages Versions
+      if: false
+      run: |
+        dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev > new_pkgs_debian.txt
+        if [ -n "$(diff new_pkgs_debian.txt pkgs_debian.txt)" ]; then
+          echo "::warning:: apt packages versions diff! $(diff new_pkgs_debian.txt pkgs_debian.txt)"
+          diff_output=$(diff --side-by-side --suppress-common-lines new_pkgs_debian.txt pkgs_debian.txt || true)
+          echo "$diff_output" | while IFS= read -r line; do
+            echo "$line"
+          done
+        fi
+
+    - name: Get Environment
+      if: false
+      id: get_env
+      run: |
+        DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
+        CODENAME=$( lsb_release --short --codename 2>/dev/null )
+        MACHINE=$( uname --machine 2>/dev/null )
+        echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+
+    - name: Build
+      run: |
+        cd Cell2Fire
+        make clean
+        make -f makefile.macos-12
+        otool -L Cell2Fire > otool.txt
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries${{ env.SUFFIX }}
+        path: |
+          Cell2Fire/otool.txt
+          Cell2Fire/Cell2Fire
+
+  test:
+    needs: build
+    runs-on: macos-12
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      if: false
+      run: |
+        apt update
+        apt install -y lsb-release unzip libtiff6 libgomp1
+        # apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev
+
+    - name: Get Environment
+      if: false
+      id: get_env
+      run: |
+        DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
+        CODENAME=$( lsb_release --short --codename 2>/dev/null )
+        MACHINE=$( uname --machine 2>/dev/null )
+        echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: binaries
+        path: Cell2Fire
+        merge-multiple: true
+
+    - name: chmod
+      run: |
+        ls Cell2Fire
+        chmod +x Cell2Fire/Cell2Fire
+
+    - name: Test
+      run: |
+        cd test
+        bash test.sh
