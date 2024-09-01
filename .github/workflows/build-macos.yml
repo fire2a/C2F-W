@@ -35,11 +35,10 @@ jobs:
         brew install gcc@12 eigen boost # libomp libtiff llvm 
 
     - name: Build
-      continue-on-error: true
       run: |
         cd Cell2Fire
         make clean
-        make -f makefile.macos
+        make -f makefile.macos-static
         otool -L Cell2Fire > otool_${{ env.suffix }}.txt
         mv Cell2Fire Cell2Fire_${{ env.suffix }}
 
@@ -50,3 +49,20 @@ jobs:
         path: |
           Cell2Fire/otool_${{ env.suffix }}.txt
           Cell2Fire/Cell2Fire_${{ env.suffix }}
+
+    - name: Build Static
+      continue-on-error: true
+      run: |
+        cd Cell2Fire
+        make clean
+        make -f makefile.macos-static
+        otool -L Cell2Fire > otool_${{ env.suffix }}-static.txt
+        mv Cell2Fire Cell2Fire_${{ env.suffix }}-static
+
+    - name: Upload Static
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries_${{ env.suffix }}
+        path: |
+          Cell2Fire/otool_${{ env.suffix }}-static.txt
+          Cell2Fire/Cell2Fire_${{ env.suffix }}-static
