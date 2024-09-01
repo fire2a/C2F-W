@@ -1,8 +1,19 @@
 # Development dependencies
 CXX = g++-12
 
+# NOT WORKING FOR MACOS 12 y 13
 # Capture the value of the environment variable HOMEBREW_PREFIX
-HOMEBREW_PREFIX := $(shell echo $$HOMEBREW_PREFIX)
+# HOMEBREW_PREFIX := $(shell echo $$HOMEBREW_PREFIX) 
+
+# Capture the output of the `arch` command
+ARCH := $(shell arch)
+
+# Set HOMEBREW_PREFIX based on the architecture
+ifeq ($(ARCH), arm64)
+	HOMEBREW_PREFIX := /opt/homebrew
+else
+	HOMEBREW_PREFIX := /usr/local
+endif
 
 INCLUDE := $(HOMEBREW_PREFIX)/include
 OPT := $(HOMEBREW_PREFIX)/opt
@@ -21,6 +32,7 @@ OBJS = $(SRCS:.cpp=.o)
 TARGET = Cell2Fire
 
 # Build rules
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
