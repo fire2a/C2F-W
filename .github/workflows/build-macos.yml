@@ -62,7 +62,7 @@ jobs:
     - name: Upload Static
       uses: actions/upload-artifact@v4
       with:
-        name: binaries_${{ env.suffix }}
+        name: binaries_${{ env.suffix }}-static
         path: |
           Cell2Fire/otool_${{ env.suffix }}-static.txt
           Cell2Fire/Cell2Fire_${{ env.suffix }}-static
