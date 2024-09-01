@@ -14,7 +14,7 @@ jobs:
   build:
     strategy:
       matrix:
-        runner: ["macos-12", "macos-13", "macos-14"]
+        runner: ["macOS-12", "macOS-13", "macOS-14"]
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -25,6 +25,9 @@ jobs:
       run: |
         arch
         echo "runner: ${{ matrix.runner }}.$(arch).$(uname -m)"
+        # mayor version: sw_vers -productVersion | cut -d '.' -f 1
+        # Darwin : uname -s
+        echo "suffix=".$(uname -s).${{ matrix.runner }}.$(arch)"" >> $GITHUB_ENV
         brew config
 
     - name: Install Dependencies
@@ -36,14 +39,14 @@ jobs:
       run: |
         cd Cell2Fire
         make clean
-        make -f makefile.macos-all
-        otool -L Cell2Fire > otool_${{ matrix.runner }}.txt
-        mv Cell2Fire Cell2Fire_${{ matrix.runner }}
+        make -f makefile.macos
+        otool -L Cell2Fire > otool_${{ env:suffix }}.txt
+        mv Cell2Fire Cell2Fire_${{ env:suffix }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: binaries_${{ matrix.runner }}
+        name: binaries_${{ env:suffix }}
         path: |
-          Cell2Fire/otool_${{ matrix.runner }}.txt
-          Cell2Fire/Cell2Fire_${{ matrix.runner }}
+          Cell2Fire/otool_${{ env:suffix }}.txt
+          Cell2Fire/Cell2Fire_${{ env:suffix }}
