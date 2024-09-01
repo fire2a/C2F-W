@@ -38,7 +38,7 @@ jobs:
       run: |
         cd Cell2Fire
         make clean
-        make -f makefile.macos-static
+        make -f makefile.macos
         otool -L Cell2Fire > otool_${{ env.suffix }}.txt
         mv Cell2Fire Cell2Fire_${{ env.suffix }}
 
