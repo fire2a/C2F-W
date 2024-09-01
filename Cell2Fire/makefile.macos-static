@@ -21,7 +21,8 @@ OPT := $(HOMEBREW_PREFIX)/opt
 # Compiler and linker flags
 CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I$(INCLUDE) -I$(INCLUDE)/eigen3 -I$(INCLUDE)/boost
 # LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff -L$(OPT)/libtiff/lib
-LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -static -static-libgcc -static-libstdc++ -lm -lpthread -ltiff -L$(OPT)/libtiff/lib
+LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -static-libgcc -static-libstdc++ -lm -lpthread -L$(OPT)/libtiff/lib -ltiff
+# LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -static -static-libgcc -static-libstdc++ -lm -lpthread -ltiff -L$(OPT)/libtiff/lib
 # -ljpeg -ljbig -llzma -lzstd -lwebp -ldeflate -lz -lLerc -Wl,--no-warn-search-mismatch
 
 # Source files
