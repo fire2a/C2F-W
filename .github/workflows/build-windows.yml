@@ -2,8 +2,8 @@ name: build windows
 
 on:
   # pull_request:
-    # branches:
-      - main
+  #   branches:
+  #     - main
   workflow_dispatch:
   workflow_call:
 
