@@ -18,8 +18,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Check Runner
       run: |
