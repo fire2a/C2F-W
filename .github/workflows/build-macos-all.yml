@@ -14,7 +14,7 @@ jobs:
   build:
     strategy:
       matrix:
-        runner: ["macos-12", "macos-13", "macos-13-arm64", "macos-14", "macos-14-arm64"]
+        runner: ["macos-12", "macos-13", "macos-14"]
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -24,12 +24,8 @@ jobs:
     - name: Check Runner
       run: |
         arch
-        echo "runner: ${{ matrix.runner }}"
+        echo "runner: ${{ matrix.runner }}.$(arch).$(uname -m)"
         brew config
-        python -c "import platform; print(platform.machine())"
-        echo "-"
-        python -c "import platform; print(dir(platform))"
-
 
     - name: Install Dependencies
       run: |
@@ -56,13 +52,13 @@ jobs:
         #    MACHINE=$( uname --machine 2>/dev/null )
         #    echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
-        #- name: Build
-        #  run: |
-        #    cd Cell2Fire
-        #    make clean
-        #    make -f makefile.macos-12
-        #    otool -L Cell2Fire > otool_${{ matrix.runner }}.txt
-        #    mv Cell2Fire Cell2Fire_${{ matrix.runner }}
+    - name: Build
+      run: |
+        cd Cell2Fire
+        make clean
+        make -f makefile.macos-all
+        otool -L Cell2Fire > otool_${{ matrix.runner }}.txt
+        mv Cell2Fire Cell2Fire_${{ matrix.runner }}
 
         #- name: Upload
         #  uses: actions/upload-artifact@v4
