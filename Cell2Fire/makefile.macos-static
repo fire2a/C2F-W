@@ -20,7 +20,6 @@ OPT := $(HOMEBREW_PREFIX)/opt
 
 # Compiler and linker flags
 CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I$(INCLUDE) -I$(INCLUDE)/eigen3 -I$(INCLUDE)/boost
-LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -static-libgcc -static-libstdc++ -lm -lpthread -ldl $(OPT)/libtiff/lib
 LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -static-libgcc -static-libstdc++ -lm -lpthread -ldl \
           $(OPT)/libtiff/lib/libtiff.a \
           $(OPT)/libjpeg/lib/libjpeg.a \
