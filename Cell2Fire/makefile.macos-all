@@ -6,7 +6,7 @@ CXX = g++-12
 # BASE ?=/opt/homebrew
 
 # Capture the output of the `arch` command
-BASE := $(shell $HOMEBREW_PREFIX)
+BASE := $(shell echo $HOMEBREW_PREFIX)
 
 INCLUDE=$(BASE)/include
 OPT=$(BASE)/opt
