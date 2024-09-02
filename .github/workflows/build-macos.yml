@@ -33,18 +33,12 @@ jobs:
     - name: Install Dependencies
       run: |
         # brew install gcc@12 eigen boost # libomp libtiff llvm 
-        ls $HOMEBREW_PREFIX/opt/libtiff/lib
+        HOMEBREW_PREFIX=$(brew --prefix)
         alist=("tiff_zstd" "tiff_zip" "tiff_pixarg" "tiff_jpeg"  "tiff_jpeg_12"  "tiffjpeg"  "tiff_lzma")
         for file in "${alist[@]}"; do
           echo "file: $file"
           find $HOMEBREW_PREFIX/opt -name $file
         done
-
-    - name: Stop running
-      if: true
-      run: |
-        echo "Stop running"
-        exit 1
 
     - name: Build
       run: |
@@ -61,6 +55,12 @@ jobs:
         path: |
           Cell2Fire/otool_${{ env.suffix }}.txt
           Cell2Fire/Cell2Fire_${{ env.suffix }}
+
+    - name: Stop running
+      if: true
+      run: |
+        echo "Stop running"
+        exit 1
 
     - name: Build Static
       continue-on-error: true
