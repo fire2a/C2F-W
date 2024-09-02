@@ -33,11 +33,12 @@ jobs:
     - name: Install Dependencies
       run: |
         # brew install gcc@12 eigen boost # libomp libtiff llvm 
-        # HOMEBREW_PREFIX=$(brew --prefix)
+        HOMEBREW_PREFIX=$(brew --prefix)
+        echo "mmm $HOMEBREW_PREFIX"
         if [ $(arch) = "arm64" ]; then
-                HOMEBREW_PREFIX := /opt/homebrew
+                HOMEBREW_PREFIX=/opt/homebrew
         else
-                HOMEBREW_PREFIX := /usr/local
+                HOMEBREW_PREFIX=/usr/local
         endif
         alist=("tiff_zstd" "tiff_zip" "tiff_pixarg" "tiff_jpeg"  "tiff_jpeg_12"  "tiffjpeg"  "tiff_lzma")
         for file in "${alist[@]}"; do
