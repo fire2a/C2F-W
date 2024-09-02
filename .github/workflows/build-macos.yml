@@ -35,14 +35,16 @@ jobs:
         cd Cell2Fire
         make clean
         make -f makefile.macos-test
-        otool -L Cell2Fire > otool_${{ env.suffix }}.txt
-        mv Cell2Fire Cell2Fire_${{ env.suffix }}
+        otool -L Cell2Fire_arm64 > otool_arm64 _${{ env.suffix }}.txt
+        otool -L Cell2Fire_x86_64 > otool_x86_64_${{ env.suffix }}.txt
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: binaries_${{ env.suffix }}
         path: |
-          Cell2Fire/otool_${{ env.suffix }}.txt
-          Cell2Fire/Cell2Fire_${{ env.suffix }}
+          Cell2Fire/otool_arm64 _${{ env.suffix }}.txt
+          Cell2Fire/otool_x86_64 _${{ env.suffix }}.txt
+          Cell2Fire/Cell2Fire_arm64 _${{ env.suffix }}
+          Cell2Fire/Cell2Fire_x86_64 _${{ env.suffix }}
 
