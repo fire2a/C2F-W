@@ -32,8 +32,9 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        # brew install gcc@12 eigen boost # libomp libtiff llvm 
+        brew install gcc@12 eigen boost libtiff # libomp llvm 
         HOMEBREW_PREFIX=$(brew --prefix)
+        HOMEBREW_PREFIX=$(echo $HOMEBREW_PREFIX | sed 's/ //g')
         alist=("zstd" "xz" "zip" "pixarg" "jpeg" "lzma" "tiff")
         for file in "${alist[@]}"; do
           echo "file: $file"
