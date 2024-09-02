@@ -37,12 +37,13 @@ jobs:
     - name: Check Dependencies
       run: |
         cd $(brew --prefix)/opt
+        pwd
         alist=("zstd" "xz" "zip" "pixarg" "jpeg" "lzma" "tiff")
         for file in "${alist[@]}"; do
           echo "file: $file"
-          find . -name *$file*
+          find . -name "*$file*"
         done
-        find lib*/lib -name *.a
+        find lib*/lib -name "*.a"
     
 
     - name: Build
