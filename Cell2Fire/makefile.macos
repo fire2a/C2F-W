@@ -1,7 +1,7 @@
 # Development dependencies
 CXX = g++-12
 
-# NOT WORKING FOR MACOS 12 y 13
+# NOT WORKING
 # Capture the value of the environment variable HOMEBREW_PREFIX
 # HOMEBREW_PREFIX := $(shell echo $$HOMEBREW_PREFIX)
 # HOMEBREW_PREFIX := $(shell echo $(brew --prefix))

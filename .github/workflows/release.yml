@@ -20,18 +20,14 @@ jobs:
   build_debian_stable:
       uses: ./.github/workflows/build-debian-stable.yml
 
-  # build_macos_latest:
-  #     uses: ./.github/workflows/build-macos-latest.yml
-
-  # build_macos_13:
-  #     uses: ./.github/workflows/build-macos-13.yml
+  build_macos:
+       uses: ./.github/workflows/build-macos.yml
 
   build_windows:
       uses: ./.github/workflows/build-windows.yml
 
   release:
-    # needs: [build_ubuntu_latest, build_debian_stable, build_windows, build_macos_latest, build_macos_13]
-    needs: [build_manylinux, build_windows, build_debian_stable]
+    needs: [build_manylinux, build_windows, build_debian_stable, build_macos]
     runs-on: ubuntu-latest
 
     steps:
@@ -65,6 +61,7 @@ jobs:
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip Cell2Fire ldd_manylinux.txt
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip Cell2Fire.Debian.bookworm.x86_64 ldd.Debian.bookworm.x86_64.txt
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.jammy.x86_64-binary.zip Cell2Fire.Ubuntu.jammy.x86_64 ldd.Ubuntu.jammy.x86_64.txt
+        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip Cell2Fire_Darwin* otool*.txt
 
     - name: Zip Data Instances
       run: |
@@ -96,6 +93,7 @@ jobs:
           Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.jammy.x86_64-binary.zip
+          Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip
           Kitral-asc.zip
           Kitral-tif.zip
           CanadianFBP-asc.zip
