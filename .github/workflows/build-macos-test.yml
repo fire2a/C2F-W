@@ -1,11 +1,7 @@
-name: build macos all
+name: build macos test
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
   workflow_dispatch:
-  workflow_call:
 
 permissions:
   contents: write
@@ -18,10 +14,6 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     steps:
-      if: false
-    - name: Checkout Code
-      uses: actions/checkout@v4
-
     - name: Check Runner
       run: |
         echo "arch $(arch)"
