@@ -1,6 +1,8 @@
 # Development dependencies
 CXX = g++-12
 
+BUILD_ARCH := $(shell echo $$BUILD_ARCH)
+
 # NOT WORKING
 # Capture the value of the environment variable HOMEBREW_PREFIX
 # HOMEBREW_PREFIX := $(shell echo $$HOMEBREW_PREFIX) 
@@ -41,7 +43,7 @@ TARGET = Cell2Fire
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) -o $(TARGET) $(OBJS) $(LDFLAGS)
+	$(CXX) -arch $(BUILD_ARCH) -o $(TARGET) $(OBJS) $(LDFLAGS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@

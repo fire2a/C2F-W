@@ -55,14 +55,12 @@ jobs:
 
     - name: Install Static Dependencies
       run: |
-        exit 0  
         brew install gcc@12 libomp eigen boost libtiff jpeg-turbo xz zstd zlib 
 
     - name: Build Static
       run: |
         cd Cell2Fire
         make clean
-        cmake -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
         make -f makefile.macos-static
         otool -L Cell2Fire > otool_${{ env.suffix }}-static.txt
         mv Cell2Fire Cell2Fire_${{ env.suffix }}-static
