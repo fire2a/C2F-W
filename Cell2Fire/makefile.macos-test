@@ -1,0 +1,33 @@
+# Compiler and flags
+CXX = clang++
+CXXFLAGS = -Wall -Wextra -std=c++11
+LDFLAGS = -lm -lpthread -ltiff -L$(OPT)/libtiff/lib
+
+# Source files
+SRCS = Cell2Fire.cpp Cells.cpp FuelModelSpain.cpp FuelModelKitral.cpp FuelModelFBP.cpp Spotting.cpp ReadCSV.cpp ReadArgs.cpp Lightning.cpp WriteCSV.cpp Ellipse.cpp DataGenerator.cpp
+
+# Object files
+OBJS = $(SRCS:.cpp=.o)
+
+# Targets
+TARGET_ARM64 = Cell2Fire_arm64
+TARGET_X86_64 = Cell2Fire_x86_64
+
+# Default target
+all: $(TARGET_ARM64) $(TARGET_X86_64)
+
+# Build for arm64
+$(TARGET_ARM64): $(OBJS)
+    $(CXX) $(CXXFLAGS) -arch arm64 -o $@ $^ $(LDFLAGS)
+
+# Build for x86_64
+$(TARGET_X86_64): $(OBJS)
+    $(CXX) $(CXXFLAGS) -arch x86_64 -o $@ $^ $(LDFLAGS)
+
+# Compile source files to object files
+%.o: %.cpp
+    $(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Clean up build artifacts
+clean:
+    rm -f $(OBJS) $(TARGET_ARM64) $(TARGET_X86_64)
