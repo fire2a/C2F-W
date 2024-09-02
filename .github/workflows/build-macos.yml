@@ -33,6 +33,9 @@ jobs:
     - name: Install Dependencies
       run: |
         brew install gcc@12 eigen boost libtiff # libomp llvm 
+
+    - name: Check Dependencies
+      run: |
         cd $(brew --prefix)/opt
         alist=("zstd" "xz" "zip" "pixarg" "jpeg" "lzma" "tiff")
         for file in "${alist[@]}"; do
