@@ -1,9 +1,9 @@
 name: build macos all
 
 on:
-  pull_request:
-    branches:
-      - main
+  # pull_request:
+  #   branches:
+  #     - main
   workflow_dispatch:
   workflow_call:
 
@@ -15,35 +15,26 @@ jobs:
     strategy:
       matrix:
         runner: ["macOS-12", "macOS-13", "macOS-14"]
-        arch: ["arm64", "x86_64"]
     runs-on: ${{ matrix.runner }}
 
     steps:
-      # - name: Checkout Code
-      #   uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Check Runner
       run: |
-        # arch
-        # echo "runner: ${{ matrix.runner }}.$(arch).$(uname -m)"
-        # mayor version: sw_vers -productVersion | cut -d '.' -f 1
-        # Darwin : uname -s
-        echo "suffix="$(uname -s).${{ matrix.runner }}.${{ matrix.arch }}"" >> $GITHUB_ENV
-        echo "BUILD_ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
-        g++-12 --target-help
-        exit 0
-        brew config
+        echo "suffix="$(uname -s).${{ matrix.runner }}.$(arch)"" >> $GITHUB_ENV
 
     - name: Install Dependencies
       run: |
-        brew install gcc@12 libomp eigen boost libtiff # llvm ?
+        brew install libomp eigen boost libtiff # llvm ?
 
     - name: Build
       continue-on-error: true
       run: |
         cd Cell2Fire
         make clean
-        make -f makefile.macos
+        make -f makefile.macos-test
         otool -L Cell2Fire > otool_${{ env.suffix }}.txt
         mv Cell2Fire Cell2Fire_${{ env.suffix }}
 
@@ -55,22 +46,3 @@ jobs:
           Cell2Fire/otool_${{ env.suffix }}.txt
           Cell2Fire/Cell2Fire_${{ env.suffix }}
 
-    - name: Install Static Dependencies
-      run: |
-        brew install gcc@12 libomp eigen boost libtiff jpeg-turbo xz zstd zlib 
-
-    - name: Build Static
-      run: |
-        cd Cell2Fire
-        make clean
-        make -f makefile.macos-static
-        otool -L Cell2Fire > otool_${{ env.suffix }}-static.txt
-        mv Cell2Fire Cell2Fire_${{ env.suffix }}-static
-
-    - name: Upload Static
-      uses: actions/upload-artifact@v4
-      with:
-        name: binaries_${{ env.suffix }}-static
-        path: |
-          Cell2Fire/otool_${{ env.suffix }}-static.txt
-          Cell2Fire/Cell2Fire_${{ env.suffix }}-static
