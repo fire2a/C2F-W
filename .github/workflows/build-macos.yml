@@ -19,8 +19,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      # - name: Checkout Code
+      #   uses: actions/checkout@v4
 
     - name: Check Runner
       run: |
@@ -30,6 +30,8 @@ jobs:
         # Darwin : uname -s
         echo "suffix="$(uname -s).${{ matrix.runner }}.${{ matrix.arch }}"" >> $GITHUB_ENV
         echo "BUILD_ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+        g++-12 --target-help
+        exit 0
         brew config
 
     - name: Install Dependencies
