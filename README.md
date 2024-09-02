@@ -1,11 +1,10 @@
 # Cell2Fire W
 
-![build & test debian-stable](https://github.com/fire2a/C2F-W/actions/workflows/build-debian-stable.yml/badge.svg)
-![build & test manylinux & ubuntu-jammy](https://github.com/fire2a/C2F-W/actions/workflows/build-manylinux.yml/badge.svg)
-![build & test windows](https://github.com/fire2a/C2F-W/actions/workflows/build-windows.yml/badge.svg)
-![build & test Darwin-x86_64](https://github.com/fire2a/C2F-W/actions/workflows/build-macos-13.yml/badge.svg)
-![build & test Darwin-arm64](https://github.com/fire2a/C2F-W/actions/workflows/build-macos-latest.yml/badge.svg)
-![release](https://github.com/fire2a/C2F-W/actions/workflows/release.yml/badge.svg)
+[![build & test debian-stable](https://github.com/fire2a/C2F-W/actions/workflows/build-debian-stable.yml/badge.svg)](https://github.com/fire2a/C2F-W/actions/workflows/build-debian-stable.yml)
+[![build & test manylinux & ubuntu-jammy](https://github.com/fire2a/C2F-W/actions/workflows/build-manylinux.yml/badge.svg)](https://github.com/fire2a/C2F-W/actions/workflows/build-manylinux.yml)
+[![build & test windows](https://github.com/fire2a/C2F-W/actions/workflows/build-windows.yml/badge.svg)](https://github.com/fire2a/C2F-W/actions/workflows/build-windows.yml)
+[![build macos all](https://github.com/fire2a/C2F-W/actions/workflows/build-macos.yml/badge.svg)](https://github.com/fire2a/C2F-W/actions/workflows/build-macos.yml)
+[![release](https://github.com/fire2a/C2F-W/actions/workflows/release.yml/badge.svg)](https://github.com/fire2a/C2F-W/actions/workflows/release.yml)
 ![License](https://img.shields.io/github/license/fire2a/C2F-W.svg)
 
 A big-scale, grid, forest fire simulator; parallel and fast (c++) nevertheless with a friendly graphical user interface for QGIS.
@@ -87,6 +86,8 @@ Compile it
 ```bash
 # dependencies
 sudo apt install g++-12 libboost-all-dev libeigen3-dev libtiff-dev
+# or brew
+brew install gcc@12 libomp eigen boost libtiff # llvm ?
 
 # fork & clone 
 git clone git@github.com:<YOU>/C2F-W.git
