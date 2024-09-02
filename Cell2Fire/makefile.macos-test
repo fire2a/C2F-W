@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = clang++
-CXXFLAGS = -Wall -Wextra -std=c++11
+CXXFLAGS = -Wall -Wextra -std=c++11 -I $(INCLUDE)/eigen3 -I $(INCLUDE)/boost
 LDFLAGS = -lm -lpthread -ltiff -L$(OPT)/libtiff/lib
 
 # Source files
