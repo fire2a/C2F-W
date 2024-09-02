@@ -69,6 +69,10 @@ jobs:
         echo "Stop running"
         exit 1
 
+    - name: Install Static Dependencies
+      run: |
+        brew install gcc@12 libomp eigen boost libtiff zstd xz zlib
+
     - name: Build Static
       continue-on-error: true
       run: |
