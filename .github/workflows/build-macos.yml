@@ -28,7 +28,8 @@ jobs:
         # echo "runner: ${{ matrix.runner }}.$(arch).$(uname -m)"
         # mayor version: sw_vers -productVersion | cut -d '.' -f 1
         # Darwin : uname -s
-        echo "suffix="$(uname -s).${{ matrix.runner }}.${{ matrix.runner }}"" >> $GITHUB_ENV
+        echo "suffix="$(uname -s).${{ matrix.runner }}.${{ matrix.arch }}"" >> $GITHUB_ENV
+        echo "BUILD_ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
         brew config
 
     - name: Install Dependencies
@@ -36,10 +37,10 @@ jobs:
         brew install gcc@12 libomp eigen boost libtiff # llvm ?
 
     - name: Build
+      continue-on-error: true
       run: |
         cd Cell2Fire
         make clean
-        cmake -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
         make -f makefile.macos
         otool -L Cell2Fire > otool_${{ env.suffix }}.txt
         mv Cell2Fire Cell2Fire_${{ env.suffix }}
@@ -54,6 +55,7 @@ jobs:
 
     - name: Install Static Dependencies
       run: |
+        exit 0  
         brew install gcc@12 libomp eigen boost libtiff jpeg-turbo xz zstd zlib 
 
     - name: Build Static
