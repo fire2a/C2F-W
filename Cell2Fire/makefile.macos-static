@@ -3,7 +3,7 @@ CXX = g++-12
 
 # NOT WORKING
 # Capture the value of the environment variable HOMEBREW_PREFIX
-# HOMEBREW_PREFIX := $(shell echo $$HOMEBREW_PREFIX)
+# HOMEBREW_PREFIX := $(shell echo $$HOMEBREW_PREFIX) 
 # HOMEBREW_PREFIX := $(shell echo $(brew --prefix))
 
 # Capture the output of the `arch` command
@@ -20,8 +20,13 @@ INCLUDE := $(HOMEBREW_PREFIX)/include
 OPT := $(HOMEBREW_PREFIX)/opt
 
 # Compiler and linker flags
-CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I $(INCLUDE) -I $(INCLUDE)/eigen3 -I $(INCLUDE)/boost
-LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff -L$(OPT)/libtiff/lib
+CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I$(INCLUDE) -I$(INCLUDE)/eigen3 -I$(INCLUDE)/boost
+LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -static-libgcc -static-libstdc++ -lm -lpthread -ldl \
+          $(OPT)/libtiff/lib/libtiff.a \
+          $(OPT)/jpeg-turbo/lib/libjpeg.a \
+          $(OPT)/zstd/lib/libzstd.a \
+          $(OPT)/xz/lib/liblzma.a \
+          $(OPT)/zlib/lib/libz.a
 
 # Source files
 SRCS = Cell2Fire.cpp Cells.cpp FuelModelSpain.cpp FuelModelKitral.cpp FuelModelFBP.cpp Spotting.cpp ReadCSV.cpp ReadArgs.cpp Lightning.cpp WriteCSV.cpp Ellipse.cpp DataGenerator.cpp
@@ -33,7 +38,6 @@ OBJS = $(SRCS:.cpp=.o)
 TARGET = Cell2Fire
 
 # Build rules
-
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -49,4 +53,5 @@ DESTDIR = /usr/local/bin
 install: all
 	cp $(TARGETS) $(DESTDIR)
 uninstall: all
-	rm $(DESTDIR)/$(TARGETS)
+	rm $(DESTDIR)/$(TARGETS) 
+
