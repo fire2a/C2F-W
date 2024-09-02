@@ -18,16 +18,16 @@ all: $(TARGET_ARM64) $(TARGET_X86_64)
 
 # Build for arm64
 $(TARGET_ARM64): $(OBJS)
-    $(CXX) $(CXXFLAGS) -arch arm64 -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -arch arm64 -o $@ $^ $(LDFLAGS)
 
 # Build for x86_64
 $(TARGET_X86_64): $(OBJS)
-    $(CXX) $(CXXFLAGS) -arch x86_64 -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -arch x86_64 -o $@ $^ $(LDFLAGS)
 
 # Compile source files to object files
 %.o: %.cpp
-    $(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Clean up build artifacts
 clean:
-    rm -f $(OBJS) $(TARGET_ARM64) $(TARGET_X86_64)
+	rm -f $(OBJS) $(TARGET_ARM64) $(TARGET_X86_64)
