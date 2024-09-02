@@ -1,7 +1,7 @@
 # Development dependencies
 CXX = g++-12
 
-HOMEBREW_PREFIX := $(shell brew --prefix) 
+HOMEBREW_PREFIX := $(shell echo $(brew --prefix))
 INCLUDE := $(HOMEBREW_PREFIX)/include
 OPT := $(HOMEBREW_PREFIX)/opt
 

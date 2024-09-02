@@ -37,7 +37,7 @@ jobs:
         alist=("tiff_zstd" "tiff_zip" "tiff_pixarg" "tiff_jpeg"  "tiff_jpeg_12"  "tiffjpeg"  "tiff_lzma")
         for file in "${alist[@]}"; do
           echo "file: $file"
-          find $HOMEBREW_PREFIX/opt -name $file
+          find $HOMEBREW_PREFIX/opt -name "*$file*"
         done
 
     - name: Build
