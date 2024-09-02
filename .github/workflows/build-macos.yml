@@ -1,9 +1,9 @@
 name: build macos all
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
   workflow_call:
 
@@ -15,6 +15,7 @@ jobs:
     strategy:
       matrix:
         runner: ["macOS-12", "macOS-13", "macOS-14"]
+        arch: ["arm64", "x86_64"]
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -27,7 +28,7 @@ jobs:
         # echo "runner: ${{ matrix.runner }}.$(arch).$(uname -m)"
         # mayor version: sw_vers -productVersion | cut -d '.' -f 1
         # Darwin : uname -s
-        echo "suffix="$(uname -s).${{ matrix.runner }}.$(arch)"" >> $GITHUB_ENV
+        echo "suffix="$(uname -s).${{ matrix.runner }}.${{ matrix.runner }}"" >> $GITHUB_ENV
         brew config
 
     - name: Install Dependencies
@@ -38,6 +39,7 @@ jobs:
       run: |
         cd Cell2Fire
         make clean
+        cmake -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
         make -f makefile.macos
         otool -L Cell2Fire > otool_${{ env.suffix }}.txt
         mv Cell2Fire Cell2Fire_${{ env.suffix }}
@@ -58,6 +60,7 @@ jobs:
       run: |
         cd Cell2Fire
         make clean
+        cmake -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
         make -f makefile.macos-static
         otool -L Cell2Fire > otool_${{ env.suffix }}-static.txt
         mv Cell2Fire Cell2Fire_${{ env.suffix }}-static
