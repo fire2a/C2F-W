@@ -33,7 +33,9 @@ for format in asc tif; do
             sim_code="K"
         fi
         Cell2Fire$1 --input-instance-folder model/$model-$format --output-folder $output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > test_results/$model-$format/log.txt
+        head test_results/$model-$format/log.txt
         sed -i "1 s/version: .*/version: v0.0.1/" test_results/$model-$format/log.txt
+        head test_results/$model-$format/log.txt
     done
 done
 set +x # disable debug tracing
