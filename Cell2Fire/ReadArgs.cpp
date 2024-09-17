@@ -323,7 +323,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 		//--scenario
 	char * input_scenario = getCmdOption(argv, argv + argc, "--scenario");
     if (input_scenario){
-        printf("Live&DeadFuelMoistureContentScenario(S&B): %s \n", input_scenario);
+        printf("LiveAndDeadFuelMoistureContentScenario: %s \n", input_scenario);
 		args_ptr->scenario = std::stoi (input_scenario ,&sz);  
     }
 	else args_ptr->scenario = dscen; 

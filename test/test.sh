@@ -3,13 +3,14 @@
 unzip -q target_results.zip 
 
 # recreate targets with tests
-# rm -rf target_results.zip
-# execute the for loop
-# mv test_results target_results
-# zip -r target_results.zip target_results
-# git add target_results.zip
-# git commit -m "Update target results"
-# git push
+cd test
+rm -rf test_results target_results target_results.zip
+execute the for loop
+mv test_results target_results
+zip -r target_results.zip target_results
+git add target_results.zip
+git commit -m "Update target results"
+git push
 
 # run simulations from model, put them in test_results, compare to target_results
 PATH=../Cell2Fire:$PATH
@@ -33,9 +34,11 @@ for format in asc tif; do
             sim_code="K"
         fi
         Cell2Fire$1 --input-instance-folder model/$model-$format --output-folder $output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > test_results/$model-$format/log.txt
-        head test_results/$model-$format/log.txt
         sed -i "1 s/version: .*/version: v0.0.1/" test_results/$model-$format/log.txt
-        head test_results/$model-$format/log.txt
+        echo "test"
+        head -15 test_results/$model-$format/log.txt
+        echo "target"
+        head -15 target_results/$model-$format/log.txt
     done
 done
 set +x # disable debug tracing
