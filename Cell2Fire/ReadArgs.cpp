@@ -40,6 +40,10 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	// Help
 	if (cmdOptionExists(argv, argv + argc, "-h")) {
 		printf("-------------------------------------------\n         Help manual!!! \n-------------------------------------------\n");
+	if (cmdOptionExists(argv, argv + argc, "-h") || cmdOptionExists(argv, argv + argc, "--help")) {
+		printf("Help at https://github.com/fire2a/docs\n");
+		printf("Try graphically building the arguments using the QGIS -processing algo.- plugin\n");
+		exit(0);
 	}
 
 	// Empty default
