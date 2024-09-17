@@ -317,7 +317,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	//--fmc
 	char * input_fmc = getCmdOption(argv, argv + argc, "--fmc");
     if (input_fmc){
-        printf("fmc: %s \n", input_fmc);
+        printf("FoliarMoistureContent: %s \n", input_fmc);
 		args_ptr->FMC = std::stoi (input_fmc ,&sz);  
     }
 	else args_ptr->FMC = dfmc; 
@@ -325,7 +325,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 		//--scenario
 	char * input_scenario = getCmdOption(argv, argv + argc, "--scenario");
     if (input_scenario){
-        printf("scenario: %s \n", input_scenario);
+        printf("Live&DeadFuelMoistureContentScenario(S&B): %s \n", input_scenario);
 		args_ptr->scenario = std::stoi (input_scenario ,&sz);  
     }
 	else args_ptr->scenario = dscen; 
