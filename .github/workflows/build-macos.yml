@@ -43,6 +43,7 @@ jobs:
         fi
         echo "version: ${version}"
         sed -i "s/c2fw_version.*/c2fw_version = \"${version}\";/" Cell2Fire/Cell2Fire.h
+      shell: bash
 
     - name: Build
       run: |
