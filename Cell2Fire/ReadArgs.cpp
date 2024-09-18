@@ -7,8 +7,8 @@
 #include <string>
 #include <algorithm>
 #include <dirent.h>
-
-
+#include <getopt.h>
+#include <cstdlib>
 
 inline char separator()
 {
@@ -19,565 +19,265 @@ inline char separator()
 #endif
 }
 
+void printHelp() {
+    std::cout << "Usage: program [options]\n"
+              << "Options:\n"
+	      << "  -O, --Simulator <string>    Set simulator (S, C, K), default S\n"
+              << "  -M, --InFolder <path>       Set input instance folder\n"
+              << "  -N, --OutFolder <path>      Set output results folder\n"
+	      << "  -L, --HarvestPlan <string>  Set Harvest plan\n"
+	      << "  -P, --WeatherOpt <string>   Set Weather option\n"
 
-char* getCmdOption(char ** begin, char ** end, const std::string & option)
-{
-    char ** itr = std::find(begin, end, option);
-    if (itr != end && ++itr != end)
-    {
-        return *itr;
-    }
-    return 0;
+	      << "  -a, --AllowCROS             Enable CROS\n"
+	      << "  -b, --BBOTuning             Enable BBO tuning\n"
+	      << "  -c, --FinalGrid             Output final scars grids\n"
+	      << "  -d, --Ignitions             Enable reading from Ignitions.csv\n"
+	      << "  -e, --IgnitionsLog          Output ignition history csv\n"
+	      << "  -f, --OutCrown              Output crown fire\n"
+	      << "  -g, --OutCrownConsumption   Output crown consumption\n"
+	      << "  -i, --OutFl                 Output flame lenght\n"
+	      << "  -j, --OutIntensity          Output fire line intensity (Byram)\n"
+	      << "  -k, --OutMessages           Output propagation digraph messages\n"
+	      << "  -l, --OutRos                Output Rate Of Spread\n"
+	      << "  -m, --OutSurfConsumption    Output surface consumption\n"
+	      << "  -n, --OutputGrids           Output scar grids\n"
+
+	      << "  -p, --BFactor <float>       Set Backward ellipsoid spread factor\n"
+	      << "  -q, --CBDFactor <float>     Set Crown bulk density factor (S&B)\n"
+	      << "  -r, --CCFFactor <float>     Set Canopy cover fraction factor (S&B)\n"
+	      << "  -s, --CROSThreshold <float> Set CROS threshold\n"
+	      << "  -t, --EFactor <float>       Set Ellipsoid spread factor\n"
+	      << "  -u, --FFactor <float>       Set Forward ellipsoid spread factor\n"
+	      << "  -o, --FirePeriodLen <float> Set fire period length\n"
+	      << "  -w, --HFIThreshold <float>  Set HFI threshold\n"
+	      << "  -x, --HFactor <float>       Set Heat factor\n"
+	      << "  -y, --ROS10Factor <float>   Set ROS10 factor (S&B)\n"
+	      << "  -z, --ROSCV <float>         Set ROS coefficient of variation\n"
+	      << "  -A, --ROSThreshold <float>  Set ROS threshold\n"
+
+	      << "  -B, --FMC <int>             Set Fuel Moisture Content\n"
+	      << "  -C, --IgnitionRadius <int>  Set Ignition radius\n"
+	      << "  -D, --MaxFirePeriods <int>  Set Maximum fire periods\n"
+	      << "  -E, --MinutesPerWP <int>    Set Minutes per weather period\n"
+	      << "  -F, --NWeatherFiles <int>   Set Number of weather files\n"
+	      << "  -G, --TotalSims <int>       Set Total simulations\n"
+	      << "  -H, --TotalYears <int>      Set Total years\n"
+	      << "  -I, --nthreads <int>        Set Number of threads\n"
+	      << "  -J, --scenario <int>        Set Scenario\n"
+	      << "  -K, --seed <int>            Set random number generator seed\n"
+
+              << "  -v, --verbose               Enable verbose mode\n"
+              << "  -h, --help                  Show this help message\n";
 }
 
-bool cmdOptionExists(char** begin, char** end, const std::string& option)
-{
-    return std::find(begin, end, option) != end;
-}
+void printArguments(const arguments& args) {
 
-void parseArgs(int argc, char* argv[], arguments* args_ptr)
-{
-	// Help
-	if (cmdOptionExists(argv, argv + argc, "-h") || cmdOptionExists(argv, argv + argc, "--help")) {
-		printf("Help at https://github.com/fire2a/docs\n");
-		printf("Try graphically building the arguments using the QGIS -processing algo.- plugin\n");
-		exit(0);
-	}
+    // Booleans
+    std::cout << "AllowCROS: " << args.AllowCROS << std::endl;
+    std::cout << "BBOTuning: " << args.BBOTuning << std::endl;
+    std::cout << "FinalGrid: " << args.FinalGrid << std::endl;
+    std::cout << "Ignitions: " << args.Ignitions << std::endl;
+    std::cout << "IgnitionsLog: " << args.IgnitionsLog << std::endl;
+    std::cout << "OutCrown: " << args.OutCrown << std::endl;
+    std::cout << "OutCrownConsumption: " << args.OutCrownConsumption << std::endl;
+    std::cout << "OutFl: " << args.OutFl << std::endl;
+    std::cout << "OutIntensity: " << args.OutIntensity << std::endl;
+    std::cout << "OutMessages: " << args.OutMessages << std::endl;
+    std::cout << "OutRos: " << args.OutRos << std::endl;
+    std::cout << "OutSurfConsumption: " << args.OutSurfConsumption << std::endl;
+    std::cout << "OutputGrids: " << args.OutputGrids << std::endl;
+    std::cout << "verbose: " << args.verbose << std::endl;
 
-	// Empty default
-	char empty = '\0';
+    // Floats
+    std::cout << "BFactor: " << args.BFactor << std::endl;
+    std::cout << "CBDFactor: " << args.CBDFactor << std::endl;
+    std::cout << "CCFFactor: " << args.CCFFactor << std::endl;
+    std::cout << "CROSThreshold: " << args.CROSThreshold << std::endl;
+    std::cout << "EFactor: " << args.EFactor << std::endl;
+    std::cout << "FFactor: " << args.FFactor << std::endl;
+    std::cout << "FirePeriodLen: " << args.FirePeriodLen << std::endl;
+    std::cout << "HFIThreshold: " << args.HFIThreshold << std::endl;
+    std::cout << "HFactor: " << args.HFactor << std::endl;
+    std::cout << "ROS10Factor: " << args.ROS10Factor << std::endl;
+    std::cout << "ROSCV: " << args.ROSCV << std::endl;
+    std::cout << "ROSThreshold: " << args.ROSThreshold << std::endl;
 
+    // Integers
+    std::cout << "FMC: " << args.FMC << std::endl;
+    std::cout << "IgnitionRadius: " << args.IgnitionRadius << std::endl;
+    std::cout << "MaxFirePeriods: " << args.MaxFirePeriods << std::endl;
+    std::cout << "MinutesPerWP: " << args.MinutesPerWP << std::endl;
+    std::cout << "NWeatherFiles: " << args.NWeatherFiles << std::endl;
+    std::cout << "TotalSims: " << args.TotalSims << std::endl;
+    std::cout << "TotalYears: " << args.TotalYears << std::endl;
+    std::cout << "nthreads: " << args.nthreads << std::endl;
+    std::cout << "scenario: " << args.scenario << std::endl;
+    std::cout << "seed: " << args.seed << std::endl;
 
-	// Strings
-	//--input-instance-folder
-	char* input_folder = getCmdOption(argv, argv + argc, "--input-instance-folder");
-	if (input_folder) {
-		printf("InFolder: %s \n", input_folder);
-	}
-	else input_folder = &empty;
+    // Strings
+    std::cout << "HarvestPlan: " << args.HarvestPlan << std::endl;
+    std::cout << "InFolder: " << args.InFolder << std::endl;
+    std::cout << "OutFolder: " << args.OutFolder << std::endl;
+    std::cout << "Simulator: " << args.Simulator << std::endl;
+    std::cout << "WeatherOpt: " << args.WeatherOpt << std::endl;
 
-	//--output-folder
-	char* output_folder = getCmdOption(argv, argv + argc, "--output-folder");
-	if (output_folder) {
-		printf("OutFolder: %s \n", output_folder);
-	}
-	else output_folder = &empty;
-
-	//--weather
-	char* input_weather = getCmdOption(argv, argv + argc, "--weather");
-	if (input_weather) {
-		printf("WeatherOpt: %s \n", input_weather);
-	}
-	else input_weather = &empty;
-
-	//--FirebreakPlan
-	char* input_hplan = getCmdOption(argv, argv + argc, "--FirebreakCells");
-	if (input_hplan) {
-		printf("FirebreakCells: %s \n", input_hplan);
-	}
-	else input_hplan = &empty;
-
-	// Booleans
-	bool out_messages = false;
-	bool out_trajectories = false;
-	bool no_output = false;
-	bool verbose_input = false;
-	bool iplog_input = false;
-	bool input_ignitions = false;
-	bool out_grids = false;
-	bool out_fl=false;
-	bool out_intensity=false;
-	bool out_ros=false;
-	bool out_crown = false;
-	bool out_crown_consumption=false;
-	bool out_surf_consumption=false;
-	bool out_finalgrid = false;
-	bool prom_tuned = false;
-	bool out_stats = false;
-	bool bbo_tuning = false;
-	bool allow_cros = false;
-
-	//--out-messages
-	if (cmdOptionExists(argv, argv + argc, "--output-messages")) {
-		out_messages = true;
-		printf("OutMessages: %d \n", out_messages);
-	}
-
-	//--fire-behavior
-	if (cmdOptionExists(argv, argv + argc, "--out-fl")) {
-		out_fl = true;
-		printf("OutFlameLength: %d \n", out_fl);
-	}
-		//--fire-behavior
-	if (cmdOptionExists(argv, argv + argc, "--out-intensity")) {
-		out_intensity = true;
-		printf("OutIntensity: %d \n", out_intensity);
-	}
-		//--fire-behavior
-	if (cmdOptionExists(argv, argv + argc, "--out-ros")) {
-		out_ros = true;
-		printf("OutROS: %d \n", out_ros);
-	}
-			//--fire-behavior
-	if (cmdOptionExists(argv, argv + argc, "--out-crown")) {
-		out_crown = true;
-		printf("OutCrown: %d \n", out_crown);
-	}
-	
-	if (cmdOptionExists(argv, argv + argc, "--out-cfb")) {
-		out_crown_consumption = true;
-		printf("OutCrownConsumption: %d \n", out_crown_consumption);
-	}
-
-	if (cmdOptionExists(argv, argv + argc, "--out-sfb")) {
-		out_surf_consumption = true;
-		printf("OutSurfaceConsumption: %d \n", out_surf_consumption);
-	}
-	
-
-	//--trajectories
-	//if (cmdOptionExists(argv, argv + argc, "--trajectories")) {
-	//	out_trajectories = true;
-	//	printf("Trajectories: %d \n", out_trajectories);
-	//}
-
-	//--no-output
-	//if (cmdOptionExists(argv, argv + argc, "--no-output")) {
-	//	no_output = true;
-	//	printf("noOutput: %d \n", no_output);
-	//}
-
-	//--verbose
-	if (cmdOptionExists(argv, argv + argc, "--verbose")) {
-		verbose_input = true;
-		printf("verbose: %d \n", verbose_input);
-	}
-
-	// --ignitionsLog
-	if (cmdOptionExists(argv, argv + argc, "--ignitionsLog")) {
-		iplog_input = true;
-		printf("Ignition Points Log: %d \n", iplog_input);
-	}
-
-	//--ignitions
-	if (cmdOptionExists(argv, argv + argc, "--ignitions")) {
-		input_ignitions = true;
-		printf("Ignitions: %d \n", input_ignitions);
-	}
-
-	//--grids
-	if (cmdOptionExists(argv, argv + argc, "--grids")) {
-		out_grids = true;
-		printf("OutputGrids: %d \n", out_grids);
-	}
-
-	//--final-grid
-	if (cmdOptionExists(argv, argv + argc, "--final-grid")) {
-		out_finalgrid = true;
-		printf("FinalGrid: %d \n", out_finalgrid);
-	}
-
-	//--Prom_tuned
-	//if (cmdOptionExists(argv, argv + argc, "--PromTuned")) {
-	//	prom_tuned = true;
-	//	printf("PromTuned: %d \n", prom_tuned);
-	//}
-
-	//--statistics
-	//if (cmdOptionExists(argv, argv + argc, "--statistics")) {
-	//	out_stats = true;
-	//	printf("Statistics: %d \n", out_stats);
-	//}
-
-	//--bbo
-	if (cmdOptionExists(argv, argv + argc, "--bbo")) {
-		bbo_tuning = true;
-		printf("BBOTuning: %d \n", out_stats);
-	}
-
-	//--cros
-	if (cmdOptionExists(argv, argv + argc, "--cros")) {
-		allow_cros = true;
-		printf("CrownROS: %d \n", allow_cros);
-	}
-
-
-	// Floats and ints
-	// defaults
-	int dsim_years = 1;
-	int dnsims = 1;
-	int dweather_period_len = 60;
-	int dmax_fire_periods = 1000;
-	int dseed = 123;
-	int diradius = 0;
-	int dnthreads = 1;
-	int dfmc=100;
-	int dscen=3;
-	float dROS_Threshold= 0.1;
-	float dHFI_Threshold= 0.1;
-	float dCROS_Threshold= 0.5;
-	//float dCROSAct_Threshold= 1.0;
-	float dROSCV= 0.;
-	float dHFactor = 1.0;
-	float dFFactor = 1.0;
-	float dBFactor = 1.0;
-	float dEFactor = 1.0;
-	float dCBDFactor = 0.0; //spain
-	//float dCBHFactor = 1.0;
-	float dCCFFactor = 0.0; //spain
-	float dROS10Factor = 3.34; //spain
-	float dinput_PeriodLen= 1.;
-	
-	// aux 
-	std::string::size_type sz;
-
-	//--sim-years  (float)
-	char * sim_years = getCmdOption(argv, argv + argc, "--sim-years");
-    if (sim_years){
-        printf("TotalYears: %s \n", sim_years);
-		args_ptr->TotalYears = std::stoi (sim_years ,&sz); 
+    // ??
+    std::cout << "HCells: ";
+    for (const auto& cell : args.HCells) {
+        std::cout << cell << " ";
     }
-	else args_ptr->TotalYears = dsim_years;
-	
-	//--nsims
-	char * input_nsims = getCmdOption(argv, argv + argc, "--nsims");
-    if (input_nsims){
-        printf("TotalSims: %s \n", input_nsims);
-		args_ptr->TotalSims = std::stoi (input_nsims ,&sz);  
-    }
-	else args_ptr->TotalSims = dnsims;
+    std::cout << std::endl;
 
-
-		//--nsims
-	char * simulator_option = getCmdOption(argv, argv + argc, "--sim");
-    if (simulator_option){
-		std::string s=simulator_option;
-		if (s!="S" && s!="K" && s!="C"){
-			printf("%s Simulator Option not recognized or not developed, using S&B as default!!! \n", simulator_option);
-			args_ptr->Simulator=simulator_option;
-		}
-		else{
-		printf("Simulator: %s \n", simulator_option);
-		args_ptr->Simulator = simulator_option; 
-		}
+    std::cout << "BCells: ";
+    for (const auto& cell : args.BCells) {
+        std::cout << cell << " ";
     }
-	else {
-		printf("No Simulator Option Selected, using S&B as default!!! \n");
-		args_ptr->Simulator = "S";}
-	
-	
-	//--Weather-Period-Length
-	char * weather_period_len = getCmdOption(argv, argv + argc, "--Weather-Period-Length");
-    if (weather_period_len){
-        printf("WeatherPeriodLength: %s \n", weather_period_len);
-		args_ptr->MinutesPerWP = std::stoi (weather_period_len ,&sz); 
-    }
-	else args_ptr->MinutesPerWP = dweather_period_len;
-	
-	//--nweathers
-	char * nweathers = getCmdOption(argv, argv + argc, "--nweathers");
-    if (nweathers){
-		args_ptr->NWeatherFiles = std::stoi (nweathers ,&sz); 
-    }
-	else{
-		//std::cout << "No NWeatherFiles specified " << input_weather << std::endl;
-		if (std::string(input_weather) == "random") {
-			//std::cout << "Counting" << std::endl;
-			std::string input_string = input_folder;
-			args_ptr->NWeatherFiles = countWeathers(input_string + "/Weathers");
-		}
-		else {
-			///std::cout << "No NWeatherFiles specified 1 default" << std::endl;
-			args_ptr->NWeatherFiles = 1;
-		}
-	} 
-	
-	//--Fire-Period-Length
-	char * input_PeriodLen = getCmdOption(argv, argv + argc, "--Fire-Period-Length");
-    if (input_PeriodLen){
-        printf("FirePeriodLength: %s \n", input_PeriodLen);
-		if (std::stof (input_PeriodLen ,&sz) <= args_ptr->MinutesPerWP){
-			 args_ptr->FirePeriodLen = std::stof (input_PeriodLen ,&sz); 
-		}
-		else args_ptr->FirePeriodLen =  args_ptr->MinutesPerWP;
-    } 
-	else args_ptr->FirePeriodLen = dinput_PeriodLen;
-	
-	//--IgnitionRad
-	char * input_igrad = getCmdOption(argv, argv + argc, "--IgnitionRad");
-    if (input_igrad){
-        printf("IgnitionRadius: %s \n", input_igrad);
-		args_ptr->IgnitionRadius = std::stoi (input_igrad ,&sz); 
-    } 
-	else args_ptr->IgnitionRadius =  diradius;
-	
-
-	//--fmc
-	char * input_fmc = getCmdOption(argv, argv + argc, "--fmc");
-    if (input_fmc){
-        printf("FoliarMoistureContent: %s \n", input_fmc);
-		args_ptr->FMC = std::stoi (input_fmc ,&sz);  
-    }
-	else args_ptr->FMC = dfmc; 
-	
-		//--scenario
-	char * input_scenario = getCmdOption(argv, argv + argc, "--scenario");
-    if (input_scenario){
-        printf("LiveAndDeadFuelMoistureContentScenario: %s \n", input_scenario);
-		args_ptr->scenario = std::stoi (input_scenario ,&sz);  
-    }
-	else args_ptr->scenario = dscen; 
-	
-	
-	//--ROS-Threshold
-	char * ROS_Threshold = getCmdOption(argv, argv + argc, "--ROS-Threshold");
-    if (ROS_Threshold){
-        printf("ROSThreshold: %s \n", ROS_Threshold);
-		args_ptr->ROSThreshold = std::stof (ROS_Threshold ,&sz); 
-    }
-	else args_ptr->ROSThreshold = dROS_Threshold;
-	
-	//--CROS-Threshold
-	char * CROS_Threshold = getCmdOption(argv, argv + argc, "--CROS-Threshold");
-    if (CROS_Threshold){
-        printf("CROSThreshold: %s \n", CROS_Threshold);
-		args_ptr->CROSThreshold = std::stof (CROS_Threshold ,&sz); 
-    }
-	else args_ptr->CROSThreshold = dCROS_Threshold;
-	
-	//--HFI-Threshold
-	char * HFI_Threshold = getCmdOption(argv, argv + argc, "--HFI-Threshold");
-    if (HFI_Threshold){
-        printf("HFIThreshold: %s \n", HFI_Threshold);
-		args_ptr->HFIThreshold = std::stof (HFI_Threshold ,&sz);
-    }
-	else args_ptr->HFIThreshold = dHFI_Threshold;
-	
-	//--CROSAct-Threshold
-	char * CROSAct_Threshold = getCmdOption(argv, argv + argc, "--CROSAct-Threshold");
-    if (CROSAct_Threshold){
-        printf("CROSActThreshold: %s \n", CROSAct_Threshold);
-		args_ptr->CROSActThreshold = std::stof (CROSAct_Threshold ,&sz); 
-    }
-	else args_ptr->CROSThreshold = dCROS_Threshold;
-	
-	
-	//--HFactor
-	char * H_Factor = getCmdOption(argv, argv + argc, "--HFactor");
-    if (H_Factor){
-        printf("HFactor: %s \n", H_Factor);
-		args_ptr->HFactor = std::stof (H_Factor ,&sz); 
-    }
-	else args_ptr->HFactor = dHFactor;
-	
-	//---FFactor
-	char * F_Factor = getCmdOption(argv, argv + argc, "--FFactor");
-    if (F_Factor){
-        printf("FFactor: %s \n", F_Factor);
-		args_ptr->FFactor = std::stof (F_Factor ,&sz); 
-    }
-	else args_ptr->FFactor = dFFactor;
-	
-	///--BFactor
-	char * B_Factor = getCmdOption(argv, argv + argc, "--BFactor");
-    if (B_Factor){
-        printf("BFactor: %s \n", B_Factor);
-		args_ptr->BFactor = std::stof (B_Factor ,&sz); 
-    }
-	else args_ptr->BFactor = dBFactor;
-	
-	///--EFactor
-	char * E_Factor = getCmdOption(argv, argv + argc, "--EFactor");
-    if (E_Factor){
-        printf("EFactor: %s \n", E_Factor);
-		args_ptr->EFactor = std::stof (E_Factor ,&sz); 
-    }
-	else args_ptr->EFactor = dEFactor;
-		
-	///--CBDFactor
-	char * CBD_Factor = getCmdOption(argv, argv + argc, "--CBDFactor");
-    if (CBD_Factor){
-        printf("CBDFactor: %s \n", CBD_Factor);
-		args_ptr->CBDFactor = std::stof (CBD_Factor ,&sz); 
-    }
-	else args_ptr->CBDFactor = dCBDFactor;
-	
-	///--CCFFactor
-	char * CCF_Factor = getCmdOption(argv, argv + argc, "--CCFFactor");
-    if (CCF_Factor){
-        printf("CCFFactor: %s \n", CCF_Factor);
-		args_ptr->CCFFactor = std::stof (CCF_Factor ,&sz); 
-    }
-	else args_ptr->CCFFactor = dCCFFactor;
-	
-	///--ROS10Factor
-	char * ROS10_Factor = getCmdOption(argv, argv + argc, "--ROS10Factor");
-    if (ROS10_Factor){
-        printf("ROS10Factor: %s \n", ROS10_Factor);
-		args_ptr->ROS10Factor = std::stof (ROS10_Factor, &sz); 
-    }
-	else args_ptr->ROS10Factor = dROS10Factor;
-	
-	//--ROS-CV
-	char * ROS_CV = getCmdOption(argv, argv + argc, "--ROS-CV");
-    if (ROS_CV){
-        printf("ROS-CV: %s \n", ROS_CV);
-		args_ptr->ROSCV = std::stof (ROS_CV ,&sz); 
-    }
-	else args_ptr->ROSCV = dROSCV;
-	
-	//--max-fire-periods
-	char * max_fire_periods = getCmdOption(argv, argv + argc, "--max-fire-periods");
-    if (max_fire_periods){
-        printf("MaxFirePeriods: %s \n", max_fire_periods);
-		args_ptr->MaxFirePeriods = std::stoi (max_fire_periods ,&sz); 
-    }
-	else args_ptr->MaxFirePeriods = dmax_fire_periods;
-	
-	//--seed  (int)
-	char * seed = getCmdOption(argv, argv + argc, "--seed");
-    if (seed){
-        printf("seed: %s \n", seed);
-		args_ptr->seed = std::stoi (seed ,&sz); 
-    }
-	else args_ptr->seed = dseed;
-	
-	//--nthreads  (int)
-	char* nthreads = getCmdOption(argv, argv + argc, "--nthreads");
-	if (nthreads) {
-		printf("nthreads: %s \n", nthreads);
-		args_ptr->nthreads = std::stoi(nthreads, &sz);
-	}
-	else args_ptr->nthreads = dnthreads;
-
-	// Populate structure
-	// Strings 
-	if (input_folder == &empty){
-		args_ptr->InFolder = ""; 
-	}
-	else args_ptr->InFolder = input_folder; 
-	
-	if (!args_ptr->InFolder.empty() && *args_ptr->InFolder.rbegin()!= separator()){
-		args_ptr->InFolder+=separator();
-	}
-
-	if (output_folder == &empty && input_folder != &empty){
-		args_ptr->OutFolder = args_ptr->InFolder + "simOuts";
-	} else if(output_folder == &empty && input_folder == &empty){
-		args_ptr->OutFolder = "simOuts";
-	} else if(output_folder != &empty && input_folder == &empty){
-		args_ptr->OutFolder = output_folder;
-	} else if(output_folder != &empty && input_folder != &empty){
-		args_ptr->OutFolder = output_folder;
-	}
-
-	if (!args_ptr->OutFolder.empty() && *args_ptr->OutFolder.rbegin()!= separator()){
-		args_ptr->OutFolder+=separator();
-	}
-		
-	if (input_weather == &empty){
-		args_ptr->WeatherOpt = "rows";
-	}
-	else{
-		args_ptr->WeatherOpt = input_weather;
-	}
-	
-	if (input_hplan == &empty){
-		args_ptr->HarvestPlan = ""; 
-	}
-	else args_ptr->HarvestPlan = input_hplan; 
-		
-	// booleans
-	args_ptr->OutMessages = out_messages;
-	args_ptr->OutFl = out_fl;
-	args_ptr->OutIntensity = out_intensity;
-	args_ptr->OutRos = out_ros;
-	args_ptr->OutCrown = out_crown;
-	args_ptr->OutCrownConsumption = out_crown_consumption;
-	args_ptr->OutSurfConsumption = out_surf_consumption;
-	args_ptr->Trajectories = out_trajectories; 
-	args_ptr->NoOutput = no_output;
-	args_ptr->verbose = verbose_input;
-	args_ptr->IgnitionsLog = iplog_input; 
-	args_ptr->Ignitions = input_ignitions;
-	args_ptr->OutputGrids = out_grids; 
-	args_ptr->FinalGrid = out_finalgrid;
-	args_ptr->PromTuned = prom_tuned;
-	args_ptr->Stats = out_stats;   
-	args_ptr->BBOTuning = bbo_tuning;
-	args_ptr->AllowCROS = allow_cros;	
-	
+    std::cout << std::endl;
 }
 
 
-void printArgs(arguments args){
+bool parseArguments(int argc, char* argv[], arguments& args) {
+    static struct option long_options[] = {
+        // Booleans
+        {"AllowCROS", no_argument, 0, 'a'},
+        {"BBOTuning", no_argument, 0, 'b'},
+        {"FinalGrid", no_argument, 0, 'c'},
+        {"Ignitions", no_argument, 0, 'd'},
+        {"IgnitionsLog", no_argument, 0, 'e'},
+        {"OutCrown", no_argument, 0, 'f'},
+        {"OutCrownConsumption", no_argument, 0, 'g'},
+        {"OutFl", no_argument, 0, 'i'},
+        {"OutIntensity", no_argument, 0, 'j'},
+        {"OutMessages", no_argument, 0, 'k'},
+        {"OutRos", no_argument, 0, 'l'},
+        {"OutSurfConsumption", no_argument, 0, 'm'},
+        {"OutputGrids", no_argument, 0, 'n'},
+        {"verbose", no_argument, 0, 'v'},
 
-	/*
-	std::cout << "Simulator: "<<args.Simulator<<std::endl;
-	std::cout << "InFolder: " << args.InFolder << std::endl; 
-	std::cout << "OutFolder: " << args.OutFolder << std::endl; 
-	std::cout << "WeatherOpt: " << args.WeatherOpt << std::endl;
-	std::cout << "NWeatherFiles: " << args.NWeatherFiles << std::endl;	
-	std::cout << "MinutesPerWP: " << args.MinutesPerWP << std::endl; 
-	std::cout << "MaxFirePeriods: " << args.MaxFirePeriods << std::endl; 
-	std::cout << "Messages: " << args.OutMessages << std::endl;
-	std::cout << "OutFlameLength: " << args.OutFl << std::endl;
-	std::cout << "OutIntensity: " << args.OutIntensity << std::endl;
-	std::cout << "OutROS: " << args.OutRos << std::endl;
-	std::cout << "OutCrown: " << args.OutCrown << std::endl;
-	std::cout << "OutCrownConsumption: " << args.OutCrownConsumption << std::endl;
-	std::cout << "OutSurfConsumption: " << args.OutSurfConsumption << std::endl;
-	std::cout << "HarvestPlan: " << args.HarvestPlan << std::endl; 
-	std::cout << "TotalYears: " << args.TotalYears << std::endl; 
-	std::cout << "TotalSims: " << args.TotalSims << std::endl; 
-	std::cout << "FirePeriodLen: " << args.FirePeriodLen << std::endl; 
-	std::cout << "Ignitions: " << args.Ignitions << std::endl; 
-	std::cout << "IgnitionRad: " << args.IgnitionRadius << std::endl; 
-	std::cout << "OutputGrid: " << args.OutputGrids << std::endl; 
-	std::cout << "FinalGrid: " << args.FinalGrid << std::endl; 
-	std::cout << "PromTuned: " << args.PromTuned << std::endl; 
-	std::cout << "BBOTuning: " << args.BBOTuning << std::endl; 
-	std::cout << "Statistics: " << args.Stats << std::endl; 
-	std::cout << "noOutput: " << args.NoOutput << std::endl; 
-	std::cout << "verbose: " << args.verbose << std::endl; 
-	std::cout << "seed: " << args.seed << std::endl; 
-	std::cout << "nthreads: " << args.nthreads << std::endl;
-	*/
+        // Floats
+        {"BFactor", required_argument, 0, 'p'},
+        {"CBDFactor", required_argument, 0, 'q'},
+        {"CCFFactor", required_argument, 0, 'w'},
+        {"CROSThreshold", required_argument, 0, 's'},
+        {"EFactor", required_argument, 0, 't'},
+        {"FFactor", required_argument, 0, 'u'},
+        {"FirePeriodLen", required_argument, 0, 'o'},
+        {"HFIThreshold", required_argument, 0, 'w'},
+        {"HFactor", required_argument, 0, 'x'},
+        {"ROS10Factor", required_argument, 0, 'y'},
+        {"ROSCV", required_argument, 0, 'z'},
+        {"ROSThreshold", required_argument, 0, 'A'},
 
-	std::cout << "Simulator: "<<args.Simulator<<std::endl;
-	std::cout << "InFolder: " << args.InFolder << std::endl; 
-	std::cout << "OutFolder: " << args.OutFolder << std::endl; 
-	std::cout << "WeatherOpt: " << args.WeatherOpt << std::endl;
-	std::cout << "FirebreakCells: " << args.HarvestPlan << std::endl;
-	std::cout << "NWeatherFiles: " << args.NWeatherFiles << std::endl;	
-	std::cout << "MinutesPerWP: " << args.MinutesPerWP << std::endl; 
-	std::cout << "MaxFirePeriods: " << args.MaxFirePeriods << std::endl; 
-	std::cout << "Messages: " << args.OutMessages << std::endl;
-	std::cout << "OutFlameLength: " << args.OutFl << std::endl;
-	std::cout << "OutIntensity: " << args.OutIntensity << std::endl;
-	std::cout << "OutROS: " << args.OutRos << std::endl;
-	std::cout << "OutCrown: " << args.OutCrown << std::endl;
-	std::cout << "OutCrownConsumption: " << args.OutCrownConsumption << std::endl;
-	std::cout << "OutSurfConsumption: " << args.OutSurfConsumption << std::endl;
-	 
-	std::cout << "TotalYears: " << args.TotalYears << std::endl; 
-	std::cout << "TotalSims: " << args.TotalSims << std::endl; 
-	std::cout << "FirePeriodLen: " << args.FirePeriodLen << std::endl; 
-	std::cout << "Ignitions: " << args.Ignitions << std::endl; 
-	std::cout << "IgnitionRad: " << args.IgnitionRadius << std::endl; 
-	std::cout << "OutputGrid: " << args.OutputGrids << std::endl; 
-	std::cout << "FinalGrid: " << args.FinalGrid << std::endl; 
-	std::cout << "PromTuned: " << args.PromTuned << std::endl; 
-	std::cout << "BBOTuning: " << args.BBOTuning << std::endl; 
-	std::cout << "Statistics: " << args.Stats << std::endl; 
-	std::cout << "noOutput: " << args.NoOutput << std::endl; 
-	std::cout << "verbose: " << args.verbose << std::endl;
-	std::cout << "Ignition Points Log: " << args.IgnitionsLog << std::endl; 
-	std::cout << "seed: " << args.seed << std::endl; 
-	std::cout << "nthreads: " << args.nthreads << std::endl;
+        // Integers
+	{"FMC", required_argument, 0, 'B'},
+	{"IgnitionRadius", required_argument, 0, 'C'},
+	{"MaxFirePeriods", required_argument, 0, 'D'},
+	{"MinutesPerWP", required_argument, 0, 'E'},
+	{"NWeatherFiles", required_argument, 0, 'F'},
+	{"TotalSims", required_argument, 0, 'G'},
+	{"TotalYears", required_argument, 0, 'H'},
+	{"nthreads", required_argument, 0, 'I'},
+	{"scenario", required_argument, 0, 'J'},
+	{"seed", required_argument, 0, 'K'},
 
-	
-	
+        // Strings
+        {"HarvestPlan", required_argument, 0, 'L'},
+        {"InFolder", required_argument, 0, 'M'},
+        {"OutFolder", required_argument, 0, 'N'},
+        {"Simulator", required_argument, 0, 'O'},
+        {"WeatherOpt", required_argument, 0, 'P'},
+
+        {"help", no_argument, 0, 'h'},
+        {0, 0, 0, 0}
+    };
+
+    int opt;
+    int option_index = 0;
+    while ((opt = getopt_long(argc, argv, "a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:A:B:C:D:E:F:G:H:I:J:K:L:M:N:O:P", long_options, &option_index)) != -1) {
+        switch (opt) {
+            case 'a': args.AllowCROS = true; break;
+            case 'b': args.BBOTuning = true; break;
+            case 'c': args.FinalGrid = true; break;
+            case 'd': args.Ignitions = true; break;
+            case 'e': args.IgnitionsLog = true; break;
+	    case 'f': args.OutCrown = true; break;
+            case 'g': args.OutCrownConsumption = true; break;
+            case 'i': args.OutFl = true; break;
+            case 'j': args.OutIntensity = true; break;
+            case 'k': args.OutMessages = true; break;
+            case 'l': args.OutRos = true; break;
+            case 'm': args.OutSurfConsumption = true; break;
+            case 'n': args.OutputGrids = true; break;
+            case 'v': args.verbose = true; break;
+
+            case 'p': args.BFactor = std::atof(optarg); break;
+            case 'q': args.CBDFactor = std::atof(optarg); break;
+            case 'r': args.CCFFactor = std::atof(optarg); break;
+            case 's': args.CROSThreshold = std::atof(optarg); break;
+            case 't': args.EFactor = std::atof(optarg); break;
+            case 'u': args.FFactor = std::atof(optarg); break;
+            case 'o': args.FirePeriodLen = std::atof(optarg); break;
+            case 'w': args.HFIThreshold = std::atof(optarg); break;
+            case 'x': args.HFactor = std::atof(optarg); break;
+            case 'y': args.ROS10Factor = std::atof(optarg); break;
+            case 'z': args.ROSCV = std::atof(optarg); break;
+            case 'A': args.ROSThreshold = std::atof(optarg); break;
+                  
+            case 'B': args.FMC = std::atoi(optarg); break;
+            case 'C': args.IgnitionRadius = std::atoi(optarg); break;
+            case 'D': args.MaxFirePeriods = std::atoi(optarg); break;
+            case 'E': args.MinutesPerWP = std::atoi(optarg); break;
+            case 'F': args.NWeatherFiles = std::atoi(optarg); break;
+	    case 'G': args.TotalSims = std::atoi(optarg); break;
+	    case 'H': args.TotalYears = std::atoi(optarg); break;
+	    case 'I': args.nthreads = std::atoi(optarg); break;
+	    case 'J': args.scenario = std::atoi(optarg); break;
+	    case 'K': args.seed = std::atoi(optarg); break;
+                  
+            case 'L': args.HarvestPlan = optarg; break;
+            case 'M': args.InFolder = optarg; break;
+            case 'N': args.OutFolder = optarg; break;
+            case 'O': args.Simulator = optarg; break;
+            case 'P': args.WeatherOpt = optarg; break;
+            case 'h': printHelp(); return 0;
+            default:
+                std::cerr << "Unknown option: " << opt << std::endl;
+		printHelp();
+                return false;
+        }
+    }
+    return true;
+}
+
+void postProcessArguments(arguments& args) {
+    if (args.NWeatherFiles < 1) {
+	if (args.WeatherOpt == "random") {
+	    args.NWeatherFiles = countWeathers(args.InFolder + separator() + "Weathers");
+	} else {
+	    args.NWeatherFiles = 1;
+	}
+    }
+
+    if (args.FirePeriodLen <= args.MinutesPerWP) {
+	args.FirePeriodLen = args.MinutesPerWP;
+    }
+
+    if (args.Simulator != "S" && args.Simulator != "C" && args.Simulator != "K") {
+	printf("Simulator not in [\"S\", \"C\", \"K\"]\n");
+	exit(1);
+    }
+
+    if (args.InFolder.back() != separator()) {
+	args.InFolder += separator();
+    }
+
+    if (args.OutFolder.empty()) {
+	args.OutFolder = args.InFolder + "results";
+    }
+
+    if (args.OutFolder.back() != separator()) {
+	args.OutFolder += separator();
+    }
 }
 
 int countWeathers(const std::string directory_path) {
