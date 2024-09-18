@@ -16,17 +16,17 @@ foreach ($format in "asc", "tif") {
         Remove-Item -Recurse -Force -Path "$outputDir/*"
     
         if ($model -eq "fbp") {
-            $additionalArgs = "--cros"
+            $additionalArgs = "--AllowCROS"
             $simCode = "C"
         } elseif ($model -eq "sb") {
-            $additionalArgs = "--scenario 1"
+            $additionalArgs = "--AllowCROS --scenario 1"
             $simCode = "S"
         } elseif ($model -eq "kitral") {
             $additionalArgs = ""
             $simCode = "K"
         }
     
-        $command = "Cell2Fire.exe --input-instance-folder model/$model-$format --output-folder $outputDir --nsims 113 --output-messages --grids --out-ros --out-intensity --sim $simCode --seed 123 $additionalArgs"
+        $command = "Cell2Fire.exe --InFolder model/$model-$format --OutFolder $outputDir --TotalSims 113 --OutMessages  --OutputGrids --OutRos --OutIntensity --Simulator $simCode --seed 123 $additionalArgs"
         Start-Process -FilePath "pwsh" -ArgumentList "-Command $command" -RedirectStandardOutput "$outputDir/log.txt" -NoNewWindow -Wait
 
 	$firstLine = (Get-Content "$outputDir/log.txt" -TotalCount 1) -replace '^version: .*', 'version: v0.0.1'
