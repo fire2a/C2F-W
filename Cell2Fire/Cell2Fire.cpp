@@ -1698,9 +1698,9 @@ std::vector<float> Cell2Fire::getFireProgressMatrix(){
 *******************************************************************************/
 int main(int argc, char* argv[]) {
 
-    printf("version: %s\n", c2fw_version.c_str());
+    std::cout << "version: " << c2fw_version << "\n";
 	
-    std::cout << "------ Argument parser ------\n";
+    std::cout << "------ Arguments ------\n";
     arguments args;
     if (!parseArguments(argc, argv, args)) {
         std::cerr << "Failed to parse arguments" << std::endl;
