@@ -115,6 +115,7 @@ jobs:
         .\bootstrap-vcpkg.bat
         .\vcpkg integrate install
         .\vcpkg install tiff # --recurse --editable
+        .\vcpkg install getopt
         # Write-Host "Listing all files in installed\x64-windows:"
         # Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
 
