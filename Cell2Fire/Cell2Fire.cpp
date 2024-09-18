@@ -975,7 +975,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 }
 
 
-// Send messages 
+    // Send messages 
 	std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 	// Iterator
 	std::unordered_map<int, Cells>::iterator it;
@@ -1698,15 +1698,16 @@ std::vector<float> Cell2Fire::getFireProgressMatrix(){
 *******************************************************************************/
 int main(int argc, char* argv[]) {
 
-	printf("version: %s\n", c2fw_version.c_str());
+    std::cout << "version: " << c2fw_version << "\n";
 	
-	// Read Arguments
-	std::cout << "------ Command line values ------\n";
-	arguments args;
-	arguments* args_ptr = &args;
-	parseArgs(argc, argv, args_ptr);
-	
-	//printArgs(args);
+    std::cout << "------ Arguments ------\n";
+    arguments args;
+    if (!parseArguments(argc, argv, args)) {
+        std::cerr << "Failed to parse arguments" << std::endl;
+        return 1;
+    }
+    postProcessArguments(args);
+    printArguments(args);
 
 	// Random generator and distributions
 	//std::default_random_engine generator (args.seed);
