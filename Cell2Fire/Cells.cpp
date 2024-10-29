@@ -4,6 +4,7 @@
 #include "FuelModelSpain.h"
 #include "FuelModelKitral.h"
 #include "FuelModelFBP.h"
+#include "FuelModelPortugal.h"
 #include "ReadCSV.h"
 #include "ReadArgs.h"
 #include "Ellipse.h"
@@ -383,6 +384,10 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 	{
 		calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 	}
+	else if (args->Simulator == "P")
+	{
+		calculate_p(&df_ptr[this->realId - 1], coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
+	}
 
 	/*  ROSs DEBUG!   */
 	if (args->verbose)
@@ -557,6 +562,10 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 				{
 					determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2);
 				}
+				else if (args->Simulator == "P")
+				{
+					determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics);
+				}
 				crownState[this->realId - 1] = mainstruct.crown;
 				crownState[nb - 1] = metrics.crown;
 				RateOfSpreads[this->realId - 1] = double(std::ceil(ros * 100.0) / 100.0);
@@ -673,6 +682,10 @@ std::vector<int> Cells::manageFireBBO(int period, std::unordered_set<int> &Avail
 	else if (args->Simulator == "C")
 	{
 		calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+	}
+	else if (args->Simulator == "P")
+	{
+		calculate_p(&df_ptr[this->realId - 1], coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 	}
 
 	/*  ROSs DEBUG!   */
@@ -822,6 +835,10 @@ std::vector<int> Cells::manageFireBBO(int period, std::unordered_set<int> &Avail
 				{
 					determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2);
 				}
+				else if (args->Simulator == "P")
+				{
+					determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics);
+				}
 				crownState[this->realId - 1] = mainstruct.crown;
 				crownState[nb - 1] = metrics.crown;
 				RateOfSpreads[this->realId - 1] = double(std::ceil(ros * 100.0) / 100.0);
@@ -938,6 +955,10 @@ bool Cells::get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs
 	{
 		calculate_fbp(&df[this->id], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 	}
+	else if (args->Simulator == "P")
+	{
+		calculate_p(&(df[this->id]), coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
+	}
 
 	if (args->verbose)
 	{
@@ -1053,7 +1074,10 @@ bool Cells::ignition(int period, int year, std::vector<int> &ignitionPoints, inp
 		{
 			calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 		}
-
+		else if (args->Simulator == "P")
+		{
+			calculate_p(&df_ptr[this->realId - 1], coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
+		}
 		if (args->verbose)
 		{
 			std::cout << "\nIn ignition function" << std::endl;

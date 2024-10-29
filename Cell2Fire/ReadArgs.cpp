@@ -250,7 +250,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	char * simulator_option = getCmdOption(argv, argv + argc, "--sim");
     if (simulator_option){
 		std::string s=simulator_option;
-		if (s!="S" && s!="K" && s!="C"){
+		if (s!="S" && s!="K" && s!="C" && s!="P"){
 			printf("%s Simulator Option not recognized or not developed, using S&B as default!!! \n", simulator_option);
 			args_ptr->Simulator=simulator_option;
 		}

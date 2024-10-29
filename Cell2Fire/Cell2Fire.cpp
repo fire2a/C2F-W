@@ -10,6 +10,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include "Spotting.h"
 #include "FuelModelSpain.h"
 #include "FuelModelKitral.h"
+#include "FuelModelPortugal.h"
 #include "ReadCSV.h"
 #include "WriteCSV.h"
 #include "ReadArgs.h"
