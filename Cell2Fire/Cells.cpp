@@ -521,7 +521,7 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 			{
 				std::cout << "     (angle, realized ros in m/min): (" << angle << ", " << ros << ")" << std::endl;
 			}
-			if (args->Simulator == "S")
+			if (args->Simulator == "S" || args->Simulator == "P")
 			{
 				// Slope effect
 				float se = slope_effect(df_ptr[this->realId - 1].elev, df_ptr[nb - 1].elev, this->perimeter / 4.);

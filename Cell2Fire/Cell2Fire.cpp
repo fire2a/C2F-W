@@ -770,6 +770,9 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	*
 	*******************************************************************/
 	// Ignitions 
+	
+	
+	
 	int aux = 0;
 	int selected = 0;
 	int loops = 0;
@@ -779,12 +782,13 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	std::default_random_engine generator2(args.seed * ep*this->nCells);// * time(NULL)); //creates a different generator solving cases when parallel running creates simulations at same time
 	std::unordered_map<int, Cells>::iterator it;
 	std::uniform_int_distribution<int> distribution(1, this->nCells);
-
+	
 	// No Ignitions provided
 	if (this->args.Ignitions == 0) {
 		while (true) {
 			microloops = 0;
 			while (true) {
+				
 				selected = distribution(generator2);
 				float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
 				//DEBUGstd::cout << "selectedPoint: " << selected << std::endl;
@@ -807,6 +811,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 			if (this->args.verbose){
 				std::cout << "aux: " << aux << std::endl;
 			}
+
 			
 			// If cell is available and not initialized, initialize it 
 			if (this->statusCells[aux - 1] < 3 && this->burntCells.find(aux) == this->burntCells.end()) {
@@ -829,15 +834,21 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 						// Status 
 						this->statusCells[it->second.realId - 1] = 1;
 
+						
+
 						// Plotter placeholder
 						if (this->args.OutputGrids){
 							this->outputGrid();
 						}
 
+						std::cout << "\n hasta aqui todo bien \n";
+
 						break;  
 					}
 				}
 			}
+
+			std::cout << "\n hasta aqui todo bien \n";
 			
 			loops++;
 			if (loops > this->nCells * 100) {
@@ -1560,6 +1571,7 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 		this->GetMessages(SendMessageList);
 	}
 	
+	
 	// Operational dynamic
 	// Ignition if we are in the first period (added workaround for no Messages)
 	if (!this->done && !this->noMessages){
@@ -1569,7 +1581,7 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 			if (this->RunIgnition(generator, ep)) {
 				// Next year
 				this->weatherPeriod = 0;
-
+				
 				// If more than planning horizon, next sim
 				if (this->year > this->args.TotalYears) {
 					// Print-out results to folder
@@ -1578,6 +1590,8 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 					// Next Sim if max year
 					this->done = true;
 				}
+			
+			
 			}
 			else {
 				// Start sending messages
@@ -1598,6 +1612,7 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 		}
 	}
 
+	
 
 	// Ending conditions 
 	//if (this->year - 1 >= this->fire_period.size()){
@@ -1724,6 +1739,7 @@ int main(int argc, char* argv[]) {
 
 	// Episodes
 
+	
 	GenDataFile(args.InFolder,args.Simulator);
 
 	int ep = 0;
@@ -1738,12 +1754,15 @@ int main(int argc, char* argv[]) {
 	
 	Cell2Fire Forest2(args); //generate Forest object
 	std::vector<Cell2Fire> Forests(num_threads, Forest2);
+	
 
 	// Multigenerator
 	std::vector<std::default_random_engine> generators;
 	for (stop = 0; stop < args.TotalSims; ++stop) {
 		generators.emplace_back(default_random_engine(args.seed * stop));
 	}
+
+	
 
 	// Parallel zone
 	#pragma omp parallel num_threads(num_threads)
@@ -1756,10 +1775,15 @@ int main(int argc, char* argv[]) {
 		else {
 			cout << "Serial version execution" << endl;
 		}
+
+		
+
 		Cell2Fire Forest = Forests[TID];
 		// Random seed
 		// std::default_random_engine generator( args.seed * (TID + 1) );
 		std::default_random_engine& generator = generators[TID]; //generators[args.nthreads]
+
+		
 
 		// Random generator and distributions
 		// printf("\n N weathers: %d \n", args.NWeatherFiles);
@@ -1779,6 +1803,8 @@ int main(int argc, char* argv[]) {
 		int tstep = 0;
 		int stop = 0;
 
+		
+
 		// #pragma omp parallel for 
 		#pragma omp for
 		for (ep = 1; ep <= args.TotalSims; ep++) {
@@ -1788,21 +1814,26 @@ int main(int argc, char* argv[]) {
 			rnumber = udistribution(generator);
 			rnumber2 = ndistribution(generator);
 
+			
+
 			// Reset
 			Forest.reset(rnumber, rnumber2, ep);
+
+			
 
 			// Time steps during horizon (or until we break it)
 			for (tstep = 0; tstep <= Forest.args.MaxFirePeriods * Forest.args.TotalYears; tstep++) {
 				//DEBUGprintf("\n ---- tstep %d \n", tstep);
 				Forest.Step(generator, ep);
 				//DEBUGprintf("\nDone: %d", Forest.done);
-
 				if (Forest.done) {
 					//DEBUGprintf("\n Done = True!, break \n");
 					break;
 				}
 
 			}
+
+			
 			// Enforces to satisfy the total number of simulations (if no ignition, find another cell until we obtain the TotalSim asked)
 			//if (Forest.sim > args.TotalSims){
 			//	break;

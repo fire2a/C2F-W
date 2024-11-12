@@ -459,6 +459,8 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 		args_ptr->InFolder+=separator();
 	}
 
+	
+
 	if (output_folder == &empty && input_folder != &empty){
 		args_ptr->OutFolder = args_ptr->InFolder + "simOuts";
 	} else if(output_folder == &empty && input_folder == &empty){
@@ -484,6 +486,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 		args_ptr->HarvestPlan = ""; 
 	}
 	else args_ptr->HarvestPlan = input_hplan; 
+
 		
 	// booleans
 	args_ptr->OutMessages = out_messages;
@@ -503,8 +506,8 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	args_ptr->PromTuned = prom_tuned;
 	args_ptr->Stats = out_stats;   
 	args_ptr->BBOTuning = bbo_tuning;
-	args_ptr->AllowCROS = allow_cros;	
-	
+	args_ptr->AllowCROS = allow_cros;
+
 }
 
 
