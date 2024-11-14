@@ -38,7 +38,7 @@ float backfire_ros_p(main_outs *at, snd_outs *sec) ;
 float flame_length(inputs *data, fuel_coefs *ptr);
 
 // Angle of the flame w.r.t. horizontal surface (Putnam's)
-float angleFL(inputs *data, fuel_coefs *ptr) ;
+float angleFL_p(inputs *data, fuel_coefs *ptr) ;
 
 // Transformation from FL to FH using angle 
 float flame_height(inputs *data, fuel_coefs *ptr) ;

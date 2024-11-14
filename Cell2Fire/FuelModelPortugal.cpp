@@ -1036,7 +1036,7 @@ float angleFL_p(inputs *data, fuel_coefs *ptr)
    {
        float angle, fl, y, ws ;
        ws = data->ws ;
-       fl = flame_length(data, ptr) ;
+       fl = flame_length_p(data, ptr) ;
        y = 10.0 / 36.0 * ws ;
 
        angle = atan(2.24 * sqrt(fl / pow(y, 2)))  ;
@@ -1167,6 +1167,7 @@ bool checkActive_p(inputs * data,main_outs* at) //En s&b se usa fm10
   
  void calculate_p(inputs *data,  fuel_coefs * ptr,arguments *args ,main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr,fire_struc *bptr,bool & activeCrown)
 {
+	
     // Hack: Initialize coefficients 
 	initialize_coeff_p(args->scenario);
 	
@@ -1187,7 +1188,7 @@ bool checkActive_p(inputs * data,main_outs* at) //En s&b se usa fm10
     ptr->q2 = q_coeff_p[data->nftype][1] ;
     ptr->q3 = q_coeff_p[data->nftype][2] ;
 	ptr->nftype = data->nftype;
-	
+
     // Step 1: Calculate HROS (surface)
     at->rss = rate_of_spread_p(data, ptr, at);
     hptr->rss = at->rss ;
@@ -1205,13 +1206,15 @@ bool checkActive_p(inputs * data,main_outs* at) //En s&b se usa fm10
     at->a = (hptr->rss + bptr->rss) / 2. ;
     at->b = (hptr->rss + bptr->rss) / (2. * sec->lb) ; 
     at->c = (hptr->rss - bptr->rss) / 2. ; 
-    
-    // Step 6: Flame Length
+	
+	// Step 6: Flame Length
     at->fl = flame_length_p(data, ptr);
+
+	//std::cout << "hasta aqui todo bien" << std::endl;
     
     // Step 7: Flame angle
     at->angle = angleFL_p(data, ptr) ;
-    
+
 	// Step 8: Flame Height
     at->fh = flame_height_p(data, ptr) ;
     

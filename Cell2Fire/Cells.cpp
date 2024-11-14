@@ -345,6 +345,7 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 								   arguments *args, weatherDF *wdf_ptr, std::vector<double> *FSCell, std::vector<float> *crownMetrics,
 								   bool &activeCrown, double randomROS, int perimeterCells, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths)
 {
+	
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
 
@@ -384,10 +385,13 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 	{
 		calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
 	}
+	
 	else if (args->Simulator == "P")
 	{
 		calculate_p(&df_ptr[this->realId - 1], coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 	}
+
+	
 
 	/*  ROSs DEBUG!   */
 	if (args->verbose)

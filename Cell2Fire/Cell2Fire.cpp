@@ -771,8 +771,6 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	*******************************************************************/
 	// Ignitions 
 	
-	
-	
 	int aux = 0;
 	int selected = 0;
 	int loops = 0;
@@ -789,6 +787,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 			microloops = 0;
 			while (true) {
 				
+
 				selected = distribution(generator2);
 				float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
 				//DEBUGstd::cout << "selectedPoint: " << selected << std::endl;
@@ -797,19 +796,28 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				//if (ignProb[selected - 1] / static_cast<float>(100) > rd_number) {    //If probabilities enter as integers, e.g: 80 as 0.8
 				if (this->ignProb[selected - 1] > rd_number) {
 					aux = selected;
-					//DEBUSstd::cout << "selected_point" << std::endl;
-					break;
-				}
-				microloops++;
-				if (microloops > this->nCells * 100) {
-					this->noIgnition = true;
+					//DEBUS
+					//std::cout << "selected_point" << aux << std::endl;
+
 					break;
 				}
 
+				
+				microloops++;
+				if (microloops > this->nCells * 100) {
+					this->noIgnition = true;
+					//std::cout << "hasta aqui todo bien 2" << std::endl;
+					break;
+				
+				}
+
 			}
+			
+			//std::cout << "selected_point" << aux << std::endl;
 			// Check information (Debugging)
 			if (this->args.verbose){
 				std::cout << "aux: " << aux << std::endl;
+				
 			}
 
 			
@@ -818,12 +826,15 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				if (this->Cells_Obj.find(aux) == this->Cells_Obj.end()) {
 					InitCell(aux);
 					it = this->Cells_Obj.find(aux);
+					
 				}
 				
 				if (it->second.getStatus() == "Available" && it->second.fType != 0) {
 					IgnitionHistory[sim] = aux;
-					std::cout << "\nSelected (Random) ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< aux;
+					std::cout << "\nSelected (Random) ignition point for Year " << this->year <<  ", sim " <<  this->sim << ": "<< aux << std::endl;
 					std::vector<int> ignPts = {aux};
+
+
 					if (it->second.ignition(this->fire_period[year - 1], this->year, ignPts, & df[aux - 1], this->coef_ptr, this->args_ptr, & wdf[this->weatherPeriod],this->activeCrown,this->perimeterCells)) {
 						//Printing info about ignitions        
 						if (this->args.verbose){
@@ -833,22 +844,20 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 						
 						// Status 
 						this->statusCells[it->second.realId - 1] = 1;
-
 						
-
+												
 						// Plotter placeholder
 						if (this->args.OutputGrids){
 							this->outputGrid();
 						}
 
-						std::cout << "\n hasta aqui todo bien \n";
-
-						break;  
+						break;
+						
 					}
 				}
+				
 			}
 
-			std::cout << "\n hasta aqui todo bien \n";
 			
 			loops++;
 			if (loops > this->nCells * 100) {
@@ -856,10 +865,11 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				break;
 			}
 			
-
+		
 		}
 	} 
 
+	
 	// Ignitions with provided points from CSV
 	else {
 		int temp = IgnitionPoints[this->year-1];
@@ -966,6 +976,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 		// End of the ignition step
 		std::cout << "\nNext Fire Period: " << this->fire_period[year-1] << std::endl;
 	}
+
 	
 	// If no ignition occurs, go to next year (no multiple ignitions per year, only one)
 	if(this->noIgnition){
@@ -981,7 +992,6 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	}
 
 	//std::cout << endl << "el punto de ignicion es: " << aux << std::endl;
-	
 	
 	return this->noIgnition;
 }
@@ -1006,6 +1016,8 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	
 	// Repeat fire flag 
 	this->repeatFire = false;
+
+	
 	
 	// Printing info before sending messages
 	if (this->args.verbose){
@@ -1022,6 +1034,9 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 			Each burning cell updates its fire progress and (if needed) populates their message
 	*/
 	for (int cell : this->burningCells) {
+
+		
+
 		std::vector<int> aux_list;
 		// Get object from unordered map
 		it = this->Cells_Obj.find(cell);
@@ -1030,27 +1045,34 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 		if (this->args.verbose) {
 			it->second.print_info();
 		}
+		
 				
 		/*
 				Manage Fire method main step
 		*/
 		if (it->second.ROSAngleDir.size() > 0) {
 			//std::cout << "Entra a Manage Fire" << std::endl;
-			if (!this->args.BBOTuning){  //&df[cell-1] replaced by full df for getting the slopes
+		
+			if (!this->args.BBOTuning){
+				//&df[cell-1] replaced by full df for getting the slopes
 				aux_list = it->second.manageFire(this->fire_period[this->year-1], this->availCells,  df, this->coef_ptr, 
 															   this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod],
 															   &this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells,this->crownState, this->crownFraction,this->surfFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
+		
 			}
 												
 			
 			else{
 				// TODO  MAY 11: Pass the slope factor or the slopes of the adjacent cells
+				
+				
 				auto factors = BBOFactors.find(NFTypesCells[cell-1]);
 				aux_list = it->second.manageFireBBO(this->fire_period[this->year-1], this->availCells,  & df[cell-1], this->coef_ptr, 
 																		this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod],
 																		&this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells, factors->second,this->crownState, this->crownFraction,this->surfFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
 			}
 			//std::cout << "Sale de Manage Fire" << std::endl;
+			
 		} 
 
 		else{
@@ -1087,7 +1109,6 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 
 	}
 	/* End sending messages loop */
-	
 	
 	// Check for burnt out updates via sets' difference
 	for(auto &bc : this->burnedOutList){
@@ -1570,7 +1591,7 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 		// Get Message
 		this->GetMessages(SendMessageList);
 	}
-	
+
 	
 	// Operational dynamic
 	// Ignition if we are in the first period (added workaround for no Messages)
@@ -1590,16 +1611,18 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 					// Next Sim if max year
 					this->done = true;
 				}
+
+				
 			
 			
 			}
 			else {
 				// Start sending messages
 				std::unordered_map<int, std::vector<int>> SendMessageList = this->SendMessages();
-
+				
 				// Get Message
 				this->GetMessages(SendMessageList);
-
+				
 				// Check if no burning cells to stop
 				if (this->burningCells.size() == 0) {
 					// Next Sim if max year
@@ -1607,9 +1630,9 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 				}
 
 
-
 			}
 		}
+		
 	}
 
 	
@@ -1803,8 +1826,6 @@ int main(int argc, char* argv[]) {
 		int tstep = 0;
 		int stop = 0;
 
-		
-
 		// #pragma omp parallel for 
 		#pragma omp for
 		for (ep = 1; ep <= args.TotalSims; ep++) {
@@ -1819,12 +1840,12 @@ int main(int argc, char* argv[]) {
 			// Reset
 			Forest.reset(rnumber, rnumber2, ep);
 
-			
-
 			// Time steps during horizon (or until we break it)
 			for (tstep = 0; tstep <= Forest.args.MaxFirePeriods * Forest.args.TotalYears; tstep++) {
 				//DEBUGprintf("\n ---- tstep %d \n", tstep);
+				
 				Forest.Step(generator, ep);
+				
 				//DEBUGprintf("\nDone: %d", Forest.done);
 				if (Forest.done) {
 					//DEBUGprintf("\n Done = True!, break \n");
