@@ -80,7 +80,7 @@ else
             echo $diff_output
             # exit at first different
             echo "run this command:"
-            echo "\trm -rf target_results"
+            echo "    rm -rf target_results"
             echo "run this command: before running the test again"
             exit 1
         fi
