@@ -1,4 +1,4 @@
-This folder contains a containerized version of Cell2Fire. The container runs the latest version of Cell2Fire  By using this you can avoid the hassle of manually building and configuring the application on your system. The container is compatible with both Podman and Docker. We recommend using Podman, but the instructions found here are easily translated into Docker.
+This folder contains a containerized version of Cell2Fire. The container runs the latest version of Cell2Fire without having to manually build and configure the application on your system. The container is compatible with both Podman and Docker. We recommend using Podman, but the instructions found here are easily translated into Docker.
 
 ## Folder Structure
 
