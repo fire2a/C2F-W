@@ -39,18 +39,18 @@ This command builds the container image and tags it as <image_name>.
 
 Once the image is built, you can run the simulation using Podman. It accepts the same parameters as if you were running the compiled binary directly.
 In order for the container to have access to the input data files, we must use volumes. Simply put the `-v` or `--volume` tag followed by the path to your input files
-(where the fuel and weather files are stored) like this:  `-v <path/to/data>:volume`. Once the simulation is finished, the results will be saved to that same directory.
+(where the fuel and weather files are stored) like this:  `-v <path/to/data>:mnt`. Once the simulation is finished, the results will be saved to that same directory.
 
 ```bash
 cd <folder with data>
 mkdir results 
-podman run -v <path/to/data>:volume [options] <image_name>  [cell2fire arguments]
+podman run -v <path/to/data>:mnt [options] <image_name>  [cell2fire arguments]
 ```
 
 For example the following command:
 
 ```bash
-podman run --name <container_name> -v /test/model/kitral-asc:volume -dt <image_name> --input-instance-folder /volume/model/kitral-asc --output-folder /volume/results --nsims 113  --sim K  
+podman run --name <container_name> -v /test/model/kitral-asc:/mnt -dt <image_name> --input-instance-folder /mnt/model/kitral-asc --output-folder /mnt/results --nsims 113  --sim K  
 ```
 would run the Kitral model on a detached container, using data found in `test/model/kitral-asc` for a total of 113 simulations and write the output to `test/model/kitral-asc/results`.
 
