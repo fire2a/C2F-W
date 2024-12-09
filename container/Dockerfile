@@ -9,4 +9,4 @@ RUN cd Cell2Fire && make
 
 COPY entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/entrypoint.sh", "--input-instance-folder volume", "--output-folder volume"]
