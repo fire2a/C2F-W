@@ -38,17 +38,20 @@ This command builds the container image and tags it as <image_name>.
 
 ## Running Cell2Fire
 
-Once the image is built, you can run the simulation using Podman. It accepts the same parameters as if you were running the compiled binary directly.
+Once the image is built, you can run the simulation using Podman. It accepts the same parameters as if you were running the compiled binary directly, except for `--input-instance-folder` and `--output-folder`.
+In order for the container to have access to the input data files, we must use volumes. Simply put the `-v` or `--volume` tag followed by the path to your input files
+(where the fuel and weather files are stored) like this:  `-v <path/to/data>:volume`. Once the simulation is finished, the results will be saved to that same folder.
+
 ```bash
-podman run [options] image [command [arg …]]
+podman run -v <path/to/data>:volume [options] <image_name> [command [arg …]]
 ```
 
 For example the following command:
 
 ```bash
-podman run --name <container_name> -dt <image_name> --input-instance-folder test/model/kitral-asc --output-folder test/test_results/kitral-asc --nsims 113  --sim K  
+podman run --name <container_name> -v /test/model/kitral-asc:volume -dt <image_name> --nsims 113  --sim K  
 ```
-would run the Kitral model on a detached container, using data found in `test/model/kitral-asc` for a total of 113 simulations and write the output to `test/test_results/kitral-asc`.
+would run the Kitral model on a detached container, using data found in `test/model/kitral-asc` for a total of 113 simulations and write the output to `test/model/kitral-asc`.
 
 You can access the simulations logs either by adding the `-it` flag to the `podman run` command to run it interactively or by executing:
 ```bash
