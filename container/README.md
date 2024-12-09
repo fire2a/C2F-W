@@ -1,5 +1,21 @@
 This folder contains a containerized version of Cell2Fire. The container runs the latest version of Cell2Fire without having to manually build and configure the application on your system. The container is compatible with both Podman and Docker. We recommend using Podman, but the instructions found here are easily translated into Docker.
 
+## TL;DR
+```
+sudo apt install podman git
+git clone git@github.com:Cell2Fire/C2F-W.git
+cd C2F-W/container
+podman build -t c2f .
+cd ../test
+mkdir results
+~/C2F-W/test$ podman run -v $(pwd):/mnt c2f --input-instance-folder /mnt/model/fbp-asc --output-folder /mnt/results --nsims 3 --sim C --grids
+ls results
+
+# unnecesary if correctly addressing the output folder:
+# enter the container interactively, overriding the entrypoint:
+podman run -it --entrypoint /bin/bash c2f
+```
+
 ## Folder Structure
 
 - `container/`: Contains the files used to build and run the container.
