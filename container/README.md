@@ -44,7 +44,7 @@ In order for the container to have access to the input data files, we must use v
 ```bash
 cd <folder with data>
 mkdir results 
-podman run -v <path/to/data>:mnt [options] <image_name>  [cell2fire arguments]
+podman run -v <path/to/data>:/mnt [options] <image_name>  [cell2fire arguments]
 ```
 
 For example the following command:
