@@ -1,21 +1,15 @@
 #!/bin/bash
 
-unzip -q target_results.zip
-
-# recreate targets with tests
-# rm -rf target_results.zip
-# execute the for loop
-# mv test_results target_results
-# zip -r target_results.zip target_results
-# git add target_results.zip
-# git commit -m "Update target results"
-# git push
+podman build -t c2f -f Dockerfile .
 
 # run simulations from model, put them in test_results, compare to target_results
-PATH=../Cell2Fire:$PATH
+#PATH=../Cell2Fire:$PATH
 
 set -x # enable debug tracing
-podman build -t c2f -f Dockerfile .
+cd ../test
+
+unzip -q target_results.zip
+
 
 # run
 for format in asc tif; do
@@ -34,7 +28,8 @@ for format in asc tif; do
             additional_args=""
             sim_code="K"
         fi
-        podman run --rm -v $(pwd):volume c2f $1 --input-instance-folder volume/model/$model-$format --output-folder volume/$output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > volume/test_results/$model-$format/log.txt
+        touch $output_folder/log.txt
+        podman run --rm -v $(pwd):/volume c2f $1 --input-instance-folder /volume/model/$model-$format --output-folder /volume/$output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > $output_folder/log.txt
     done
 done
 set +x # disable debug tracing
