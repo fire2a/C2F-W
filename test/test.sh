@@ -1,6 +1,8 @@
 #!/bin/bash
 
-unzip -q target_results.zip 
+
+
+unzip -q target_results.zip
 
 # recreate targets with tests
 # rm -rf target_results.zip
@@ -36,7 +38,6 @@ for format in asc tif; do
     done
 done
 set +x # disable debug tracing
-
 
 # find difference between directories and files
 

@@ -1,16 +1,22 @@
 #!/bin/bash
 
 podman build -t c2f -f Dockerfile .
+cd ../test
+unzip -q target_results.zip
+
+# recreate targets with tests
+# rm -rf target_results.zip
+# execute the for loop
+# mv test_results target_results
+# zip -r target_results.zip target_results
+# git add target_results.zip
+# git commit -m "Update target results"
+# git push
 
 # run simulations from model, put them in test_results, compare to target_results
 #PATH=../Cell2Fire:$PATH
 
 set -x # enable debug tracing
-cd ../test
-
-unzip -q target_results.zip
-
-
 # run
 for format in asc tif; do
     for model in fbp kitral sb; do
@@ -28,8 +34,7 @@ for format in asc tif; do
             additional_args=""
             sim_code="K"
         fi
-        touch $output_folder/log.txt
-        podman run --rm -v $(pwd):/volume c2f $1 --input-instance-folder /volume/model/$model-$format --output-folder /volume/$output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > $output_folder/log.txt
+        podman run --rm -v $(pwd):/mnt c2f $1 --input-instance-folder /mnt/model/$model-$format --output-folder /mnt/$output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > $output_folder/log.txt
     done
 done
 set +x # disable debug tracing
@@ -56,7 +61,8 @@ if [ $dir1_num_files -ne $dir2_num_files ]; then
     exit 1
 fi
 
-# use diff to compare the files in each directorydiff_output=$(diff -rq "$dir1" "$dir2")
+# use diff to compare the files in each directory
+diff_output=$(diff -rq "$dir1" "$dir2")
 # echo $diff_output
 
 # check if there is any difference
