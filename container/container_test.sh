@@ -1,22 +1,17 @@
 #!/bin/bash
 
 podman build -t c2f -f Dockerfile .
-cd ../test
-unzip -q target_results.zip
-
-# recreate targets with tests
-# rm -rf target_results.zip
-# execute the for loop
-# mv test_results target_results
-# zip -r target_results.zip target_results
-# git add target_results.zip
-# git commit -m "Update target results"
-# git push
 
 # run simulations from model, put them in test_results, compare to target_results
 #PATH=../Cell2Fire:$PATH
 
 set -x # enable debug tracing
+PATH=../Cell2Fire:$PATH
+cd ../test
+rm -rf container_target_results
+unzip -q container_target_results.zip
+
+
 # run
 for format in asc tif; do
     for model in fbp kitral sb; do
@@ -34,6 +29,7 @@ for format in asc tif; do
             additional_args=""
             sim_code="K"
         fi
+        touch $output_folder/log.txt
         podman run --rm -v $(pwd):/mnt c2f $1 --input-instance-folder /mnt/model/$model-$format --output-folder /mnt/$output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > $output_folder/log.txt
     done
 done
@@ -43,7 +39,7 @@ set +x # disable debug tracing
 
 # define the directories to compare
 dir1="test_results"
-dir2="target_results"
+dir2="container_target_results"
 
 # get the list of files in each directory
 dir1_files=$(find "$dir1" -type f | sort)
@@ -80,9 +76,7 @@ else
             echo "Files are not equal, $file1"
             echo $diff_output
             # exit at first different
-            echo "run this command:"
-            echo "    rm -rf target_results"
-            echo "run this command: before running the test again"
+            rm -rf container_target_results
             exit 1
         fi
     done
@@ -90,5 +84,5 @@ else
     #exit 1
 fi
 
-rm -rf target_results
+rm -rf container_target_results
 exit 0
