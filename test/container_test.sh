@@ -1,17 +1,26 @@
 #!/bin/bash
+# run simulations from model, put them in test_results, compare to target_results
 
+# build container
 podman build -t c2f -f ../container/Dockerfile .
 
-# run simulations from model, put them in test_results, compare to target_results
-#PATH=../Cell2Fire:$PATH
-
-set -x # enable debug tracing
-PATH=../Cell2Fire:$PATH
 rm -rf target_results
 unzip -q target_results.zip
 
+# recreate targets with tests
+# rm -rf target_results.zip
+# execute the for loop
+# mv test_results target_results
+# zip -r target_results.zip target_results
+# git add target_results.zip
+# git commit -m "Update target results"
+# git push
+
+# add to path
+# PATH=../Cell2Fire:$PATH
 
 # run
+set -x # enable debug tracing
 for format in asc tif; do
     for model in fbp kitral sb; do
         echo running $model-$format
@@ -28,7 +37,6 @@ for format in asc tif; do
             additional_args=""
             sim_code="K"
         fi
-        touch $output_folder/log.txt
         podman run --rm -v $(pwd):/mnt c2f $1 --input-instance-folder /mnt/model/$model-$format --output-folder /mnt/$output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > $output_folder/log.txt
     done
 done
@@ -56,9 +64,10 @@ if [ $dir1_num_files -ne $dir2_num_files ]; then
     exit 1
 fi
 
-# use diff to compare the files in each directory
+# cut the /mnt/ from the logs that where mounted inside the container
 find . -type f -name "*.txt" -print0 | xargs -0 sed -i 's|/mnt/||g'
 
+# use diff to compare the files in each directory
 diff_output=$(diff -rq "$dir1" "$dir2")
 # echo $diff_output
 
@@ -74,10 +83,8 @@ else
         # echo "Comparing $file1 and $file2"
         diff_output=$(diff "$file1" "$file2")
         if [ -n "$diff_output" ]; then
-            echo "Files are not equal, $file1"
+            echo "Files are not equal, aborting... $file1"
             echo $diff_output
-            # exit at first different
-            rm -rf target_results
             exit 1
         fi
     done

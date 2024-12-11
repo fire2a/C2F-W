@@ -1,7 +1,8 @@
 #!/bin/bash
+# run simulations from model, put them in test_results, compare to target_results
 
 
-
+rm -rf target_results
 unzip -q target_results.zip
 
 # recreate targets with tests
@@ -13,11 +14,11 @@ unzip -q target_results.zip
 # git commit -m "Update target results"
 # git push
 
-# run simulations from model, put them in test_results, compare to target_results
+# add to path
 PATH=../Cell2Fire:$PATH
 
-set -x # enable debug tracing
 # run
+set -x # enable debug tracing
 for format in asc tif; do
     for model in fbp kitral sb; do
         echo running $model-$format
@@ -77,12 +78,8 @@ else
         # echo "Comparing $file1 and $file2"
         diff_output=$(diff "$file1" "$file2")
         if [ -n "$diff_output" ]; then
-            echo "Files are not equal, $file1"
+            echo "Files are not equal, aborting... $file1"
             echo $diff_output
-            # exit at first different
-            echo "run this command:"
-            echo "    rm -rf target_results"
-            echo "run this command: before running the test again"
             exit 1
         fi
     done
