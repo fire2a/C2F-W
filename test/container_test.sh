@@ -1,13 +1,12 @@
 #!/bin/bash
 
-podman build -t c2f -f Dockerfile .
+podman build -t c2f -f ../container/Dockerfile .
 
 # run simulations from model, put them in test_results, compare to target_results
 #PATH=../Cell2Fire:$PATH
 
 set -x # enable debug tracing
 PATH=../Cell2Fire:$PATH
-cd ../test
 rm -rf target_results
 unzip -q target_results.zip
 
