@@ -1,6 +1,8 @@
 #!/bin/bash
 # run simulations from model, put them in test_results, compare to target_results
 
+# build container
+podman build -t c2f -f ../container/Dockerfile .
 
 rm -rf target_results
 unzip -q target_results.zip
@@ -15,7 +17,7 @@ unzip -q target_results.zip
 # git push
 
 # add to path
-PATH=../Cell2Fire:$PATH
+# PATH=../Cell2Fire:$PATH
 
 # run
 set -x # enable debug tracing
@@ -35,7 +37,7 @@ for format in asc tif; do
             additional_args=""
             sim_code="K"
         fi
-        Cell2Fire$1 --input-instance-folder model/$model-$format --output-folder $output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > test_results/$model-$format/log.txt
+        podman run --rm -v $(pwd):/mnt c2f $1 --input-instance-folder /mnt/model/$model-$format --output-folder /mnt/$output_folder --nsims 113 --output-messages --grids --out-ros --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > $output_folder/log.txt
     done
 done
 set +x # disable debug tracing
@@ -61,6 +63,9 @@ if [ $dir1_num_files -ne $dir2_num_files ]; then
     echo "Directory ${dir2} has ${dir2_num_files} files"
     exit 1
 fi
+
+# cut the /mnt/ from the logs that where mounted inside the container
+find . -type f -name "*.txt" -print0 | xargs -0 sed -i 's|/mnt/||g'
 
 # use diff to compare the files in each directory
 diff_output=$(diff -rq "$dir1" "$dir2")

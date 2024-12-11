@@ -25,7 +25,7 @@ Installation, usage, specifications available by [reading the friendly manual he
 # Usage (TL;DR)
 
 - [Easy](https://fire2a.github.io/docs/docs/qgis-toolbox/README.html#usage-alternatives): Use through QGIS desktop application
-- [Moderate: CLI](#moderate-cli): Download a release, unzip, and run the CLI
+- [Moderate: CLI](#moderate-cli): Download a release or get the container
 - [Collaborative](##collaborative): Clone & [compile](https://fire2a.github.io/docs/docs/Cell2Fire/README.html)
 
 # Output examples
@@ -45,6 +45,7 @@ Full guide, how to [fire2a.io/docs](https://fire2a.github.io/docs/)
 Plugin repo: [fire2a/fire-analytics-qgis-processing-toolbox-plugin](https://github.com/fire2a/fire-analytics-qgis-processing-toolbox-plugin) repo
 
 ## Moderate: CLI 
+### Get a Release
 Go to releases (right vertical tab bar):
 1. Download the latest (non-draft) release version of the binary, choose platform:
 
@@ -80,6 +81,22 @@ Cell2Fire[.exe|Debian.boookworm|...] --input-instance-folder </path/to/instance>
 Cell2Fire --final-grid --output-messages --out-ros --sim S --nsims 2 --seed 123 --nthreads 3 --fmc 66 --scenario 2 --cros --weather rows --input-instance-folder /tmp/processing_cdcCGk/Vilopriu_2013 --output-folder /tmp/processing_cdcCGk/Vilopriu_2013/results | tee log.txt
 
 # check the results: to convert to tiff or see the results in QGIS, use the plugin
+```
+### Get the container
+![Tutorial here](container/README.md), TL;DR:
+```bash
+# have or install podman (or docker)
+sudo apt install podman
+
+# download the container [Dockerfile](https://github.com/fire2a/C2F-W/raw/refs/heads/feature-containerize/container/Dockerfile)
+wget https://github.com/fire2a/C2F-W/raw/refs/heads/feature-containerize/container/Dockerfile
+
+# build
+podman build -t c2f -f Dockerfile .
+
+# Done! Usage mounting the instance and results directories into the container
+mkdir results
+podman run -v $(pwd):/mnt c2f --input-instance-folder /mnt/data/Kitral/Portillo-tif --output-folder /mnt/results --nsims 3 --sim K --grids | tee results/log.txt
 ```
 ## Collaborative
 Compile it
