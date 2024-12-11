@@ -8,8 +8,8 @@ podman build -t c2f -f Dockerfile .
 set -x # enable debug tracing
 PATH=../Cell2Fire:$PATH
 cd ../test
-rm -rf container_target_results
-unzip -q container_target_results.zip
+rm -rf target_results
+unzip -q target_results.zip
 
 
 # run
@@ -39,7 +39,7 @@ set +x # disable debug tracing
 
 # define the directories to compare
 dir1="test_results"
-dir2="container_target_results"
+dir2="target_results"
 
 # get the list of files in each directory
 dir1_files=$(find "$dir1" -type f | sort)
@@ -58,6 +58,8 @@ if [ $dir1_num_files -ne $dir2_num_files ]; then
 fi
 
 # use diff to compare the files in each directory
+find . -type f -name "*.txt" -print0 | xargs -0 sed -i 's|/mnt/||g'
+
 diff_output=$(diff -rq "$dir1" "$dir2")
 # echo $diff_output
 
@@ -76,7 +78,7 @@ else
             echo "Files are not equal, $file1"
             echo $diff_output
             # exit at first different
-            rm -rf container_target_results
+            rm -rf target_results
             exit 1
         fi
     done
@@ -84,5 +86,5 @@ else
     #exit 1
 fi
 
-rm -rf container_target_results
+rm -rf target_results
 exit 0
