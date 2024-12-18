@@ -24,9 +24,22 @@
 
 using namespace std;
 
-/*
-	Constructor   // WORKING CHECK OK
-*/
+/**
+ * @brief Constructs a Cell object for the wildfire simulation.
+ *
+ * Initializes the cell's properties, such as its unique identifier, geographical attributes,
+ * fuel type, fire status, and other internal parameters used in the simulation.
+ * Validates the cell's area and perimeter consistency during initialization.
+ *
+ * @param _id The unique identifier for the cell (0 to size of landscape - 1).
+ * @param _area The area of the cell.
+ * @param _coord The coordinates of the cell, represented as a vector of integers.
+ * @param _fType The primary fuel type of the cell (0: NonBurnable, 1: Normal, 2: Burnable).
+ * @param _fType2 The secondary fuel type as a descriptive string.
+ * @param _perimeter The perimeter of the cell.
+ * @param _status The fire status of the cell (0: Available, 1: Burning, 2: Burnt, 3: Harvested, 4: Non Fuel).
+ * @param _realId Alternative identifier of the cell (1 to size of the landscape).
+ */
 Cells::Cells(int _id, double _area, std::vector<int> _coord,
 			 int _fType, std::string _fType2, double _perimeter,
 			 int _status, int _realId)
@@ -78,17 +91,20 @@ Cells::Cells(int _id, double _area, std::vector<int> _coord,
 	this->angleToNb = std::unordered_map<int, int>();
 }
 
-/*
-	Populates angles, distances, and initialize ROS per axis
-	Modified by dlw to use cell area to compute distances in meters.
-	ASSUME square fire cells.
-
-	Returns        void
-
-	Inputs:
-	CoorCells      array of 2D int arrays
-	AvailSet       int set
-*/
+/**
+ * @brief Initializes fire-related fields for the cell during ignition.
+ *
+ * Populates the angles and distances to adjacent cells, and initializes the Rate of Spread (ROS) per axis
+ * using cell area to compute distances in meters. This method calculates angles based on the relative positions
+ * of adjacent cells and updates several internal dictionaries used for fire simulation.
+ *
+ * @param coordCells A 2D vector representing the coordinates of all cells in the landscape.
+ * @param availSet A set of available cells that can participate in fire spread.
+ * @param cols The number of columns in the grid.
+ * @param rows The number of rows in the grid.
+ *
+ * @return void
+ */
 void Cells::initializeFireFields(std::vector<std::vector<int>> &coordCells,				// TODO: should probably make a coordinate type
 								 std::unordered_set<int> &availSet, int cols, int rows) // WORKING CHECK OK
 {
@@ -143,6 +159,20 @@ void Cells::initializeFireFields(std::vector<std::vector<int>> &coordCells,				/
 	}
 }
 
+/**
+ * @brief Calculates the neighboring cells in the grid.
+ *
+ * Returns the indices of the eight neighboring cells (north, south, east, west, northeast, southeast, southwest, northwest)
+ * for the cell in a grid defined by the number of rows and columns. If a neighbor does not exist
+ * (e.g., out of bounds), it is marked as -1.
+ *
+ * @param cell The index of the current cell (1-based index).
+ * @param nrows The number of rows in the grid.
+ * @param ncols The number of columns in the grid.
+ *
+ * @return A vector of integers representing the indices of the adjacent cells. Each index corresponds to a neighbor:
+ *         {west, east, southwest, southeast, south, northwest, northeast, north}. Missing neighbors are represented by -1.
+ */
 std::vector<int> adjacentCells(int cell, int nrows, int ncols)
 {
 	if (cell <= 0 || cell > nrows * ncols)
@@ -210,6 +240,18 @@ void Cells::ros_distr_old(double thetafire, double forward, double flank, double
 	}
 }
 
+/**
+ * @brief Calculates the radial distance for a given angle in an ellipse defined by its semi-major and semi-minor axes.
+ *
+ * Computes the distance from the center of an ellipse to its perimeter at a specified angle using the polar equation
+ * of an ellipse. The semi-major axis (`a`) and semi-minor axis (`b`) define the ellipse's geometry.
+ *
+ * @param theta The angle (in degrees) from the ellipse's major axis.
+ * @param a The length of the semi-major axis of the ellipse.
+ * @param b The length of the semi-minor axis of the ellipse.
+ *
+ * @return The radial distance from the ellipse's center to its perimeter at the given angle.
+ */
 double Cells::rhoTheta(double theta, double a, double b)
 {
 	const double pi = 3.141592653589793;
@@ -224,7 +266,7 @@ double Cells::rhoTheta(double theta, double a, double b)
 	r = r1 / r2;
 	return r;
 }
-
+/*
 void Cells::ros_distr(double thetafire, double forward, double flank, double back, double EFactor)
 { // WORKING CHECK OK
 
@@ -269,9 +311,23 @@ void Cells::ros_distr(double thetafire, double forward, double flank, double bac
 		}
 		this->ROSAngleDir[angle.first] = rhoTheta(offset, a, b) * EFactor;
 	}
-}
+}*/
 
-void Cells::ros_distr_V2(double thetafire, double a, double b, double c, double EFactor)
+/**
+ * @brief Distributes the Rate of Spread (ROS) across the cell's neighbors based on fire direction and ellipse geometry.
+ *
+ * Updates the ROS for each angle in the `ROSAngleDir` dictionary using an elliptical model. The ROS is scaled by
+ * the elliptical geometry parameters and an environmental factor (`EFactor`), with adjustments based on the
+ * fire's heading direction.
+ *
+ * @param thetafire The direction of the fire's spread (in degrees).
+ * @param a The semi-major axis of the ellipse representing fire spread.
+ * @param b The semi-minor axis of the ellipse representing fire spread.
+ * @param EFactor A scaling factor.
+ *
+ * @return void
+ */
+void Cells::ros_distr_V2(double thetafire, double a, double b, double EFactor)
 {
 
 	// Ros allocation for each angle inside the dictionary
@@ -291,27 +347,19 @@ void Cells::ros_distr_V2(double thetafire, double a, double b, double c, double 
 	}
 }
 
-/*
-	Returns      double
 
-	Inputs:
-	offset       double
-	base         double
-	ros1         double
-	ros2         double
-*/
 double Cells::allocate(double offset, double base, double ros1, double ros2)
 { // WORKING CHECK OK
 	double d = (offset - base) / 90;
 	return (1 - d) * ros1 + d * ros2;
 }
 
-/*
-	Slope effect
-	Inputs:
-		elev_i: elevation of burning cell
-		elev_j: elevation of cell reached by fire
-		cellsize: side of a cell
+/**
+* @brief  Calculates the cell's slope effect
+*
+* @param elev_i elevation of burning cell
+* @param elev_j elevation of cell reached by fire
+* @param cellsize side of a cell
 */
 
 float Cells::slope_effect(float elev_i, float elev_j, int cellsize)
@@ -323,20 +371,35 @@ float Cells::slope_effect(float elev_i, float elev_j, int cellsize)
 	return se;
 }
 
-/*
-	Returns           vect[integers]   Important: we are sending a True sometimes, pick a special value -x for replacing it
-
-	Inputs:
-	period            int
-	AvailSet          int set
-	verbose           boolean
-	df                Data frame
-	coef              pointer
-	spotting          boolean
-	SpottingParams    Data frame
-	CoordCells        array of 2D doubles arrays
-	Cells_Obj         dictionary of cells objects
-*/
+/**
+ * @brief Manage's the cell's response to being reached by fire.
+ *
+ * Calculates various fire dynamics such as rate of spread (ROS), intensity, flame length, and other metrics based
+ * on the simulation's parameters and environmental inputs. It determines if the cell begins to spread fire,
+ * if so, messages are sent to neighboring cells. It also logs fire metrics for further analysis.
+ *
+ * @param period Current simulation period or timestep.
+ * @param AvailSet A set of available cells in the simulation (unused in this function, included for compatibility).
+ * @param df_ptr Array of input structures containing cell-specific environmental and fuel data.
+ * @param coef Pointer to a structure containing fuel coefficients used in ROS calculations.
+ * @param coordCells A vector of coordinate mappings for the cells.
+ * @param Cells_Obj A mapping of cell IDs to their corresponding `Cells` objects.
+ * @param args Pointer to a structure containing global simulation arguments and configurations.
+ * @param wdf_ptr Pointer to the weather data structure containing wind speed, direction, and other weather variables.
+ * @param FSCell A vector to store fire spread information, including source cell, target cell, period, and ROS values.
+ * @param crownMetrics A vector to store metrics related to crown fire behavior.
+ * @param activeCrown A boolean reference indicating whether crown fire activity is ongoing.
+ * @param randomROS A random value applied to ROS calculations when stochasticity is enabled.
+ * @param perimeterCells Cell size, perimeter of a cell.
+ * @param crownState A vector tracking the crown fire state of each cell.
+ * @param crownFraction A vector tracking the fraction of fire in the crown layer for each cell.
+ * @param surfFraction A vector tracking the fraction of fire in the surface layer for each cell.
+ * @param Intensities A vector tracking the fire intensity for each cell.
+ * @param RateOfSpreads A vector tracking the rate of spread for each cell.
+ * @param FlameLengths A vector tracking the flame length for each cell.
+ *
+ * @return A vector of integers representing the list of neighboring cells that should receive a message indicating fire has reached them.
+ */
 
 std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet,
 								   inputs df_ptr[], fuel_coefs *coef,
@@ -491,10 +554,9 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 					  args->EFactor);
 		*/
 		ros_distr_V2(cartesianAngle,
-					 mainstruct.a * args->HFactor,
-					 mainstruct.b * args->FFactor,
-					 mainstruct.c * args->BFactor,
-					 args->EFactor);
+		             mainstruct.a * args->HFactor,
+		             mainstruct.b * args->FFactor,
+		             args->EFactor);
 		// std::cout << "Sale de Ros Dist" << std::endl;
 
 		// Fire progress using ROS from burning cell, not the neighbors //
@@ -778,10 +840,9 @@ std::vector<int> Cells::manageFireBBO(int period, std::unordered_set<int> &Avail
 					  EllipseFactors[3]);
 		*/
 		ros_distr_V2(cartesianAngle,
-					 mainstruct.a * EllipseFactors[0],
-					 mainstruct.b * EllipseFactors[1],
-					 mainstruct.c * EllipseFactors[2],
-					 EllipseFactors[3]);
+		             mainstruct.a * EllipseFactors[0],
+		             mainstruct.b * EllipseFactors[1],
+		             EllipseFactors[3]);
 		// std::cout << "Sale de Ros Dist" << std::endl;
 
 		// Fire progress using ROS from burning cell, not the neighbors //
