@@ -95,8 +95,8 @@ Cells::Cells(int _id, double _area, std::vector<int> _coord,
  * @brief Initializes fire-related fields for the cell during ignition.
  *
  * Populates the angles and distances to adjacent cells, and initializes the Rate of Spread (ROS) per axis
- * using cell area to compute distances in meters. This method calculates angles based on the relative positions
- * of adjacent cells and updates several internal dictionaries used for fire simulation.
+ * using cell area to compute distances in meters. Initializes the internal dictionaries used for managing
+ * fire spread to the cell's neighbors.
  *
  * @param coordCells A 2D vector representing the coordinates of all cells in the landscape.
  * @param availSet A set of available cells that can participate in fire spread.
@@ -266,7 +266,7 @@ double Cells::rhoTheta(double theta, double a, double b)
 	r = r1 / r2;
 	return r;
 }
-/*
+
 void Cells::ros_distr(double thetafire, double forward, double flank, double back, double EFactor)
 { // WORKING CHECK OK
 
@@ -311,13 +311,13 @@ void Cells::ros_distr(double thetafire, double forward, double flank, double bac
 		}
 		this->ROSAngleDir[angle.first] = rhoTheta(offset, a, b) * EFactor;
 	}
-}*/
+}
 
 /**
  * @brief Distributes the Rate of Spread (ROS) across the cell's neighbors based on fire direction and ellipse geometry.
  *
- * Updates the ROS for each angle in the `ROSAngleDir` dictionary using an elliptical model. The ROS is scaled by
- * the elliptical geometry parameters and an environmental factor (`EFactor`), with adjustments based on the
+ * Updates the ROS for each neighbor in the `ROSAngleDir` dictionary using an elliptical model. The ROS is scaled by
+ * the elliptical geometry parameters and a factor (`EFactor`), with adjustments based on the
  * fire's heading direction.
  *
  * @param thetafire The direction of the fire's spread (in degrees).
@@ -374,13 +374,13 @@ float Cells::slope_effect(float elev_i, float elev_j, int cellsize)
 /**
  * @brief Manage's the cell's response to being reached by fire.
  *
- * Calculates various fire dynamics such as rate of spread (ROS), intensity, flame length, and other metrics based
+ * Calculates fire dynamics such as rate of spread (ROS), intensity, flame length, and other metrics based
  * on the simulation's parameters and environmental inputs. It determines if the cell begins to spread fire,
  * if so, messages are sent to neighboring cells. It also logs fire metrics for further analysis.
  *
  * @param period Current simulation period or timestep.
  * @param AvailSet A set of available cells in the simulation (unused in this function, included for compatibility).
- * @param df_ptr Array of input structures containing cell-specific environmental and fuel data.
+ * @param df_ptr Array containing cell-specific environmental and fuel data.
  * @param coef Pointer to a structure containing fuel coefficients used in ROS calculations.
  * @param coordCells A vector of coordinate mappings for the cells.
  * @param Cells_Obj A mapping of cell IDs to their corresponding `Cells` objects.
@@ -684,7 +684,7 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 	return msg_list;
 }
 
-/*
+/**
 
 	Manage fire for BBO tuning version
 
@@ -947,20 +947,24 @@ std::vector<int> Cells::manageFireBBO(int period, std::unordered_set<int> &Avail
 	return msg_list;
 }
 
-/*
-	Get burned new logic: Checks if the ROS on its side is above a threshold for burning
-
-	Returns     boolean
-
-	Inputs:
-	period      int
-	NMsg        int
-	Season      int
-	verbose     boolean
-	df          Data frame
-	coef        pointer
-	ROSThresh   double
- */
+/**
+ * @brief Checks if a cell that has been reached by fire begins to burn.
+ *
+ * If the ROS is above a threshold for burning then the cell ignites.
+ *
+ * @return	True if the cell starts to burn, False if not.
+ *
+ * @param period      Current simulation period or time step.
+ * @param NMsg        Current simulation year.
+ * @param season      int
+ * @param df Array containing cell-specific environmental and fuel data.
+ * @param coef Pointer to a structure containing fuel coefficients used in ROS calculations.
+ * @param args Pointer to a structure containing global simulation arguments and configurations.
+ * The ROS threshold should be stored here with the key "ROSThreshold".
+ * @param wdf_ptr Pointer to the weather data structure containing wind speed, direction, and other weather variables.
+ * @param activeCrown A boolean reference indicating whether crown fire activity is ongoing.
+ * @param perimeterCells Cell size, perimeter of a cell.
+*/
 
 bool Cells::get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, int perimeterCells)
 {
@@ -981,7 +985,7 @@ bool Cells::get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs
 	df[this->id].tmp = wdf_ptr->tmp;
 	df[this->id].rh = wdf_ptr->rh;
 	int head_cell = angleToNb[wdf_ptr->waz]; // head cell for slope calculation
-	if (head_cell <= 0)						 // solve boundaries case
+	if (head_cell <= 0)						// solve boundaries case
 	{
 		head_cell = this->realId; // as it is used only for slope calculation, if it is a boundary cell, it uses the same cell, so it uses a no slope scenario
 	}
@@ -1032,42 +1036,47 @@ bool Cells::get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs
 //     this->adjacents = adjacentCells;
 // }
 
-/*
-	Returns            void
-
-	Inputs:
-	Status_int         int
-*/
+/**
+ * @brief Sets a cell's fire status (0: Available, 1: Burning, 2: Burnt, 3: Harvested, 4: Non Fuel).
+ * @param status_int Code for new status.
+ */
 void Cells::setStatus(int status_int)
-{ // WORKING CHECK OK
+{
 	this->status = status_int;
 }
 
-/*
-	Returns            string
-
-	Inputs:
-*/
+/**
+ * @brief Retrieve the cell's fire status.
+ *
+ * @return The cell's fire status as a descriptive string.
+ */
 std::string Cells::getStatus()
-{ // WORKING CHECK OK
+{
 	// Return cell's status
 	return this->StatusD[this->status];
 }
 
-/*
-	Returns           boolean
-
-	Inputs:
-	period            int
-	Season            int
-	IgnitionPoints    array of int
-	df                Data frame
-	coef              pointer
-	ROSThresh         double
-	HFIThreshold      double
+/**
+ * @brief Ignites a cell.
+ *
+ * Sets the following cell's attributes to represent ignition: status, fireStarts, fireStartsSeason, burnt.
+ *
+ * @param period Current simulation period or timestep.
+ * @param df_ptr Array containing cell-specific environmental and fuel data.
+ * @param coef Pointer to a structure containing fuel coefficients used in ROS calculations.
+ * @param year Current simulation year
+ * @param ignitionPoints Vector with ignition point.
+ * @param args Pointer to a structure containing global simulation arguments and configurations.
+ * The ROS threshold should be stored here with the key "ROSThreshold".
+ * @param wdf_ptr Pointer to the weather data structure containing wind speed, direction, and other weather variables.
+ * @param activeCrown A boolean reference indicating whether crown fire activity is ongoing.
+ * @param perimeterCells size of a cell.
+ *
+ *
+ * @return True if ignition happens, False if not.
  */
 bool Cells::ignition(int period, int year, std::vector<int> &ignitionPoints, inputs *df_ptr, // WORKING CHECK OK
-					 fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, int perimeterCells)
+                     fuel_coefs *coef, arguments *args, weatherDF *wdf_ptr, bool &activeCrown, int perimeterCells)
 {
 
 	// If we have ignition points, update
