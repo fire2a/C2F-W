@@ -104,7 +104,7 @@ class Cells {
         void ros_distr_old(double thetafire, double forward, double flank, double back);
 	double rhoTheta(double theta, double a, double b);
 	void ros_distr(double thetafire, double forward, double flank, double back, double EFactor);
-	void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
+	void ros_distr_V2(double thetafire, double a, double b, double EFactor);
 		
         std::vector<int> manageFire(int period, std::unordered_set<int> & AvailSet,      
                                                           inputs df[], fuel_coefs * coef, 
