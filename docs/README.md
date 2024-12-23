@@ -1,7 +1,7 @@
 ## TL;DR
 ```
-sudo apt-get install doxygen
-cd C2F-W/docs
+sudo apt-get install doxygen graphviz
+cd docs
 doxygen Doxyfile
 ```
 The generated files will be saved to the docs directory.
