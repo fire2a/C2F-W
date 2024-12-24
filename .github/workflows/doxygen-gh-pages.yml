@@ -1,3 +1,4 @@
+---
 name: Doxygen GitHub Pages Deploy Action
 
 on:
@@ -11,8 +12,21 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          config_file: 'docs/Doxyfile'
-          folder: docs/html
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Doxygen
+        run: sudo apt install -y doxygen graphviz
+
+      - name: Generate Doxygen documentation
+        run: cd docs && doxygen Doxyfile
+
+      - name: Deploy to GitHub Pages
+        run: |
+          cd docs/html
+          git config --global user.name 'Fdo Bad Vel'
+          git config --global user.email 'fbadilla@ing.uchile.cl'
+          git init
+          git add -A
+          git commit -m "Deploy to GitHub Pages"
+          git push -f git@github.com:fdobad/C2F-W.git main:gh-pages
