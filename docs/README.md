@@ -1,11 +1,12 @@
+# C2F-W Code Documentation
 ## TL;DR
+The Doxigen generated files will be saved to the docs directory.
 ```
-sudo apt-get install doxygen graphviz
-cd docs
+sudo apt install doxygen graphviz
+cd C2F-W/docs
 doxygen Doxyfile
+firefox html/index.html
 ```
-The generated files will be saved to the docs directory.
-
 
 ## Prerequisites
 
@@ -13,5 +14,4 @@ Ensure you have Doxygen installed on your system. You can find installation inst
 
 ## Generating the documentation
 
-Go to the `docs` directory and run the command `doxygen Doxyfile`. The generated HTML files will be stored in that same
-directory. You can open the main file `html/index.html` using your favorite browser.
+Go to the `docs` directory and run the command `doxygen Doxyfile`. The generated HTML files will be stored in that same directory. You can open the main file `html/index.html` using your favorite browser (firefox).
