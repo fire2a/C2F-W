@@ -32,7 +32,7 @@ Ellipse::Ellipse(std::vector<double> _x, std::vector<double> _y)
 	// Aux integers
 	int i,j;
 	int N =  _x.size();
-	
+
 	// Initialize Arrays and Matrices 
 	ArrayXXd X(1,N);
 	ArrayXXd Y(1,N);
@@ -130,7 +130,8 @@ Ellipse::Ellipse(std::vector<double> _x, std::vector<double> _y)
 	}
 	
 	//std::cout << "Coef:" << Coef << //std::endl;
-	this->_Coef = Coef; 
+	this->_Coef = Coef;
+	std::cout << "la elipse" << endl;
 }
 
 std::vector<double> Ellipse::get_parameters(){

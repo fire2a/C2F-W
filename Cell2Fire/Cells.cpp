@@ -210,6 +210,13 @@ std::vector<int> adjacentCells(int cell, int nrows, int ncols)
 
 	Returns       void
  */
+/**
+ * 
+ * @param thetafire 
+ * @param forward 
+ * @param flank 
+ * @param back 
+ */
 void Cells::ros_distr_old(double thetafire, double forward, double flank, double back)
 { // WORKING CHECK OK
 	for (auto &angle : this->ROSAngleDir)
@@ -267,6 +274,14 @@ double Cells::rhoTheta(double theta, double a, double b)
 	return r;
 }
 
+/**
+ * 
+ * @param thetafire 
+ * @param forward 
+ * @param flank 
+ * @param back 
+ * @param EFactor 
+ */
 void Cells::ros_distr(double thetafire, double forward, double flank, double back, double EFactor)
 { // WORKING CHECK OK
 
