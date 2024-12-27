@@ -52,6 +52,11 @@ std::unordered_map<int,int> IgnitionHistory;
 /******************************************************************************
 																Utils
 *******************************************************************************/
+
+/**
+ *
+ *
+ */
 void printSets(std::unordered_set<int> availCells, std::unordered_set<int> nonBurnableCells, 	
 					 std::unordered_set<int> burningCells, std::unordered_set<int> burntCells, std::unordered_set<int> harvestCells)
 {
@@ -106,10 +111,42 @@ void CSVGrid(int rows, int cols, int gridNumber, std::string gridFolder, std::ve
 	CSVPloter.printCSV_V2(rows, cols, statusCellsCSV);
 }
 
+inline char separator()
+{
+#if defined _WIN32 || defined __CYGWIN__
+	return '\\';
+#else
+	return '/';
+#endif
+}
+
+
 
 /******************************************************************************
 															Constructor 
 *******************************************************************************/
+
+/**
+ * @brief Constructs and initializes the Cell2Fire object to run a simulation.
+ *
+ * This constructor initializes the `Cell2Fire` object by reading configuration and data files
+ * required for simulating fire spread in a forested environment. It populates various member variables,
+ * including fuel coefficients, forest structure, weather data, ignition points, and other
+ * simulation-related parameters. It also performs preprocessing steps to categorize cells
+ * into burnable and non-burnable types and to establish fire ignition sets.
+ *
+ * @param _args List of command line arguments containing configuration and file paths needed for the simulation.
+ *
+ * @return A fully initialized `Cell2Fire` object ready for simulation.
+ *
+ * ### Notes:
+ * - Initializes forest data from the `fuels` data and `Data.csv` files.
+ * - Initializes weather data from `Weather.csv` and optionally `WeatherDistribution.csv`.
+ * - Processes ignition points from `Ignitions.csv` (if provided) and computes adjacent cells based on the ignition radius.
+ * - Categorizes cells as burnable, non-burnable, or harvested based on input data.
+ * - If BBO tuning is enabled, initializes tuning factors using `BBOFuels.csv`.
+ * - Validates and adjusts simulation parameters based on the weather file consistency.
+ */
 Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv", ","), 
 														  CSVForest(_args.InFolder + "fuels", " ")
 														  {
@@ -131,7 +168,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	*/
 	//DEBUGstd::cout << "------ Command line values ------\n";
 	//DEBUGprintArgs(this->args);
-	
+
 	/********************************************************************
 								 Initialize fuel coefficients for Spread Model
 	********************************************************************/
@@ -153,7 +190,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	std::vector<std::vector<std::string>> FDF = this->CSVForest.getData();
 	//DEBUGthis->CSVForest.printData(FDF);
 	this->CSVForest.parseForestDF(&frdf, FDF);
-		
+
 	//DEBUGstd::cout << "------------------Detailed Data ----------------------\n" << std::endl;
 	this->rows = frdf.rows;
 	this->cols = frdf.cols;
@@ -167,7 +204,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 
 	this->coordCells = frdf.coordCells;
 	//this->adjCells = frdf.adjCells;
-	
+
 	/********************************************************************
 							Dataframes initialization: Forest and Weather
 	********************************************************************/
@@ -290,7 +327,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	
 	if(this->args.Ignitions){
 		//DEBUGstd::cout << "\nWe have specific ignition points:" << std::endl;
-		
+
 		/* Ignition points */
 		std::string ignitionFile = args.InFolder + "Ignitions.csv";
 		std::string sep = ",";
@@ -307,7 +344,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 		//DEBUGstd::cout << "Total Years: " << this->args.TotalYears  << std::endl;
 		args.TotalYears = std::min(args.TotalYears, IgnitionYears);
 		//DEBUGstd::cout << "Setting TotalYears to " << args.TotalYears << " for consistency with Ignitions file" << std::endl;
-		
+
 		// Ignition points 
 		this->IgnitionPoints = std::vector<int>(IgnitionYears, 0);
 		CSVIgnitions.parseIgnitionDF(this->IgnitionPoints, IgnitionsDF, IgnitionYears);
@@ -326,7 +363,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 			// Debug
 			//for (i=0; i<this->args.TotalYears; i++)
 			//	std::cout << this->IgnitionPoints[i] <<	std::endl;
-			
+
 			// Loop
 			for (i=0; i<this->args.TotalYears; i++){
 				auxSet.clear();
@@ -450,7 +487,29 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 /******************************************************************************
 																Methods
 *******************************************************************************/
-// Init Cells
+
+/**
+ * @brief Initializes a cell within the simulation and adds it to the cell collection.
+ *
+ * This method creates a `Cells` object for the specified cell ID, populates it with the necessary
+ * parameters, and stores it in the `Cells_Obj` unordered map. It also initializes the fire-related
+ * fields for the cell and, if verbose mode is enabled, prints debugging information about the cell.
+ *
+ * @param id The ID of the cell to initialize.
+ *
+ * ### Details:
+ * - The `Cells` object is constructed using the cell's properties, including:
+ *   - `areaCells`: The area of the cell.
+ *   - `coordCells`: The coordinates of the cell.
+ *   - `fTypeCells`: The fuel type of the cell.
+ *   - `fTypeCells2`: A textual description of the fuel type.
+ *   - `perimeterCells`: The perimeter of the cell.
+ *   - `statusCells`: The status of the cell (e.g., burning, available).
+ *   - `id`: The identifier for the cell.
+ * - The newly created cell is added to the `Cells_Obj` unordered map.
+ *
+ */
+
 void Cell2Fire::InitCell(int id){
 	// Declare an iterator to unordered_map
 	std::unordered_map<int, Cells>::iterator it2;
@@ -469,20 +528,23 @@ void Cell2Fire::InitCell(int id){
 	// Print info for debugging
 	if (this->args.verbose) it2->second.print_info();
 
-
 }
 
-inline char separator()
-{
-#if defined _WIN32 || defined __CYGWIN__
-	return '\\';
-#else
-	return '/';
-#endif
-}
-
-
-// Resets the instance/object
+/**
+ * @brief Resets the simulation environment for a new run.
+ *
+ * This method initializes and resets all relevant parameters, structures, and files needed for the simulation. It handles:
+ * - Global simulation parameters
+ * - Output directories and files
+ * - Weather configuration
+ * - Randomized inputs for fire spread simulation
+ * - Data structures related to cells and fire metrics
+ *
+ * @param rnumber Random seed or identifier for weather selection.
+ * @param rnumber2 Random value for initializing ROS (Rate of Spread) variations.
+ * @param simExt Simulation extension identifier (default: 1).
+ *
+ */
 void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	// Reset info
 	//DEBUGstd::cout  << "--------------------- Reseting environment -----------------------" << std::endl;
@@ -757,7 +819,37 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 }
 
 
-//Ignition method (False then ignition)
+/**
+ * @brief Simulates the ignition phase of the fire spread model for a single simulation year.
+ *
+ * This method is responsible for selecting ignition points, either randomly or from predefined
+ * data (e.g., CSV files), and attempting to ignite those points based on the conditions of the cells
+ * (availability, burnability, etc.). The simulation state is updated accordingly, including
+ * tracking ignited, burnt, and available cells, as well as the fire and weather periods.
+ *
+ * @param generator A random engine used to generate random values for ignition point selection.
+ * @param ep The current simulation epoch, used to seed the secondary random generator for parallel simulations.
+ * @return true If no ignition occurs during the current simulation year.
+ * @return false If at least one ignition occurs during the current simulation year.
+ *
+ * ### Detailed Behavior:
+ * - If no ignition points are provided (args.Ignitions == 0), a random point is selected
+ *   repeatedly until a valid ignition is found or a limit is reached.
+ * - If ignition points are provided, the algorithm selects a point directly or samples
+ *   from a specified radius around the predefined points.
+ * - The ignition process updates the state of the forest, including burning and burnt cells,
+ *   and prepares for the next period or year if no ignition occurs.
+ *
+ * ### Key Updates:
+ * - Ignition history (IgnitionHistory)
+ * - Forest cell states (statusCells, burningCells, burntCells, availCells)
+ * - Fire and weather periods
+ *
+ * ### Verbose Mode:
+ * When `args.verbose` is true, detailed logs of the ignition process, including selected points,
+ * random values, and status updates, are printed to the console.
+ */
+
 bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	if (this->args.verbose) {
 		printf("\n----------------------------- Simulating Year %d -----------------------------\n", this->year);
