@@ -342,7 +342,7 @@ void Cells::ros_distr(double thetafire, double forward, double flank, double bac
  *
  * @return void
  */
-void Cells::ros_distr_V2(double thetafire, double a, double b, double EFactor)
+void Cells::ros_distr_V2(double thetafire, double a, double b, double c, double EFactor)
 {
 
 	// Ros allocation for each angle inside the dictionary
@@ -571,6 +571,7 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 		ros_distr_V2(cartesianAngle,
 		             mainstruct.a * args->HFactor,
 		             mainstruct.b * args->FFactor,
+		             mainstruct.c * args->BFactor,
 		             args->EFactor);
 		// std::cout << "Sale de Ros Dist" << std::endl;
 
@@ -857,6 +858,7 @@ std::vector<int> Cells::manageFireBBO(int period, std::unordered_set<int> &Avail
 		ros_distr_V2(cartesianAngle,
 		             mainstruct.a * EllipseFactors[0],
 		             mainstruct.b * EllipseFactors[1],
+		             mainstruct.c * EllipseFactors[2],
 		             EllipseFactors[3]);
 		// std::cout << "Sale de Ros Dist" << std::endl;
 
