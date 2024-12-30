@@ -2317,11 +2317,16 @@ float rate_of_spread10(inputs *data, arguments *args)
    fccf  = args->CCFFactor ;
    
    ws = data->ws ;
-   ros10 = 1. / (p1 * exp(-p2 * ws) + p3) ;
+   ros10 = 1. / (p1 * exp(-p2 * ws *0.4) + p3) ;
    ros = ffros * ros10 + fccf * data->ccf + fcbd * args->CBDFactor ;
    
    return(ros);
    }
+
+float active_rate_of_spread(inputs *data, arguments *args){
+	float ros_FM10 = rate_of_spread10(data, args);
+	return ros_FM10 * 3.34;
+}
 
 
 float final_rate_of_spread10(inputs *data,  main_outs* at)
