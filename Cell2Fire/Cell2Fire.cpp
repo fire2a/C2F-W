@@ -18,6 +18,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 
 // Include libraries
 #include <omp.h>
+#include <typeinfo>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -289,7 +290,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	std::vector<int> IgnitionPoints;   
 	
 	if(this->args.Ignitions){
-		//DEBUGstd::cout << "\nWe have specific ignition points:" << std::endl;
+		//DEBUG std::cout << "\nWe have specific ignition points:" << std::endl;
 		
 		/* Ignition points */
 		std::string ignitionFile = args.InFolder + "Ignitions.csv";
@@ -310,9 +311,11 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 		
 		// Ignition points 
 		this->IgnitionPoints = std::vector<int>(IgnitionYears, 0);
+		//std::cout << this->IgnitionPoints[1] << std::endl;
+	
 		CSVIgnitions.parseIgnitionDF(this->IgnitionPoints, IgnitionsDF, IgnitionYears);
 		//this->IgnitionSets = std::vector<unordered_set<int>>(this->IgnitionPoints.size());
-		this->IgnitionSets = std::vector<std::vector<int>>(this->args.TotalYears);
+		this->IgnitionSets = std::vector<std::vector<int>>(args.TotalYears);
 		
 		
 		// Ignition radius
@@ -850,7 +853,20 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 
 	// Ignitions with provided points from CSV
 	else {
-		int temp = IgnitionPoints[this->year-1];
+		
+		std::vector<int> InitialIgnitionPoints;
+		InitialIgnitionPoints = initialPoints; // Almacena la lista inicial
+        IgnitionPoints = initialPoints;
+		
+		std::random_device dev;
+		std::mt19937 rng(dev());
+		std::uniform_int_distribution<std::mt19937::result_type> dist6(1,this->IgnitionPoints.size());
+		int rd = dist6(rng);
+        
+		int temp = IgnitionPoints[rd-1];
+		IgnitionPoints.erase(IgnitionPoints.begin() + rd-1);
+
+		std::cout << temp << std::endl;
 		
 		// If ignition Radius != 0, sample from the Radius set
 		if (this->args.IgnitionRadius > 0){
