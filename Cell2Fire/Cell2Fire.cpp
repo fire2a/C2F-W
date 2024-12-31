@@ -49,6 +49,7 @@ std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;   
 std::vector<int> NFTypesCells;
 std::unordered_map<int,int> IgnitionHistory;
+std::vector<int> initialPoints;
 
 /******************************************************************************
 																Utils
@@ -854,19 +855,17 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	// Ignitions with provided points from CSV
 	else {
 		
-		std::vector<int> InitialIgnitionPoints;
-		InitialIgnitionPoints = initialPoints; // Almacena la lista inicial
-        IgnitionPoints = initialPoints;
-		
+		if (initialPoints.empty()) {
+            initialPoints = this->IgnitionPoints;
+		}
+
 		std::random_device dev;
 		std::mt19937 rng(dev());
-		std::uniform_int_distribution<std::mt19937::result_type> dist6(1,this->IgnitionPoints.size());
-		int rd = dist6(rng);
+		std::uniform_int_distribution<std::mt19937::result_type> dist(1,initialPoints.size());
+		int rd = dist(rng);
         
-		int temp = IgnitionPoints[rd-1];
-		IgnitionPoints.erase(IgnitionPoints.begin() + rd-1);
-
-		std::cout << temp << std::endl;
+		int temp = initialPoints[rd-1];
+		initialPoints.erase(initialPoints.begin() + rd-1);
 		
 		// If ignition Radius != 0, sample from the Radius set
 		if (this->args.IgnitionRadius > 0){
