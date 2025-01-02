@@ -716,7 +716,7 @@ float crownfractionburn(inputs* data, main_outs* at,int FMC) { //generar output 
 
 
 
-float active_rate_of_spreadFM10(inputs* data, main_outs *at) //En KITRAL SE USA PL04
+float active_rate_of_spreadPL04(inputs* data, main_outs *at) //En KITRAL SE USA PL04
 {
     float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps, ros_active, rospl04, fp, ros_final, ros;
 
@@ -744,7 +744,7 @@ float active_rate_of_spreadFM10(inputs* data, main_outs *at) //En KITRAL SE USA 
     return ros_active;
 }
 
-float final_rate_of_spreadFM10(main_outs* at) //En KITRAL SE USA PL04
+float final_rate_of_spreadPL04(main_outs* at) //En KITRAL SE USA PL04
 {
     float  ros_active, ros_final, ros;
     ros = at->rss;
@@ -755,18 +755,18 @@ float final_rate_of_spreadFM10(main_outs* at) //En KITRAL SE USA PL04
 
 bool checkActive(inputs * data,main_outs* at, int FMC) //En KITRAL SE USA PL04
 {
-    float  rac, cbd,H,wa,i0,cbh;
+    float  ros_critical, cbd,H,wa,i0,cbh;
     bool active;
     cbh = cbhs[data->nftype][0];
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
     wa = fls_david[data->nftype][0];
     cbd = cbds[data->nftype][0];
-    rac = 60 * i0 / (H * wa);
+    ros_critical = 60 * i0 / (H * wa);
 
     cbd = cbds[data->nftype][0];
 
-    active=cbd*rac>=3;
+    active=cbd*ros_critical>=3;
     return active;
 }
 
@@ -782,7 +782,12 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
     
     return bros;
   }
-  
+
+/***
+ * fire_struc *hptr: headstruct
+ * fire_struc *fptr: flankstruct
+ * fire_struc *bptr: backstruct
+ */
  void calculate_k(inputs *data, inputs *head,int cellsize, fuel_coefs * ptr,arguments *args, main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr,fire_struc *bptr, bool & activeCrown)
 {
     // Hack: Initialize coefficients 
@@ -798,6 +803,7 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
 		std::cout  << "Populate fuel types " <<  std::endl;
 		std::cout  << "NfTypes:"  << data->nftype <<  std::endl;
 	}
+	// FMC = Fuel Moisture Content
     FMC=args->FMC;
 	ptr->nftype = data->nftype;
     ptr->fmc = fmcs[data->nftype][0];
@@ -831,7 +837,6 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
     
     // Step 6: Byram Intensity
     at->sfi = byram_intensity(data,at);
-    
 
     // Step 7: Flame Length
     at->fl = flame_length(data, at);
@@ -846,10 +851,9 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
 	// Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
     if (args->AllowCROS && cbhs[data->nftype][0]!=0) {
         if (activeCrown){ //si el fuego esta activo en copas chequeamos condiciones
-           at->ros_active=active_rate_of_spreadFM10(data,at);
+           at->ros_active=active_rate_of_spreadPL04(data,at);
            if (!checkActive(data,at,FMC)){
                 activeCrown=false;
-
            }
         }
         else{
@@ -858,22 +862,17 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
                 cout << "Checking crown Fire conditions " << crownFire << "\n";
         }
         }
-
     }
     else {
         crownFire = false;
         activeCrown=false;
-
     }
-
-
-
 	// If we have Crown fire, update the ROSs
     if (crownFire){
-            at->ros_active=active_rate_of_spreadFM10(data,at);
+            at->ros_active=active_rate_of_spreadPL04(data,at);
             at->cfb = crownfractionburn(data, at,FMC);
 
-            hptr->ros = final_rate_of_spreadFM10(at) ;
+            hptr->ros = final_rate_of_spreadPL04(at) ;
             at->rss=hptr->ros;
             bptr->ros = backfire_ros10_k(hptr,sec) ;
             fptr->ros = flankfire_ros_k(hptr->ros, bptr->ros, sec->lb) ;
@@ -910,11 +909,9 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
 			at->crown = 1;
             //std::cout  << "ros_activo: "  <<hptr->ros <<  std::endl;
 
-
-
     }
 	
-	// Otherwise, use the surface alues
+	// Otherwise, use the surface values
     else{
         at->crown=0;
         hptr->ros = hptr->rss ;
