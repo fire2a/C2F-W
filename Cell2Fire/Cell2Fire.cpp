@@ -18,6 +18,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 
 // Include libraries
 #include <omp.h>
+#include <typeinfo>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -48,6 +49,7 @@ std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;   
 std::vector<int> NFTypesCells;
 std::unordered_map<int,int> IgnitionHistory;
+std::vector<int> initialPoints;
 
 /******************************************************************************
 																Utils
@@ -289,7 +291,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	std::vector<int> IgnitionPoints;   
 	
 	if(this->args.Ignitions){
-		//DEBUGstd::cout << "\nWe have specific ignition points:" << std::endl;
+		//DEBUG std::cout << "\nWe have specific ignition points:" << std::endl;
 		
 		/* Ignition points */
 		std::string ignitionFile = args.InFolder + "Ignitions.csv";
@@ -310,9 +312,11 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 		
 		// Ignition points 
 		this->IgnitionPoints = std::vector<int>(IgnitionYears, 0);
+		//std::cout << this->IgnitionPoints[1] << std::endl;
+	
 		CSVIgnitions.parseIgnitionDF(this->IgnitionPoints, IgnitionsDF, IgnitionYears);
 		//this->IgnitionSets = std::vector<unordered_set<int>>(this->IgnitionPoints.size());
-		this->IgnitionSets = std::vector<std::vector<int>>(this->args.TotalYears);
+		this->IgnitionSets = std::vector<std::vector<int>>(args.TotalYears);
 		
 		
 		// Ignition radius
@@ -780,7 +784,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	std::uniform_int_distribution<int> distribution(1, this->nCells);
 
 	// No Ignitions provided
-	if (this->args.Ignitions == 0) {
+	if (this->args.Ignitions == "random" || this->args.Ignitions == 0) {
 		while (true) {
 			microloops = 0;
 			while (true) {
@@ -793,7 +797,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				if (this->ignProb[selected - 1] > rd_number) {
 					aux = selected;
 					//DEBUSstd::cout << "selected_point" << std::endl;
-					break;
+					break;ss
 				}
 				microloops++;
 				if (microloops > this->nCells * 100) {
@@ -849,8 +853,19 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	} 
 
 	// Ignitions with provided points from CSV
-	else {
-		int temp = IgnitionPoints[this->year-1];
+	else if (args.Ignitions == "raster") {
+		
+		if (initialPoints.empty()) {
+            initialPoints = this->IgnitionPoints;
+		}
+
+		std::random_device dev;
+		std::mt19937 rng(dev());
+		std::uniform_int_distribution<std::mt19937::result_type> dist(1,initialPoints.size());
+		int rd = dist(rng);
+        
+		int temp = initialPoints[rd-1];
+		initialPoints.erase(initialPoints.begin() + rd-1);
 		
 		// If ignition Radius != 0, sample from the Radius set
 		if (this->args.IgnitionRadius > 0){
@@ -908,7 +923,10 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 
 	}
 	
-	
+	else {
+		std::cerr << "Error: ignition mode not found" << std::endl;
+		return;
+	}
 	
 	
 	// If ignition occurs, we update the forest status

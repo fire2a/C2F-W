@@ -454,7 +454,7 @@ void CSVReader::parseIgnitionDF(std::vector<int> & ig, std::vector<std::vector<s
 		
 		// Set values
 		ig[i-1]= igcell;
-			
+		std::cout << igcell << std::endl;	
 		// Next pointer
 		//ig_ptr++;
 	}
