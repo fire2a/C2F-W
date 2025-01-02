@@ -797,7 +797,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				if (this->ignProb[selected - 1] > rd_number) {
 					aux = selected;
 					//DEBUSstd::cout << "selected_point" << std::endl;
-					break;ss
+					break;
 				}
 				microloops++;
 				if (microloops > this->nCells * 100) {
