@@ -784,7 +784,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	std::uniform_int_distribution<int> distribution(1, this->nCells);
 
 	// No Ignitions provided
-	if (this->args.Ignitions == 0) {
+	if (this->args.Ignitions == "random" || this->args.Ignitions == 0) {
 		while (true) {
 			microloops = 0;
 			while (true) {
@@ -797,7 +797,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 				if (this->ignProb[selected - 1] > rd_number) {
 					aux = selected;
 					//DEBUSstd::cout << "selected_point" << std::endl;
-					break;
+					break;ss
 				}
 				microloops++;
 				if (microloops > this->nCells * 100) {
@@ -853,7 +853,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	} 
 
 	// Ignitions with provided points from CSV
-	else {
+	else if (args.Ignitions == "raster") {
 		
 		if (initialPoints.empty()) {
             initialPoints = this->IgnitionPoints;
@@ -923,7 +923,10 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 
 	}
 	
-	
+	else {
+		std::cerr << "Error: ignition mode not found" << std::endl;
+		return;
+	}
 	
 	
 	// If ignition occurs, we update the forest status
