@@ -20,6 +20,7 @@ using namespace std;
 std::unordered_map<int, std::vector<float>> p_coeff;
 std::unordered_map<int, std::vector<float>> q_coeff;
 std::unordered_map<int, std::vector<float>> fm_parameters;
+int16_t HEAT_YIELD = 18000; // unidad kJ/kg
  
 /*
 	Functions
@@ -2307,26 +2308,26 @@ bool fire_type(inputs* data, main_outs* at)
 
 
 float rate_of_spread10(inputs *data, arguments *args)
-   {
-   // FM 10 coef
-   float p1 = 0.2802, p2 = 0.07786, p3 = 0.01123 ;
-   float ros, ros10, ws, ffros, fcbd, fccf;
+	{
+	// FM 10 coef
+	float p1 = 0.2802, p2 = 0.07786, p3 = 0.01123 ;
+	float ros, ws;
+	ws = data->ws ;
 
-   ffros = args->ROS10Factor ;
-   fcbd  = args->CBDFactor ;
-   fccf  = args->CCFFactor ;
-   
-   ws = data->ws ;
-   ros10 = 1. / (p1 * exp(-p2 * ws *0.4) + p3) ;
-   ros = ffros * ros10 + fccf * data->ccf + fcbd * args->CBDFactor ;
-   
-   return(ros);
+	ros = 1.0 / (p1 * exp(-p2 * ws * 0.4) + p3);
+
+	if (args->ClassicCrownFire) {
+		float  ffros, fcbd, fccf;
+		ffros = args->ROS10Factor ;
+		fcbd  = args->CBDFactor ;
+		fccf  = args->CCFFactor ;
+		ros = ffros * ros + fccf * data->ccf + fcbd * args->CBDFactor ;
+	} else {
+		ros = ros * 3.34;
+	}
+
+	return(ros);
    }
-
-float active_rate_of_spread(inputs *data, arguments *args){
-	float ros_FM10 = rate_of_spread10(data, args);
-	return ros_FM10 * 3.34;
-}
 
 
 float final_rate_of_spread10(inputs *data,  main_outs* at)
@@ -2334,7 +2335,7 @@ float final_rate_of_spread10(inputs *data,  main_outs* at)
  	float  ros_active, ros_final, ros;
     ros = at->rss;
     ros_active=at->ros_active;
-    ros_final = ros + at->cfb * (ros_active - ros); 
+    ros_final = ros + at->cfb * (ros_active - ros);
    return(ros_final);
    }
  
@@ -2351,7 +2352,7 @@ float backfire_ros10_s(fire_struc *hptr, snd_outs *sec)
 
 float crownfractionburn(inputs* data, main_outs* at) { //generar output de cfb
     float a, cbd, ros, ros0, H, wa, i0, cbh, FMC, cfb;
-    FMC = fmc_scen(data);; //modificar para ingresar manualmente
+    FMC = fmc_scen(data); //modificar para ingresar manualmente
     cbh = data->cbh;
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     wa = fm_parameters[data->nftype][0];
@@ -2591,8 +2592,6 @@ void determine_destiny_metrics_s(inputs* data, fuel_coefs* ptr,arguments *args, 
     else {
         crownFire = false;
     }
-
-	
 
 
 	metrics->crown = crownFire;

@@ -94,6 +94,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	bool out_stats = false;
 	bool bbo_tuning = false;
 	bool allow_cros = false;
+	bool classic_crown_fire = false;
 
 	//--out-messages
 	if (cmdOptionExists(argv, argv + argc, "--output-messages")) {
@@ -130,6 +131,11 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	if (cmdOptionExists(argv, argv + argc, "--out-sfb")) {
 		out_surf_consumption = true;
 		printf("OutSurfaceConsumption: %d \n", out_surf_consumption);
+	}
+
+	if (cmdOptionExists(argv, argv + argc, "--classic-crown-fire")) {
+		classic_crown_fire = true;
+		printf("ClassicCrownFire: %d \n", classic_crown_fire);
 	}
 	
 
@@ -503,7 +509,8 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	args_ptr->PromTuned = prom_tuned;
 	args_ptr->Stats = out_stats;   
 	args_ptr->BBOTuning = bbo_tuning;
-	args_ptr->AllowCROS = allow_cros;	
+	args_ptr->AllowCROS = allow_cros;
+	args_ptr->ClassicCrownFire = classic_crown_fire;
 	
 }
 
