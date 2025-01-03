@@ -2318,7 +2318,7 @@ float rate_of_spread10(inputs *data, arguments *args)
    fccf  = args->CCFFactor ;
 
    ws = data->ws ;
-   ros10 = 1. / (p1 * exp(-p2 * ws) + p3) ;
+   ros10 = 1. / (p1 * exp(-p2 * ws * 0.4) + p3) ;
    ros = ffros * ros10 + fccf * data->ccf + fcbd * args->CBDFactor ;
 
    return(ros);
