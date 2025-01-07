@@ -586,9 +586,9 @@ float rate_of_spread_k(inputs *data, fuel_coefs *ptr, main_outs *at) //incluir e
    p1 = -12.86;
    p2 = 0.04316;
    p3 = 13.8;
-   ch = (-2.97374 + 0.262 * rh - 0.00982 * tmp);
+   ch = max(1.0, -2.97374 + 0.262 * rh - 0.00982 * tmp);
    fmc = fmcs[data->nftype][0]*60; //factor de propagacion en m/min
-   fch = (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0)) / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0)); //es -14.3 segun el libro
+   fch = min(51.43, 52.3342 * pow(ch, -1.3035));
    fv = p1 * exp(-p2 * ws) + p3;
    if (ps==0){
         at->rss = fmc*fch*(fv);
