@@ -454,10 +454,10 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
                  const std::vector<float>& SAZ, const std::vector<float>& Curing,
                  const std::vector<float>& CBD, const std::vector<float>& CBH,
                  const std::vector<float>& CCF, const std::vector<float>& PY,
-                 const std::vector<float>& FMC, const std::string& InFolder) {
+                 const std::vector<float>& FMC, const std::vector<float>& Height, const std::string& InFolder) {
     // DF columns
     std::vector<std::string> Columns = {"fueltype", "lat", "lon", "elev", "ws", "waz", "ps", "saz", "cur", "cbd", "cbh", "ccf", "ftypeN", "fmc", "py",
-                                        "jd", "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern"};
+                                        "jd", "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern", "height"};
 
     // GFL dictionary (FBP)
     std::unordered_map<std::string, float> GFLD = {
@@ -646,9 +646,17 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
         }
-        
-        
+
         rowData.emplace_back(std::make_unique<std::string>(""));
+
+        // Height 24
+        if (std::isnan(Height[i]))
+        {
+            rowData.emplace_back(std::make_unique<std::string>(""));
+        }
+        else {
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(Height[i])));
+        }
 
         // Add the rowData to dataGrids
         dataGrids.push_back(std::move(rowData));
@@ -667,7 +675,7 @@ void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>
 
     std::ofstream dataFile(InFolder + separator() + "Data.csv");
     std::vector<std::string> Columns = {"fueltype", "lat", "lon", "elev", "ws", "waz", "ps", "saz", "cur", "cbd", "cbh", "ccf", "ftypeN", "fmc", "py",
-                                        "jd", "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern"};
+                                        "jd", "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern", "height"};
     if (dataFile.is_open()) {
         // Write header
         for (const auto& col : Columns) {
@@ -785,10 +793,11 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     std::vector<float> CCF(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> PY(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> FMC(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> Height(NCells, static_cast<float>(std::nanf("")));
 
     std::vector<std::string> filenames = {
         "elevation" + extension, "saz" + extension, "slope" + extension, "cur" + extension,
-        "cbd" + extension, "cbh" + extension, "ccf" + extension, "py" + extension, "fmc" + extension
+        "cbd" + extension, "cbh" + extension, "ccf" + extension, "py" + extension, "fmc" + extension, "hm" + extension
     };
 
     for (const auto& name : filenames) {
@@ -813,6 +822,9 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
                 DataGrids(filePath, PY, NCells);
             } else if (name == "fmc.asc") {
                 DataGrids(filePath, FMC, NCells);
+            } else if (name == "hm.asc") {
+                DataGrids(filePath, Height, NCells);
+
             } else {
                 // Handle the case where the file name doesn't match any condition
                 // std::cout << "Unhandled file: " << name << std::endl;
@@ -824,7 +836,7 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
     }
 
     // Call GenerateDat function
-    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, PY, FMC, InFolder);
+    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, PY, FMC, Height, InFolder);
     writeDataToFile(result,InFolder);
     std::cout << "File Generated";
 }

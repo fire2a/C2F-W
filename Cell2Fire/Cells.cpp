@@ -399,6 +399,7 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 		std::cout << "elev: " << df_ptr[this->realId - 1].elev << std::endl;
 		std::cout << "cbd: " << df_ptr[this->realId - 1].cbd << std::endl;
 		std::cout << "cbh: " << df_ptr[this->realId - 1].cbh << std::endl;
+		std::cout << "height: " << df_ptr[this->realId - 1].height << std::endl;
 		std::cout << "ccf: " << df_ptr[this->realId - 1].ccf << std::endl;
 		std::cout << "\n-------Mainout Structure--------" << std::endl;
 		std::cout << "rss: " << mainstruct.rss << std::endl;
