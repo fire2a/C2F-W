@@ -41,7 +41,7 @@ typedef struct
 
   typedef struct
   { float hffmc,sfc,csi,fl, fh, a, b, c, rss, angle,
-  ros_active,cfb,se,rso,fmc,sfi,isi,be,sf,raz,wsv,ff;
+  ros_active,cfb,se,rso,fmc,sfi,isi,be,sf,raz,wsv,ff, crown_intensity;
      char covertype;
      int crown,jd_min,jd;
   } main_outs;

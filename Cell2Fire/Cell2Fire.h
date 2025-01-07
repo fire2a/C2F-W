@@ -101,10 +101,12 @@ class Cell2Fire {
 		 std::vector<float> crownMetrics;
 		 std::vector<int>crownState;
 		 std::vector<float>Intensities;
+		 std::vector<float>CrownIntensities;
 		 std::vector<float>crownFraction;
 		 std::vector<float>surfFraction;
 		 std::vector<float>RateOfSpreads;
 		 std::vector<float>FlameLengths;
+		 std::vector<float>CrownFlameLengths;
 		 std::vector<std::vector<int>> IgnitionSets;
 		 // std::vector<int> IgnitionHistory;
 

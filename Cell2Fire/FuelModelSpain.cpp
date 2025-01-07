@@ -2283,6 +2283,14 @@ float byram_intensity(main_outs* at, fuel_coefs* ptr) {
 	return ib;
 }
 
+float crown_byram_intensity(main_outs* at, inputs* data) {
+	float canopy_height, ib;
+	canopy_height = data->cbh - data->height;
+	ib = HEAT_YIELD * data->cbd * canopy_height * at->ros_active;
+	return ib;
+}
+
+
 int fmc_scen(inputs* data) {
 	int fmc;
 	fmc= data->FMC;
@@ -2477,6 +2485,7 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 				cout << "bptr->ros = " << bptr->ros << "\n" ;
 				cout << "fptr->ros = " << fptr->ros << "\n" ;
 			}
+			at->crown_intensity = crown_byram_intensity(at, data);
 
             at->a = (hptr->ros + bptr->ros) / 2. ;
             at->b = (hptr->ros + bptr->ros) / (2. * sec->lb) ; 

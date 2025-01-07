@@ -200,8 +200,11 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->crownFraction = std::vector<float> (this->nCells, 0);
 	this->surfFraction = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
+	//TODO: only if allowCROS and SB
+	this->CrownIntensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
 	this->FlameLengths = std::vector<float> (this->nCells, 0);
+	this->CrownFlameLengths = std::vector<float> (this->nCells, 0);
 
 	this->ignProb = std::vector<float>(this->nCells, 1);
 	CSVParser.parsePROB(this->ignProb, DF, this->nCells);
@@ -708,8 +711,10 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->crownFraction = std::vector<float> (this->nCells, 0);
 	this->surfFraction = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
+	this->CrownIntensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
 	this->FlameLengths = std::vector<float> (this->nCells, 0);
+	this->CrownFlameLengths = std::vector<float> (this->nCells, 0);
 
 	this->FSCell.clear();
 	this->crownMetrics.clear();//intensity and crown
@@ -1280,6 +1285,7 @@ void Cell2Fire::Results(){
 	******************************************************************************/
 	// Iterator
 	// Declare an iterator to unordered_map
+	// TODO: output intensity and flame length result if crown fire in SB
 	std::unordered_map<int, Cells>::iterator it; 
 	int i;
 	
