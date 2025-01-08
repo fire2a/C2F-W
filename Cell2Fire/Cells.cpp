@@ -571,10 +571,12 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 				surfFraction[nb] = metrics.sfc;
 				FlameLengths[this->realId - 1] = mainstruct.fl;
 				FlameLengths[nb - 1] = metrics.fl;
-				CrownFlameLengths[this->realId - 1] = mainstruct.crown_flame_length;
-				CrownFlameLengths[nb - 1] = metrics.crown_flame_length;
-				CrownIntensities[this->realId - 1] = mainstruct.crown_intensity;
-				CrownIntensities[nb - 1] = metrics.crown_intensity;
+				if (args->Simulator == "S") {
+					CrownFlameLengths[this->realId - 1] = mainstruct.crown_flame_length;
+					CrownFlameLengths[nb - 1] = metrics.crown_flame_length;
+					CrownIntensities[this->realId - 1] = mainstruct.crown_intensity;
+					CrownIntensities[nb - 1] = metrics.crown_intensity;
+				}
 
 				// cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
 				// toPop.push_back(angle);

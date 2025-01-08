@@ -1403,7 +1403,7 @@ void Cell2Fire::Results(){
 	}
 
 	// Crown Intensity
-	if (this->args.AllowCROS) {
+	if ((this->args.AllowCROS) && (this->args.Simulator == "S")) {
 		this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity"+separator();
 		std::string intensityName;
 		std::ostringstream oss;
@@ -1432,7 +1432,7 @@ void Cell2Fire::Results(){
 	}
 
 	// Crown Flame length
-	if (this->args.AllowCROS) {
+	if ((this->args.AllowCROS) && (this->args.Simulator == "S")) {
 		this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength"+separator();
 		std::string fileName;
 		std::ostringstream oss;
