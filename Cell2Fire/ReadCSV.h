@@ -24,8 +24,8 @@
 typedef struct
    { int cellside, rows, cols;
 	double xllcorner, yllcorner;
-      //std::vector<std::unordered_map<std::string, int>> adjCells;
-	  std::vector<std::vector<int>> coordCells;
+    //std::vector<std::unordered_map<std::string, int>> adjCells;
+	std::vector<std::vector<int>> coordCells;
    } forestDF;
 
  

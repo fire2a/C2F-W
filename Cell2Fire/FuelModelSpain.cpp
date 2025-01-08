@@ -14,18 +14,22 @@
 
 using namespace std;
 
-/*
-	Global coefficients
-*/  
+/**
+ * Global coefficients
+ */
 std::unordered_map<int, std::vector<float>> p_coeff;
 std::unordered_map<int, std::vector<float>> q_coeff;
 std::unordered_map<int, std::vector<float>> fm_parameters;
 int16_t HEAT_YIELD = 18000; // unidad kJ/kg
- 
+
 /*
 	Functions
 */
 
+/**
+ *
+ * @param scenario Weather scenario used in the simulation. It determines the fuel model coefficients.
+ */
 void initialize_coeff(int scenario)
 {
 	if (scenario == 1){
@@ -2200,31 +2204,31 @@ fm_parameters.insert(std::make_pair(189,fp_189));
 
 float rate_of_spread_s(inputs *data, fuel_coefs *ptr, main_outs *at)
    {
-   float p1, p2, p3, ws  ;
+   float p1, p2, p3, ws ;
    
-   p1 = p_coeff[data->nftype][0] ;
-   p2 = p_coeff[data->nftype][1] ;
+   p1 = p_coeff[data->nftype][0];
+   p2 = p_coeff[data->nftype][1];
    p3 = p_coeff[data->nftype][2];
-   //se = slope_effect(inp) ;
-   ws = data->ws ;
-   at->rss = 1.0 / (p1 * exp(-p2 * ws) + p3) ;
+   //se = slope_effect(inp);
+   ws = data->ws;
+   at->rss = 1.0 / (p1 * exp(-p2 * ws) + p3);
    
-   return at->rss * (at->rss >= 0) ;
+   return at->rss * (at->rss >= 0);
 	
    }
 
 float flankfire_ros_s(float ros,float bros,float lb)
    {
-      return  ((ros + bros) / ( lb * 2.0)) ;
+      return  ((ros + bros) / ( lb * 2.0));
    }
 
 /* ----------------- Length-to-Breadth --------------------------*/
 float l_to_b(float ws)
   {
     //if(strncmp(ft,"O1",2)==0)return( ws<1.0 ? 1.0 : (1.1*pow(ws,0.464)));
-    float alpha, beta, factor ;
-    alpha = 0.2566 ;
-    beta = -0.1548 ;
+    float alpha, beta, factor;
+    alpha = 0.2566;
+    beta = -0.1548;
     factor = 1000.0 / 3600.0;
     return pow((0.936 * exp(alpha * factor * ws) + 0.461 * exp(beta * factor * ws) - 0.397), 0.45);
   }
@@ -2232,26 +2236,26 @@ float l_to_b(float ws)
 /* ----------------- Back Rate of Spread --------------------------*/
 float backfire_ros_s(main_outs *at, snd_outs *sec)
   {
-    float hb, bros, lb ;
-    //lb = l_to_b(data->fueltype,at->wsv) ;
-    lb = sec->lb ;
-    hb = (lb + sqrt(pow(lb,2) - 1.0)) /  (lb - sqrt(pow(lb, 2) - 1.0)) ;
+    float hb, bros, lb;
+    //lb = l_to_b(data->fueltype,at->wsv);
+    lb = sec->lb;
+    hb = (lb + sqrt(pow(lb,2) - 1.0)) /  (lb - sqrt(pow(lb, 2) - 1.0));
 
-    bros = at->rss / hb ;
+    bros = at->rss / hb;
     
     return bros * (bros >= 0);
   }
 
 float flame_length(inputs *data, fuel_coefs *ptr)
    {
-       float q1, q2, q3, fl, ws ;
+       float q1, q2, q3, fl, ws;
 
-       ws = data->ws ;
-       q1 = q_coeff[data->nftype][0] ;
-       q2 = q_coeff[data->nftype][1] ;
-       q3 = q_coeff[data->nftype][2] ; 
+       ws = data->ws;
+       q1 = q_coeff[data->nftype][0];
+       q2 = q_coeff[data->nftype][1];
+       q3 = q_coeff[data->nftype][2];
 
-       fl = pow(q1 * exp(-q2 * ws) + q3, 2) ;
+       fl = pow(q1 * exp(-q2 * ws) + q3, 2);
        return fl; 
    }
 
@@ -2273,21 +2277,21 @@ float crown_flame_length(float intensity)
 
 float angleFL(inputs *data, fuel_coefs *ptr)
    {
-       float angle, fl, y, ws ;
-       ws = data->ws ;
-       fl = flame_length(data, ptr) ;
-       y = 10.0 / 36.0 * ws ;
+       float angle, fl, y, ws;
+       ws = data->ws;
+       fl = flame_length(data, ptr);
+       y = 10.0 / 36.0 * ws;
 
-       angle = atan(2.24 * sqrt(fl / pow(y, 2)))  ;
+       angle = atan(2.24 * sqrt(fl / pow(y, 2)));
        return angle;
    }
 
 float flame_height(inputs *data, fuel_coefs *ptr)
   {
-      float fh, phi ;
-      phi = angleFL(data, ptr) ;
-      fh = flame_length(data, ptr) * sin(phi) ;
-      return fh ;
+      float fh, phi;
+      phi = angleFL(data, ptr);
+      fh = flame_length(data, ptr) * sin(phi);
+      return fh;
   }
 
 
@@ -2344,7 +2348,7 @@ bool fire_type(inputs* data, main_outs* at)
 float rate_of_spread10(inputs *data, arguments *args)
    {
    // FM 10 coef
-   float p1 = 0.2802, p2 = 0.07786, p3 = 0.01123 ;
+   float p1 = 0.2802, p2 = 0.07786, p3 = 0.01123;
    float ros, ros10, ws, ffros, fcbd, fccf;
 
    ffros = args->ROS10Factor ;
@@ -2370,11 +2374,11 @@ float final_rate_of_spread10(inputs *data,  main_outs* at)
  
 float backfire_ros10_s(fire_struc *hptr, snd_outs *sec)
   {
-    float hb, bros, lb ;
-    lb = sec->lb ;
-    hb = (lb + sqrt(pow(lb, 2) - 1.0)) /  (lb - sqrt(pow(lb, 2) - 1.0)) ;
+    float hb, bros, lb;
+    lb = sec->lb;
+    hb = (lb + sqrt(pow(lb, 2) - 1.0)) /  (lb - sqrt(pow(lb, 2) - 1.0));
 
-    bros = hptr->ros / hb ;
+    bros = hptr->ros / hb;
     
     return bros;
   }
@@ -2415,7 +2419,7 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
     wa = fm_parameters[data->nftype][0];
 	H = fm_parameters[data->nftype][1];
     cbd = data->cbd;
-    rac = 60 * i0 / (H * wa);
+    rac = 60 * i0 / (H * wa); //rate active crown
 
     active=cbd*rac>=3;
     return active;
@@ -2437,40 +2441,40 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 		std::cout  << "NfTypes:"  << data->nftype <<  std::endl;
 		std::cout  << "scen:"  << args->scenario <<  std::endl;
 	}
-	ptr->p1 = p_coeff[data->nftype][0] ;
-    ptr->p2 = p_coeff[data->nftype][1] ;
-    ptr->p3 = p_coeff[data->nftype][2] ;
-    ptr->q1 = q_coeff[data->nftype][0] ;
-    ptr->q2 = q_coeff[data->nftype][1] ;
-    ptr->q3 = q_coeff[data->nftype][2] ;
+	ptr->p1 = p_coeff[data->nftype][0];
+    ptr->p2 = p_coeff[data->nftype][1];
+    ptr->p3 = p_coeff[data->nftype][2];
+    ptr->q1 = q_coeff[data->nftype][0];
+    ptr->q2 = q_coeff[data->nftype][1];
+    ptr->q3 = q_coeff[data->nftype][2];
 	ptr->nftype = data->nftype;
 	
     // Step 1: Calculate HROS (surface)
     at->rss = rate_of_spread_s(data, ptr, at);
-    hptr->rss = at->rss ;
+    hptr->rss = at->rss;
     
     // Step 2: Calculate Length-to-breadth
-    sec->lb = l_to_b(data->ws) ;
+    sec->lb = l_to_b(data->ws);
     
     // Step 3: Calculate BROS (surface)
-    bptr->rss = backfire_ros_s(at, sec) ;
+    bptr->rss = backfire_ros_s(at, sec);
     
     // Step 4: Calculate central FROS (surface)
     fptr->rss = flankfire_ros_s(hptr->rss, bptr->rss, sec->lb);
     
     // Step 5: Ellipse components
-    at->a = (hptr->rss + bptr->rss) / 2. ;
-    at->b = (hptr->rss + bptr->rss) / (2. * sec->lb) ; 
-    at->c = (hptr->rss - bptr->rss) / 2. ; 
+    at->a = (hptr->rss + bptr->rss) / 2.;
+    at->b = (hptr->rss + bptr->rss) / (2. * sec->lb);
+    at->c = (hptr->rss - bptr->rss) / 2.;
     
     // Step 6: Flame Length
     at->fl = flame_length(data, ptr);
     
     // Step 7: Flame angle
-    at->angle = angleFL(data, ptr) ;
+    at->angle = angleFL(data, ptr);
     
 	// Step 8: Flame Height
-    at->fh = flame_height(data, ptr) ;
+    at->fh = flame_height(data, ptr);
     
 	// Step 9: Byram Intensity
 	at->sfi = byram_intensity(at, ptr);
@@ -2496,97 +2500,92 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 		activeCrown=false;
 	}
 
-
 	// If we have Crown fire, update the ROSs
     if (crownFire){
             at->ros_active=rate_of_spread10(data,args);
             at->cfb = crownfractionburn(data, at);
 
-            hptr->ros = final_rate_of_spread10(data,at) ;
+            hptr->ros = final_rate_of_spread10(data,at);
             at->rss=hptr->ros;
-            bptr->ros = backfire_ros10_s(hptr,sec) ;
-            fptr->ros = flankfire_ros_s(hptr->ros, bptr->ros, sec->lb) ;
+            bptr->ros = backfire_ros10_s(hptr,sec);
+            fptr->ros = flankfire_ros_s(hptr->ros, bptr->ros, sec->lb);
 			if (args->verbose){
-				cout << "hptr->ros = " << hptr->ros << "\n" ;
-				cout << "bptr->ros = " << bptr->ros << "\n" ;
-				cout << "fptr->ros = " << fptr->ros << "\n" ;
+				cout << "hptr->ros = " << hptr->ros << "\n";
+				cout << "bptr->ros = " << bptr->ros << "\n";
+				cout << "fptr->ros = " << fptr->ros << "\n";
 			}
 			at->crown_intensity = crown_byram_intensity(at, data);
 			at->crown_flame_length = crown_flame_length(at->crown_intensity);
 
-            at->a = (hptr->ros + bptr->ros) / 2. ;
-            at->b = (hptr->ros + bptr->ros) / (2. * sec->lb) ; 
-            at->c = (hptr->ros - bptr->rss) / 2 ; 
+            at->a = (hptr->ros + bptr->ros) / 2.;
+            at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
+            at->c = (hptr->ros - bptr->rss) / 2;
 			at->crown = 1;
             activeCrown=true;
-
-
     }
     else if (activeCrown){
             at->cfb = crownfractionburn(data, at); //lo calculamos igual porque lo necesitamos para el output
-            hptr->ros = at->ros_active ;
+            hptr->ros = at->ros_active;
             at->rss=hptr->ros;
             bptr->ros = backfire_ros10_s(hptr,sec) ;
             fptr->ros = flankfire_ros_s(hptr->ros, bptr->ros, sec->lb) ;
     		at->crown_intensity = crown_byram_intensity(at, data);
 			at->crown_flame_length = crown_flame_length(at->crown_intensity);
-            
+
 			if (args->verbose){
-				cout << "hptr->ros = " << hptr->ros << "\n" ;
-				cout << "bptr->ros = " << bptr->ros << "\n" ;
-				cout << "fptr->ros = " << fptr->ros << "\n" ;
+				cout << "hptr->ros = " << hptr->ros << "\n";
+				cout << "bptr->ros = " << bptr->ros << "\n";
+				cout << "fptr->ros = " << fptr->ros << "\n";
 			}
 
-            at->a = (hptr->ros + bptr->ros) / 2. ;
-            at->b = (hptr->ros + bptr->ros) / (2. * sec->lb) ; 
-            at->c = (hptr->ros - bptr->rss) / 2 ; 
+            at->a = (hptr->ros + bptr->ros) / 2.;
+            at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
+            at->c = (hptr->ros - bptr->rss) / 2;
 			at->crown = 1;
             //std::cout  << "ros_activo: "  <<hptr->ros <<  std::endl;
 
-
-
     }
 	
-	// Otherwise, use the surface alues
+	// Otherwise, use the surface values
     else{
         at->crown=0;
 		at->cfb=0;
-        hptr->ros = hptr->rss ;
-        bptr->ros = bptr->rss ; 
-        fptr->ros = fptr->rss ;
+        hptr->ros = hptr->rss;
+        bptr->ros = bptr->rss;
+        fptr->ros = fptr->rss;
 		if (args->verbose){
-			cout << "hptr->ros = " << hptr->ros << "\n" ;
-			cout << "bptr->ros = " << bptr->ros << "\n" ;
-			cout << "fptr->ros = " << fptr->ros << "\n" ;
+			cout << "hptr->ros = " << hptr->ros << "\n";
+			cout << "bptr->ros = " << bptr->ros << "\n";
+			cout << "fptr->ros = " << fptr->ros << "\n";
 		}
 
     }
 	//if (hptr->ros>100){
-	//cout << "hptr->rss = " << hptr->ros << "\n" ;
+	//cout << "hptr->rss = " << hptr->ros << "\n";
 
 	//}
 
 	if (args->verbose){
-		cout << "--------------- Inputs --------------- \n" ;
-		cout << "ws = " << data->ws << "\n" ;
-		cout << "coef data->cbh = " << data->cbh << "\n" ;
-		cout << "coef ptr->p1 = " << ptr->p1 << "\n" ;
-		cout << "coef ptr->p2 = " << ptr->p2 << "\n" ;
-		cout << "coef ptr->p3 = " << ptr->p3 << "\n" ;
-		cout << "coef ptr->q1 = " << ptr->q1 << "\n" ;
-		cout << "coef ptr->q2 = " << ptr->q2 << "\n" ;
-		cout << "coef ptr->q3 = " << ptr->q3 << "\n" ;
-		cout << "\n" ;
+		cout << "--------------- Inputs --------------- \n";
+		cout << "ws = " << data->ws << "\n";
+		cout << "coef data->cbh = " << data->cbh << "\n";
+		cout << "coef ptr->p1 = " << ptr->p1 << "\n";
+		cout << "coef ptr->p2 = " << ptr->p2 << "\n";
+		cout << "coef ptr->p3 = " << ptr->p3 << "\n";
+		cout << "coef ptr->q1 = " << ptr->q1 << "\n";
+		cout << "coef ptr->q2 = " << ptr->q2 << "\n";
+		cout << "coef ptr->q3 = " << ptr->q3 << "\n";
+		cout << "\n";
 
-		cout << "---------------- Outputs --------------- \n" ;
-		cout << "at->rss = " << at->rss << "\n" ;
-		cout << "hptr->rss = " << hptr->rss << "\n" ;
-		cout << "lb = " << sec->lb << "\n" ;
-		cout << "bptr->rss = " << bptr->rss << "\n" ;
-		cout << "fptr->rss = " << fptr->rss << "\n" ;
-		cout << "axis a = " << at->a << "\n" ;
-		cout << "axis b = " << at->b << "\n" ;
-		cout << "axis c = " << at->c << "\n" ;
+		cout << "---------------- Outputs --------------- \n";
+		cout << "at->rss = " << at->rss << "\n";
+		cout << "hptr->rss = " << hptr->rss << "\n";
+		cout << "lb = " << sec->lb << "\n";
+		cout << "bptr->rss = " << bptr->rss << "\n";
+		cout << "fptr->rss = " << fptr->rss << "\n";
+		cout << "axis a = " << at->a << "\n";
+		cout << "axis b = " << at->b << "\n";
+		cout << "axis c = " << at->c << "\n";
 		cout << "fl = " << at->fl << "\n";
 		cout << "angle = " << at->angle << "\n";
 		cout << "fh = " << at->fh << "\n";

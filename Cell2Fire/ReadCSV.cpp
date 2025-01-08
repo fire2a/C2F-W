@@ -15,7 +15,7 @@
 #include "tiffio.h"
  
 /*
- * Constructur
+ * Constructor
  */
 CSVReader::CSVReader(std::string filename, std::string delm){
 	this->fileName = filename;

@@ -48,8 +48,8 @@ bool fire_type(inputs *data, main_outs* atr, int FMC) ;
 //Active crown
 bool checkActive(inputs * data,main_outs* at, int FMC);
 // CROS adjustements
-float final_rate_of_spreadFM10(main_outs* at) ;
-float active_rate_of_spreadFM10(inputs* data,main_outs *at); //En KITRAL SE USA PL04
+float final_rate_of_spreadPL04(main_outs* at) ;
+float active_rate_of_spreadPL04(inputs* data,main_outs *at); //En KITRAL SE USA PL04
 float crownfractionburn(inputs* data, main_outs* at,int FMC);
 
 // Back fire with CROS 
