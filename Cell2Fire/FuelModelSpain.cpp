@@ -2271,7 +2271,7 @@ float crown_flame_length(float intensity)
 		return 0;
 	}
 	else {
-		return fl;
+		return std::ceil(fl * 100.0) / 100.0;
 	}
 }
 
@@ -2317,7 +2317,7 @@ float canopy_height;
 	if (canopy_height < 0) {
 		throw std::runtime_error("Tree height is lower than canopy base height, please provide valid files.");
 	}
-	return (HEAT_YIELD / 60)* data->cbd * canopy_height * at->ros_active;
+	return std::ceil((HEAT_YIELD / 60)* data->cbd * canopy_height * at->ros_active * 100.0) / 100.0 ;
 }
 
 
