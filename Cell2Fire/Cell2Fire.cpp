@@ -784,7 +784,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	std::uniform_int_distribution<int> distribution(1, this->nCells);
 
 	// No Ignitions provided
-	if (this->args.Ignitions == "random" || this->args.Ignitions == 0) {
+	if (this->args.Ignitions == 0) {
 		while (true) {
 			microloops = 0;
 			while (true) {
@@ -853,7 +853,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	} 
 
 	// Ignitions with provided points from CSV
-	else if (args.Ignitions == "raster") {
+	else {
 		
 		if (initialPoints.empty()) {
             initialPoints = this->IgnitionPoints;
@@ -921,11 +921,6 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 			this->weatherPeriod = 0;
 		}
 
-	}
-	
-	else {
-		std::cerr << "Error: ignition mode not found" << std::endl;
-		return;
 	}
 	
 	
