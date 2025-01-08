@@ -535,12 +535,26 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		CSVFolder.MakeDir(this->intensityFolder);
 		this->intensityFolder = this->args.OutFolder + "Intensity" + separator();
 	}
+	//Crown Byram Intensity Folder
+	if (this->args.AllowCROS) {
+		CSVWriter CSVFolder("", "");
+		this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" ;
+		CSVFolder.MakeDir(this->crownIntensityFolder);
+		this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
+	}
 	//Flame Length Folder
 	if (this->args.OutFl) {
 		CSVWriter CSVFolder("", "");
 		this->flFolder = this->args.OutFolder + "FlameLength" ;
 		CSVFolder.MakeDir(this->flFolder);
 		this->flFolder = this->args.OutFolder + "FlameLength"+separator();
+	}
+	//Crown Flame Length Folder
+	if (this->args.AllowCROS) {
+		CSVWriter CSVFolder("", "");
+		this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" ;
+		CSVFolder.MakeDir(this->crownFlameLengthFolder);
+		this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength"+separator();
 	}
 	//Crown Folder
 	if (this->args.OutCrown && this->args.AllowCROS) {
@@ -1031,8 +1045,8 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 			//std::cout << "Entra a Manage Fire" << std::endl;
 			if (!this->args.BBOTuning){  //&df[cell-1] replaced by full df for getting the slopes
 				aux_list = it->second.manageFire(this->fire_period[this->year-1], this->availCells,  df, this->coef_ptr, 
-															   this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod],
-															   &this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells,this->crownState, this->crownFraction,this->surfFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
+				                                 this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod],
+				                                 &this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells,this->crownState, this->crownFraction,this->surfFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths, this->CrownFlameLengths, this->CrownIntensities);
 			}
 												
 			
@@ -1288,7 +1302,6 @@ void Cell2Fire::Results(){
 	// TODO: output intensity and flame length result if crown fire in SB
 	std::unordered_map<int, Cells>::iterator it; 
 	int i;
-	
 	for (auto & br : this->burntCells) {
 		if (this->Cells_Obj.find(br) != this->Cells_Obj.end()) {
 			// Get object from unordered map
@@ -1389,6 +1402,21 @@ void Cell2Fire::Results(){
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->Intensities);
 	}
 
+	// Crown Intensity
+	if (this->args.AllowCROS) {
+		this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity"+separator();
+		std::string intensityName;
+		std::ostringstream oss;
+		oss.str("");
+		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+		intensityName= this->crownIntensityFolder+"CrownIntensity"+oss.str()+".asc";
+		if (this->args.verbose) {
+			std::cout << "We are generating the Crown Intensity to a asc file " << intensityName << std::endl;
+		}
+		CSVWriter CSVPloter(intensityName, " ");
+		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->CrownIntensities);
+	}
+
 	if (this->args.OutFl) {
 		this->flFolder = this->args.OutFolder + "FlameLength"+separator();
 		std::string flName;
@@ -1397,12 +1425,27 @@ void Cell2Fire::Results(){
 		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
 		flName= this->flFolder+"FL"+oss.str()+".asc";
 		if (this->args.verbose) {
-			std::cout << "We are generating the Flame Lenght to a asc file " << flName << std::endl;
+			std::cout << "We are generating the Flame Length to a asc file " << flName << std::endl;
 		}
 		CSVWriter CSVPloter(flName, " ");
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->FlameLengths);
 	}
 
+	// Crown Flame length
+	if (this->args.AllowCROS) {
+		std::cout<<"writing flame length"<<std::endl;
+		this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength"+separator();
+		std::string fileName;
+		std::ostringstream oss;
+		oss.str("");
+		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+		fileName= this->crownFlameLengthFolder+"CrownFlameLength"+oss.str()+".asc";
+		if (this->args.verbose) {
+			std::cout << "We are generating the Crown Flame Length to a asc file " << fileName << std::endl;
+		}
+		CSVWriter CSVPloter(fileName, " ");
+		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->CrownFlameLengths);
+	}
 	
 		// Intensity
 	if ((this->args.OutCrownConsumption) && (this->args.AllowCROS)) {

@@ -41,7 +41,7 @@ typedef struct
 
   typedef struct
   { float hffmc,sfc,csi,fl, fh, a, b, c, rss, angle,
-  ros_active,cfb,se,rso,fmc,sfi,isi,be,sf,raz,wsv,ff, crown_intensity;
+  ros_active,cfb,se,rso,fmc,sfi,isi,be,sf,raz,wsv,ff, crown_intensity, crown_flame_length;
      char covertype;
      int crown,jd_min,jd;
   } main_outs;
@@ -106,11 +106,12 @@ class Cells {
 	void ros_distr(double thetafire, double forward, double flank, double back, double EFactor);
 	void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
 		
-        std::vector<int> manageFire(int period, std::unordered_set<int> & AvailSet,      
-                                                          inputs df[], fuel_coefs * coef, 
-							  std::vector<std::vector<int>> & coordCells, std::unordered_map<int, Cells> & Cells_Obj, 
-							  arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float> * crownMetrics,
-							  bool & activeCrown,double randomROS,int perimeterCells,std::vector<int> & crownState, std::vector<float> & crownFraction,std::vector<float> & surfFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads,  std::vector<float> & FlameLengths);
+        std::vector<int> manageFire(int period, std::unordered_set<int> & AvailSet,
+                                    inputs df[], fuel_coefs * coef,
+                                    std::vector<std::vector<int>> & coordCells, std::unordered_map<int, Cells> & Cells_Obj,
+                                    arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float> * crownMetrics,
+                                    bool & activeCrown, double randomROS, int perimeterCells, std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & surfFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads, std::vector<float> & FlameLengths, std
+                                    ::vector<float> &CrownFlameLengths, std::vector<float> &CrownIntensities);
 		
 		std::vector<int> manageFireBBO(int period, std::unordered_set<int> & AvailSet,      
 						inputs * df_ptr, fuel_coefs * coef, 

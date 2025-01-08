@@ -77,9 +77,11 @@ class Cell2Fire {
 		 string rosFolder;
 		 string crownFolder;
 		 string intensityFolder;
+		 string crownIntensityFolder;
 		 string sfbFolder;
 		 string cfbFolder;
 		 string flFolder;
+		 string crownFlameLengthFolder;
 		 string historyFolder;
 		 string ignitionsFolder;
 	
