@@ -2255,6 +2255,22 @@ float flame_length(inputs *data, fuel_coefs *ptr)
        return fl; 
    }
 
+/**
+ * @brief Calculates the flame length of a cell when there is crown fire.
+ * @param intensity Byram intensity for crown fires
+ * @return the flame length
+ */
+float crown_flame_length(float intensity)
+{
+	float fl = 0.1 * pow(intensity, 0.5);
+	if (fl < 0.01) {
+		return 0;
+	}
+	else {
+		return fl;
+	}
+}
+
 float angleFL(inputs *data, fuel_coefs *ptr)
    {
        float angle, fl, y, ws ;
@@ -2283,10 +2299,20 @@ float byram_intensity(main_outs* at, fuel_coefs* ptr) {
 	return ib;
 }
 
+/**
+ * Calculates byram fire intensity when there is active crown fire.
+ * In order for this to be calculated, the input folder must contain
+ * files with CBD, CBH and tree height data for each cell.
+ * @param at Structure containing the cell's output data.
+ * @param data Structure containing the cell's input data.
+ * @return Fire intensity.
+ */
 float crown_byram_intensity(main_outs* at, inputs* data) {
 	float canopy_height, ib;
 	canopy_height = data->cbh - data->height;
 	ib = HEAT_YIELD * data->cbd * canopy_height * at->ros_active;
+	canopy_height = data->height - data->cbh;
+	ib = (HEAT_YIELD / 60)* data->cbd * canopy_height * at->ros_active;
 	return ib;
 }
 
@@ -2486,6 +2512,7 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 				cout << "fptr->ros = " << fptr->ros << "\n" ;
 			}
 			at->crown_intensity = crown_byram_intensity(at, data);
+			at->crown_flame_length = crown_flame_length(at->crown_intensity);
 
             at->a = (hptr->ros + bptr->ros) / 2. ;
             at->b = (hptr->ros + bptr->ros) / (2. * sec->lb) ; 
@@ -2501,6 +2528,8 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
             at->rss=hptr->ros;
             bptr->ros = backfire_ros10_s(hptr,sec) ;
             fptr->ros = flankfire_ros_s(hptr->ros, bptr->ros, sec->lb) ;
+    		at->crown_intensity = crown_byram_intensity(at, data);
+			at->crown_flame_length = crown_flame_length(at->crown_intensity);
             
 			if (args->verbose){
 				cout << "hptr->ros = " << hptr->ros << "\n" ;
@@ -2587,6 +2616,8 @@ void determine_destiny_metrics_s(inputs* data, fuel_coefs* ptr,arguments *args, 
         crownFire = fire_type(data, metrics);
         if (crownFire){
             metrics->cfb = crownfractionburn(data, metrics);
+        	metrics->crown_intensity = crown_byram_intensity(metrics, data);
+        	metrics->crown_flame_length = crown_flame_length(metrics->crown_intensity);
 
         }
         if (args->verbose) {
