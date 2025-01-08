@@ -1433,7 +1433,6 @@ void Cell2Fire::Results(){
 
 	// Crown Flame length
 	if (this->args.AllowCROS) {
-		std::cout<<"writing flame length"<<std::endl;
 		this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength"+separator();
 		std::string fileName;
 		std::ostringstream oss;
