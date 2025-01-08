@@ -2308,12 +2308,12 @@ float byram_intensity(main_outs* at, fuel_coefs* ptr) {
  * @return Fire intensity.
  */
 float crown_byram_intensity(main_outs* at, inputs* data) {
-	float canopy_height, ib;
-	canopy_height = data->cbh - data->height;
-	ib = HEAT_YIELD * data->cbd * canopy_height * at->ros_active;
+float canopy_height;
 	canopy_height = data->height - data->cbh;
-	ib = (HEAT_YIELD / 60)* data->cbd * canopy_height * at->ros_active;
-	return ib;
+	if (canopy_height < 0) {
+		throw std::runtime_error("Tree height is lower than canopy base height, please provide valid files.");
+	}
+	return (HEAT_YIELD / 60)* data->cbd * canopy_height * at->ros_active;
 }
 
 
