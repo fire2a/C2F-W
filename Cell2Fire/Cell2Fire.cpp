@@ -237,7 +237,6 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->crownFraction = std::vector<float> (this->nCells, 0);
 	this->surfFraction = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
-	//TODO: only if allowCROS and SB
 	this->CrownIntensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
 	this->FlameLengths = std::vector<float> (this->nCells, 0);
@@ -598,7 +597,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		this->intensityFolder = this->args.OutFolder + "Intensity" + separator();
 	}
 	//Crown Byram Intensity Folder
-	if (this->args.AllowCROS) {
+	if ((this->args.AllowCROS) && (this->args.Simulator=="S")) {
 		CSVWriter CSVFolder("", "");
 		this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" ;
 		CSVFolder.MakeDir(this->crownIntensityFolder);
@@ -610,6 +609,13 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		this->flFolder = this->args.OutFolder + "FlameLength" ;
 		CSVFolder.MakeDir(this->flFolder);
 		this->flFolder = this->args.OutFolder + "FlameLength"+separator();
+	}
+	//Crown Flame Length Folder
+	if ((this->args.AllowCROS) && (this->args.Simulator=="S")) {
+		CSVWriter CSVFolder("", "");
+		this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" ;
+		CSVFolder.MakeDir(this->crownFlameLengthFolder);
+		this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
 	}
 	//Crown Folder
 	if (this->args.OutCrown && this->args.AllowCROS) {
@@ -1484,7 +1490,6 @@ void Cell2Fire::Results(){
 	******************************************************************************/
 	// Iterator
 	// Declare an iterator to unordered_map
-	// TODO: output intensity and flame length result if crown fire in SB
 	std::unordered_map<int, Cells>::iterator it;
 	int i;
 	for (auto & br : this->burntCells) {
