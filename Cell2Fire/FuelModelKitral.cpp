@@ -586,7 +586,10 @@ float rate_of_spread_k(inputs *data, fuel_coefs *ptr, main_outs *at) //incluir e
    p1 = -12.86;
    p2 = 0.04316;
    p3 = 13.8;
-   ch = max(1.0, -2.97374 + 0.262 * rh - 0.00982 * tmp);
+   float midpoint = 57.09;
+   float steepness=0.081;
+   float sigmoid = 1.0 / (1.0 + exp(-steepness * (rh - midpoint)));
+   ch =  4 + 16 * sigmoid - 0.00982 * tmp;
    fmc = fmcs[data->nftype][0]*60; //factor de propagacion en m/min
    fch = min(51.43, 52.3342 * pow(ch, -1.3035));
    fv = p1 * exp(-p2 * ws) + p3;
