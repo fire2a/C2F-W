@@ -828,7 +828,7 @@ void GenDataFile(const std::string& InFolder, const std::string& Simulator) {
 
             } else {
                 // Handle the case where the file name doesn't match any condition
-                // std::cout << "Unhandled file: " << name << std::endl;
+                //std::cout << "Unhandled file: " << name << std::endl;
             }
         } 
         else {

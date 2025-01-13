@@ -597,7 +597,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		this->intensityFolder = this->args.OutFolder + "Intensity" + separator();
 	}
 	//Crown Byram Intensity Folder
-	if ((this->args.AllowCROS) && (this->args.Simulator=="S")) {
+	if ((this->args.OutCrownIntensity) && (this->args.Simulator=="S")) {
 		CSVWriter CSVFolder("", "");
 		this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" ;
 		CSVFolder.MakeDir(this->crownIntensityFolder);
@@ -611,7 +611,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		this->flFolder = this->args.OutFolder + "FlameLength"+separator();
 	}
 	//Crown Flame Length Folder
-	if ((this->args.AllowCROS) && (this->args.Simulator=="S")) {
+	if ((this->args.OutCrownFl) && (this->args.Simulator=="S")) {
 		CSVWriter CSVFolder("", "");
 		this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" ;
 		CSVFolder.MakeDir(this->crownFlameLengthFolder);
@@ -1586,7 +1586,7 @@ void Cell2Fire::Results(){
 	}
 
 	// Crown Intensity
-	if ((this->args.AllowCROS) && (this->args.Simulator == "S")) {
+	if ((this->args.OutCrownIntensity) && (this->args.Simulator == "S")) {
 		this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity"+separator();
 		std::string intensityName;
 		std::ostringstream oss;
@@ -1615,7 +1615,7 @@ void Cell2Fire::Results(){
 	}
 
 	// Crown Flame length
-	if ((this->args.AllowCROS) && (this->args.Simulator == "S")) {
+	if ((this->args.OutCrownFl) && (this->args.Simulator == "S")) {
 		this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength"+separator();
 		std::string fileName;
 		std::ostringstream oss;

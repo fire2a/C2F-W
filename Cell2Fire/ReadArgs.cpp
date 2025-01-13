@@ -94,6 +94,8 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	bool out_stats = false;
 	bool bbo_tuning = false;
 	bool allow_cros = false;
+	bool out_crown_intensity=false;
+	bool out_crown_fl=false;
 
 	//--out-messages
 	if (cmdOptionExists(argv, argv + argc, "--output-messages")) {
@@ -110,6 +112,16 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	if (cmdOptionExists(argv, argv + argc, "--out-intensity")) {
 		out_intensity = true;
 		printf("OutIntensity: %d \n", out_intensity);
+	}
+
+	if (cmdOptionExists(argv, argv + argc, "--out-crown-fl")) {
+		out_crown_fl = true;
+		printf("OutCrownFlameLength: %d \n", out_crown_fl);
+	}
+	//
+	if (cmdOptionExists(argv, argv + argc, "--out-crown-intensity")) {
+		out_crown_intensity = true;
+		printf("OutCrownIntensity: %d \n", out_crown_intensity);
 	}
 		//--fire-behavior
 	if (cmdOptionExists(argv, argv + argc, "--out-ros")) {
@@ -489,6 +501,8 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	args_ptr->OutMessages = out_messages;
 	args_ptr->OutFl = out_fl;
 	args_ptr->OutIntensity = out_intensity;
+	args_ptr->OutCrownFl = out_crown_fl;
+	args_ptr->OutCrownIntensity = out_crown_intensity;
 	args_ptr->OutRos = out_ros;
 	args_ptr->OutCrown = out_crown;
 	args_ptr->OutCrownConsumption = out_crown_consumption;
@@ -553,6 +567,8 @@ void printArgs(arguments args){
 	std::cout << "Messages: " << args.OutMessages << std::endl;
 	std::cout << "OutFlameLength: " << args.OutFl << std::endl;
 	std::cout << "OutIntensity: " << args.OutIntensity << std::endl;
+	std::cout << "OutCrownFlameLength: " << args.OutCrownFl << std::endl;
+	std::cout << "OutCrownIntensity: " << args.OutCrownIntensity << std::endl;
 	std::cout << "OutROS: " << args.OutRos << std::endl;
 	std::cout << "OutCrown: " << args.OutCrown << std::endl;
 	std::cout << "OutCrownConsumption: " << args.OutCrownConsumption << std::endl;
