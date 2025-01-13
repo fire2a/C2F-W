@@ -110,8 +110,8 @@ class Cells {
                                     inputs df[], fuel_coefs * coef,
                                     std::vector<std::vector<int>> & coordCells, std::unordered_map<int, Cells> & Cells_Obj,
                                     arguments * args, weatherDF * wdf_ptr, std::vector<double> * FSCell, std::vector<float> * crownMetrics,
-                                    bool & activeCrown, double randomROS, int perimeterCells, std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & surfFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads, std::vector<float> & FlameLengths, std
-                                    ::vector<float> &CrownFlameLengths, std::vector<float> &CrownIntensities);
+                                    bool & activeCrown, double randomROS, int perimeterCells, std::vector<int> & crownState, std::vector<float> & crownFraction, std::vector<float> & surfFraction, std::vector<float> & Intensities, std::vector<float> & RateOfSpreads, std::vector<float> & FlameLengths,
+                                    std::vector<float> & CrownFlameLengths, std::vector<float> & CrownIntensities);
 		
 		std::vector<int> manageFireBBO(int period, std::unordered_set<int> & AvailSet,      
 						inputs * df_ptr, fuel_coefs * coef, 

@@ -2264,6 +2264,7 @@ float flame_length(inputs *data, fuel_coefs *ptr)
  * @param intensity Byram intensity for crown fires
  * @return the flame length
  */
+
 float crown_flame_length(float intensity)
 {
 	float fl = 0.1 * pow(intensity, 0.5);
@@ -2311,6 +2312,7 @@ float byram_intensity(main_outs* at, fuel_coefs* ptr) {
  * @param data Structure containing the cell's input data.
  * @return Fire intensity.
  */
+
 float crown_byram_intensity(main_outs* at, inputs* data) {
 float canopy_height;
 	canopy_height = data->height - data->cbh;
@@ -2550,6 +2552,8 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
     else{
         at->crown=0;
 		at->cfb=0;
+    	at->crown_flame_length=0;
+    	at->crown_intensity=0;
         hptr->ros = hptr->rss;
         bptr->ros = bptr->rss;
         fptr->ros = fptr->rss;

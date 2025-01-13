@@ -798,6 +798,8 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
     int FMC;
 	bool crownFire=false;
     at->cfb=0;
+	at->crown_flame_length=0;
+	at->crown_intensity=0;
     // Populate fuel coefs struct
 	if (args->verbose){
 		std::cout  << "Populate fuel types " <<  std::endl;

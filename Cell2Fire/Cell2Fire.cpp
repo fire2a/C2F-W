@@ -237,9 +237,9 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->crownFraction = std::vector<float> (this->nCells, 0);
 	this->surfFraction = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
-	this->CrownIntensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
 	this->FlameLengths = std::vector<float> (this->nCells, 0);
+	this->CrownIntensities = std::vector<float> (this->nCells, 0);
 	this->CrownFlameLengths = std::vector<float> (this->nCells, 0);
 
 	this->ignProb = std::vector<float>(this->nCells, 1);

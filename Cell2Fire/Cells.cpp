@@ -412,6 +412,8 @@ float Cells::slope_effect(float elev_i, float elev_j, int cellsize)
  * @param Intensities A vector tracking the fire intensity for each cell.
  * @param RateOfSpreads A vector tracking the rate of spread for each cell.
  * @param FlameLengths A vector tracking the flame length for each cell.
+ * @param CrownFlameLengths
+ * @param CrownIntensities
  *
  * @return A vector of integers representing the list of neighboring cells that should receive a message indicating fire has reached them.
  */
@@ -420,8 +422,8 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
                                    inputs df_ptr[], fuel_coefs *coef,
                                    std::vector<std::vector<int>> &coordCells, std::unordered_map<int, Cells> &Cells_Obj,
                                    arguments *args, weatherDF *wdf_ptr, std::vector<double> *FSCell, std::vector<float> *crownMetrics,
-                                   bool &activeCrown, double randomROS, int perimeterCells, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths, std
-                                   ::vector<float> &CrownFlameLengths, std::vector<float> &CrownIntensities)
+                                   bool &activeCrown, double randomROS, int perimeterCells, std::vector<int> &crownState, std::vector<float> &crownFraction, std::vector<float> &surfFraction, std::vector<float> &Intensities, std::vector<float> &RateOfSpreads, std::vector<float> &FlameLengths,
+                                   std::vector<float> &CrownFlameLengths, std::vector<float> &CrownIntensities)
 {
 	// Special flag for repetition (False = -99 for the record)
 	int repeat = -99;
@@ -445,7 +447,7 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 		head_cell = this->realId; // as it is used only for slope calculation, if it is a boundary cell, it uses the same cell, so it uses a no slope scenario
 	}
 	// Compute main angle and ROSs: forward, flanks and back
-	main_outs mainstruct, metrics;
+	main_outs mainstruct = {}; main_outs metrics = {};
 	snd_outs sndstruct;
 	fire_struc headstruct, backstruct, flankstruct, metrics2;
 
@@ -478,7 +480,7 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 		std::cout << "elev: " << df_ptr[this->realId - 1].elev << std::endl;
 		std::cout << "cbd: " << df_ptr[this->realId - 1].cbd << std::endl;
 		std::cout << "cbh: " << df_ptr[this->realId - 1].cbh << std::endl;
-		std::cout << "height: " << df_ptr[this->realId - 1].height << std::endl;
+		//std::cout << "height: " << df_ptr[this->realId - 1].height << std::endl;
 		std::cout << "ccf: " << df_ptr[this->realId - 1].ccf << std::endl;
 		std::cout << "\n-------Mainout Structure--------" << std::endl;
 		std::cout << "rss: " << mainstruct.rss << std::endl;
@@ -649,12 +651,10 @@ std::vector<int> Cells::manageFire(int period, std::unordered_set<int> &AvailSet
 				surfFraction[nb] = metrics.sfc;
 				FlameLengths[this->realId - 1] = mainstruct.fl;
 				FlameLengths[nb - 1] = metrics.fl;
-				if (args->Simulator == "S") {
-					CrownFlameLengths[this->realId - 1] = mainstruct.crown_flame_length;
-					CrownFlameLengths[nb - 1] = metrics.crown_flame_length;
-					CrownIntensities[this->realId - 1] = mainstruct.crown_intensity;
-					CrownIntensities[nb - 1] = metrics.crown_intensity;
-				}
+				CrownFlameLengths[this->realId - 1] = mainstruct.crown_flame_length;
+				CrownFlameLengths[nb - 1] = metrics.crown_flame_length;
+				CrownIntensities[this->realId - 1] = mainstruct.crown_intensity;
+				CrownIntensities[nb - 1] = metrics.crown_intensity;
 
 				// cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
 				// toPop.push_back(angle);

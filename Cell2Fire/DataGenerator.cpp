@@ -650,6 +650,7 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
         rowData.emplace_back(std::make_unique<std::string>(""));
 
         // Height 24
+
         if (std::isnan(Height[i]))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
