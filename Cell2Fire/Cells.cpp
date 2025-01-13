@@ -412,8 +412,8 @@ float Cells::slope_effect(float elev_i, float elev_j, int cellsize)
  * @param Intensities A vector tracking the fire intensity for each cell.
  * @param RateOfSpreads A vector tracking the rate of spread for each cell.
  * @param FlameLengths A vector tracking the flame length for each cell.
- * @param CrownFlameLengths
- * @param CrownIntensities
+ * @param CrownFlameLengths A vector tracking the crownfire flame length for each cell.
+ * @param CrownIntensities A vector tracking the crown fire intensity for each cell.
  *
  * @return A vector of integers representing the list of neighboring cells that should receive a message indicating fire has reached them.
  */
