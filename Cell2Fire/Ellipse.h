@@ -15,15 +15,15 @@ using namespace std;
 
 class Ellipse
 {
-public:
-  // mutable
-  double _a;
-  double _b;
-  ArrayXXd _Coef;
+  public:
+    // mutable
+    double _a;
+    double _b;
+    ArrayXXd _Coef;
 
-  // constructor and methods here
-  Ellipse (std::vector<double> _x, std::vector<double> _y);
-  std::vector<double> get_parameters ();
+    // constructor and methods here
+    Ellipse(std::vector<double> _x, std::vector<double> _y);
+    std::vector<double> get_parameters();
 };
 
 #endif
