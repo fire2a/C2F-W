@@ -777,7 +777,7 @@ float Cell2Fire::get_co2eq(inputs* df_ptr){
 	};
 
 	// Definir las columnas
-	// Fuente Parámetros(Gef): 2006 IPCC Guidelines for National Greenhouse Gas Inventories Chapter 2, Vol 4
+	// Fuente Parametros(Gef): 2006 IPCC Guidelines for National Greenhouse Gas Inventories Chapter 2, Vol 4
 	std::vector<std::string> fuelTypes = {"O1a", "O1b", "S1", "S2", "S3", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "D1", "D2", "M1", "M2", "M3", "M4"};
 	std::vector<int> CO2 = {1613, 1613, 1613, 1613, 1613, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569};
 	std::vector<double> CH4 = {2.3, 2.3, 2.3, 2.3, 2.3, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7};
