@@ -48,6 +48,8 @@ std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;   
 std::vector<int> NFTypesCells;
 std::unordered_map<int,int> IgnitionHistory;
+std::unordered_map<int,std::string> WeathersHistory;
+
 
 /******************************************************************************
 																Utils
@@ -560,12 +562,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		CSVFolder.MakeDir(this->sfbFolder);
 		this->sfbFolder = this->args.OutFolder + separator() +"SurfFractionBurn" + separator();
 	}
-		
-	// Random Weather 
-	/*std::cout << "Weather Option:" << this->args.WeatherOpt << std::endl;
-	std::cout << "Weather Option random check:" << (this->args.WeatherOpt.compare("random") == 0) << std::endl;
-	std::cout << "Weather Option rows check:" << (this->args.WeatherOpt.compare("rows") == 0) << std::endl;
-	*/
+	
 	
 	if (this->args.WeatherOpt.compare("random") == 0) {
 		// Random Weather 	
@@ -579,8 +576,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 			std::cerr << e.what() << std::endl;
 			std::abort();
 		}
-		std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
-
+		
 		// Populate WDF 
 		int WPeriods = this->WeatherDF.size() - 1;  // -1 due to header
 		wdf_ptr = &wdf[0];
@@ -908,7 +904,9 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 
 	}
 	
-	
+	// Populate weather history
+	WeathersHistory[sim] = this->CSVWeather.fileName;
+	std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
 	
 	
 	// If ignition occurs, we update the forest status
@@ -1462,6 +1460,18 @@ void Cell2Fire::Results(){
 		CSVWriter ignitionsFile(this->ignitionsFolder + filename);
 		ignitionsFile.printIgnitions(IgnitionHistory);
     }
+
+	if (currentSim == args.TotalSims){
+
+		std::cout << "Writing Weather log csv..." << endl;
+
+		std::string filename = "weathers_log.csv";
+		CSVWriter weatherHistoryFolder("", "");
+		this->weathersFolder = this->args.OutFolder + "WeathersHistory"+separator();
+		weatherHistoryFolder.MakeDir(this->weathersFolder);
+		CSVWriter weathersFile(this->weathersFolder + filename);
+		weathersFile.printWeathers(WeathersHistory);
+    }
 }
 
 
@@ -1645,19 +1655,6 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 		
 		// Next Sim if max year
 		this->sim += 1;
-	}
-
-	if ((this->sim > args.TotalSims) && (args.WeatherOpt != "rows")) {
-		this->counter_wt += 1;
-		if (this->counter_wt <= 1) {
-			// Weather History Folder
-			std::string filename = "WeatherHistory.csv";
-			CSVWriter WtHistoryFolder("", "");
-			this->historyFolder = this->args.OutFolder + "WeatherHistory"+separator() ;
-			WtHistoryFolder.MakeDir(this->historyFolder);
-			CSVWriter WtFile(this->historyFolder + filename);
-			WtFile.printWeather(WeatherHistory);
-		}
 	}
 	
 	// Print current status

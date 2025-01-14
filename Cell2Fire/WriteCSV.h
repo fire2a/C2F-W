@@ -39,8 +39,8 @@ public:
 	void printASCII(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<float> statusCells);
 	void printASCIIInt(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<int> statusCells);
 	void asciiHeader(int rows, int cols, double xllcorner, double yllcorner, int cellside);
-	void printWeather(std::vector<std::string> weatherHistory);
 	void printIgnitions(std::unordered_map<int,int> ignitionsHistory);
+	void printWeathers(std::unordered_map<int,std::string> weathersHistory);
 	void printCSV_V2(int rows, int cols, std::vector<int> statusCells);
 	// Function to create a directory
 	void MakeDir(std::string pathPlot);
