@@ -57,8 +57,10 @@ std::unordered_map<int, int> IgnitionHistory;
  *
  */
 void
-printSets(std::unordered_set<int> availCells, std::unordered_set<int> nonBurnableCells,
-          std::unordered_set<int> burningCells, std::unordered_set<int> burntCells,
+printSets(std::unordered_set<int> availCells,
+          std::unordered_set<int> nonBurnableCells,
+          std::unordered_set<int> burningCells,
+          std::unordered_set<int> burntCells,
           std::unordered_set<int> harvestCells)
 {
     std::cout << "\nSet information period" << std::endl;
@@ -248,7 +250,9 @@ Cell2Fire::Cell2Fire(arguments _args)
     df_ptr = &df[0];  // access reference for the first element of df
 
     // Populate the df [nCells] objects
-    CSVParser.parseDF(df_ptr, DF, this->args_ptr,
+    CSVParser.parseDF(df_ptr,
+                      DF,
+                      this->args_ptr,
                       this->nCells);  // iterates from the first element of df, using DF,
                                       // args_ptr and the number of cells
 
@@ -579,8 +583,14 @@ Cell2Fire::InitCell(int id)
     std::unordered_map<int, Cells>::iterator it2;
 
     // Initialize cell, insert it inside the unordered map
-    Cells Cell(id - 1, this->areaCells, this->coordCells[id - 1], this->fTypeCells[id - 1], this->fTypeCells2[id - 1],
-               this->perimeterCells, this->statusCells[id - 1], id);
+    Cells Cell(id - 1,
+               this->areaCells,
+               this->coordCells[id - 1],
+               this->fTypeCells[id - 1],
+               this->fTypeCells2[id - 1],
+               this->perimeterCells,
+               this->statusCells[id - 1],
+               id);
     this->Cells_Obj.insert(std::make_pair(id, Cell));
 
     // Get object from unordered map
@@ -1053,9 +1063,15 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
                     std::cout << "\nSelected (Random) ignition point for Year " << this->year << ", sim " << this->sim
                               << ": " << aux;
                     std::vector<int> ignPts = { aux };
-                    if (it->second.ignition(this->fire_period[year - 1], this->year, ignPts, &df[aux - 1],
-                                            this->coef_ptr, this->args_ptr, &wdf[this->weatherPeriod],
-                                            this->activeCrown, this->perimeterCells))
+                    if (it->second.ignition(this->fire_period[year - 1],
+                                            this->year,
+                                            ignPts,
+                                            &df[aux - 1],
+                                            this->coef_ptr,
+                                            this->args_ptr,
+                                            &wdf[this->weatherPeriod],
+                                            this->activeCrown,
+                                            this->perimeterCells))
                     {
                         // Printing info about ignitions
                         if (this->args.verbose)
@@ -1127,8 +1143,14 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
             if (it->second.getStatus() == "Available" && it->second.fType != 0)
             {
                 std::vector<int> ignPts = { temp };
-                if (it->second.ignition(this->fire_period[year - 1], this->year, ignPts, &df[temp - 1], this->coef_ptr,
-                                        this->args_ptr, &wdf[this->weatherPeriod], this->activeCrown,
+                if (it->second.ignition(this->fire_period[year - 1],
+                                        this->year,
+                                        ignPts,
+                                        &df[temp - 1],
+                                        this->coef_ptr,
+                                        this->args_ptr,
+                                        &wdf[this->weatherPeriod],
+                                        this->activeCrown,
                                         this->perimeterCells))
                 {
 
@@ -1175,8 +1197,8 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
         // Print sets information
         if (this->args.verbose)
         {
-            printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells,
-                      this->harvestCells);
+            printSets(
+                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
         }
     }
 
@@ -1338,11 +1360,25 @@ Cell2Fire::SendMessages()
             // std::cout << "Entra a Manage Fire" << std::endl;
             if (!this->args.BBOTuning)
             {  //&df[cell-1] replaced by full df for getting the slopes
-                aux_list = it->second.manageFire(
-                    this->fire_period[this->year - 1], this->availCells, df, this->coef_ptr, this->coordCells,
-                    this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod], &this->FSCell, &this->crownMetrics,
-                    this->activeCrown, this->ROSRV, this->perimeterCells, this->crownState, this->crownFraction,
-                    this->surfFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
+                aux_list = it->second.manageFire(this->fire_period[this->year - 1],
+                                                 this->availCells,
+                                                 df,
+                                                 this->coef_ptr,
+                                                 this->coordCells,
+                                                 this->Cells_Obj,
+                                                 this->args_ptr,
+                                                 &wdf[this->weatherPeriod],
+                                                 &this->FSCell,
+                                                 &this->crownMetrics,
+                                                 this->activeCrown,
+                                                 this->ROSRV,
+                                                 this->perimeterCells,
+                                                 this->crownState,
+                                                 this->crownFraction,
+                                                 this->surfFraction,
+                                                 this->Intensities,
+                                                 this->RateOfSpreads,
+                                                 this->FlameLengths);
             }
 
             else
@@ -1350,12 +1386,26 @@ Cell2Fire::SendMessages()
                 // TODO  MAY 11: Pass the slope factor or the slopes of the
                 // adjacent cells
                 auto factors = BBOFactors.find(NFTypesCells[cell - 1]);
-                aux_list = it->second.manageFireBBO(
-                    this->fire_period[this->year - 1], this->availCells, &df[cell - 1], this->coef_ptr,
-                    this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod], &this->FSCell,
-                    &this->crownMetrics, this->activeCrown, this->ROSRV, this->perimeterCells, factors->second,
-                    this->crownState, this->crownFraction, this->surfFraction, this->Intensities, this->RateOfSpreads,
-                    this->FlameLengths);
+                aux_list = it->second.manageFireBBO(this->fire_period[this->year - 1],
+                                                    this->availCells,
+                                                    &df[cell - 1],
+                                                    this->coef_ptr,
+                                                    this->coordCells,
+                                                    this->Cells_Obj,
+                                                    this->args_ptr,
+                                                    &wdf[this->weatherPeriod],
+                                                    &this->FSCell,
+                                                    &this->crownMetrics,
+                                                    this->activeCrown,
+                                                    this->ROSRV,
+                                                    this->perimeterCells,
+                                                    factors->second,
+                                                    this->crownState,
+                                                    this->crownFraction,
+                                                    this->surfFraction,
+                                                    this->Intensities,
+                                                    this->RateOfSpreads,
+                                                    this->FlameLengths);
             }
             // std::cout << "Sale de Manage Fire" << std::endl;
         }
@@ -1525,8 +1575,8 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
         }
         this->burningCells.clear();
         if (this->args.verbose)
-            printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells,
-                      this->harvestCells);
+            printSets(
+                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
     }
 
     // Mesages and no repeat
@@ -1594,9 +1644,15 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
                 // Check if burnable, then check potential ignition
                 if (it->second.fType != 0)
                 {
-                    checkBurnt = it->second.get_burned(this->fire_period[this->year - 1], 1, this->year, df,
-                                                       this->coef_ptr, this->args_ptr, &wdf[this->weatherPeriod],
-                                                       this->activeCrown, this->perimeterCells);
+                    checkBurnt = it->second.get_burned(this->fire_period[this->year - 1],
+                                                       1,
+                                                       this->year,
+                                                       df,
+                                                       this->coef_ptr,
+                                                       this->args_ptr,
+                                                       &wdf[this->weatherPeriod],
+                                                       this->activeCrown,
+                                                       this->perimeterCells);
                 }
                 else
                 {
@@ -1662,8 +1718,8 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
         // Display info for debugging
         if (this->args.verbose)
         {
-            printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells,
-                      this->harvestCells);
+            printSets(
+                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
         }
 
         /*
@@ -1850,8 +1906,8 @@ Cell2Fire::Results()
             std::cout << "We are generating the Rate of Spread to a asc file " << rosName << std::endl;
         }
         CSVWriter CSVPloter(rosName, " ");
-        CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide,
-                             this->RateOfSpreads);
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->RateOfSpreads);
     }
 
     // Intensity
@@ -1869,8 +1925,8 @@ Cell2Fire::Results()
             std::cout << "We are generating the Byram Intensity to a asc file " << intensityName << std::endl;
         }
         CSVWriter CSVPloter(intensityName, " ");
-        CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide,
-                             this->Intensities);
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->Intensities);
     }
 
     if (this->args.OutFl)
@@ -1886,8 +1942,8 @@ Cell2Fire::Results()
             std::cout << "We are generating the Flame Lenght to a asc file " << flName << std::endl;
         }
         CSVWriter CSVPloter(flName, " ");
-        CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide,
-                             this->FlameLengths);
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->FlameLengths);
     }
 
     // Intensity
@@ -1904,8 +1960,8 @@ Cell2Fire::Results()
             std::cout << "We are generating the Crown Fraction Burn to a asc file " << cfbName << std::endl;
         }
         CSVWriter CSVPloter(cfbName, " ");
-        CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide,
-                             this->crownFraction);
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFraction);
     }
 
     // Intensity
@@ -1922,8 +1978,8 @@ Cell2Fire::Results()
             std::cout << "We are generating the Surface Fraction Burn to a asc file " << sfbName << std::endl;
         }
         CSVWriter CSVPloter(sfbName, " ");
-        CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide,
-                             this->surfFraction);
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfFraction);
     }
 
     // Crown
@@ -1943,8 +1999,8 @@ Cell2Fire::Results()
         // CSVPloter.printCrownAscii(this->rows, this->cols, this->xllcorner,
         // this->yllcorner, this->cellSide, this->crownMetrics, statusCells2);
         // /OLD VERSION
-        CSVPloter.printASCIIInt(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide,
-                                this->crownState);
+        CSVPloter.printASCIIInt(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownState);
     }
 
     // Ignition Logfile

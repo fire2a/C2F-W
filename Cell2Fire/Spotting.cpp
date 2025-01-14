@@ -14,9 +14,13 @@
 using namespace std;
 
 std::vector<int>
-Spotting(std::unordered_map<int, Cells>& Cells_Obj, std::vector<std::vector<int>>& coordCells,
-         std::unordered_set<int>& AvailSet, double WSD, double WSC,
-         std::unordered_map<std::string, double> spottingParams, bool verbose)
+Spotting(std::unordered_map<int, Cells>& Cells_Obj,
+         std::vector<std::vector<int>>& coordCells,
+         std::unordered_set<int>& AvailSet,
+         double WSD,
+         double WSC,
+         std::unordered_map<std::string, double> spottingParams,
+         bool verbose)
 {
 
     // TODO data structures should be passed by reference

@@ -44,8 +44,14 @@ using namespace std;
  * @param _realId Alternative identifier of the cell (1 to size of the
  * landscape).
  */
-Cells::Cells(int _id, double _area, std::vector<int> _coord, int _fType, std::string _fType2, double _perimeter,
-             int _status, int _realId)
+Cells::Cells(int _id,
+             double _area,
+             std::vector<int> _coord,
+             int _fType,
+             std::string _fType2,
+             double _perimeter,
+             int _status,
+             int _realId)
 {
     // Global "dictionaries" (vectors) for status and types
     // Status: 0: "Available", 1: "Burning", 2: "Burnt", 3: "Harvested", 4:"Non
@@ -116,7 +122,9 @@ Cells::Cells(int _id, double _area, std::vector<int> _coord, int _fType, std::st
  */
 void
 Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,  // TODO: should probably make a coordinate type
-                            std::unordered_set<int>& availSet, int cols, int rows)  // WORKING CHECK OK
+                            std::unordered_set<int>& availSet,
+                            int cols,
+                            int rows)  // WORKING CHECK OK
 {
     std::vector<int> adj = adjacentCells(this->realId, rows, cols);
 
@@ -452,11 +460,24 @@ Cells::slope_effect(float elev_i, float elev_j, int cellsize)
  */
 
 std::vector<int>
-Cells::manageFire(int period, std::unordered_set<int>& AvailSet, inputs df_ptr[], fuel_coefs* coef,
-                  std::vector<std::vector<int>>& coordCells, std::unordered_map<int, Cells>& Cells_Obj, arguments* args,
-                  weatherDF* wdf_ptr, std::vector<double>* FSCell, std::vector<float>* crownMetrics, bool& activeCrown,
-                  double randomROS, int perimeterCells, std::vector<int>& crownState, std::vector<float>& crownFraction,
-                  std::vector<float>& surfFraction, std::vector<float>& Intensities, std::vector<float>& RateOfSpreads,
+Cells::manageFire(int period,
+                  std::unordered_set<int>& AvailSet,
+                  inputs df_ptr[],
+                  fuel_coefs* coef,
+                  std::vector<std::vector<int>>& coordCells,
+                  std::unordered_map<int, Cells>& Cells_Obj,
+                  arguments* args,
+                  weatherDF* wdf_ptr,
+                  std::vector<double>* FSCell,
+                  std::vector<float>* crownMetrics,
+                  bool& activeCrown,
+                  double randomROS,
+                  int perimeterCells,
+                  std::vector<int>& crownState,
+                  std::vector<float>& crownFraction,
+                  std::vector<float>& surfFraction,
+                  std::vector<float>& Intensities,
+                  std::vector<float>& RateOfSpreads,
                   std::vector<float>& FlameLengths)
 {
     // Special flag for repetition (False = -99 for the record)
@@ -490,13 +511,29 @@ Cells::manageFire(int period, std::unordered_set<int>& AvailSet, inputs df_ptr[]
     // Calculate parameters
     if (args->Simulator == "K")
     {
-        calculate_k(&df_ptr[this->realId - 1], &df_ptr[head_cell - 1], perimeterCells, coef, args, &mainstruct,
-                    &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
+        calculate_k(&df_ptr[this->realId - 1],
+                    &df_ptr[head_cell - 1],
+                    perimeterCells,
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown);
     }
     else if (args->Simulator == "S")
     {
-        calculate_s(&df_ptr[this->realId - 1], coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct,
-                    &backstruct, activeCrown);
+        calculate_s(&df_ptr[this->realId - 1],
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown);
     }
     else if (args->Simulator == "C")
     {
@@ -610,8 +647,11 @@ Cells::manageFire(int period, std::unordered_set<int>& AvailSet, inputs df_ptr[]
                                   backstruct.ros * args->BFactor,
                                   args->EFactor);
         */
-        ros_distr_V2(cartesianAngle, mainstruct.a * args->HFactor, mainstruct.b * args->FFactor,
-                     mainstruct.c * args->BFactor, args->EFactor);
+        ros_distr_V2(cartesianAngle,
+                     mainstruct.a * args->HFactor,
+                     mainstruct.b * args->FFactor,
+                     mainstruct.c * args->BFactor,
+                     args->EFactor);
         // std::cout << "Sale de Ros Dist" << std::endl;
 
         // Fire progress using ROS from burning cell, not the neighbors //
@@ -752,12 +792,25 @@ Cells::manageFire(int period, std::unordered_set<int>& AvailSet, inputs df_ptr[]
 */
 
 std::vector<int>
-Cells::manageFireBBO(int period, std::unordered_set<int>& AvailSet, inputs* df_ptr, fuel_coefs* coef,
-                     std::vector<std::vector<int>>& coordCells, std::unordered_map<int, Cells>& Cells_Obj,
-                     arguments* args, weatherDF* wdf_ptr, std::vector<double>* FSCell, std::vector<float>* crownMetrics,
-                     bool& activeCrown, double randomROS, int perimeterCells, std::vector<float>& EllipseFactors,
-                     std::vector<int>& crownState, std::vector<float>& crownFraction, std::vector<float>& surfFraction,
-                     std::vector<float>& Intensities, std::vector<float>& RateOfSpreads,
+Cells::manageFireBBO(int period,
+                     std::unordered_set<int>& AvailSet,
+                     inputs* df_ptr,
+                     fuel_coefs* coef,
+                     std::vector<std::vector<int>>& coordCells,
+                     std::unordered_map<int, Cells>& Cells_Obj,
+                     arguments* args,
+                     weatherDF* wdf_ptr,
+                     std::vector<double>* FSCell,
+                     std::vector<float>* crownMetrics,
+                     bool& activeCrown,
+                     double randomROS,
+                     int perimeterCells,
+                     std::vector<float>& EllipseFactors,
+                     std::vector<int>& crownState,
+                     std::vector<float>& crownFraction,
+                     std::vector<float>& surfFraction,
+                     std::vector<float>& Intensities,
+                     std::vector<float>& RateOfSpreads,
                      std::vector<float>& FlameLengths)
 {
     // Special flag for repetition (False = -99 for the record)
@@ -791,13 +844,29 @@ Cells::manageFireBBO(int period, std::unordered_set<int>& AvailSet, inputs* df_p
 
     if (args->Simulator == "K")
     {
-        calculate_k(&df_ptr[this->realId - 1], &df_ptr[head_cell - 1], perimeterCells, coef, args, &mainstruct,
-                    &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
+        calculate_k(&df_ptr[this->realId - 1],
+                    &df_ptr[head_cell - 1],
+                    perimeterCells,
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown);
     }
     else if (args->Simulator == "S")
     {
-        calculate_s(&df_ptr[this->realId - 1], coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct,
-                    &backstruct, activeCrown);
+        calculate_s(&df_ptr[this->realId - 1],
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown);
     }
 
     else if (args->Simulator == "C")
@@ -908,8 +977,11 @@ Cells::manageFireBBO(int period, std::unordered_set<int>& AvailSet, inputs* df_p
                                   backstruct.ros * EllipseFactors[2],
                                   EllipseFactors[3]);
         */
-        ros_distr_V2(cartesianAngle, mainstruct.a * EllipseFactors[0], mainstruct.b * EllipseFactors[1],
-                     mainstruct.c * EllipseFactors[2], EllipseFactors[3]);
+        ros_distr_V2(cartesianAngle,
+                     mainstruct.a * EllipseFactors[0],
+                     mainstruct.b * EllipseFactors[1],
+                     mainstruct.c * EllipseFactors[2],
+                     EllipseFactors[3]);
         // std::cout << "Sale de Ros Dist" << std::endl;
 
         // Fire progress using ROS from burning cell, not the neighbors //
@@ -1044,8 +1116,15 @@ Cells::manageFireBBO(int period, std::unordered_set<int>& AvailSet, inputs* df_p
  */
 
 bool
-Cells::get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs* coef, arguments* args, weatherDF* wdf_ptr,
-                  bool& activeCrown, int perimeterCells)
+Cells::get_burned(int period,
+                  int season,
+                  int NMsg,
+                  inputs df[],
+                  fuel_coefs* coef,
+                  arguments* args,
+                  weatherDF* wdf_ptr,
+                  bool& activeCrown,
+                  int perimeterCells)
 {
     if (args->verbose)
     {
@@ -1073,13 +1152,22 @@ Cells::get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs* coe
     // Calculate parameters
     if (args->Simulator == "K")
     {
-        calculate_k(&(df[this->id]), &(df[head_cell - 1]), perimeterCells, coef, args, &mainstruct, &sndstruct,
-                    &headstruct, &flankstruct, &backstruct, activeCrown);
+        calculate_k(&(df[this->id]),
+                    &(df[head_cell - 1]),
+                    perimeterCells,
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown);
     }
     else if (args->Simulator == "S")
     {
-        calculate_s(&(df[this->id]), coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,
-                    activeCrown);
+        calculate_s(
+            &(df[this->id]), coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
     }
 
     else if (args->Simulator == "C")
@@ -1168,9 +1256,15 @@ Cells::getStatus()
  * @return True if ignition happens, False if not.
  */
 bool
-Cells::ignition(int period, int year, std::vector<int>& ignitionPoints,
+Cells::ignition(int period,
+                int year,
+                std::vector<int>& ignitionPoints,
                 inputs* df_ptr,  // WORKING CHECK OK
-                fuel_coefs* coef, arguments* args, weatherDF* wdf_ptr, bool& activeCrown, int perimeterCells)
+                fuel_coefs* coef,
+                arguments* args,
+                weatherDF* wdf_ptr,
+                bool& activeCrown,
+                int perimeterCells)
 {
 
     // If we have ignition points, update
@@ -1210,18 +1304,34 @@ Cells::ignition(int period, int year, std::vector<int>& ignitionPoints,
         // Calculate parameters
         if (args->Simulator == "K")
         {
-            calculate_k(&df_ptr[this->realId - 1], &df_ptr[head_cell - 1], perimeterCells, coef, args, &mainstruct,
-                        &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
+            calculate_k(&df_ptr[this->realId - 1],
+                        &df_ptr[head_cell - 1],
+                        perimeterCells,
+                        coef,
+                        args,
+                        &mainstruct,
+                        &sndstruct,
+                        &headstruct,
+                        &flankstruct,
+                        &backstruct,
+                        activeCrown);
         }
         else if (args->Simulator == "S")
         {
-            calculate_s(&df_ptr[this->realId - 1], coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct,
-                        &backstruct, activeCrown);
+            calculate_s(&df_ptr[this->realId - 1],
+                        coef,
+                        args,
+                        &mainstruct,
+                        &sndstruct,
+                        &headstruct,
+                        &flankstruct,
+                        &backstruct,
+                        activeCrown);
         }
         else if (args->Simulator == "C")
         {
-            calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct,
-                          &backstruct);
+            calculate_fbp(
+                &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
         }
 
         if (args->verbose)

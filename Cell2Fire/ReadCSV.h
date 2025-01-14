@@ -56,8 +56,8 @@ class CSVReader
     void parsePROB(std::vector<float>& probabilities, std::vector<std::vector<std::string>>& DF, int NCells);
 
     // Populate Weather DF (Spanish version)
-    void parseWeatherDF(weatherDF* wt_ptr, arguments* args_ptr, std::vector<std::vector<std::string>>& DF,
-                        int WPeriods);
+    void
+    parseWeatherDF(weatherDF* wt_ptr, arguments* args_ptr, std::vector<std::vector<std::string>>& DF, int WPeriods);
 
     // Populate Ignition Points
     void parseIgnitionDF(std::vector<int>& ig, std::vector<std::vector<std::string>>& DF, int IgPeriods);
@@ -66,11 +66,13 @@ class CSVReader
     void parseForestDF(forestDF* frt_ptr, std::vector<std::vector<std::string>>& DF);
 
     // Populate Harvested Cells
-    void parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc, std::vector<std::vector<std::string>>& DF,
+    void parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
+                          std::vector<std::vector<std::string>>& DF,
                           int HPeriods);
 
     // Populate BBO Factors
-    void parseBBODF(std::unordered_map<int, std::vector<float>>& bbo, std::vector<std::vector<std::string>>& DF,
+    void parseBBODF(std::unordered_map<int, std::vector<float>>& bbo,
+                    std::vector<std::vector<std::string>>& DF,
                     int NFTypes);
 
     // Prints individual cell info

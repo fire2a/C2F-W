@@ -2399,8 +2399,15 @@ checkActive(inputs* data, main_outs* at)  // En s&b se usa fm10
 }
 
 void
-calculate_s(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* at, snd_outs* sec, fire_struc* hptr,
-            fire_struc* fptr, fire_struc* bptr, bool& activeCrown)
+calculate_s(inputs* data,
+            fuel_coefs* ptr,
+            arguments* args,
+            main_outs* at,
+            snd_outs* sec,
+            fire_struc* hptr,
+            fire_struc* fptr,
+            fire_struc* bptr,
+            bool& activeCrown)
 {
     // Hack: Initialize coefficients
     initialize_coeff(args->scenario);

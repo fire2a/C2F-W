@@ -560,7 +560,8 @@ setup_const()
 }
 
 float
-rate_of_spread_k(inputs* data, fuel_coefs* ptr,
+rate_of_spread_k(inputs* data,
+                 fuel_coefs* ptr,
                  main_outs* at)  // incluir efecto pendiente aqui y no afuera
 {
     float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps, fp;
@@ -795,8 +796,17 @@ backfire_ros10_k(fire_struc* hptr, snd_outs* sec)
  * fire_struc *bptr: backstruct
  */
 void
-calculate_k(inputs* data, inputs* head, int cellsize, fuel_coefs* ptr, arguments* args, main_outs* at, snd_outs* sec,
-            fire_struc* hptr, fire_struc* fptr, fire_struc* bptr, bool& activeCrown)
+calculate_k(inputs* data,
+            inputs* head,
+            int cellsize,
+            fuel_coefs* ptr,
+            arguments* args,
+            main_outs* at,
+            snd_outs* sec,
+            fire_struc* hptr,
+            fire_struc* fptr,
+            fire_struc* bptr,
+            bool& activeCrown)
 {
     // Hack: Initialize coefficients
     setup_const();

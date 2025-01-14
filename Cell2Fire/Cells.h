@@ -105,35 +105,74 @@ class Cells
     // TODO: reference to shared object
 
     // constructor and methods here
-    Cells(int _id, double _area, std::vector<int> _coord, int _fType, std::string _fType2, double _perimeter,
-          int _status, int _realId);
+    Cells(int _id,
+          double _area,
+          std::vector<int> _coord,
+          int _fType,
+          std::string _fType2,
+          double _perimeter,
+          int _status,
+          int _realId);
 
-    void initializeFireFields(std::vector<std::vector<int>>& coordCells, std::unordered_set<int>& availSet, int cols,
+    void initializeFireFields(std::vector<std::vector<int>>& coordCells,
+                              std::unordered_set<int>& availSet,
+                              int cols,
                               int rows);  // TODO: need TYPE
     void ros_distr_old(double thetafire, double forward, double flank, double back);
     double rhoTheta(double theta, double a, double b);
     void ros_distr(double thetafire, double forward, double flank, double back, double EFactor);
     void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
 
-    std::vector<int> manageFire(int period, std::unordered_set<int>& AvailSet, inputs df[], fuel_coefs* coef,
-                                std::vector<std::vector<int>>& coordCells, std::unordered_map<int, Cells>& Cells_Obj,
-                                arguments* args, weatherDF* wdf_ptr, std::vector<double>* FSCell,
-                                std::vector<float>* crownMetrics, bool& activeCrown, double randomROS,
-                                int perimeterCells, std::vector<int>& crownState, std::vector<float>& crownFraction,
-                                std::vector<float>& surfFraction, std::vector<float>& Intensities,
-                                std::vector<float>& RateOfSpreads, std::vector<float>& FlameLengths);
+    std::vector<int> manageFire(int period,
+                                std::unordered_set<int>& AvailSet,
+                                inputs df[],
+                                fuel_coefs* coef,
+                                std::vector<std::vector<int>>& coordCells,
+                                std::unordered_map<int, Cells>& Cells_Obj,
+                                arguments* args,
+                                weatherDF* wdf_ptr,
+                                std::vector<double>* FSCell,
+                                std::vector<float>* crownMetrics,
+                                bool& activeCrown,
+                                double randomROS,
+                                int perimeterCells,
+                                std::vector<int>& crownState,
+                                std::vector<float>& crownFraction,
+                                std::vector<float>& surfFraction,
+                                std::vector<float>& Intensities,
+                                std::vector<float>& RateOfSpreads,
+                                std::vector<float>& FlameLengths);
 
-    std::vector<int> manageFireBBO(int period, std::unordered_set<int>& AvailSet, inputs* df_ptr, fuel_coefs* coef,
-                                   std::vector<std::vector<int>>& coordCells, std::unordered_map<int, Cells>& Cells_Obj,
-                                   arguments* args, weatherDF* wdf_ptr, std::vector<double>* FSCell,
-                                   std::vector<float>* crownMetrics, bool& activeCrown, double randomROS,
-                                   int perimeterCells, std::vector<float>& EllipseFactors, std::vector<int>& crownState,
-                                   std::vector<float>& crownFraction, std::vector<float>& surfFraction,
-                                   std::vector<float>& Intensities, std::vector<float>& RateOfSpreads,
+    std::vector<int> manageFireBBO(int period,
+                                   std::unordered_set<int>& AvailSet,
+                                   inputs* df_ptr,
+                                   fuel_coefs* coef,
+                                   std::vector<std::vector<int>>& coordCells,
+                                   std::unordered_map<int, Cells>& Cells_Obj,
+                                   arguments* args,
+                                   weatherDF* wdf_ptr,
+                                   std::vector<double>* FSCell,
+                                   std::vector<float>* crownMetrics,
+                                   bool& activeCrown,
+                                   double randomROS,
+                                   int perimeterCells,
+                                   std::vector<float>& EllipseFactors,
+                                   std::vector<int>& crownState,
+                                   std::vector<float>& crownFraction,
+                                   std::vector<float>& surfFraction,
+                                   std::vector<float>& Intensities,
+                                   std::vector<float>& RateOfSpreads,
                                    std::vector<float>& FlameLengths);
 
-    bool get_burned(int period, int season, int NMsg, inputs df[], fuel_coefs* coef, arguments* args,
-                    weatherDF* wdf_ptr, bool& activeCrown, int perimeterCells);
+    bool get_burned(int period,
+                    int season,
+                    int NMsg,
+                    inputs df[],
+                    fuel_coefs* coef,
+                    arguments* args,
+                    weatherDF* wdf_ptr,
+                    bool& activeCrown,
+                    int perimeterCells);
 
     // void set_Adj(std::unordered_map<std::string, int> & adjacentCells);
 
@@ -141,9 +180,15 @@ class Cells
 
     std::string getStatus();
 
-    bool ignition(int period, int year, std::vector<int>& ignitionPoints,
+    bool ignition(int period,
+                  int year,
+                  std::vector<int>& ignitionPoints,
                   inputs* df_ptr,  // WORKING CHECK OK
-                  fuel_coefs* coef, arguments* args, weatherDF* wdf_ptr, bool& activeCrown, int perimeterCells);
+                  fuel_coefs* coef,
+                  arguments* args,
+                  weatherDF* wdf_ptr,
+                  bool& activeCrown,
+                  int perimeterCells);
 
     void harvested(int id, int period);
 

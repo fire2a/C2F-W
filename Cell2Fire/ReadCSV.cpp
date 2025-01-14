@@ -446,7 +446,9 @@ CSVReader::parsePROB(std::vector<float>& probabilities, std::vector<std::vector<
  * Populate Weather DF Spain
  */
 void
-CSVReader::parseWeatherDF(weatherDF* wdf_ptr, arguments* args_ptr, std::vector<std::vector<std::string>>& DF,
+CSVReader::parseWeatherDF(weatherDF* wdf_ptr,
+                          arguments* args_ptr,
+                          std::vector<std::vector<std::string>>& DF,
                           int WPeriods)
 {
     int i;
@@ -599,7 +601,8 @@ CSVReader::parseIgnitionDF(std::vector<int>& ig, std::vector<std::vector<std::st
  * Populate HarvestedDF
  */
 void
-CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc, std::vector<std::vector<std::string>>& DF,
+CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
+                            std::vector<std::vector<std::string>>& DF,
                             int HPeriods)
 {
     // Integers
@@ -631,7 +634,8 @@ CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc, std::
  * Populate BBO Tuning factors
  */
 void
-CSVReader::parseBBODF(std::unordered_map<int, std::vector<float>>& bbo, std::vector<std::vector<std::string>>& DF,
+CSVReader::parseBBODF(std::unordered_map<int, std::vector<float>>& bbo,
+                      std::vector<std::vector<std::string>>& DF,
                       int NFTypes)
 {
     // Integers

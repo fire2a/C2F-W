@@ -79,8 +79,8 @@ float flankfire_ros(float ros, float bros, float lb);
 
 float spread_distance(inputs* inp, fire_struc* ptr, float accn);
 
-float flank_spread_distance(inputs* inp, fire_struc* ptr, snd_outs* sec, float hrost, float brost, float hd, float bd,
-                            float lb, float a);
+float flank_spread_distance(
+    inputs* inp, fire_struc* ptr, snd_outs* sec, float hrost, float brost, float hd, float bd, float lb, float a);
 
 int time_to_crown(float ros, float rso, float a);
 
@@ -89,8 +89,8 @@ float flank_fire_behaviour(inputs* inp, fuel_coefs* ptr, main_outs* at, fire_str
 
 void set_all(fire_struc* ptr, int time);
 
-void calculate_fbp(inputs* data, fuel_coefs* ptr, main_outs* at, snd_outs* sec, fire_struc* hptr, fire_struc* fptr,
-                   fire_struc* bptr);
+void calculate_fbp(
+    inputs* data, fuel_coefs* ptr, main_outs* at, snd_outs* sec, fire_struc* hptr, fire_struc* fptr, fire_struc* bptr);
 void determine_destiny_metrics_fbp(inputs* data, fuel_coefs* pt, main_outs* metrics, fire_struc* metrics2);
 void zero_main(main_outs* m);
 

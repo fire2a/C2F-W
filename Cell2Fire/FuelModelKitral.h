@@ -59,8 +59,17 @@ float slope_effect(float elev_i, float elev_j, int cellsize);
 
 // Main function to populate spread outputs based on inputs provided from main
 // class
-void calculate_k(inputs* data, inputs* head, int cellsize, fuel_coefs* ptr, arguments* args, main_outs* at,
-                 snd_outs* sec, fire_struc* hptr, fire_struc* fptr, fire_struc* bptr, bool& activeCrown);
+void calculate_k(inputs* data,
+                 inputs* head,
+                 int cellsize,
+                 fuel_coefs* ptr,
+                 arguments* args,
+                 main_outs* at,
+                 snd_outs* sec,
+                 fire_struc* hptr,
+                 fire_struc* fptr,
+                 fire_struc* bptr,
+                 bool& activeCrown);
 
 void determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* at);
 

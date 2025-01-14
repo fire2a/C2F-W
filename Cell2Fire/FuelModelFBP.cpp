@@ -84,8 +84,8 @@ float slopelimit_isi = 0.01;
 int numfuels = 18;
 
 void
-calculate_fbp(inputs* data, fuel_coefs* pt, main_outs* at, snd_outs* sec, fire_struc* hptr, fire_struc* fptr,
-              fire_struc* bptr)
+calculate_fbp(
+    inputs* data, fuel_coefs* pt, main_outs* at, snd_outs* sec, fire_struc* hptr, fire_struc* fptr, fire_struc* bptr)
 {
     int firetype = 0;
     float accn;
@@ -943,8 +943,8 @@ flankfire_ros(float ros, float bros, float lb)
 }
 
 float
-flank_spread_distance(inputs* inp, fire_struc* ptr, snd_outs* sec, float hrost, float brost, float hd, float bd,
-                      float lb, float a)
+flank_spread_distance(
+    inputs* inp, fire_struc* ptr, snd_outs* sec, float hrost, float brost, float hd, float bd, float lb, float a)
 {
     sec->lbt = (lb - 1.0) * (1.0 - exp(-a * inp->time)) + 1.0;
     ptr->rost = (hrost + brost) / (sec->lbt * 2.0);

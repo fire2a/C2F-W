@@ -94,8 +94,8 @@ Dictionary(const std::string& filename)
                 FBPDict[tokens[0]] = tokens[3].substr(0, 3);
             }
 
-            ColorsDict[tokens[0]] = std::make_tuple(std::stof(tokens[4]) / 255.0f, std::stof(tokens[5]) / 255.0f,
-                                                    std::stof(tokens[6]) / 255.0f, 1.0f);
+            ColorsDict[tokens[0]] = std::make_tuple(
+                std::stof(tokens[4]) / 255.0f, std::stof(tokens[5]) / 255.0f, std::stof(tokens[6]) / 255.0f, 1.0f);
         }
 
         if (aux == 1)
@@ -515,10 +515,17 @@ DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells)
 }
 
 std::vector<std::vector<std::unique_ptr<std::string>>>
-GenerateDat(const std::vector<std::string>& GFuelType, const std::vector<int>& GFuelTypeN,
-            const std::vector<float>& Elevation, const std::vector<float>& PS, const std::vector<float>& SAZ,
-            const std::vector<float>& Curing, const std::vector<float>& CBD, const std::vector<float>& CBH,
-            const std::vector<float>& CCF, const std::vector<float>& PY, const std::vector<float>& FMC,
+GenerateDat(const std::vector<std::string>& GFuelType,
+            const std::vector<int>& GFuelTypeN,
+            const std::vector<float>& Elevation,
+            const std::vector<float>& PS,
+            const std::vector<float>& SAZ,
+            const std::vector<float>& Curing,
+            const std::vector<float>& CBD,
+            const std::vector<float>& CBH,
+            const std::vector<float>& CCF,
+            const std::vector<float>& PY,
+            const std::vector<float>& FMC,
             const std::string& InFolder)
 {
     // DF columns

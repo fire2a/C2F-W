@@ -37,10 +37,10 @@ class CSVWriter
     void printCSV(int rows, int cols, std::vector<int> statusCells);
     void printCSVDouble(int rows, int cols, std::vector<double> network);
     void printCSVDouble_V2(int rows, int cols, std::vector<double> network);
-    void printASCII(int rows, int cols, double xllcorner, double yllcorner, int cellside,
-                    std::vector<float> statusCells);
-    void printASCIIInt(int rows, int cols, double xllcorner, double yllcorner, int cellside,
-                       std::vector<int> statusCells);
+    void
+    printASCII(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<float> statusCells);
+    void
+    printASCIIInt(int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<int> statusCells);
     void asciiHeader(int rows, int cols, double xllcorner, double yllcorner, int cellside);
     void printWeather(std::vector<std::string> weatherHistory);
     void printIgnitions(std::unordered_map<int, int> ignitionsHistory);

@@ -196,8 +196,8 @@ CSVWriter::printCSVDouble_V2(int rows, int cols, std::vector<double> network)
 }
 
 void
-CSVWriter::printASCII(int rows, int cols, double xllcorner, double yllcorner, int cellside,
-                      std::vector<float> statusCells)
+CSVWriter::printASCII(
+    int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<float> statusCells)
 {
     // Create a rowVector for printing
     std::vector<float> rowVector;
@@ -225,8 +225,8 @@ CSVWriter::printASCII(int rows, int cols, double xllcorner, double yllcorner, in
 }
 
 void
-CSVWriter::printASCIIInt(int rows, int cols, double xllcorner, double yllcorner, int cellside,
-                         std::vector<int> statusCells)
+CSVWriter::printASCIIInt(
+    int rows, int cols, double xllcorner, double yllcorner, int cellside, std::vector<int> statusCells)
 {
     // Create a rowVector for printing
     std::vector<int> rowVector;
