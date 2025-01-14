@@ -15,14 +15,14 @@ AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortEnumsOnASingleLine: true
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: All
+AllowShortFunctionsOnASingleLine: Empty
 AllowShortLambdasOnASingleLine: All
-AllowShortIfStatementsOnASingleLine: Never
+AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: All
 AlwaysBreakAfterReturnType: AllDefinitions
 AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: MultiLine
+AlwaysBreakTemplateDeclarations: Yes
 AttributeMacros:
   - __capability
 BinPackArguments: true
@@ -48,7 +48,7 @@ BraceWrapping:
   SplitEmptyNamespace: true
 BreakBeforeBinaryOperators: All
 BreakBeforeConceptDeclarations: true
-BreakBeforeBraces: GNU
+BreakBeforeBraces: Allman
 BreakBeforeInheritanceComma: false
 BreakInheritanceList: BeforeColon
 BreakBeforeTernaryOperators: true
@@ -56,7 +56,7 @@ BreakConstructorInitializersBeforeComma: false
 BreakConstructorInitializers: BeforeColon
 BreakAfterJavaFieldAnnotations: false
 BreakStringLiterals: true
-ColumnLimit:     79
+ColumnLimit:     120
 CommentPragmas:  '^ IWYU pragma:'
 QualifierAlignment: Leave
 CompactNamespaces: false
@@ -70,7 +70,7 @@ EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock
 ExperimentalAutoDetectBinPacking: false
 PackConstructorInitializers: BinPack
-BasedOnStyle:    ''
+BasedOnStyle:    'Google'
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 AllowAllConstructorInitializersOnNextLine: true
 FixNamespaceComments: false
@@ -103,7 +103,7 @@ IndentGotoLabels: true
 IndentPPDirectives: None
 IndentExternBlock: AfterExternBlock
 IndentRequires:  false
-IndentWidth:     2
+IndentWidth:     4
 IndentWrappedFunctionNames: false
 InsertTrailingCommas: None
 JavaScriptQuotes: Leave
@@ -129,7 +129,7 @@ PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 60
 PenaltyIndentedWhitespace: 0
-PointerAlignment: Right
+PointerAlignment: Left
 PPIndentWidth:   -1
 ReferenceAlignment: Pointer
 ReflowComments:  true
@@ -147,7 +147,7 @@ SpaceBeforeCaseColon: false
 SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
-SpaceBeforeParens: Always
+SpaceBeforeParens: ControlStatements
 SpaceBeforeParensOptions:
   AfterControlStatements: false
   AfterForeachMacros: false
@@ -160,25 +160,25 @@ SpaceAroundPointerQualifiers: Default
 SpaceBeforeRangeBasedForLoopColon: true
 SpaceInEmptyBlock: false
 SpaceInEmptyParentheses: false
-SpacesBeforeTrailingComments: 1
-SpacesInAngles:  Never
+SpacesBeforeTrailingComments: 2
+SpacesInAngles:  false
 SpacesInConditionalStatement: false
-SpacesInContainerLiterals: true
+SpacesInContainerLiterals: false
 SpacesInCStyleCastParentheses: false
 SpacesInLineCommentPrefix:
   Minimum:         1
-  Maximum:         -1
+  Maximum:         1
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 SpaceBeforeSquareBrackets: false
 BitFieldColonSpacing: Both
-Standard:        c++03
+Standard: Cpp11
 StatementAttributeLikeMacros:
   - Q_EMIT
 StatementMacros:
   - Q_UNUSED
   - QT_REQUIRE_VERSION
-TabWidth:        8
+TabWidth:        4
 UseCRLF:         false
 UseTab:          Never
 WhitespaceSensitiveMacros:
