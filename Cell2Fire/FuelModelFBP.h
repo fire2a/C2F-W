@@ -11,6 +11,7 @@
 #if !defined(_FBPHEAD)
 #define _FBPHEAD
 
+#include "Cells.h"
 #include <stdio.h>
 
 float grass(fuel_coefs* ptr, float cur, float isi, float* mu);
