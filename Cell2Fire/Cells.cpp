@@ -26,18 +26,23 @@ using namespace std;
 /**
  * @brief Constructs a Cell object for the wildfire simulation.
  *
- * Initializes the cell's properties, such as its unique identifier, geographical attributes,
- * fuel type, fire status, and other internal parameters used in the simulation.
- * Validates the cell's area and perimeter consistency during initialization.
+ * Initializes the cell's properties, such as its unique identifier,
+ * geographical attributes, fuel type, fire status, and other internal
+ * parameters used in the simulation. Validates the cell's area and perimeter
+ * consistency during initialization.
  *
  * @param _id The unique identifier for the cell (0 to size of landscape - 1).
  * @param _area The area of the cell.
- * @param _coord The coordinates of the cell, represented as a vector of integers.
- * @param _fType The primary fuel type of the cell (0: NonBurnable, 1: Normal, 2: Burnable).
+ * @param _coord The coordinates of the cell, represented as a vector of
+ * integers.
+ * @param _fType The primary fuel type of the cell (0: NonBurnable, 1: Normal,
+ * 2: Burnable).
  * @param _fType2 The secondary fuel type as a descriptive string.
  * @param _perimeter The perimeter of the cell.
- * @param _status The fire status of the cell (0: Available, 1: Burning, 2: Burnt, 3: Harvested, 4: Non Fuel).
- * @param _realId Alternative identifier of the cell (1 to size of the landscape).
+ * @param _status The fire status of the cell (0: Available, 1: Burning, 2:
+ * Burnt, 3: Harvested, 4: Non Fuel).
+ * @param _realId Alternative identifier of the cell (1 to size of the
+ * landscape).
  */
 Cells::Cells(int _id,
              double _area,
@@ -49,7 +54,8 @@ Cells::Cells(int _id,
              int _realId)
 {
     // Global "dictionaries" (vectors) for status and types
-    // Status: 0: "Available", 1: "Burning", 2: "Burnt", 3: "Harvested", 4:"Non Fuel"
+    // Status: 0: "Available", 1: "Burning", 2: "Burnt", 3: "Harvested", 4:"Non
+    // Fuel"
     this->StatusD[0] = "Available";
     this->StatusD[1] = "Burning";
     this->StatusD[2] = "Burnt";
@@ -62,14 +68,16 @@ Cells::Cells(int _id,
     this->FTypeD[2] = "Burnable";
 
     // Initialize fields of the Cell object
-    this->id = _id;  // identifier for programming purposes: goes from 0 to size of landscape-1
+    this->id = _id;  // identifier for programming purposes: goes from 0 to size
+                     // of landscape-1
     this->area = _area;
     this->coord = _coord;
     this->fType = _fType;
     this->fType2 = _fType2;
     this->perimeter = _perimeter;
     this->status = _status;
-    this->realId = _realId;  // real identifier of the landscape (goes from 1 to the size of the landscape)
+    this->realId = _realId;  // real identifier of the landscape (goes from 1 to
+                             // the size of the landscape)
     this->_ctr2ctrdist = std::sqrt(this->area);
 
     if (std::abs(4 * this->_ctr2ctrdist - this->perimeter) > 0.01 * this->perimeter)
@@ -98,12 +106,15 @@ Cells::Cells(int _id,
 /**
  * @brief Initializes fire-related fields for the cell during ignition.
  *
- * Populates the angles and distances to adjacent cells, and initializes the Rate of Spread (ROS) per axis
- * using cell area to compute distances in meters. Initializes the internal dictionaries used for managing
- * fire spread to the cell's neighbors.
+ * Populates the angles and distances to adjacent cells, and initializes the
+ * Rate of Spread (ROS) per axis using cell area to compute distances in
+ * meters. Initializes the internal dictionaries used for managing fire spread
+ * to the cell's neighbors.
  *
- * @param coordCells A 2D vector representing the coordinates of all cells in the landscape.
- * @param availSet A set of available cells that can participate in fire spread.
+ * @param coordCells A 2D vector representing the coordinates of all cells in
+ * the landscape.
+ * @param availSet A set of available cells that can participate in fire
+ * spread.
  * @param cols The number of columns in the grid.
  * @param rows The number of rows in the grid.
  *
@@ -156,7 +167,8 @@ Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,  // TODO:
             this->angleDict[nb] = angle;
             if (availSet.find(nb) != availSet.end())
             {
-                // TODO: cannot be None, replaced None = -1   and ROSAngleDir has a double inside
+                // TODO: cannot be None, replaced None = -1   and ROSAngleDir has
+                // a double inside
                 this->ROSAngleDir[angle] = -1;
             }
             this->angleToNb[angle] = nb;
@@ -169,16 +181,18 @@ Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,  // TODO:
 /**
  * @brief Calculates the neighboring cells in the grid.
  *
- * Returns the indices of the eight neighboring cells (north, south, east, west, northeast, southeast, southwest,
- * northwest) for the cell in a grid defined by the number of rows and columns. If a neighbor does not exist (e.g., out
- * of bounds), it is marked as -1.
+ * Returns the indices of the eight neighboring cells (north, south, east,
+ * west, northeast, southeast, southwest, northwest) for the cell in a grid
+ * defined by the number of rows and columns. If a neighbor does not exist
+ * (e.g., out of bounds), it is marked as -1.
  *
  * @param cell The index of the current cell (1-based index).
  * @param nrows The number of rows in the grid.
  * @param ncols The number of columns in the grid.
  *
- * @return A vector of integers representing the indices of the adjacent cells. Each index corresponds to a neighbor:
- *         {west, east, southwest, southeast, south, northwest, northeast, north}. Missing neighbors are represented by
+ * @return A vector of integers representing the indices of the adjacent cells.
+ * Each index corresponds to a neighbor: {west, east, southwest, southeast,
+ * south, northwest, northeast, north}. Missing neighbors are represented by
  * -1.
  */
 std::vector<int>
@@ -203,21 +217,17 @@ adjacentCells(int cell, int nrows, int ncols)
 }
 
 /*
-    New functions for calculating the ROS based on the fire angles
-    Distribute the rate of spread (ROS,ros) to the axes given in the AngleList.
-    All angles are w.t.r. E-W with East positive and in non-negative degrees.
-    Inputs:
-            thetafire: direction of "forward"
-            forward : forward ROS
-            flank: ROS normal to forward (on both sides)
-            back: ROS in the opposide direction of forward
-            AngleList: List of angles for the axes connecting centers
-                       of interest (might have less than 8 angles)
-    Effect:
-            Populate the ROSAngleDir, whose indexes are the angles,
-            with ROS values.
+        New functions for calculating the ROS based on the fire angles
+        Distribute the rate of spread (ROS,ros) to the axes given in the
+   AngleList. All angles are w.t.r. E-W with East positive and in non-negative
+   degrees. Inputs: thetafire: direction of "forward" forward : forward ROS
+                        flank: ROS normal to forward (on both sides)
+                        back: ROS in the opposide direction of forward
+                        AngleList: List of angles for the axes connecting
+   centers of interest (might have less than 8 angles) Effect: Populate the
+   ROSAngleDir, whose indexes are the angles, with ROS values.
 
-    Returns       void
+        Returns       void
  */
 /**
  *
@@ -258,16 +268,19 @@ Cells::ros_distr_old(double thetafire, double forward, double flank, double back
 }
 
 /**
- * @brief Calculates the radial distance for a given angle in an ellipse defined by its semi-major and semi-minor axes.
+ * @brief Calculates the radial distance for a given angle in an ellipse
+ * defined by its semi-major and semi-minor axes.
  *
- * Computes the distance from the center of an ellipse to its perimeter at a specified angle using the polar equation
- * of an ellipse. The semi-major axis (`a`) and semi-minor axis (`b`) define the ellipse's geometry.
+ * Computes the distance from the center of an ellipse to its perimeter at a
+ * specified angle using the polar equation of an ellipse. The semi-major axis
+ * (`a`) and semi-minor axis (`b`) define the ellipse's geometry.
  *
  * @param theta The angle (in degrees) from the ellipse's major axis.
  * @param a The length of the semi-major axis of the ellipse.
  * @param b The length of the semi-minor axis of the ellipse.
  *
- * @return The radial distance from the ellipse's center to its perimeter at the given angle.
+ * @return The radial distance from the ellipse's center to its perimeter at
+ * the given angle.
  */
 double
 Cells::rhoTheta(double theta, double a, double b)
@@ -341,11 +354,13 @@ Cells::ros_distr(double thetafire, double forward, double flank, double back, do
 }
 
 /**
- * @brief Distributes the Rate of Spread (ROS) across the cell's neighbors based on fire direction and ellipse geometry.
+ * @brief Distributes the Rate of Spread (ROS) across the cell's neighbors
+ * based on fire direction and ellipse geometry.
  *
- * Updates the ROS for each neighbor in the `ROSAngleDir` dictionary using an elliptical model. The ROS is scaled by
- * the elliptical geometry parameters and a factor (`EFactor`), with adjustments based on the
- * fire's heading direction.
+ * Updates the ROS for each neighbor in the `ROSAngleDir` dictionary using an
+ * elliptical model. The ROS is scaled by the elliptical geometry parameters
+ * and a factor (`EFactor`), with adjustments based on the fire's heading
+ * direction.
  *
  * @param thetafire The direction of the fire's spread (in degrees).
  * @param a The semi-major axis of the ellipse representing fire spread.
@@ -403,34 +418,47 @@ Cells::slope_effect(float elev_i, float elev_j, int cellsize)
 /**
  * @brief Manage's the cell's response to being reached by fire.
  *
- * Calculates fire dynamics such as rate of spread (ROS), intensity, flame length, and other metrics based
- * on the simulation's parameters and environmental inputs. It determines if the cell begins to spread fire,
- * if so, messages are sent to neighboring cells. It also logs fire metrics for further analysis.
+ * Calculates fire dynamics such as rate of spread (ROS), intensity, flame
+ * length, and other metrics based on the simulation's parameters and
+ * environmental inputs. It determines if the cell begins to spread fire, if
+ * so, messages are sent to neighboring cells. It also logs fire metrics for
+ * further analysis.
  *
  * @param period Current simulation period or timestep.
- * @param AvailSet A set of available cells in the simulation (unused in this function, included for compatibility).
+ * @param AvailSet A set of available cells in the simulation (unused in this
+ * function, included for compatibility).
  * @param df_ptr Array containing cell-specific environmental and fuel data.
- * @param coef Pointer to a structure containing fuel coefficients used in ROS calculations.
+ * @param coef Pointer to a structure containing fuel coefficients used in ROS
+ * calculations.
  * @param coordCells A vector of coordinate mappings for the cells.
- * @param Cells_Obj A mapping of cell IDs to their corresponding `Cells` objects.
- * @param args Pointer to a structure containing global simulation arguments and configurations.
- * @param wdf_ptr Pointer to the weather data structure containing wind speed, direction, and other weather variables.
- * @param FSCell A vector to store fire spread information, including source cell, target cell, period, and ROS values.
- * @param crownMetrics A vector to store metrics related to crown fire behavior.
- * @param activeCrown A boolean reference indicating whether crown fire activity is ongoing.
- * @param randomROS A random value applied to ROS calculations when stochasticity is enabled.
+ * @param Cells_Obj A mapping of cell IDs to their corresponding `Cells`
+ * objects.
+ * @param args Pointer to a structure containing global simulation arguments
+ * and configurations.
+ * @param wdf_ptr Pointer to the weather data structure containing wind speed,
+ * direction, and other weather variables.
+ * @param FSCell A vector to store fire spread information, including source
+ * cell, target cell, period, and ROS values.
+ * @param crownMetrics A vector to store metrics related to crown fire
+ * behavior.
+ * @param activeCrown A boolean reference indicating whether crown fire
+ * activity is ongoing.
+ * @param randomROS A random value applied to ROS calculations when
+ * stochasticity is enabled.
  * @param perimeterCells Cell size, perimeter of a cell.
  * @param crownState A vector tracking the crown fire state of each cell.
- * @param crownFraction A vector tracking the fraction of fire in the crown layer for each cell.
- * @param surfFraction A vector tracking the fraction of fire in the surface layer for each cell.
+ * @param crownFraction A vector tracking the fraction of fire in the crown
+ * layer for each cell.
+ * @param surfFraction A vector tracking the fraction of fire in the surface
+ * layer for each cell.
  * @param Intensities A vector tracking the fire intensity for each cell.
  * @param RateOfSpreads A vector tracking the rate of spread for each cell.
  * @param FlameLengths A vector tracking the flame length for each cell.
  * @param CrownFlameLengths A vector tracking the crownfire flame length for each cell.
  * @param CrownIntensities A vector tracking the crown fire intensity for each cell.
  *
- * @return A vector of integers representing the list of neighboring cells that should receive a message indicating fire
- * has reached them.
+ * @return A vector of integers representing the list of neighboring cells that
+ * should receive a message indicating fire has reached them.
  */
 
 std::vector<int>
@@ -475,8 +503,10 @@ Cells::manageFire(int period,
     int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
-        head_cell = this->realId;  // as it is used only for slope calculation, if it is a boundary cell, it uses the
-                                   // same cell, so it uses a no slope scenario
+        head_cell = this->realId;  // as it is used only for slope calculation, if
+                                   // it is a boundary cell, it uses the
+                                   // same
+                                   // cell, so it uses a no slope scenario
     }
     // Compute main angle and ROSs: forward, flanks and back
     main_outs mainstruct = {};
@@ -592,7 +622,8 @@ Cells::manageFire(int period,
         std::cout << "Std Normal RV for Stochastic ROS CV: " << ROSRV << std::endl;
     }
 
-    // If cell cannot send (thresholds), then it will be burned out in the main loop
+    // If cell cannot send (thresholds), then it will be burned out in the main
+    // loop
     double HROS = (1 + args->ROSCV * ROSRV) * headstruct.ros * args->HFactor;
 
     // Extra debug step for sanity checks
@@ -615,13 +646,13 @@ Cells::manageFire(int period,
         }
 
         // ROS distribution method
-        // ros_distr(mainstruct.raz,  headstruct.ros, flankstruct.ros, backstruct.ros);
-        // std::cout << "Entra a Ros Dist" << std::endl;
+        // ros_distr(mainstruct.raz,  headstruct.ros, flankstruct.ros,
+        // backstruct.ros); std::cout << "Entra a Ros Dist" << std::endl;
         /*ros_distr(cartesianAngle,
-                      headstruct.ros * args->HFactor,
-                      flankstruct.ros * args->FFactor,
-                      backstruct.ros * args->BFactor,
-                      args->EFactor);
+                                  headstruct.ros * args->HFactor,
+                                  flankstruct.ros * args->FFactor,
+                                  backstruct.ros * args->BFactor,
+                                  args->EFactor);
         */
         ros_distr_V2(cartesianAngle,
                      mainstruct.a * args->HFactor,
@@ -664,7 +695,8 @@ Cells::manageFire(int period,
             else
                 this->fireProgress[nb] += ros * args->FirePeriodLen;
 
-            // If the message arrives to the adjacent cell's center, send a message
+            // If the message arrives to the adjacent cell's center, send a
+            // message
             if (this->fireProgress[nb] >= this->distToCenter[nb])
             {
                 msg_list.push_back(nb);
@@ -707,11 +739,11 @@ Cells::manageFire(int period,
                 CrownIntensities[this->realId - 1] = mainstruct.crown_intensity;
                 CrownIntensities[nb - 1] = metrics.crown_intensity;
 
-                // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
-                // toPop.push_back(angle);
+                // cannot mutate ROSangleDir during iteration.. we do it like 10
+                // lines down toPop.push_back(angle);
                 /*if (verbose) {
-                    //fill out this verbose section
-                    std::cout << "MSG list" << msg_list << std::endl;
+                        //fill out this verbose section
+                        std::cout << "MSG list" << msg_list << std::endl;
                 }*/
             }
 
@@ -720,7 +752,8 @@ Cells::manageFire(int period,
             {
                 if (args->verbose)
                 {
-                    std::cout << "A Repeat = TRUE flag is sent in order to continue with the current fire....."
+                    std::cout << "A Repeat = TRUE flag is sent in order to "
+                                 "continue with the current fire....."
                               << std::endl;
                     std::cout << "Main workaround of the new sim logic....." << std::endl;
                 }
@@ -739,7 +772,8 @@ Cells::manageFire(int period,
         }
     }
 
-    // If original is empty (no messages but fire is alive if aux_list is not empty)
+    // If original is empty (no messages but fire is alive if aux_list is not
+    // empty)
     if (msg_list.size() == 0)
     {
         if (msg_list_aux[0] == -100)
@@ -755,14 +789,16 @@ Cells::manageFire(int period,
 
     if (args->verbose)
     {
-        std::cout << " ----------------- End of new manageFire function -----------------" << std::endl;
+        std::cout << " ----------------- End of new manageFire function "
+                     "-----------------"
+                  << std::endl;
     }
     return msg_list;
 }
 
 /**
 
-    Manage fire for BBO tuning version
+        Manage fire for BBO tuning version
 
 */
 
@@ -811,8 +847,9 @@ Cells::manageFireBBO(int period,
     int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
-        head_cell = this->realId;  // as it is used only for slope calculation, if it is a boundary cell, it uses the
-                                   // same cell, so it uses a no slope scenario
+        head_cell = this->realId;  // as it is used only for slope calculation, if
+                                   // it is a boundary cell, it uses the same
+                                   // cell, so it uses a no slope scenario
     }
     // Calculate parameters
 
@@ -919,7 +956,8 @@ Cells::manageFireBBO(int period,
         std::cout << "Std Normal RV for Stochastic ROS CV: " << ROSRV << std::endl;
     }
 
-    // If cell cannot send (thresholds), then it will be burned out in the main loop
+    // If cell cannot send (thresholds), then it will be burned out in the main
+    // loop
     double HROS = (1 + args->ROSCV * ROSRV) * headstruct.ros * EllipseFactors[0];
 
     // Extra debug step for sanity checks
@@ -942,13 +980,13 @@ Cells::manageFireBBO(int period,
         }
 
         // ROS distribution method
-        // ros_distr(mainstruct.raz,  headstruct.ros, flankstruct.ros, backstruct.ros);
-        // std::cout << "Entra a Ros Dist" << std::endl;
+        // ros_distr(mainstruct.raz,  headstruct.ros, flankstruct.ros,
+        // backstruct.ros); std::cout << "Entra a Ros Dist" << std::endl;
         /*ros_distr(cartesianAngle,
-                      headstruct.ros * EllipseFactors[0],
-                      flankstruct.ros * EllipseFactors[1],
-                      backstruct.ros * EllipseFactors[2],
-                      EllipseFactors[3]);
+                                  headstruct.ros * EllipseFactors[0],
+                                  flankstruct.ros * EllipseFactors[1],
+                                  backstruct.ros * EllipseFactors[2],
+                                  EllipseFactors[3]);
         */
         ros_distr_V2(cartesianAngle,
                      mainstruct.a * EllipseFactors[0],
@@ -975,7 +1013,8 @@ Cells::manageFireBBO(int period,
             // Workaround PeriodLen in 60 minutes
             this->fireProgress[nb] += ros * args->FirePeriodLen;  // Updates fire progress
 
-            // If the message arrives to the adjacent cell's center, send a message
+            // If the message arrives to the adjacent cell's center, send a
+            // message
             if (this->fireProgress[nb] >= this->distToCenter[nb])
             {
                 msg_list.push_back(nb);
@@ -1007,11 +1046,11 @@ Cells::manageFireBBO(int period,
                 surfFraction[nb] = metrics.sfc;
                 FlameLengths[this->realId - 1] = mainstruct.fl;
                 FlameLengths[nb - 1] = metrics.fl;
-                // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
-                // toPop.push_back(angle);
+                // cannot mutate ROSangleDir during iteration.. we do it like 10
+                // lines down toPop.push_back(angle);
                 /*if (verbose) {
-                    //fill out this verbose section
-                    std::cout << "MSG list" << msg_list << std::endl;
+                        //fill out this verbose section
+                        std::cout << "MSG list" << msg_list << std::endl;
                 }*/
             }
 
@@ -1020,7 +1059,8 @@ Cells::manageFireBBO(int period,
             {
                 if (args->verbose)
                 {
-                    std::cout << "A Repeat = TRUE flag is sent in order to continue with the current fire....."
+                    std::cout << "A Repeat = TRUE flag is sent in order to "
+                                 "continue with the current fire....."
                               << std::endl;
                     std::cout << "Main workaround of the new sim logic....." << std::endl;
                 }
@@ -1039,7 +1079,8 @@ Cells::manageFireBBO(int period,
         }
     }
 
-    // If original is empty (no messages but fire is alive if aux_list is not empty)
+    // If original is empty (no messages but fire is alive if aux_list is not
+    // empty)
     if (msg_list.size() == 0)
     {
         if (msg_list_aux[0] == -100)
@@ -1055,7 +1096,9 @@ Cells::manageFireBBO(int period,
 
     if (args->verbose)
     {
-        std::cout << " ----------------- End of new manageFire function -----------------" << std::endl;
+        std::cout << " ----------------- End of new manageFire function "
+                     "-----------------"
+                  << std::endl;
     }
     return msg_list;
 }
@@ -1071,13 +1114,17 @@ Cells::manageFireBBO(int period,
  * @param NMsg        Current simulation year.
  * @param season      int
  * @param df Array containing cell-specific environmental and fuel data.
- * @param coef Pointer to a structure containing fuel coefficients used in ROS calculations.
- * @param args Pointer to a structure containing global simulation arguments and configurations.
- * The ROS threshold should be stored here with the key "ROSThreshold".
- * @param wdf_ptr Pointer to the weather data structure containing wind speed, direction, and other weather variables.
- * @param activeCrown A boolean reference indicating whether crown fire activity is ongoing.
+ * @param coef Pointer to a structure containing fuel coefficients used in ROS
+ * calculations.
+ * @param args Pointer to a structure containing global simulation arguments
+ * and configurations. The ROS threshold should be stored here with the key
+ * "ROSThreshold".
+ * @param wdf_ptr Pointer to the weather data structure containing wind speed,
+ * direction, and other weather variables.
+ * @param activeCrown A boolean reference indicating whether crown fire
+ * activity is ongoing.
  * @param perimeterCells Cell size, perimeter of a cell.
- */
+*/
 
 bool
 Cells::get_burned(int period,
@@ -1109,8 +1156,9 @@ Cells::get_burned(int period,
     int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
-        head_cell = this->realId;  // as it is used only for slope calculation, if it is a boundary cell, it uses the
-                                   // same cell, so it uses a no slope scenario
+        head_cell = this->realId;  // as it is used only for slope calculation, if
+                                   // it is a boundary cell, it uses the same
+                                   // cell, so it uses a no slope scenario
     }
     // Calculate parameters
     if (args->Simulator == "K")
@@ -1160,18 +1208,20 @@ Cells::get_burned(int period,
 }
 
 /* Old functions
-    Returns            void
+        Returns            void
 
-    Inputs:
-    AdjacentCells      dictionary{string:[array integers]}
+        Inputs:
+        AdjacentCells      dictionary{string:[array integers]}
 */
-// void Cells::set_Adj(std::unordered_map<std::string, int> & adjacentCells) {   // WORKING CHECK OK
+// void Cells::set_Adj(std::unordered_map<std::string, int> & adjacentCells) {
+// // WORKING CHECK OK
 //     // TODO: in python, these are pointers, maybe make these pointers too :P
 //     this->adjacents = adjacentCells;
 // }
 
 /**
- * @brief Sets a cell's fire status (0: Available, 1: Burning, 2: Burnt, 3: Harvested, 4: Non Fuel).
+ * @brief Sets a cell's fire status (0: Available, 1: Burning, 2: Burnt, 3:
+ * Harvested, 4: Non Fuel).
  * @param status_int Code for new status.
  */
 void
@@ -1195,17 +1245,22 @@ Cells::getStatus()
 /**
  * @brief Ignites a cell.
  *
- * Sets the following cell's attributes to represent ignition: status, fireStarts, fireStartsSeason, burnt.
+ * Sets the following cell's attributes to represent ignition: status,
+ * fireStarts, fireStartsSeason, burnt.
  *
  * @param period Current simulation period or timestep.
  * @param df_ptr Array containing cell-specific environmental and fuel data.
- * @param coef Pointer to a structure containing fuel coefficients used in ROS calculations.
+ * @param coef Pointer to a structure containing fuel coefficients used in ROS
+ * calculations.
  * @param year Current simulation year
  * @param ignitionPoints Vector with ignition point.
- * @param args Pointer to a structure containing global simulation arguments and configurations.
- * The ROS threshold should be stored here with the key "ROSThreshold".
- * @param wdf_ptr Pointer to the weather data structure containing wind speed, direction, and other weather variables.
- * @param activeCrown A boolean reference indicating whether crown fire activity is ongoing.
+ * @param args Pointer to a structure containing global simulation arguments
+ * and configurations. The ROS threshold should be stored here with the key
+ * "ROSThreshold".
+ * @param wdf_ptr Pointer to the weather data structure containing wind speed,
+ * direction, and other weather variables.
+ * @param activeCrown A boolean reference indicating whether crown fire
+ * activity is ongoing.
  * @param perimeterCells size of a cell.
  *
  *
@@ -1242,8 +1297,8 @@ Cells::ignition(int period,
         fire_struc headstruct, backstruct, flankstruct;
 
         // printf("\nWeather inside ignition:\n");
-        // std::cout << "waz: " << wdf_ptr->waz << "  ffmc: " <<    wdf_ptr->ffmc << "  bui: " <<   wdf_ptr->bui <<
-        // std::endl;
+        // std::cout << "waz: " << wdf_ptr->waz << "  ffmc: " <<    wdf_ptr->ffmc
+        // << "  bui: " <<   wdf_ptr->bui << std::endl;
 
         // Populate inputs
         df_ptr->waz = wdf_ptr->waz;
@@ -1253,8 +1308,9 @@ Cells::ignition(int period,
         int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
         if (head_cell <= 0)                       // solve boundaries case
         {
-            head_cell = this->realId;  // as it is used only for slope calculation, if it is a boundary cell, it uses
-                                       // the same cell, so it uses a no slope scenario
+            head_cell = this->realId;  // as it is used only for slope calculation, if
+                                       // it is a boundary cell, it uses the same cell,
+                                       // so it uses a no slope scenario
         }
         // Calculate parameters
         if (args->Simulator == "K")
@@ -1319,10 +1375,10 @@ Cells::ignition(int period,
 }
 
 /*
-    Returns      void
-    Inputs
-    ID           int
-    period       int
+        Returns      void
+        Inputs
+        ID           int
+        period       int
 */
 void
 Cells::harvested(int id, int period)
@@ -1333,7 +1389,7 @@ Cells::harvested(int id, int period)
 }
 
 /*
-    Returns      void
+        Returns      void
 */
 void
 Cells::print_info()

@@ -21,14 +21,15 @@ std::vector<int> adjacentCells(int cell, int nrows, int ncols);
 typedef struct
 {
     float ws, waz, rh, tmp, apcp, ffmc, dmc, dc, isi, bui,
-        fwi;  // David: some variables only used on C2FK and not on C2FSB and viceversa
+        fwi;  // David: some variables only used on C2FK and not on C2FSB and
+              // viceversa
 } weatherDF;  // David: Moved here to simplify inclusion
 
 typedef struct
 {
     char fueltype[4];
     float ws, saz, cur, ps, cbh, ccf, cbd, elev, tmp, rh, lat, lon, ffmc, bui, gfl,
-        height;  // David: some variables only used on C2FK and not on C2FSB and viceversa
+        height;  // David: some variables only used on C2FK and not on C2FSB and// viceversa
     int waz, nftype, FMC, time, pattern, mon, jd, jd_min, pc, pdf;
 } inputs;  // David: Moved here to simplify inclusion
 
@@ -76,7 +77,8 @@ class Cells
 
     std::string fType2;
     std::vector<int> coord;  // maybe change this into a tuple or class	CP: 2-tuple (int)
-    // std::unordered_map<std::string, int> adjacents; // CP: dictionary {string: [int array]}
+    // std::unordered_map<std::string, int> adjacents; // CP: dictionary {string:
+    // [int array]}
 
     string FTypeD[3];
     string StatusD[5];
@@ -94,8 +96,9 @@ class Cells
     std::unordered_map<int, std::vector<int>> gMsgListSeason;
     std::unordered_map<int, double> fireProgress;  // CP: dictionary {int: double}
     std::unordered_map<int, double> angleDict;     // CP: dictionary {int: double}
-    std::unordered_map<int, double> ROSAngleDir;   // CP: dictionary {int: double|None}   Instead of None we can use a
-                                                   // determined number like -9999 = None  TODO: maybe int : double
+    std::unordered_map<int, double> ROSAngleDir;   // CP: dictionary {int: double|None}   Instead of None we
+                                                   // can use a determined number like -9999 = None  TODO:
+                                                   // maybe int : double
     std::unordered_map<int, double> distToCenter;  // CP: dictionary {int: double}
     std::unordered_map<int, int> angleToNb;        // CP: dictionary {double: int}
 

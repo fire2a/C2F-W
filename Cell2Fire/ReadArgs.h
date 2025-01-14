@@ -26,11 +26,11 @@ typedef struct {
   std::unordered_set<int> HCells, BCells;
 } arguments;
 
-char *getCmdOption(char **begin, char **end, const std::string &option);
+char* getCmdOption(char** begin, char** end, const std::string& option);
 
-bool cmdOptionExists(char **begin, char **end, const std::string &option);
+bool cmdOptionExists(char** begin, char** end, const std::string& option);
 
-void parseArgs(int argc, char *argv[], arguments *args_ptr);
+void parseArgs(int argc, char* argv[], arguments* args_ptr);
 
 void printArgs(arguments args);
 

@@ -27,7 +27,8 @@ separator()
 #endif
 }
 
-// Reads fbp_lookup_table.csv and creates dictionaries for the fuel types and cells' ColorsDict
+// Reads fbp_lookup_table.csv and creates dictionaries for the fuel types and
+// cells' ColorsDict
 std::tuple<std::unordered_map<std::string, std::string>,
            std::unordered_map<std::string, std::tuple<float, float, float, float>>>
 Dictionary(const std::string& filename)
@@ -268,10 +269,12 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
     Reads fuel data from a .tif
     Args:
        filename (std::string): Name of .tif file.
-       Dictionary (std::unordered_map<std::string, std::string>&): Reference to fuels dictionary
+       Dictionary (std::unordered_map<std::string, std::string>&): Reference to
+    fuels dictionary
 
     Returns:
-        Fuel vectors, number of cells y cell size (tuple[std::vector<int>, std::vector<std::string>)
+        Fuel vectors, number of cells y cell size (tuple[std::vector<int>,
+    std::vector<std::string>)
     */
     // Tries to open file
     std::cout << filename << '\n';
@@ -409,10 +412,12 @@ DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells)
     Reads fuel data from a .tif
     Args:
     filename (std::string): Name of .tif file.
-    Dictionary (std::unordered_map<std::string, std::string>&): Reference to fuels dictionary
+    Dictionary (std::unordered_map<std::string, std::string>&): Reference to
+    fuels dictionary
 
     Returns:
-        Fuel vectors, number of cells y cell size (tuple[std::vector<int>, std::vector<std::string>)
+        Fuel vectors, number of cells y cell size (tuple[std::vector<int>,
+    std::vector<std::string>)
     */
     // Tries to open file
     std::cout << filename << '\n';
@@ -602,7 +607,8 @@ GenerateDat(const std::vector<std::string>& GFuelType,
     // Create a vector to store unique_ptr of ~BaseData
     std::vector<std::vector<std::unique_ptr<std::string>>> dataGrids;
     // Dataframe
-    // std::vector<std::vector<boost::any>> DF(GFuelType.size(), std::vector<boost::any>(Columns.size()));
+    // std::vector<std::vector<boost::any>> DF(GFuelType.size(),
+    // std::vector<boost::any>(Columns.size()));
 
     // Populate DF
     for (size_t i = 0; i < GFuelType.size(); ++i)
@@ -903,8 +909,10 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     // Print ColorsDict
     std::cout << "ColorsDict:\n";
     for (const auto& entry : ColorsDict) {
-        std::cout << "  " << entry.first << ": " << std::get<0>(entry.second) << ", "
-                  << std::get<1>(entry.second) << ", " << std::get<2>(entry.second) << ", "
+        std::cout << "  " << entry.first << ": " << std::get<0>(entry.second) <<
+    ", "
+                  << std::get<1>(entry.second) << ", " <<
+    std::get<2>(entry.second) << ", "
                   << std::get<3>(entry.second) << std::endl;
     }
 
@@ -924,7 +932,8 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     std::cout << "\n" << "CellSide:" << CellSide << "\n";
 
     */
-    // FOR DEBUGING ENDS HERE-----------------------------------------------------
+    // FOR DEBUGING ENDS
+    // HERE-----------------------------------------------------
 
     int NCells = GFuelType.size();
 
@@ -992,8 +1001,9 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
             }
             else
             {
-                // Handle the case where the file name doesn't match any condition
-                // std::cout << "Unhandled file: " << name << std::endl;
+                // Handle the case where the file name doesn't match any
+                // condition std::cout << "Unhandled file: " << name <<
+                // std::endl;
             }
         }
         else
