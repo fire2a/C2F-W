@@ -12,18 +12,16 @@
 /*
  *   Args structure
  */
-typedef struct {
-  std::string InFolder, OutFolder, WeatherOpt, HarvestPlan, Simulator;
-  bool OutMessages, OutFl, OutIntensity, OutRos, OutCrown, OutCrownConsumption,
-      OutSurfConsumption, Trajectories, NoOutput, verbose, IgnitionsLog,
-      Ignitions, OutputGrids, FinalGrid, PromTuned, Stats, BBOTuning, AllowCROS,
-      OutCrownFl, OutCrownIntensity;
-  float ROSCV, ROSThreshold, CROSThreshold, HFIThreshold, HFactor, FFactor,
-      BFactor, EFactor, FirePeriodLen;
-  float CBDFactor, CCFFactor, ROS10Factor, CROSActThreshold;
-  int MinutesPerWP, MaxFirePeriods, TotalYears, TotalSims, NWeatherFiles,
-      IgnitionRadius, seed, nthreads, FMC, scenario;
-  std::unordered_set<int> HCells, BCells;
+typedef struct
+{
+    std::string InFolder, OutFolder, WeatherOpt, HarvestPlan, Simulator;
+    bool OutMessages, OutFl, OutIntensity, OutRos, OutCrown, OutCrownConsumption, OutSurfConsumption, Trajectories,
+        NoOutput, verbose, IgnitionsLog, Ignitions, OutputGrids, FinalGrid, PromTuned, Stats, BBOTuning, AllowCROS;
+    float ROSCV, ROSThreshold, CROSThreshold, HFIThreshold, HFactor, FFactor, BFactor, EFactor, FirePeriodLen;
+    float CBDFactor, CCFFactor, ROS10Factor, CROSActThreshold;
+    int MinutesPerWP, MaxFirePeriods, TotalYears, TotalSims, NWeatherFiles, IgnitionRadius, seed, nthreads, FMC,
+        scenario;
+    std::unordered_set<int> HCells, BCells;
 } arguments;
 
 char* getCmdOption(char** begin, char** end, const std::string& option);

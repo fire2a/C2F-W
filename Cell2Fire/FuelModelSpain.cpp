@@ -19,7 +19,7 @@ using namespace std;
 std::unordered_map<int, std::vector<float>> p_coeff;
 std::unordered_map<int, std::vector<float>> q_coeff;
 std::unordered_map<int, std::vector<float>> fm_parameters;
-int16_t HEAT_YIELD = 18000; // unidad kJ/kg
+int16_t HEAT_YIELD = 18000;  // unidad kJ/kg
 
 /**
  *

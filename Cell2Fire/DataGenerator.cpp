@@ -531,8 +531,9 @@ GenerateDat(const std::vector<std::string>& GFuelType,
 {
     // DF columns
     std::vector<std::string> Columns
-        = { "fueltype", "lat", "lon", "elev",   "ws", "waz", "ps",   "saz",  "cur", "cbd", "cbh",     "ccf",   "ftypeN",
-            "fmc",      "py",  "jd",  "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern", "tree_height" };
+        = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",     "ps",         "saz",    "cur",
+            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "py",      "jd",         "jd_min", "pc",
+            "pdf",      "time", "ffmc", "bui",    "gfl", "pattern", "tree_height" };
 
     // GFL dictionary (FBP)
     std::unordered_map<std::string, float> GFLD = { { "C1", 0.75f },
@@ -803,8 +804,9 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
 
     std::ofstream dataFile(InFolder + separator() + "Data.csv");
     std::vector<std::string> Columns
-        = { "fueltype", "lat", "lon", "elev",   "ws", "waz", "ps",   "saz",  "cur", "cbd", "cbh",     "ccf",   "ftypeN",
-            "fmc",      "py",  "jd",  "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern", "tree_height" };
+        = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",     "ps",         "saz",    "cur",
+            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "py",      "jd",         "jd_min", "pc",
+            "pdf",      "time", "ffmc", "bui",    "gfl", "pattern", "tree_height" };
     if (dataFile.is_open())
     {
         // Write header

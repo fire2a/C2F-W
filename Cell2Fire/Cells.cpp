@@ -453,9 +453,10 @@ Cells::slope_effect(float elev_i, float elev_j, int cellsize)
  * layer for each cell.
  * @param Intensities A vector tracking the fire intensity for each cell.
  * @param RateOfSpreads A vector tracking the rate of spread for each cell.
- * @param FlameLengths A vector tracking the flame length for each cell.
+ * @param SurfaceFlameLengths A vector tracking the flame length for each cell.
  * @param CrownFlameLengths A vector tracking the crownfire flame length for each cell.
  * @param CrownIntensities A vector tracking the crown fire intensity for each cell.
+ * @param MaxFlameLengths A vector tracking the maximum between surface and crown flame lengths.
  *
  * @return A vector of integers representing the list of neighboring cells that
  * should receive a message indicating fire has reached them.
@@ -480,9 +481,10 @@ Cells::manageFire(int period,
                   std::vector<float>& surfFraction,
                   std::vector<float>& Intensities,
                   std::vector<float>& RateOfSpreads,
-                  std::vector<float>& FlameLengths,
+                  std::vector<float>& SurfaceFlameLengths,
                   std::vector<float>& CrownFlameLengths,
-                  std::vector<float>& CrownIntensities)
+                  std::vector<float>& CrownIntensities,
+                  std::vector<float>& MaxFlameLengths)
 {
     // Special flag for repetition (False = -99 for the record)
     int repeat = -99;
@@ -732,12 +734,24 @@ Cells::manageFire(int period,
                 crownFraction[nb - 1] = metrics.cfb;
                 surfFraction[this->realId] = mainstruct.sfc;
                 surfFraction[nb] = metrics.sfc;
-                FlameLengths[this->realId - 1] = mainstruct.fl;
-                FlameLengths[nb - 1] = metrics.fl;
+                SurfaceFlameLengths[this->realId - 1] = mainstruct.fl;
+                SurfaceFlameLengths[nb - 1] = metrics.fl;
                 CrownFlameLengths[this->realId - 1] = mainstruct.crown_flame_length;
                 CrownFlameLengths[nb - 1] = metrics.crown_flame_length;
                 CrownIntensities[this->realId - 1] = mainstruct.crown_intensity;
                 CrownIntensities[nb - 1] = metrics.crown_intensity;
+                if (args->AllowCROS)
+                {
+                    float comp_zero = 0;
+                    MaxFlameLengths[this->realId - 1]
+                        = std::max({ mainstruct.crown_flame_length, mainstruct.fl, comp_zero });
+                    MaxFlameLengths[nb - 1] = std::max({ metrics.crown_flame_length, metrics.fl, comp_zero });
+                }
+                else
+                {
+                    MaxFlameLengths[this->realId - 1] = mainstruct.fl;
+                    MaxFlameLengths[nb - 1] = metrics.fl;
+                }
 
                 // cannot mutate ROSangleDir during iteration.. we do it like 10
                 // lines down toPop.push_back(angle);
