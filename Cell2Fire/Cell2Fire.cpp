@@ -256,19 +256,19 @@ Cell2Fire::Cell2Fire(arguments _args)
                       this->nCells);  // iterates from the first element of df, using DF,
                                       // args_ptr and the number of cells
 
-  // Initialize and populate relevant vectors
-  this->fTypeCells = std::vector<int>(this->nCells, 1);
-  this->fTypeCells2 = std::vector<string>(this->nCells, "Burnable");
-  this->statusCells = std::vector<int>(this->nCells, 0);
-  // Outputs
-  this->crownState = std::vector<int>(this->nCells, 0);
-  this->crownFraction = std::vector<float>(this->nCells, 0);
-  this->surfFraction = std::vector<float>(this->nCells, 0);
-  this->Intensities = std::vector<float>(this->nCells, 0);
-  this->RateOfSpreads = std::vector<float>(this->nCells, 0);
-  this->FlameLengths = std::vector<float>(this->nCells, 0);
-  this->CrownIntensities = std::vector<float>(this->nCells, 0);
-  this->CrownFlameLengths = std::vector<float>(this->nCells, 0);
+    // Initialize and populate relevant vectors
+    this->fTypeCells = std::vector<int>(this->nCells, 1);
+    this->fTypeCells2 = std::vector<string>(this->nCells, "Burnable");
+    this->statusCells = std::vector<int>(this->nCells, 0);
+    // Outputs
+    this->crownState = std::vector<int>(this->nCells, 0);
+    this->crownFraction = std::vector<float>(this->nCells, 0);
+    this->surfFraction = std::vector<float>(this->nCells, 0);
+    this->Intensities = std::vector<float>(this->nCells, 0);
+    this->RateOfSpreads = std::vector<float>(this->nCells, 0);
+    this->FlameLengths = std::vector<float>(this->nCells, 0);
+    this->CrownIntensities = std::vector<float>(this->nCells, 0);
+    this->CrownFlameLengths = std::vector<float>(this->nCells, 0);
 
     this->ignProb = std::vector<float>(this->nCells, 1);
     CSVParser.parsePROB(this->ignProb, DF, this->nCells);
@@ -623,116 +623,123 @@ Cell2Fire::InitCell(int id)
  * @param simExt Simulation extension identifier (default: 1).
  *
  */
-void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
-  {// Reset info
-  // DEBUGstd::cout  << "--------------------- Reseting environment
-  // -----------------------" << std::endl;
+void
+Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
+{  // Reset info
+    // DEBUGstd::cout  << "--------------------- Reseting environment
+    // -----------------------" << std::endl;
 
-  // Aux
-  int i;
+    // Aux
+    int i;
 
-  // Reset global parameters for the simulation
-  this->year = 1;
-  this->weatherPeriod = 0;
-  this->noIgnition = true; // None = -1
-  this->nIgnitions = 0;
-  this->gridNumber = 0;
-  this->activeCrown = false;
-  this->done = false;
-  this->fire_period = vector<int>(this->args.TotalYears, 0);
-  this->sim = simExt;
-  // Initial status grid folder
-  if (this->args.OutputGrids || this->args.FinalGrid)
-    {CSVWriter CSVFolder("", "");
-    this->gridFolder = this->args.OutFolder + "Grids" + separator();
-    CSVFolder.MakeDir(this->gridFolder);
-    this->gridFolder = this->args.OutFolder + "Grids" + separator() + "Grids" +
-                       std::to_string(this->sim) + separator();
-    CSVFolder.MakeDir(this->gridFolder);
-    // DEBUGstd::cout << "\nInitial Grid folder was generated in " <<
-    // this->gridFolder << std::endl;
-  }
+    // Reset global parameters for the simulation
+    this->year = 1;
+    this->weatherPeriod = 0;
+    this->noIgnition = true;  // None = -1
+    this->nIgnitions = 0;
+    this->gridNumber = 0;
+    this->activeCrown = false;
+    this->done = false;
+    this->fire_period = vector<int>(this->args.TotalYears, 0);
+    this->sim = simExt;
+    // Initial status grid folder
+    if (this->args.OutputGrids || this->args.FinalGrid)
+    {
+        CSVWriter CSVFolder("", "");
+        this->gridFolder = this->args.OutFolder + "Grids" + separator();
+        CSVFolder.MakeDir(this->gridFolder);
+        this->gridFolder
+            = this->args.OutFolder + "Grids" + separator() + "Grids" + std::to_string(this->sim) + separator();
+        CSVFolder.MakeDir(this->gridFolder);
+        // DEBUGstd::cout << "\nInitial Grid folder was generated in " <<
+        // this->gridFolder << std::endl;
+    }
 
-  // Messages Folder
-  if (this->args.OutMessages)
-    {CSVWriter CSVFolder("", "");
-    this->messagesFolder = this->args.OutFolder + "Messages";
-    CSVFolder.MakeDir(this->messagesFolder);
-    this->messagesFolder = this->args.OutFolder + "Messages" + separator();
-  }
-  // ROS Folder
-  if (this->args.OutRos)
-    {CSVWriter CSVFolder("", "");
-    this->rosFolder = this->args.OutFolder + "RateOfSpread";
-    CSVFolder.MakeDir(this->rosFolder);
-    this->rosFolder = this->args.OutFolder + "RateOfSpread" + separator();
-  }
-  // Byram Intensity Folder
-  if (this->args.OutIntensity) {
-    CSVWriter CSVFolder("", "");
-    this->intensityFolder = this->args.OutFolder + "Intensity";
-    CSVFolder.MakeDir(this->intensityFolder);
-    this->intensityFolder = this->args.OutFolder + "Intensity" + separator();
-  }
-  // Crown Byram Intensity Folder
-  if ((this->args.OutCrownIntensity) && (this->args.Simulator == "S")) {
-    CSVWriter CSVFolder("", "");
-    this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity";
-    CSVFolder.MakeDir(this->crownIntensityFolder);
-    this->crownIntensityFolder =
-        this->args.OutFolder + "CrownIntensity" + separator();
-  }
-  // Flame Length Folder
-  if (this->args.OutFl) {
-    CSVWriter CSVFolder("", "");
-    this->flFolder = this->args.OutFolder + "FlameLength";
-    CSVFolder.MakeDir(this->flFolder);
-    this->flFolder = this->args.OutFolder + "FlameLength" + separator();
-  }
-  // Crown Flame Length Folder
-  if ((this->args.OutCrownFl) && (this->args.Simulator == "S")) {
-    CSVWriter CSVFolder("", "");
-    this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength";
-    CSVFolder.MakeDir(this->crownFlameLengthFolder);
-    this->crownFlameLengthFolder =
-        this->args.OutFolder + "CrownFlameLength" + separator();
-  }
-  // Crown Folder
-  if (this->args.OutCrown && this->args.AllowCROS)
-    {CSVWriter CSVFolder("", "");
-    this->crownFolder = this->args.OutFolder + "CrownFire";
-    CSVFolder.MakeDir(this->crownFolder);
-    this->crownFolder = this->args.OutFolder + "CrownFire" + separator();
-  }
-  // Crown Fraction Burn Folder
-  if (this->args.OutCrownConsumption && this->args.AllowCROS)
-    {CSVWriter CSVFolder("", "");
-    this->cfbFolder = this->args.OutFolder + "CrownFractionBurn";
-    CSVFolder.MakeDir(this->cfbFolder);
-    this->cfbFolder =
-        this->args.OutFolder + separator() + "CrownFractionBurn" + separator();
-  }
-  // Surf Fraction Burn Folder
-  if (this->args.OutSurfConsumption && this->args.Simulator == "C")
-    {CSVWriter CSVFolder("", "");
-    this->sfbFolder = this->args.OutFolder + "SurfFractionBurn";
-    CSVFolder.MakeDir(this->sfbFolder);
-    this->sfbFolder =
-        this->args.OutFolder + separator() + "SurfFractionBurn" + separator();
-  }
+    // Messages Folder
+    if (this->args.OutMessages)
+    {
+        CSVWriter CSVFolder("", "");
+        this->messagesFolder = this->args.OutFolder + "Messages";
+        CSVFolder.MakeDir(this->messagesFolder);
+        this->messagesFolder = this->args.OutFolder + "Messages" + separator();
+    }
+    // ROS Folder
+    if (this->args.OutRos)
+    {
+        CSVWriter CSVFolder("", "");
+        this->rosFolder = this->args.OutFolder + "RateOfSpread";
+        CSVFolder.MakeDir(this->rosFolder);
+        this->rosFolder = this->args.OutFolder + "RateOfSpread" + separator();
+    }
+    // Byram Intensity Folder
+    if (this->args.OutIntensity)
+    {
+        CSVWriter CSVFolder("", "");
+        this->intensityFolder = this->args.OutFolder + "Intensity";
+        CSVFolder.MakeDir(this->intensityFolder);
+        this->intensityFolder = this->args.OutFolder + "Intensity" + separator();
+    }
+    // Crown Byram Intensity Folder
+    if ((this->args.OutCrownIntensity) && (this->args.Simulator == "S"))
+    {
+        CSVWriter CSVFolder("", "");
+        this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity";
+        CSVFolder.MakeDir(this->crownIntensityFolder);
+        this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
+    }
+    // Flame Length Folder
+    if (this->args.OutFl)
+    {
+        CSVWriter CSVFolder("", "");
+        this->flFolder = this->args.OutFolder + "FlameLength";
+        CSVFolder.MakeDir(this->flFolder);
+        this->flFolder = this->args.OutFolder + "FlameLength" + separator();
+    }
+    // Crown Flame Length Folder
+    if ((this->args.OutCrownFl) && (this->args.Simulator == "S"))
+    {
+        CSVWriter CSVFolder("", "");
+        this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength";
+        CSVFolder.MakeDir(this->crownFlameLengthFolder);
+        this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
+    }
+    // Crown Folder
+    if (this->args.OutCrown && this->args.AllowCROS)
+    {
+        CSVWriter CSVFolder("", "");
+        this->crownFolder = this->args.OutFolder + "CrownFire";
+        CSVFolder.MakeDir(this->crownFolder);
+        this->crownFolder = this->args.OutFolder + "CrownFire" + separator();
+    }
+    // Crown Fraction Burn Folder
+    if (this->args.OutCrownConsumption && this->args.AllowCROS)
+    {
+        CSVWriter CSVFolder("", "");
+        this->cfbFolder = this->args.OutFolder + "CrownFractionBurn";
+        CSVFolder.MakeDir(this->cfbFolder);
+        this->cfbFolder = this->args.OutFolder + separator() + "CrownFractionBurn" + separator();
+    }
+    // Surf Fraction Burn Folder
+    if (this->args.OutSurfConsumption && this->args.Simulator == "C")
+    {
+        CSVWriter CSVFolder("", "");
+        this->sfbFolder = this->args.OutFolder + "SurfFractionBurn";
+        CSVFolder.MakeDir(this->sfbFolder);
+        this->sfbFolder = this->args.OutFolder + separator() + "SurfFractionBurn" + separator();
+    }
 
-  // Random Weather
-  /*std::cout << "Weather Option:" << this->args.WeatherOpt << std::endl;
-  std::cout << "Weather Option random check:" <<
-  (this->args.WeatherOpt.compare("random") == 0) << std::endl; std::cout <<
-  "Weather Option rows check:" << (this->args.WeatherOpt.compare("rows") == 0)
-  << std::endl;
-  */
+    // Random Weather
+    /*std::cout << "Weather Option:" << this->args.WeatherOpt << std::endl;
+    std::cout << "Weather Option random check:" <<
+    (this->args.WeatherOpt.compare("random") == 0) << std::endl; std::cout <<
+    "Weather Option rows check:" << (this->args.WeatherOpt.compare("rows") == 0)
+    << std::endl;
+    */
 
-  if (this->args.WeatherOpt.compare("random") == 0)
-    {// Random Weather
-    this->CSVWeather.fileName = this->args.InFolder + "Weathers" + separator() +
-                                "Weather" + std::to_string(rnumber) + ".csv";
+    if (this->args.WeatherOpt.compare("random") == 0)
+    {  // Random Weather
+        this->CSVWeather.fileName
+            = this->args.InFolder + "Weathers" + separator() + "Weather" + std::to_string(rnumber) + ".csv";
 
         /* Weather DataFrame */
         try
@@ -866,41 +873,41 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         // this->args.FirePeriodLen << std::endl; DEBUGstd::cout <<
         // "MaxfirePeriods: " << this->args.MaxFirePeriods << std::endl;
 
-    if (this->args.MaxFirePeriods > maxFP)
-      {this->args.MaxFirePeriods = maxFP;
-      if (this->args.verbose)
-      {
-          std::cout << "Maximum fire periods are set to: "
-                   << this->args.MaxFirePeriods
-                   << " based on the weather file, Fire Period Length, "
-                              "and "
-                      "Minutes per WP"
-                   << std::endl;
-      }
+        if (this->args.MaxFirePeriods > maxFP)
+        {
+            this->args.MaxFirePeriods = maxFP;
+            if (this->args.verbose)
+            {
+                std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
+                          << " based on the weather file, Fire Period Length, "
+                             "and "
+                             "Minutes per WP"
+                          << std::endl;
+            }
+        }
     }
-  }
-  // Random ROS-CV
-  this->ROSRV = std::abs(rnumber2);
-  // std::cout << "ROSRV: " << this->ROSRV << std::endl;
+    // Random ROS-CV
+    this->ROSRV = std::abs(rnumber2);
+    // std::cout << "ROSRV: " << this->ROSRV << std::endl;
 
-  // Cells dictionary
-  this->Cells_Obj.clear();
+    // Cells dictionary
+    this->Cells_Obj.clear();
 
-  // Declare an iterator to unordered_map
-  std::unordered_map<int, Cells>::iterator it;
+    // Declare an iterator to unordered_map
+    std::unordered_map<int, Cells>::iterator it;
 
-  // Reset status
-  this->fTypeCells = std::vector<int>(this->nCells, 1);
-  this->fTypeCells2 = std::vector<string>(this->nCells, "Burnable");
-  this->statusCells = std::vector<int>(this->nCells, 0);
-  this->crownState = std::vector<int>(this->nCells, 0);
-  this->crownFraction = std::vector<float>(this->nCells, 0);
-  this->surfFraction = std::vector<float>(this->nCells, 0);
-  this->Intensities = std::vector<float>(this->nCells, 0);
-  this->CrownIntensities = std::vector<float>(this->nCells, 0);
-  this->RateOfSpreads = std::vector<float>(this->nCells, 0);
-  this->FlameLengths = std::vector<float>(this->nCells, 0);
-  this->CrownFlameLengths = std::vector<float>(this->nCells, 0);
+    // Reset status
+    this->fTypeCells = std::vector<int>(this->nCells, 1);
+    this->fTypeCells2 = std::vector<string>(this->nCells, "Burnable");
+    this->statusCells = std::vector<int>(this->nCells, 0);
+    this->crownState = std::vector<int>(this->nCells, 0);
+    this->crownFraction = std::vector<float>(this->nCells, 0);
+    this->surfFraction = std::vector<float>(this->nCells, 0);
+    this->Intensities = std::vector<float>(this->nCells, 0);
+    this->CrownIntensities = std::vector<float>(this->nCells, 0);
+    this->RateOfSpreads = std::vector<float>(this->nCells, 0);
+    this->FlameLengths = std::vector<float>(this->nCells, 0);
+    this->CrownFlameLengths = std::vector<float>(this->nCells, 0);
 
     this->FSCell.clear();
     this->crownMetrics.clear();  // intensity and crown
@@ -1390,7 +1397,9 @@ Cell2Fire::SendMessages()
                                                  this->surfFraction,
                                                  this->Intensities,
                                                  this->RateOfSpreads,
-                                                 this->FlameLengths);
+                                                 this->FlameLengths,
+                                                 this->CrownFlameLengths,
+                                                 this->CrownIntensities);
             }
 
             else
@@ -1932,71 +1941,67 @@ Cell2Fire::Results()
         oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
         intensityName = this->intensityFolder + "Intensity" + oss.str() + ".asc";
 
-    if (this->args.verbose)
-      {std::cout << "We are generating the Byram Intensity to a asc file "
-                << intensityName << std::endl;
+        if (this->args.verbose)
+        {
+            std::cout << "We are generating the Byram Intensity to a asc file " << intensityName << std::endl;
+        }
+        CSVWriter CSVPloter(intensityName, " ");
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->Intensities);
     }
-    CSVWriter CSVPloter(intensityName, " ");
-    CSVPloter.printASCII(this->rows, this->cols, this->xllcorner,
-                         this->yllcorner, this->cellSide, this->Intensities);
-  }
 
-  // Crown Intensity
-  if ((this->args.OutCrownIntensity) && (this->args.Simulator == "S")) {
-    this->crownIntensityFolder =
-        this->args.OutFolder + "CrownIntensity" + separator();
-    std::string intensityName;
-    std::ostringstream oss;
-    oss.str("");
-    oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-    intensityName =
-        this->crownIntensityFolder + "CrownIntensity" + oss.str() + ".asc";
-    if (this->args.verbose) {
-      std::cout << "We are generating the Crown Intensity to a asc file "
-                << intensityName << std::endl;
+    // Crown Intensity
+    if ((this->args.OutCrownIntensity) && (this->args.Simulator == "S"))
+    {
+        this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
+        std::string intensityName;
+        std::ostringstream oss;
+        oss.str("");
+        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
+        intensityName = this->crownIntensityFolder + "CrownIntensity" + oss.str() + ".asc";
+        if (this->args.verbose)
+        {
+            std::cout << "We are generating the Crown Intensity to a asc file " << intensityName << std::endl;
+        }
+        CSVWriter CSVPloter(intensityName, " ");
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->CrownIntensities);
     }
-    CSVWriter CSVPloter(intensityName, " ");
-    CSVPloter.printASCII(this->rows, this->cols, this->xllcorner,
-                         this->yllcorner, this->cellSide,
-                         this->CrownIntensities);
-  }
 
-  if (this->args.OutFl)
-    {this->flFolder = this->args.OutFolder + "FlameLength" + separator();
-    std::string flName;
-    std::ostringstream oss;
-    oss.str("");
-    oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-    flName = this->flFolder + "FL" + oss.str() + ".asc";
-    if (this->args.verbose)
-      {
-            std::cout << "We are generating the Flame Length to a asc file " << flName
-                << std::endl;
+    if (this->args.OutFl)
+    {
+        this->flFolder = this->args.OutFolder + "FlameLength" + separator();
+        std::string flName;
+        std::ostringstream oss;
+        oss.str("");
+        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
+        flName = this->flFolder + "FL" + oss.str() + ".asc";
+        if (this->args.verbose)
+        {
+            std::cout << "We are generating the Flame Length to a asc file " << flName << std::endl;
+        }
+        CSVWriter CSVPloter(flName, " ");
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->FlameLengths);
     }
-    CSVWriter CSVPloter(flName, " ");
-    CSVPloter.printASCII(this->rows, this->cols, this->xllcorner,
-                         this->yllcorner, this->cellSide, this->FlameLengths);
-  }
 
-  // Crown Flame length
-  if ((this->args.OutCrownFl) && (this->args.Simulator == "S")) {
-    this->crownFlameLengthFolder =
-        this->args.OutFolder + "CrownFlameLength" + separator();
-    std::string fileName;
-    std::ostringstream oss;
-    oss.str("");
-    oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-    fileName =
-        this->crownFlameLengthFolder + "CrownFlameLength" + oss.str() + ".asc";
-    if (this->args.verbose) {
-      std::cout << "We are generating the Crown Flame Length to a asc file "
-                << fileName << std::endl;
+    // Crown Flame length
+    if ((this->args.OutCrownFl) && (this->args.Simulator == "S"))
+    {
+        this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
+        std::string fileName;
+        std::ostringstream oss;
+        oss.str("");
+        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
+        fileName = this->crownFlameLengthFolder + "CrownFlameLength" + oss.str() + ".asc";
+        if (this->args.verbose)
+        {
+            std::cout << "We are generating the Crown Flame Length to a asc file " << fileName << std::endl;
+        }
+        CSVWriter CSVPloter(fileName, " ");
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->CrownFlameLengths);
     }
-    CSVWriter CSVPloter(fileName, " ");
-    CSVPloter.printASCII(this->rows, this->cols, this->xllcorner,
-                         this->yllcorner, this->cellSide,
-                         this->CrownFlameLengths);
-  }
 
     // Intensity
     if ((this->args.OutCrownConsumption) && (this->args.AllowCROS))
