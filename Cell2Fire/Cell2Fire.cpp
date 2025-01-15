@@ -271,6 +271,7 @@ Cell2Fire::Cell2Fire(arguments _args)
     this->crownFlameLengths = std::vector<float>(this->nCells, 0);
     this->maxFlameLengths = std::vector<float>(this->nCells, 0);
 
+
     this->ignProb = std::vector<float>(this->nCells, 1);
     CSVParser.parsePROB(this->ignProb, DF, this->nCells);
 
@@ -626,7 +627,8 @@ Cell2Fire::InitCell(int id)
  */
 void
 Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
-{  // Reset info
+{
+    // Reset info
     // DEBUGstd::cout  << "--------------------- Reseting environment
     // -----------------------" << std::endl;
 
@@ -746,7 +748,8 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     */
 
     if (this->args.WeatherOpt.compare("random") == 0)
-    {  // Random Weather
+    {
+        // Random Weather
         this->CSVWeather.fileName
             = this->args.InFolder + "Weathers" + separator() + "Weather" + std::to_string(rnumber) + ".csv";
 
@@ -889,8 +892,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             {
                 std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
                           << " based on the weather file, Fire Period Length, "
-                             "and "
-                             "Minutes per WP"
+                             "and Minutes per WP"
                           << std::endl;
             }
         }
@@ -937,6 +939,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             this->statusCells[i] = 4;
         }
     }
+
 
     // Relevant sets: Initialization
     this->availCells.clear();

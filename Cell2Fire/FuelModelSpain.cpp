@@ -2364,6 +2364,7 @@ rate_of_spread10(inputs* data, arguments* args)
 
     ws = data->ws;
     ros10 = 1. / (p1 * exp(-p2 * ws * 0.4) + p3);
+
     ros = ffros * ros10 + fccf * data->ccf + fcbd * args->CBDFactor;
 
     return (ros);
@@ -2408,6 +2409,7 @@ crownfractionburn(inputs* data, main_outs* at)
     {
         a = -log(0.1) / (0.9 * (3.0 / cbd - ros0));
         // a=0.23;
+
     }
     else
     {
@@ -2503,8 +2505,9 @@ calculate_s(inputs* data,
     // Step 9: Byram Intensity
     at->sfi = byram_intensity(at, ptr);
 
-    // Step 10: Criterion for Crown Fire Initiation (no init if user does not// want
-    // to include it)
+
+    // Step 10: Criterion for Crown Fire Initiation (no init if user does not
+    // want to include it)
     if (args->AllowCROS && data->cbh != 0 && data->cbd != 0)
     {
         if (activeCrown)
@@ -2549,6 +2552,7 @@ calculate_s(inputs* data,
         at->crown_intensity = crown_byram_intensity(at, data);
         at->crown_flame_length = crown_flame_length(at->crown_intensity);
 
+
         at->a = (hptr->ros + bptr->ros) / 2.;
         at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
         at->c = (hptr->ros - bptr->rss) / 2;
@@ -2557,13 +2561,15 @@ calculate_s(inputs* data,
     }
     else if (activeCrown)
     {
-        at->cfb = crownfractionburn(data, at);  // lo calculamos igual porque lo necesitamos para el output
+        at->cfb = crownfractionburn(data,
+                                    at);  // lo calculamos igual porque lo necesitamos para el output
         hptr->ros = at->ros_active;
         at->rss = hptr->ros;
         bptr->ros = backfire_ros10_s(hptr, sec);
         fptr->ros = flankfire_ros_s(hptr->ros, bptr->ros, sec->lb);
         at->crown_intensity = crown_byram_intensity(at, data);
         at->crown_flame_length = crown_flame_length(at->crown_intensity);
+
 
         if (args->verbose)
         {
@@ -2659,6 +2665,7 @@ determine_destiny_metrics_s(inputs* data, fuel_coefs* ptr, arguments* args, main
             metrics->cfb = crownfractionburn(data, metrics);
             metrics->crown_intensity = crown_byram_intensity(metrics, data);
             metrics->crown_flame_length = crown_flame_length(metrics->crown_intensity);
+
         }
         if (args->verbose)
         {

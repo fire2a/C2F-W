@@ -1017,6 +1017,7 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     // Call GenerateDat function
     std::vector<std::vector<std::unique_ptr<std::string>>> result
         = GenerateDat(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, PY, FMC, TreeHeight, InFolder);
+
     writeDataToFile(result, InFolder);
     std::cout << "File Generated";
 }

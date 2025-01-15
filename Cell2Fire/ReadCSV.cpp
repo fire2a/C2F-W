@@ -212,7 +212,9 @@ CSVReader::printData(std::vector<std::vector<std::string>>& DF)
 }
 
 /*
- * Populates the df input objects based on the DF csv file for each row/cell (spanish version)
+
+ * Populates the df input objects based on the DF csv file for each row/cell
+ * (spanish version)
  */
 void
 CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, arguments* args_ptr, int NCells)
@@ -221,6 +223,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
 
     // Floats
     float cur, elev, ws, waz, saz, cbd, cbh, ccf, ps, lat, lon, ffmc, bui, gfl, tree_height;
+
 
     // Integers
     int nftype, FMC, jd, jd_min, pc, pdf, time, pattern;
@@ -354,6 +357,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
             tree_height = 0;
         else
             tree_height = std::stof(DF[i][24], &sz);
+
 
         // Set values
         strncpy(df_ptr->fueltype, faux, 4);
