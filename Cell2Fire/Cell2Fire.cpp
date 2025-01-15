@@ -681,7 +681,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->surfaceIntensityFolder = this->args.OutFolder + "SurfaceIntensity" + separator();
     }
     // Crown Byram Intensity Folder
-    if ((this->args.OutIntensity) && (this->args.AllowCROS))
+    if ((this->args.OutIntensity) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
         CSVWriter CSVFolder("", "");
         this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity";
@@ -697,7 +697,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->surfaceFlameLengthFolder = this->args.OutFolder + "SurfaceFlameLength" + separator();
     }
     // Crown Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
         CSVWriter CSVFolder("", "");
         this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength";
@@ -705,7 +705,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
     }
     // max Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
         CSVWriter CSVFolder("", "");
         this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength";
@@ -1962,7 +1962,7 @@ Cell2Fire::Results()
     }
 
     // Crown Intensity
-    if ((this->args.OutIntensity) && (this->args.AllowCROS))
+    if ((this->args.OutIntensity) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
         this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
         std::string intensityName;
@@ -1998,7 +1998,7 @@ Cell2Fire::Results()
     }
 
     // Crown Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
         this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
         std::string fileName;
@@ -2016,7 +2016,7 @@ Cell2Fire::Results()
     }
 
     // Max Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
         this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength" + separator();
         std::string fileName;

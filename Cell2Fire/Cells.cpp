@@ -736,16 +736,16 @@ Cells::manageFire(int period,
                 surfFraction[nb] = metrics.sfc;
                 SurfaceFlameLengths[this->realId - 1] = mainstruct.fl;
                 SurfaceFlameLengths[nb - 1] = metrics.fl;
-                CrownFlameLengths[this->realId - 1] = mainstruct.crown_flame_length;
-                CrownFlameLengths[nb - 1] = metrics.crown_flame_length;
-                CrownIntensities[this->realId - 1] = mainstruct.crown_intensity;
-                CrownIntensities[nb - 1] = metrics.crown_intensity;
-                if (args->AllowCROS)
+                if ((args->AllowCROS) && (args->Simulator == "S"))
                 {
                     float comp_zero = 0;
                     MaxFlameLengths[this->realId - 1]
                         = std::max({ mainstruct.crown_flame_length, mainstruct.fl, comp_zero });
                     MaxFlameLengths[nb - 1] = std::max({ metrics.crown_flame_length, metrics.fl, comp_zero });
+                    CrownFlameLengths[this->realId - 1] = mainstruct.crown_flame_length;
+                    CrownFlameLengths[nb - 1] = metrics.crown_flame_length;
+                    CrownIntensities[this->realId - 1] = mainstruct.crown_intensity;
+                    CrownIntensities[nb - 1] = metrics.crown_intensity;
                 }
                 else
                 {
