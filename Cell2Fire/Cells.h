@@ -29,7 +29,7 @@ typedef struct
 {
     char fueltype[4];
     float ws, saz, cur, ps, cbh, ccf, cbd, elev, tmp, rh, lat, lon, ffmc, bui, gfl,
-        height;  // David: some variables only used on C2FK and not on C2FSB and// viceversa
+        tree_height;  // David: some variables only used on C2FK and not on C2FSB and// viceversa
     int waz, nftype, FMC, time, pattern, mon, jd, jd_min, pc, pdf;
 } inputs;  // David: Moved here to simplify inclusion
 

@@ -561,7 +561,7 @@ Cells::manageFire(int period,
         std::cout << "elev: " << df_ptr[this->realId - 1].elev << std::endl;
         std::cout << "cbd: " << df_ptr[this->realId - 1].cbd << std::endl;
         std::cout << "cbh: " << df_ptr[this->realId - 1].cbh << std::endl;
-        // std::cout << "height: " << df_ptr[this->realId - 1].height << std::endl;
+        std::cout << "tree height: " << df_ptr[this->realId - 1].tree_height << std::endl;
         std::cout << "ccf: " << df_ptr[this->realId - 1].ccf << std::endl;
         std::cout << "\n-------Mainout Structure--------" << std::endl;
         std::cout << "rss: " << mainstruct.rss << std::endl;
@@ -1124,7 +1124,7 @@ Cells::manageFireBBO(int period,
  * @param activeCrown A boolean reference indicating whether crown fire
  * activity is ongoing.
  * @param perimeterCells Cell size, perimeter of a cell.
-*/
+ */
 
 bool
 Cells::get_burned(int period,

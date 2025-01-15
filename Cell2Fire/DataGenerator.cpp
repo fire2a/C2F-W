@@ -526,13 +526,13 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             const std::vector<float>& CCF,
             const std::vector<float>& PY,
             const std::vector<float>& FMC,
-            const std::vector<float>& Height,
+            const std::vector<float>& TreeHeight,
             const std::string& InFolder)
 {
     // DF columns
     std::vector<std::string> Columns
         = { "fueltype", "lat", "lon", "elev",   "ws", "waz", "ps",   "saz",  "cur", "cbd", "cbh",     "ccf",   "ftypeN",
-            "fmc",      "py",  "jd",  "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern", "height" };
+            "fmc",      "py",  "jd",  "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern", "tree_height" };
 
     // GFL dictionary (FBP)
     std::unordered_map<std::string, float> GFLD = { { "C1", 0.75f },
@@ -776,15 +776,15 @@ GenerateDat(const std::vector<std::string>& GFuelType,
 
         rowData.emplace_back(std::make_unique<std::string>(""));
 
-        // Height 24
+        // TreeHeight 24
 
-        if (std::isnan(Height[i]))
+        if (std::isnan(TreeHeight[i]))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(Height[i])));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(TreeHeight[i])));
         }
 
         // Add the rowData to dataGrids
@@ -804,7 +804,7 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
     std::ofstream dataFile(InFolder + separator() + "Data.csv");
     std::vector<std::string> Columns
         = { "fueltype", "lat", "lon", "elev",   "ws", "waz", "ps",   "saz",  "cur", "cbd", "cbh",     "ccf",   "ftypeN",
-            "fmc",      "py",  "jd",  "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern", "height" };
+            "fmc",      "py",  "jd",  "jd_min", "pc", "pdf", "time", "ffmc", "bui", "gfl", "pattern", "tree_height" };
     if (dataFile.is_open())
     {
         // Write header
@@ -947,7 +947,7 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     std::vector<float> CCF(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> PY(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> FMC(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> Height(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> TreeHeight(NCells, static_cast<float>(std::nanf("")));
 
     std::vector<std::string> filenames
         = { "elevation" + extension, "saz" + extension, "slope" + extension, "cur" + extension, "cbd" + extension,
@@ -997,7 +997,7 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
             }
             else if (name == "hm.asc")
             {
-                DataGrids(filePath, Height, NCells);
+                DataGrids(filePath, TreeHeight, NCells);
             }
             else
             {
@@ -1014,7 +1014,7 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
 
     // Call GenerateDat function
     std::vector<std::vector<std::unique_ptr<std::string>>> result
-        = GenerateDat(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, PY, FMC, Height, InFolder);
+        = GenerateDat(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, PY, FMC, TreeHeight, InFolder);
     writeDataToFile(result, InFolder);
     std::cout << "File Generated";
 }

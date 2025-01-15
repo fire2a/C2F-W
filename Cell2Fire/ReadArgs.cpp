@@ -85,27 +85,27 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     else
         input_hplan = &empty;
 
-	// Booleans
-	bool out_messages = false;
-	bool out_trajectories = false;
-	bool no_output = false;
-	bool verbose_input = false;
-	bool iplog_input = false;
-	bool input_ignitions = false;
-	bool out_grids = false;
-	bool out_fl=false;
-	bool out_intensity=false;
-	bool out_ros=false;
-	bool out_crown = false;
-	bool out_crown_consumption=false;
-	bool out_surf_consumption=false;
-	bool out_finalgrid = false;
-	bool prom_tuned = false;
-	bool out_stats = false;
-	bool bbo_tuning = false;
-	bool allow_cros = false;
-	bool out_crown_intensity=false;
-	bool out_crown_fl=false;
+    // Booleans
+    bool out_messages = false;
+    bool out_trajectories = false;
+    bool no_output = false;
+    bool verbose_input = false;
+    bool iplog_input = false;
+    bool input_ignitions = false;
+    bool out_grids = false;
+    bool out_fl = false;
+    bool out_intensity = false;
+    bool out_ros = false;
+    bool out_crown = false;
+    bool out_crown_consumption = false;
+    bool out_surf_consumption = false;
+    bool out_finalgrid = false;
+    bool prom_tuned = false;
+    bool out_stats = false;
+    bool bbo_tuning = false;
+    bool allow_cros = false;
+    bool out_crown_intensity = false;
+    bool out_crown_fl = false;
 
     //--out-messages
     if (cmdOptionExists(argv, argv + argc, "--output-messages"))
@@ -114,41 +114,48 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         printf("OutMessages: %d \n", out_messages);
     }
 
-	//--fire-behavior
-	if (cmdOptionExists(argv, argv + argc, "--out-fl")) {
-		out_fl = true;
-		printf("OutFlameLength: %d \n", out_fl);
-	}
-		//--fire-behavior
-	if (cmdOptionExists(argv, argv + argc, "--out-intensity")) {
-		out_intensity = true;
-		printf("OutIntensity: %d \n", out_intensity);
-	}
+    //--fire-behavior
+    if (cmdOptionExists(argv, argv + argc, "--out-fl"))
+    {
+        out_fl = true;
+        printf("OutFlameLength: %d \n", out_fl);
+    }
+    //--fire-behavior
+    if (cmdOptionExists(argv, argv + argc, "--out-intensity"))
+    {
+        out_intensity = true;
+        printf("OutIntensity: %d \n", out_intensity);
+    }
 
-	if (cmdOptionExists(argv, argv + argc, "--out-crown-fl")) {
-		out_crown_fl = true;
-		printf("OutCrownFlameLength: %d \n", out_crown_fl);
-	}
-	//
-	if (cmdOptionExists(argv, argv + argc, "--out-crown-intensity")) {
-		out_crown_intensity = true;
-		printf("OutCrownIntensity: %d \n", out_crown_intensity);
-	}
-		//--fire-behavior
-	if (cmdOptionExists(argv, argv + argc, "--out-ros")) {
-		out_ros = true;
-		printf("OutROS: %d \n", out_ros);
-	}
-			//--fire-behavior
-	if (cmdOptionExists(argv, argv + argc, "--out-crown")) {
-		out_crown = true;
-		printf("OutCrown: %d \n", out_crown);
-	}
-	
-	if (cmdOptionExists(argv, argv + argc, "--out-cfb")) {
-		out_crown_consumption = true;
-		printf("OutCrownConsumption: %d \n", out_crown_consumption);
-	}
+    if (cmdOptionExists(argv, argv + argc, "--out-crown-fl"))
+    {
+        out_crown_fl = true;
+        printf("OutCrownFlameLength: %d \n", out_crown_fl);
+    }
+    //
+    if (cmdOptionExists(argv, argv + argc, "--out-crown-intensity"))
+    {
+        out_crown_intensity = true;
+        printf("OutCrownIntensity: %d \n", out_crown_intensity);
+    }
+    //--fire-behavior
+    if (cmdOptionExists(argv, argv + argc, "--out-ros"))
+    {
+        out_ros = true;
+        printf("OutROS: %d \n", out_ros);
+    }
+    //--fire-behavior
+    if (cmdOptionExists(argv, argv + argc, "--out-crown"))
+    {
+        out_crown = true;
+        printf("OutCrown: %d \n", out_crown);
+    }
+
+    if (cmdOptionExists(argv, argv + argc, "--out-cfb"))
+    {
+        out_crown_consumption = true;
+        printf("OutCrownConsumption: %d \n", out_crown_consumption);
+    }
 
     if (cmdOptionExists(argv, argv + argc, "--out-sfb"))
     {
@@ -587,23 +594,22 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->OutFl = out_fl;
     args_ptr->OutIntensity = out_intensity;
     args_ptr->OutCrownFl = out_crown_fl;
-	args_ptr->OutCrownIntensity = out_crown_intensity;
-	args_ptr->OutRos = out_ros;
-	args_ptr->OutCrown = out_crown;
-	args_ptr->OutCrownConsumption = out_crown_consumption;
-	args_ptr->OutSurfConsumption = out_surf_consumption;
-	args_ptr->Trajectories = out_trajectories;
-	args_ptr->NoOutput = no_output;
-	args_ptr->verbose = verbose_input;
-	args_ptr->IgnitionsLog = iplog_input;
-	args_ptr->Ignitions = input_ignitions;
-	args_ptr->OutputGrids = out_grids;
-	args_ptr->FinalGrid = out_finalgrid;
-	args_ptr->PromTuned = prom_tuned;
-	args_ptr->Stats = out_stats;
-	args_ptr->BBOTuning = bbo_tuning;
-	args_ptr->AllowCROS = allow_cros;
-	
+    args_ptr->OutCrownIntensity = out_crown_intensity;
+    args_ptr->OutRos = out_ros;
+    args_ptr->OutCrown = out_crown;
+    args_ptr->OutCrownConsumption = out_crown_consumption;
+    args_ptr->OutSurfConsumption = out_surf_consumption;
+    args_ptr->Trajectories = out_trajectories;
+    args_ptr->NoOutput = no_output;
+    args_ptr->verbose = verbose_input;
+    args_ptr->IgnitionsLog = iplog_input;
+    args_ptr->Ignitions = input_ignitions;
+    args_ptr->OutputGrids = out_grids;
+    args_ptr->FinalGrid = out_finalgrid;
+    args_ptr->PromTuned = prom_tuned;
+    args_ptr->Stats = out_stats;
+    args_ptr->BBOTuning = bbo_tuning;
+    args_ptr->AllowCROS = allow_cros;
 }
 
 void
@@ -654,8 +660,8 @@ printArgs(arguments args)
     std::cout << "OutFlameLength: " << args.OutFl << std::endl;
     std::cout << "OutIntensity: " << args.OutIntensity << std::endl;
     std::cout << "OutCrownFlameLength: " << args.OutCrownFl << std::endl;
-	std::cout << "OutCrownIntensity: " << args.OutCrownIntensity << std::endl;
-	std::cout << "OutROS: " << args.OutRos << std::endl;
+    std::cout << "OutCrownIntensity: " << args.OutCrownIntensity << std::endl;
+    std::cout << "OutROS: " << args.OutRos << std::endl;
     std::cout << "OutCrown: " << args.OutCrown << std::endl;
     std::cout << "OutCrownConsumption: " << args.OutCrownConsumption << std::endl;
     std::cout << "OutSurfConsumption: " << args.OutSurfConsumption << std::endl;

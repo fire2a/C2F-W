@@ -2259,20 +2259,27 @@ flame_length(inputs* data, fuel_coefs* ptr)
  * @return the flame length
  */
 
-float crown_flame_length(float intensity) {
-  float fl = 0.1 * pow(intensity, 0.5);
-  if (fl < 0.01) {
-    return 0;
-  } else {
-    return std::ceil(fl * 100.0) / 100.0;
-  }
+float
+crown_flame_length(float intensity)
+{
+    float fl = 0.1 * pow(intensity, 0.5);
+    if (fl < 0.01)
+    {
+        return 0;
+    }
+    else
+    {
+        return std::ceil(fl * 100.0) / 100.0;
+    }
 }
 
-float angleFL(inputs *data, fuel_coefs *ptr) {
-  float angle, fl, y, ws;
-  ws = data->ws;
-  fl = flame_length(data, ptr);
-  y = 10.0 / 36.0 * ws;
+float
+angleFL(inputs* data, fuel_coefs* ptr)
+{
+    float angle, fl, y, ws;
+    ws = data->ws;
+    fl = flame_length(data, ptr);
+    y = 10.0 / 36.0 * ws;
 
     angle = atan(2.24 * sqrt(fl / pow(y, 2)));
     return angle;
@@ -2306,15 +2313,16 @@ byram_intensity(main_outs* at, fuel_coefs* ptr)
  * @return Fire intensity.
  */
 
-float crown_byram_intensity(main_outs *at, inputs *data) {
-  float canopy_height = data->height - data->cbh;
-  if (canopy_height < 0) {
-    throw std::runtime_error("Tree height is lower than canopy base height, "
-                             "please provide valid files.");
-  }
-  return std::ceil((HEAT_YIELD / 60) * data->cbd * canopy_height *
-                   at->ros_active * 100.0) /
-         100.0;
+float
+crown_byram_intensity(main_outs* at, inputs* data)
+{
+    float canopy_height = data->tree_height - data->cbh;
+    if (canopy_height < 0)
+    {
+        throw std::runtime_error("Tree height is lower than canopy base height, "
+                                 "please provide valid files.");
+    }
+    return std::ceil((HEAT_YIELD / 60) * data->cbd * canopy_height * at->ros_active * 100.0) / 100.0;
 }
 
 int
@@ -2350,15 +2358,15 @@ rate_of_spread10(inputs* data, arguments* args)
     float p1 = 0.2802, p2 = 0.07786, p3 = 0.01123;
     float ros, ros10, ws, ffros, fcbd, fccf;
 
-  ffros = args->ROS10Factor;
-  fcbd = args->CBDFactor;
-  fccf = args->CCFFactor;
+    ffros = args->ROS10Factor;
+    fcbd = args->CBDFactor;
+    fccf = args->CCFFactor;
 
-  ws = data->ws;
-  ros10 = 1. / (p1 * exp(-p2 * ws * 0.4) + p3);
-  ros = ffros * ros10 + fccf * data->ccf + fcbd * args->CBDFactor;
+    ws = data->ws;
+    ros10 = 1. / (p1 * exp(-p2 * ws * 0.4) + p3);
+    ros = ffros * ros10 + fccf * data->ccf + fcbd * args->CBDFactor;
 
-  return (ros);
+    return (ros);
 }
 
 float
@@ -2432,170 +2440,194 @@ checkActive(inputs* data, main_outs* at)  // En s&b se usa fm10
     return active;
 }
 
-void calculate_s(inputs *data, fuel_coefs *ptr, arguments *args, main_outs *at,
-                 snd_outs *sec, fire_struc *hptr, fire_struc *fptr,
-                 fire_struc *bptr, bool &activeCrown) {
-  // Hack: Initialize coefficients
-  initialize_coeff(args->scenario);
+void
+calculate_s(inputs* data,
+            fuel_coefs* ptr,
+            arguments* args,
+            main_outs* at,
+            snd_outs* sec,
+            fire_struc* hptr,
+            fire_struc* fptr,
+            fire_struc* bptr,
+            bool& activeCrown)
+{
+    // Hack: Initialize coefficients
+    initialize_coeff(args->scenario);
 
-  // Aux
-  float ros, bros, lb, fros;
-  bool crownFire = false;
-  // Populate fuel coefs struct
-  // ptr->fueltype = data->fueltype;
-  if (args->verbose) {
-    std::cout << "Populate fuel types " << std::endl;
-    std::cout << "NfTypes:" << data->nftype << std::endl;
-    std::cout << "scen:" << args->scenario << std::endl;
-  }
-  ptr->p1 = p_coeff[data->nftype][0];
-  ptr->p2 = p_coeff[data->nftype][1];
-  ptr->p3 = p_coeff[data->nftype][2];
-  ptr->q1 = q_coeff[data->nftype][0];
-  ptr->q2 = q_coeff[data->nftype][1];
-  ptr->q3 = q_coeff[data->nftype][2];
-  ptr->nftype = data->nftype;
-
-  // Step 1: Calculate HROS (surface)
-  at->rss = rate_of_spread_s(data, ptr, at);
-  hptr->rss = at->rss;
-
-  // Step 2: Calculate Length-to-breadth
-  sec->lb = l_to_b(data->ws);
-
-  // Step 3: Calculate BROS (surface)
-  bptr->rss = backfire_ros_s(at, sec);
-
-  // Step 4: Calculate central FROS (surface)
-  fptr->rss = flankfire_ros_s(hptr->rss, bptr->rss, sec->lb);
-
-  // Step 5: Ellipse components
-  at->a = (hptr->rss + bptr->rss) / 2.;
-  at->b = (hptr->rss + bptr->rss) / (2. * sec->lb);
-  at->c = (hptr->rss - bptr->rss) / 2.;
-
-  // Step 6: Flame Length
-  at->fl = flame_length(data, ptr);
-
-  // Step 7: Flame angle
-  at->angle = angleFL(data, ptr);
-
-  // Step 8: Flame Height
-  at->fh = flame_height(data, ptr);
-
-  // Step 9: Byram Intensity
-  at->sfi = byram_intensity(at, ptr);
-
-  // Step 10: Criterion for Crown Fire Initiation (no init if user does not// want
-  // to include it)
-  if (args->AllowCROS && data->cbh != 0 && data->cbd != 0) {
-    if (activeCrown) {
-      at->ros_active = rate_of_spread10(data, args);
-      if (!checkActive(data, at)) {
-        activeCrown = false;
-      }
-    } else {
-      crownFire = fire_type(data, at);
-      if (args->verbose) {
-        cout << "Checking crown Fire conditions " << crownFire << "\n";
-      }
-    }
-  } else {
-    crownFire = false;
-    activeCrown = false;
-  }
-
-  // If we have Crown fire, update the ROSs
-  if (crownFire)
-    {at->ros_active = rate_of_spread10(data, args);
-    at->cfb = crownfractionburn(data, at);
-
-    hptr->ros = final_rate_of_spread10(data, at);
-    at->rss = hptr->ros;
-    bptr->ros = backfire_ros10_s(hptr, sec);
-    fptr->ros = flankfire_ros_s(hptr->ros, bptr->ros, sec->lb);
+    // Aux
+    float ros, bros, lb, fros;
+    bool crownFire = false;
+    // Populate fuel coefs struct
+    // ptr->fueltype = data->fueltype;
     if (args->verbose)
-      {cout << "hptr->ros = " << hptr->ros << "\n";
-      cout << "bptr->ros = " << bptr->ros << "\n";
-      cout << "fptr->ros = " << fptr->ros << "\n";
+    {
+        std::cout << "Populate fuel types " << std::endl;
+        std::cout << "NfTypes:" << data->nftype << std::endl;
+        std::cout << "scen:" << args->scenario << std::endl;
     }
-    at->crown_intensity = crown_byram_intensity(at, data);
-    at->crown_flame_length = crown_flame_length(at->crown_intensity);
+    ptr->p1 = p_coeff[data->nftype][0];
+    ptr->p2 = p_coeff[data->nftype][1];
+    ptr->p3 = p_coeff[data->nftype][2];
+    ptr->q1 = q_coeff[data->nftype][0];
+    ptr->q2 = q_coeff[data->nftype][1];
+    ptr->q3 = q_coeff[data->nftype][2];
+    ptr->nftype = data->nftype;
 
-    at->a = (hptr->ros + bptr->ros) / 2.;
-    at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
-    at->c = (hptr->ros - bptr->rss) / 2;
-    at->crown = 1;
-    activeCrown = true;
-  } else if (activeCrown)
-    {at->cfb = crownfractionburn(
-        data, at); // lo calculamos igual porque lo necesitamos para el output
-    hptr->ros = at->ros_active;
-    at->rss = hptr->ros;
-    bptr->ros = backfire_ros10_s(hptr, sec);
-    fptr->ros = flankfire_ros_s(hptr->ros, bptr->ros, sec->lb);
-    at->crown_intensity = crown_byram_intensity(at, data);
-    at->crown_flame_length = crown_flame_length(at->crown_intensity);
+    // Step 1: Calculate HROS (surface)
+    at->rss = rate_of_spread_s(data, ptr, at);
+    hptr->rss = at->rss;
 
-    if (args->verbose) {
-      cout << "hptr->ros = " << hptr->ros << "\n";
-      cout << "bptr->ros = " << bptr->ros << "\n";
-      cout << "fptr->ros = " << fptr->ros << "\n";
+    // Step 2: Calculate Length-to-breadth
+    sec->lb = l_to_b(data->ws);
+
+    // Step 3: Calculate BROS (surface)
+    bptr->rss = backfire_ros_s(at, sec);
+
+    // Step 4: Calculate central FROS (surface)
+    fptr->rss = flankfire_ros_s(hptr->rss, bptr->rss, sec->lb);
+
+    // Step 5: Ellipse components
+    at->a = (hptr->rss + bptr->rss) / 2.;
+    at->b = (hptr->rss + bptr->rss) / (2. * sec->lb);
+    at->c = (hptr->rss - bptr->rss) / 2.;
+
+    // Step 6: Flame Length
+    at->fl = flame_length(data, ptr);
+
+    // Step 7: Flame angle
+    at->angle = angleFL(data, ptr);
+
+    // Step 8: Flame Height
+    at->fh = flame_height(data, ptr);
+
+    // Step 9: Byram Intensity
+    at->sfi = byram_intensity(at, ptr);
+
+    // Step 10: Criterion for Crown Fire Initiation (no init if user does not// want
+    // to include it)
+    if (args->AllowCROS && data->cbh != 0 && data->cbd != 0)
+    {
+        if (activeCrown)
+        {
+            at->ros_active = rate_of_spread10(data, args);
+            if (!checkActive(data, at))
+            {
+                activeCrown = false;
+            }
+        }
+        else
+        {
+            crownFire = fire_type(data, at);
+            if (args->verbose)
+            {
+                cout << "Checking crown Fire conditions " << crownFire << "\n";
+            }
+        }
+    }
+    else
+    {
+        crownFire = false;
+        activeCrown = false;
     }
 
-    at->a = (hptr->ros + bptr->ros) / 2.;
-    at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
-    at->c = (hptr->ros - bptr->rss) / 2;
-    at->crown = 1;
-    // std::cout  << "ros_activo: "  <<hptr->ros <<  std::endl;
-  }
+    // If we have Crown fire, update the ROSs
+    if (crownFire)
+    {
+        at->ros_active = rate_of_spread10(data, args);
+        at->cfb = crownfractionburn(data, at);
 
-  // Otherwise, use the surface values
-  else {
-    at->crown = 0;
-    at->cfb = 0;
-    at->crown_flame_length = 0;
-    at->crown_intensity = 0;
-    hptr->ros = hptr->rss;
-    bptr->ros = bptr->rss;
-    fptr->ros = fptr->rss;
-    if (args->verbose) {
-      cout << "hptr->ros = " << hptr->ros << "\n";
-      cout << "bptr->ros = " << bptr->ros << "\n";
-      cout << "fptr->ros = " << fptr->ros << "\n";
+        hptr->ros = final_rate_of_spread10(data, at);
+        at->rss = hptr->ros;
+        bptr->ros = backfire_ros10_s(hptr, sec);
+        fptr->ros = flankfire_ros_s(hptr->ros, bptr->ros, sec->lb);
+        if (args->verbose)
+        {
+            cout << "hptr->ros = " << hptr->ros << "\n";
+            cout << "bptr->ros = " << bptr->ros << "\n";
+            cout << "fptr->ros = " << fptr->ros << "\n";
+        }
+        at->crown_intensity = crown_byram_intensity(at, data);
+        at->crown_flame_length = crown_flame_length(at->crown_intensity);
+
+        at->a = (hptr->ros + bptr->ros) / 2.;
+        at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
+        at->c = (hptr->ros - bptr->rss) / 2;
+        at->crown = 1;
+        activeCrown = true;
     }
-  }
-  // if (hptr->ros>100){
-  // cout << "hptr->rss = " << hptr->ros << "\n";
+    else if (activeCrown)
+    {
+        at->cfb = crownfractionburn(data, at);  // lo calculamos igual porque lo necesitamos para el output
+        hptr->ros = at->ros_active;
+        at->rss = hptr->ros;
+        bptr->ros = backfire_ros10_s(hptr, sec);
+        fptr->ros = flankfire_ros_s(hptr->ros, bptr->ros, sec->lb);
+        at->crown_intensity = crown_byram_intensity(at, data);
+        at->crown_flame_length = crown_flame_length(at->crown_intensity);
+
+        if (args->verbose)
+        {
+            cout << "hptr->ros = " << hptr->ros << "\n";
+            cout << "bptr->ros = " << bptr->ros << "\n";
+            cout << "fptr->ros = " << fptr->ros << "\n";
+        }
+
+        at->a = (hptr->ros + bptr->ros) / 2.;
+        at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
+        at->c = (hptr->ros - bptr->rss) / 2;
+        at->crown = 1;
+        // std::cout  << "ros_activo: "  <<hptr->ros <<  std::endl;
+    }
+
+    // Otherwise, use the surface values
+    else
+    {
+        at->crown = 0;
+        at->cfb = 0;
+        at->crown_flame_length = 0;
+        at->crown_intensity = 0;
+        hptr->ros = hptr->rss;
+        bptr->ros = bptr->rss;
+        fptr->ros = fptr->rss;
+        if (args->verbose)
+        {
+            cout << "hptr->ros = " << hptr->ros << "\n";
+            cout << "bptr->ros = " << bptr->ros << "\n";
+            cout << "fptr->ros = " << fptr->ros << "\n";
+        }
+    }
+    // if (hptr->ros>100){
+    // cout << "hptr->rss = " << hptr->ros << "\n";
 
     //}
 
-  if (args->verbose)
-    {cout << "--------------- Inputs --------------- \n";
-    cout << "ws = " << data->ws << "\n";
-    cout << "coef data->cbh = " << data->cbh << "\n";
-    cout << "coef ptr->p1 = " << ptr->p1 << "\n";
-    cout << "coef ptr->p2 = " << ptr->p2 << "\n";
-    cout << "coef ptr->p3 = " << ptr->p3 << "\n";
-    cout << "coef ptr->q1 = " << ptr->q1 << "\n";
-    cout << "coef ptr->q2 = " << ptr->q2 << "\n";
-    cout << "coef ptr->q3 = " << ptr->q3 << "\n";
-    cout << "\n";
+    if (args->verbose)
+    {
+        cout << "--------------- Inputs --------------- \n";
+        cout << "ws = " << data->ws << "\n";
+        cout << "coef data->cbh = " << data->cbh << "\n";
+        cout << "coef ptr->p1 = " << ptr->p1 << "\n";
+        cout << "coef ptr->p2 = " << ptr->p2 << "\n";
+        cout << "coef ptr->p3 = " << ptr->p3 << "\n";
+        cout << "coef ptr->q1 = " << ptr->q1 << "\n";
+        cout << "coef ptr->q2 = " << ptr->q2 << "\n";
+        cout << "coef ptr->q3 = " << ptr->q3 << "\n";
+        cout << "\n";
 
-    cout << "---------------- Outputs --------------- \n";
-    cout << "at->rss = " << at->rss << "\n";
-    cout << "hptr->rss = " << hptr->rss << "\n";
-    cout << "lb = " << sec->lb << "\n";
-    cout << "bptr->rss = " << bptr->rss << "\n";
-    cout << "fptr->rss = " << fptr->rss << "\n";
-    cout << "axis a = " << at->a << "\n";
-    cout << "axis b = " << at->b << "\n";
-    cout << "axis c = " << at->c << "\n";
-    cout << "fl = " << at->fl << "\n";
-    cout << "angle = " << at->angle << "\n";
-    cout << "fh = " << at->fh << "\n";
-    cout << "Crown Fire = " << crownFire << "\n";
-  }
+        cout << "---------------- Outputs --------------- \n";
+        cout << "at->rss = " << at->rss << "\n";
+        cout << "hptr->rss = " << hptr->rss << "\n";
+        cout << "lb = " << sec->lb << "\n";
+        cout << "bptr->rss = " << bptr->rss << "\n";
+        cout << "fptr->rss = " << fptr->rss << "\n";
+        cout << "axis a = " << at->a << "\n";
+        cout << "axis b = " << at->b << "\n";
+        cout << "axis c = " << at->c << "\n";
+        cout << "fl = " << at->fl << "\n";
+        cout << "angle = " << at->angle << "\n";
+        cout << "fh = " << at->fh << "\n";
+        cout << "Crown Fire = " << crownFire << "\n";
+    }
 }
 
 void
@@ -2604,35 +2636,39 @@ determine_destiny_metrics_s(inputs* data, fuel_coefs* ptr, arguments* args, main
     // Hack: Initialize coefficients
     initialize_coeff(args->scenario);
 
-  // Aux
-  float ros = 0, bros = 0, lb = 0, fros = 0;
-  bool crownFire = false;
-  ptr->q1 = q_coeff[data->nftype][0];
-  ptr->q2 = q_coeff[data->nftype][1];
-  ptr->q3 = q_coeff[data->nftype][2];
-  ptr->nftype = data->nftype;
-  // Step 6: Flame Length
-  metrics->fl = flame_length(data, ptr);
-  // Step 9: Byram Intensity
-  metrics->sfi = byram_intensity(metrics, ptr);
-  // Set cfb value for no crown fire scenario
-  metrics->cfb = 0;
-  // Step 10: Criterion for Crown Fire Initiation (no init if user does not
-  // want to include it)
-  if (args->AllowCROS) {
-    crownFire = fire_type(data, metrics);
-    if (crownFire) {
-      metrics->cfb = crownfractionburn(data, metrics);
-      metrics->crown_intensity = crown_byram_intensity(metrics, data);
-      metrics->crown_flame_length =
-          crown_flame_length(metrics->crown_intensity);
+    // Aux
+    float ros = 0, bros = 0, lb = 0, fros = 0;
+    bool crownFire = false;
+    ptr->q1 = q_coeff[data->nftype][0];
+    ptr->q2 = q_coeff[data->nftype][1];
+    ptr->q3 = q_coeff[data->nftype][2];
+    ptr->nftype = data->nftype;
+    // Step 6: Flame Length
+    metrics->fl = flame_length(data, ptr);
+    // Step 9: Byram Intensity
+    metrics->sfi = byram_intensity(metrics, ptr);
+    // Set cfb value for no crown fire scenario
+    metrics->cfb = 0;
+    // Step 10: Criterion for Crown Fire Initiation (no init if user does not
+    // want to include it)
+    if (args->AllowCROS)
+    {
+        crownFire = fire_type(data, metrics);
+        if (crownFire)
+        {
+            metrics->cfb = crownfractionburn(data, metrics);
+            metrics->crown_intensity = crown_byram_intensity(metrics, data);
+            metrics->crown_flame_length = crown_flame_length(metrics->crown_intensity);
+        }
+        if (args->verbose)
+        {
+            cout << "Checking crown Fire conditions " << crownFire << "\n";
+        }
     }
-    if (args->verbose) {
-      cout << "Checking crown Fire conditions " << crownFire << "\n";
+    else
+    {
+        crownFire = false;
     }
-  } else
-    {crownFire = false;
-  }
 
     metrics->crown = crownFire;
 }

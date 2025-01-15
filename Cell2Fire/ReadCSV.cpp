@@ -212,24 +212,27 @@ CSVReader::printData(std::vector<std::vector<std::string>>& DF)
 }
 
 /*
-* Populates the df input objects based on the DF csv file for each row/cell (spanish version)
-*/
-void CSVReader::parseDF(inputs * df_ptr, std::vector<std::vector<std::string>> & DF,arguments* args_ptr,int NCells){
-	int i;
+ * Populates the df input objects based on the DF csv file for each row/cell (spanish version)
+ */
+void
+CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, arguments* args_ptr, int NCells)
+{
+    int i;
 
-	// Floats
-	float cur, elev, ws, waz, saz, cbd, cbh, ccf, ps, lat, lon, ffmc, bui, gfl, height;
+    // Floats
+    float cur, elev, ws, waz, saz, cbd, cbh, ccf, ps, lat, lon, ffmc, bui, gfl, tree_height;
 
-	// Integers
-	int nftype,FMC, jd,jd_min,pc,pdf,time,pattern;
+    // Integers
+    int nftype, FMC, jd, jd_min, pc, pdf, time, pattern;
 
-	// CChar
-	const char * faux;
-	std::string::size_type sz;   // alias of size_t
+    // CChar
+    const char* faux;
+    std::string::size_type sz;  // alias of size_t
 
-	// Loop over cells (populating per row)
-	for (i=1; i <= NCells; i++){
-		//printf("Populating DF for cell %d\n", i);
+    // Loop over cells (populating per row)
+    for (i = 1; i <= NCells; i++)
+    {
+        // printf("Populating DF for cell %d\n", i);
 
         faux = DF[i][0].append(" ").c_str();
 
@@ -342,27 +345,45 @@ void CSVReader::parseDF(inputs * df_ptr, std::vector<std::vector<std::string>> &
         else
             gfl = std::stof(DF[i][22], &sz);
 
-		if (DF[i][23].compare("") == 0) pattern = 0;
-		else pattern = 1;// std::stoi (DF[i][18], &sz);
+        if (DF[i][23].compare("") == 0)
+            pattern = 0;
+        else
+            pattern = 1;  // std::stoi (DF[i][18], &sz);
 
-		if (DF[i][24].compare("") == 0) height = 0;
-		else height = std::stof (DF[i][24], &sz);
+        if (DF[i][24].compare("") == 0)
+            tree_height = 0;
+        else
+            tree_height = std::stof(DF[i][24], &sz);
 
-		// Set values
-		strncpy(df_ptr->fueltype, faux, 4);
-		df_ptr->elev=elev; df_ptr->ws=ws; df_ptr->waz=waz;
-		df_ptr->ps=ps; df_ptr->saz=saz; df_ptr->cur=cur;
-		df_ptr->cbd=cbd;df_ptr->cbh=cbh; df_ptr->ccf=ccf;
-		df_ptr->nftype=nftype;df_ptr->FMC=FMC;df_ptr->jd=jd;
-		df_ptr->jd_min=jd_min;df_ptr->pc=pc;df_ptr->pdf=pdf;
-		df_ptr->time=time;df_ptr->lat=lat;df_ptr->lon=lon;
-		df_ptr->ffmc=ffmc;df_ptr->bui=bui;df_ptr->gfl=gfl;
-		df_ptr->pattern=pattern;
-		df_ptr->height=height;
-			
-		// Next pointer
-		df_ptr++;
-	}
+        // Set values
+        strncpy(df_ptr->fueltype, faux, 4);
+        df_ptr->elev = elev;
+        df_ptr->ws = ws;
+        df_ptr->waz = waz;
+        df_ptr->ps = ps;
+        df_ptr->saz = saz;
+        df_ptr->cur = cur;
+        df_ptr->cbd = cbd;
+        df_ptr->cbh = cbh;
+        df_ptr->ccf = ccf;
+        df_ptr->nftype = nftype;
+        df_ptr->FMC = FMC;
+        df_ptr->jd = jd;
+        df_ptr->jd_min = jd_min;
+        df_ptr->pc = pc;
+        df_ptr->pdf = pdf;
+        df_ptr->time = time;
+        df_ptr->lat = lat;
+        df_ptr->lon = lon;
+        df_ptr->ffmc = ffmc;
+        df_ptr->bui = bui;
+        df_ptr->gfl = gfl;
+        df_ptr->pattern = pattern;
+        df_ptr->tree_height = tree_height;
+
+        // Next pointer
+        df_ptr++;
+    }
 }
 
 /*
