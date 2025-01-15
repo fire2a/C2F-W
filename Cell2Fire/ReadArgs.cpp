@@ -124,6 +124,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         out_intensity = true;
         printf("OutIntensity: %d \n", out_intensity);
     }
+
     //--fire-behavior
     if (cmdOptionExists(argv, argv + argc, "--out-ros"))
     {

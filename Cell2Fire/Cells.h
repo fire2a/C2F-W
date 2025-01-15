@@ -28,8 +28,8 @@ typedef struct
 typedef struct
 {
     char fueltype[4];
-    float ws, saz, cur, ps, cbh, ccf, cbd, elev, tmp, rh, lat, lon, ffmc, bui,
-        gfl;  // David: some variables only used on C2FK and not on C2FSB and
+    float ws, saz, cur, ps, cbh, ccf, cbd, elev, tmp, rh, lat, lon, ffmc, bui, gfl,
+        tree_height;  // David: some variables only used on C2FK and not on C2FSB and
               // viceversa
     int waz, nftype, FMC, time, pattern, mon, jd, jd_min, pc, pdf;
 } inputs;  // David: Moved here to simplify inclusion
@@ -46,7 +46,8 @@ typedef struct
 
 typedef struct
 {
-    float hffmc, sfc, csi, fl, fh, a, b, c, rss, angle, ros_active, cfb, se, rso, fmc, sfi, isi, be, sf, raz, wsv, ff;
+    float hffmc, sfc, csi, fl, fh, a, b, c, rss, angle, ros_active, cfb, se, rso, fmc, sfi, isi, be, sf, raz, wsv, ff,
+        crown_intensity, crown_flame_length, max_flame_length;
     char covertype;
     int crown, jd_min, jd;
 } main_outs;
@@ -141,7 +142,10 @@ class Cells
                                 std::vector<float>& surfFraction,
                                 std::vector<float>& Intensities,
                                 std::vector<float>& RateOfSpreads,
-                                std::vector<float>& FlameLengths);
+                                std::vector<float>& SurfaceFlameLengths,
+                                std::vector<float>& CrownFlameLengths,
+                                std::vector<float>& CrownIntensities,
+                                std::vector<float>& MaxFlameLengths);
 
     std::vector<int> manageFireBBO(int period,
                                    std::unordered_set<int>& AvailSet,

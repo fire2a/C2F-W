@@ -38,6 +38,8 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
                                                                    const std::vector<float>& CCF,
                                                                    const std::vector<float>& PY,
                                                                    const std::vector<float>& FMC,
+                                                                   const std::vector<float>& TreeHeight,
+
                                                                    const std::string& InFolder);
 
 void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids,
