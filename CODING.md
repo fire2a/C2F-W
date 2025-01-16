@@ -14,6 +14,16 @@ Some IDE integrations below, last resort use a pre-commit hook!
 #### Codium / Visual Studio Code
 
 #### C-Lion
+Requirements: Already installed CLion and have the appropiate `.clang-format` file in the
+project root.
+
+CLion will automatically enable ClangFormat and apply the settings found in the file if it's under the project root.
+
+To manually run the formatting, use **ctrl + alt + shift + L**.
+You can also enable automatic formatting on save, go to **Settings | Tools | Actions on save**
+and enable "Reformat code".
+
+You can find more information in the [official CLion documentation](https://www.jetbrains.com/help/clion/clangformat-as-alternative-formatter.html).
 
 #### vim using ALE plugin
 Requirements: Already installed vim and ALE plugin
