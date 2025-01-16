@@ -264,9 +264,12 @@ Cell2Fire::Cell2Fire(arguments _args)
     this->crownState = std::vector<int>(this->nCells, 0);
     this->crownFraction = std::vector<float>(this->nCells, 0);
     this->surfFraction = std::vector<float>(this->nCells, 0);
-    this->Intensities = std::vector<float>(this->nCells, 0);
+    this->surfaceIntensities = std::vector<float>(this->nCells, 0);
     this->RateOfSpreads = std::vector<float>(this->nCells, 0);
-    this->FlameLengths = std::vector<float>(this->nCells, 0);
+    this->surfaceFlameLengths = std::vector<float>(this->nCells, 0);
+    this->crownIntensities = std::vector<float>(this->nCells, 0);
+    this->crownFlameLengths = std::vector<float>(this->nCells, 0);
+    this->maxFlameLengths = std::vector<float>(this->nCells, 0);
 
     this->ignProb = std::vector<float>(this->nCells, 1);
     CSVParser.parsePROB(this->ignProb, DF, this->nCells);
@@ -670,21 +673,45 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         CSVFolder.MakeDir(this->rosFolder);
         this->rosFolder = this->args.OutFolder + "RateOfSpread" + separator();
     }
-    // Byram Intensity Folder
+    // Surface Byram Intensity Folder
     if (this->args.OutIntensity)
     {
         CSVWriter CSVFolder("", "");
-        this->intensityFolder = this->args.OutFolder + "Intensity";
-        CSVFolder.MakeDir(this->intensityFolder);
-        this->intensityFolder = this->args.OutFolder + "Intensity" + separator();
+        this->surfaceIntensityFolder = this->args.OutFolder + "SurfaceIntensity";
+        CSVFolder.MakeDir(this->surfaceIntensityFolder);
+        this->surfaceIntensityFolder = this->args.OutFolder + "SurfaceIntensity" + separator();
     }
-    // Flame Length Folder
+    // Crown Byram Intensity Folder
+    if ((this->args.OutIntensity) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    {
+        CSVWriter CSVFolder("", "");
+        this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity";
+        CSVFolder.MakeDir(this->crownIntensityFolder);
+        this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
+    }
+    // Surface Flame Length Folder
     if (this->args.OutFl)
     {
         CSVWriter CSVFolder("", "");
-        this->flFolder = this->args.OutFolder + "FlameLength";
-        CSVFolder.MakeDir(this->flFolder);
-        this->flFolder = this->args.OutFolder + "FlameLength" + separator();
+        this->surfaceFlameLengthFolder = this->args.OutFolder + "SurfaceFlameLength";
+        CSVFolder.MakeDir(this->surfaceFlameLengthFolder);
+        this->surfaceFlameLengthFolder = this->args.OutFolder + "SurfaceFlameLength" + separator();
+    }
+    // Crown Flame Length Folder
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    {
+        CSVWriter CSVFolder("", "");
+        this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength";
+        CSVFolder.MakeDir(this->crownFlameLengthFolder);
+        this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
+    }
+    // max Flame Length Folder
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    {
+        CSVWriter CSVFolder("", "");
+        this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength";
+        CSVFolder.MakeDir(this->maxFlameLengthFolder);
+        this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength" + separator();
     }
     // Crown Folder
     if (this->args.OutCrown && this->args.AllowCROS)
@@ -886,9 +913,12 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->crownState = std::vector<int>(this->nCells, 0);
     this->crownFraction = std::vector<float>(this->nCells, 0);
     this->surfFraction = std::vector<float>(this->nCells, 0);
-    this->Intensities = std::vector<float>(this->nCells, 0);
+    this->surfaceIntensities = std::vector<float>(this->nCells, 0);
+    this->crownIntensities = std::vector<float>(this->nCells, 0);
     this->RateOfSpreads = std::vector<float>(this->nCells, 0);
-    this->FlameLengths = std::vector<float>(this->nCells, 0);
+    this->surfaceFlameLengths = std::vector<float>(this->nCells, 0);
+    this->crownFlameLengths = std::vector<float>(this->nCells, 0);
+    this->maxFlameLengths = std::vector<float>(this->nCells, 0);
 
     this->FSCell.clear();
     this->crownMetrics.clear();  // intensity and crown
@@ -1376,9 +1406,12 @@ Cell2Fire::SendMessages()
                                                  this->crownState,
                                                  this->crownFraction,
                                                  this->surfFraction,
-                                                 this->Intensities,
+                                                 this->surfaceIntensities,
                                                  this->RateOfSpreads,
-                                                 this->FlameLengths);
+                                                 this->surfaceFlameLengths,
+                                                 this->crownFlameLengths,
+                                                 this->crownIntensities,
+                                                 this->maxFlameLengths);
             }
 
             else
@@ -1403,9 +1436,9 @@ Cell2Fire::SendMessages()
                                                     this->crownState,
                                                     this->crownFraction,
                                                     this->surfFraction,
-                                                    this->Intensities,
+                                                    this->surfaceIntensities,
                                                     this->RateOfSpreads,
-                                                    this->FlameLengths);
+                                                    this->surfaceFlameLengths);
             }
             // std::cout << "Sale de Manage Fire" << std::endl;
         }
@@ -1913,12 +1946,12 @@ Cell2Fire::Results()
     // Intensity
     if (this->args.OutIntensity)
     {
-        this->intensityFolder = this->args.OutFolder + "Intensity" + separator();
+        this->surfaceIntensityFolder = this->args.OutFolder + "SurfaceIntensity" + separator();
         std::string intensityName;
         std::ostringstream oss;
         oss.str("");
         oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        intensityName = this->intensityFolder + "Intensity" + oss.str() + ".asc";
+        intensityName = this->surfaceIntensityFolder + "SurfaceIntensity" + oss.str() + ".asc";
 
         if (this->args.verbose)
         {
@@ -1926,24 +1959,79 @@ Cell2Fire::Results()
         }
         CSVWriter CSVPloter(intensityName, " ");
         CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->Intensities);
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfaceIntensities);
     }
 
+    // Crown Intensity
+    if ((this->args.OutIntensity) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    {
+        this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
+        std::string intensityName;
+        std::ostringstream oss;
+        oss.str("");
+        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
+        intensityName = this->crownIntensityFolder + "CrownIntensity" + oss.str() + ".asc";
+        if (this->args.verbose)
+        {
+            std::cout << "We are generating the Crown Intensity to a asc file " << intensityName << std::endl;
+        }
+        CSVWriter CSVPloter(intensityName, " ");
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownIntensities);
+    }
+
+    // Surface Flame Length
     if (this->args.OutFl)
     {
-        this->flFolder = this->args.OutFolder + "FlameLength" + separator();
+        this->surfaceFlameLengthFolder = this->args.OutFolder + "SurfaceFlameLength" + separator();
         std::string flName;
         std::ostringstream oss;
         oss.str("");
         oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        flName = this->flFolder + "FL" + oss.str() + ".asc";
+        flName = this->surfaceFlameLengthFolder + "SurfaceFlameLength" + oss.str() + ".asc";
         if (this->args.verbose)
         {
-            std::cout << "We are generating the Flame Lenght to a asc file " << flName << std::endl;
+            std::cout << "We are generating the Flame Length to a asc file " << flName << std::endl;
         }
         CSVWriter CSVPloter(flName, " ");
         CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->FlameLengths);
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfaceFlameLengths);
+    }
+
+    // Crown Flame length
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    {
+        this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
+        std::string fileName;
+        std::ostringstream oss;
+        oss.str("");
+        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
+        fileName = this->crownFlameLengthFolder + "CrownFlameLength" + oss.str() + ".asc";
+        if (this->args.verbose)
+        {
+            std::cout << "We are generating the Crown Flame Length to a asc file " << fileName << std::endl;
+        }
+        CSVWriter CSVPloter(fileName, " ");
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFlameLengths);
+    }
+
+    // Max Flame length
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    {
+        this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength" + separator();
+        std::string fileName;
+        std::ostringstream oss;
+        oss.str("");
+        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
+        fileName = this->maxFlameLengthFolder + "MaxFlameLength" + oss.str() + ".asc";
+        if (this->args.verbose)
+        {
+            std::cout << "We are generating the Max Flame Length to a asc file " << fileName << std::endl;
+        }
+        CSVWriter CSVPloter(fileName, " ");
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->maxFlameLengths);
     }
 
     // Intensity

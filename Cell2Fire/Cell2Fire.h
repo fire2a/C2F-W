@@ -76,10 +76,13 @@ class Cell2Fire
     string messagesFolder;
     string rosFolder;
     string crownFolder;
-    string intensityFolder;
+    string surfaceIntensityFolder;
+    string crownIntensityFolder;
     string sfbFolder;
     string cfbFolder;
-    string flFolder;
+    string surfaceFlameLengthFolder;
+    string maxFlameLengthFolder;
+    string crownFlameLengthFolder;
     string historyFolder;
     string ignitionsFolder;
 
@@ -100,11 +103,14 @@ class Cell2Fire
     std::vector<double> FSCell;
     std::vector<float> crownMetrics;
     std::vector<int> crownState;
-    std::vector<float> Intensities;
+    std::vector<float> surfaceIntensities;
+    std::vector<float> crownIntensities;
     std::vector<float> crownFraction;
     std::vector<float> surfFraction;
     std::vector<float> RateOfSpreads;
-    std::vector<float> FlameLengths;
+    std::vector<float> surfaceFlameLengths;
+    std::vector<float> crownFlameLengths;
+    std::vector<float> maxFlameLengths;
     std::vector<std::vector<int>> IgnitionSets;
     // std::vector<int> IgnitionHistory;
 
