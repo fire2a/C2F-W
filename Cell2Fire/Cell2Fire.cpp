@@ -3,6 +3,7 @@ __version__ = "3.0"
 __author__ = "Cristobal Pais"
 __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios"
 */
+/** @file */
 // Unified version by David Palacios
 //  Include classes
 #include "Cell2Fire.h"
@@ -2380,6 +2381,12 @@ Cell2Fire::getFireProgressMatrix()
  * and executes the main simulation loop, either in serial or parallel mode.
  * The program simulates fire spread across a forest landscape using stochastic
  * methods.
+ *
+ * @param argc Number of command line arguments provided
+ * @param argv An array of C-style strings representing the command-line arguments.
+ *             - `--input-instance-folder <directory>`: Path to the folder containing input data such as fuel and
+ * weather.
+ *             - `--output-folder <directory>`: Path to the folder where outputs should be saved.
  *
  * @return Exit status of the program (0 for success).
  *
