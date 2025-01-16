@@ -88,4 +88,5 @@ else
 fi
 
 rm -rf target_results
+rm -rf test_results
 exit 0
