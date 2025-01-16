@@ -271,7 +271,6 @@ Cell2Fire::Cell2Fire(arguments _args)
     this->crownFlameLengths = std::vector<float>(this->nCells, 0);
     this->maxFlameLengths = std::vector<float>(this->nCells, 0);
 
-
     this->ignProb = std::vector<float>(this->nCells, 1);
     CSVParser.parsePROB(this->ignProb, DF, this->nCells);
 
@@ -939,7 +938,6 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             this->statusCells[i] = 4;
         }
     }
-
 
     // Relevant sets: Initialization
     this->availCells.clear();
@@ -1990,7 +1988,7 @@ Cell2Fire::Results()
         std::ostringstream oss;
         oss.str("");
         oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        flName = this->surfaceFlameLengthFolder + "SurfaceFameLength" + oss.str() + ".asc";
+        flName = this->surfaceFlameLengthFolder + "SurfaceFlameLength" + oss.str() + ".asc";
         if (this->args.verbose)
         {
             std::cout << "We are generating the Flame Length to a asc file " << flName << std::endl;
