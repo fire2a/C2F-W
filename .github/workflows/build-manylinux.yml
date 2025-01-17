@@ -76,6 +76,7 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
+    container: ubuntu:noble
 
     steps:
 
