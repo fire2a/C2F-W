@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu:jammy
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout Code
@@ -76,8 +76,8 @@ jobs:
 
   test:
     needs: build
-    runs-on: ubuntu:jammy
-    container: ubuntu:jammy
+    runs-on: ubuntu-22.04
+    container: ubuntu-22.04
 
     steps:
 
