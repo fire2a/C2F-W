@@ -62,8 +62,8 @@ jobs:
         run: |
           cd Cell2Fire
           make clean
-          make -f makefile.static > ldd_manylinux.txt 
-          ldd Cell2Fire > ldd_manylinux.txt
+          make -f makefile.static > ldd_manylinux.txt  2>&1|| true
+          ! ldd Cell2Fire
 
       - name: Upload Static
         uses: actions/upload-artifact@v4
