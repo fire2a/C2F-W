@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
@@ -63,7 +63,7 @@ jobs:
           cd Cell2Fire
           make clean
           make -f makefile.static > ldd_manylinux.txt 2>&1 
-          ldd Cell2Fire > ldd_manylinux.txt 2>&1 
+      #        ldd Cell2Fire > ldd_manylinux.txt 2>&1
 
       - name: Upload Static
         uses: actions/upload-artifact@v4
