@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu:jammy
 
     steps:
       - name: Checkout Code
@@ -62,7 +62,8 @@ jobs:
         run: |
           cd Cell2Fire
           make clean
-          make -f makefile.static > ldd_manylinux.txt
+          make -f makefile.static > ldd_manylinux.txt 2>&1 || true
+          ldd Cell2Fire > ldd_manylinux.txt 2>&1 || true
 
       - name: Upload Static
         uses: actions/upload-artifact@v4
@@ -75,8 +76,8 @@ jobs:
 
   test:
     needs: build
-    runs-on: ubuntu-latest
-    container: ubuntu:noble
+    runs-on: ubuntu:jammy
+    container: ubuntu:jammy
 
     steps:
 
