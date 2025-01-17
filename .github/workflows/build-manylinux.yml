@@ -77,7 +77,6 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
-    container: ubuntu:jammy
 
     steps:
 
