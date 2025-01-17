@@ -1108,7 +1108,6 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
     // Ignitions with provided points from CSV
     else
     {
-        int temp = IgnitionPoints[this->year - 1];
 
         if (initialPoints.empty())
         {
