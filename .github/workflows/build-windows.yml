@@ -75,7 +75,7 @@ jobs:
         # boost
         if ($CACHE_BOOST -ne 'true') {
           $fname = "boost_1_84_0.tar.gz"
-          Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
+          Invoke-WebRequest -Uri https://archives.boost.io/release/1.84.0/source/$fname -OutFile $fname
           tar -xzf $fname -C include
         } else {
           echo "Boost already cached"
