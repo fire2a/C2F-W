@@ -60,7 +60,7 @@ jobs:
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip Cell2Fire ldd_manylinux.txt
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip Cell2Fire.Debian.bookworm.x86_64 ldd.Debian.bookworm.x86_64.txt
-        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.jammy.x86_64-binary.zip Cell2Fire.Ubuntu.jammy.x86_64 ldd.Ubuntu.jammy.x86_64.txt
+        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.noble.x86_64-binary.zip Cell2Fire.Ubuntu.noble.x86_64 ldd.Ubuntu.noble.x86_64.txt
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip Cell2Fire_Darwin* otool*.txt
 
     - name: Zip Data Instances
@@ -92,7 +92,7 @@ jobs:
           Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.jammy.x86_64-binary.zip
+          Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.noble.x86_64-binary.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip
           Kitral-asc.zip
           Kitral-tif.zip
