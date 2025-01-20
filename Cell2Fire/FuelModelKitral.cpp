@@ -770,6 +770,21 @@ bool checkActive(inputs * data,main_outs* at, int FMC) //En KITRAL SE USA PL04
     return active;
 }
 
+/*--------- Surface Fuel Consumption ---------*/
+float surface_fuel_consumption_k(inputs * data, fuel_coefs * ptr)
+{
+    float tmp, rh, ch, fch, wa, sfc;
+
+    tmp= data->tmp;
+    rh= data->rh;
+    wa= fls_david[data->nftype][0];
+    ch= (-2.97374 + 0.262 * rh - 0.00982 * tmp);
+    fch= (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0)) / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0));
+    sfc= wa * (1 - exp(-0.23 * (fch - 6.08)));
+    return sfc;
+
+
+}
 
  
 float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
