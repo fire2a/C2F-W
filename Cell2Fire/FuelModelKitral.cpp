@@ -892,9 +892,9 @@ float surface_fuel_consumption_k(inputs * data, fuel_coefs * ptr)
 }
 
 /*------- Emsiones generadas en superficie -------*/
-float surface_emissions(inputs * data, fuel_oefs * ptr){
+float surface_emissions(inputs * data, fuel_coefs * ptr){
     string dens;
-    float sfc, gef_CH4, gef_CO, gef_CO2, gef_N2O, gef_NOx, Se_CO2, Se_CO, Se_CH4, Se_N2O, Se_NOx, Se_total;
+    float sfc, gef_CH4, gef_CO, gef_CO2, gef_N2O, gef_NOx, Se_CO2, Se_CO, Se_CH4, Se_N2O, Se_NOx, GHG_se;
 
     dens= dens[data->nftype][0];
 
@@ -913,8 +913,8 @@ float surface_emissions(inputs * data, fuel_oefs * ptr){
         Se_N2O= sfc * gef_N2O;
         Se_NOx= sfc * gef_NOx;
 
-        //Emisiones totales
-        Se_total= Se_CO2 + Se_CO + Se_CH4 + Se_N2O + Se_NOx;
+        //Emisiones totales t-CO2-eq
+        GHG_se= Se_CO2 + Se_CH4 * 27 + Se_N2O * 273;
     }
     else {
         gef_CO2= 1569;
@@ -929,9 +929,9 @@ float surface_emissions(inputs * data, fuel_oefs * ptr){
         Se_N2O= sfc * gef_N2O;
         Se_NOx= sfc * gef_NOx;
 
-        Se_total= Se_CO2 + Se_CO + Se_CH4 + Se_N2O + Se_NOx;
+        GHG_se= Se_CO2 + Se_CH4 * 27 + Se_N2O * 273;
     }
-    return Se_total;
+    return GHG_se;
 }
 
 
