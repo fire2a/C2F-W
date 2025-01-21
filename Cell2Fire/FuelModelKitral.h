@@ -55,6 +55,9 @@ float crownfractionburn(inputs* data, main_outs* at,int FMC);
 //Surface Fuel consumption
 float surface_fuel_consumption_k(inputs * data, fuel_coefs * ptr);
 
+//Surface Emissions
+float surface_emissions(inputs * data, fuel_oefs * ptr);
+
 // Back fire with CROS 
 float backfire_ros10_k(fire_struc *hptr, snd_outs *sec) ;
 
