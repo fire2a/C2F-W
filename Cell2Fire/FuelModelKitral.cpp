@@ -22,6 +22,7 @@ std::unordered_map<int, std::vector<float>> cbhs;
 std::unordered_map<int, std::vector<float>> fls_david;
 std::unordered_map<int, std::vector<float>> hs;
 std::unordered_map<int, std::vector<float>> cbds;
+std::unordered_map<int, std::vector<string>> dens;
 
 
  
@@ -330,7 +331,7 @@ void setup_const()
     fl_bn02.push_back(2.310);
     h_bn02.push_back(19037);
     cbd_bn02.push_back(0);
-    dens.push_back("Tree");
+    dens_bn02.push_back("Tree");
     fmcs.insert(std::make_pair(BN02, fmc_bn02));
     cbhs.insert(std::make_pair(BN02, cbh_bn02));
     fls_david.insert(std::make_pair(BN02, fl_bn02));
@@ -863,24 +864,24 @@ bool checkActive(inputs * data,main_outs* at, int FMC) //En KITRAL SE USA PL04
     return active;
 }
 
-/*--------- Surface Fuel Consumption ---------*/
-float surface_fuel_consumption_k(inputs * data, fuel_coefs * ptr)
+/*--------- Surface Fuel Consumption ---------, fuel_coefs * ptr*/
+float surface_fuel_consumption_k(inputs * data)
 {
     float tmp, rh, ch, fch, wa, sigma, sfc;
-    string dens;
+    string cat;
 
     tmp= data->tmp;
     rh= data->rh;
     wa= fls_david[data->nftype][0];
-    dens= dens[data->nftype][0];
+    cat= dens[data->nftype][0];
     sigma= 1/(1+exp(-0.081*(rh-57.09))); //Calculo de sigmoide.
     ch= (4 + 16 * sigma - 0.00982 * tmp);//Calculo de ch V.3 con el sigmoide.
     fch= (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0)) / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0));
     // se escoje la curva que corresponda segun el tipo de combustible
-    if (dens=="Grass"){
+    if (cat=="Grass"){
     sfc= wa * (1 - exp( (ch - 19.127019)));
     }
-    if (dens=="Shrub"){
+    if (cat=="Shrub"){
         sfc= wa * (1 - exp(0.11 * (ch - 19.127019)));
     }
     else {
@@ -892,14 +893,14 @@ float surface_fuel_consumption_k(inputs * data, fuel_coefs * ptr)
 }
 
 /*------- Emsiones generadas en superficie -------*/
-float surface_emissions(inputs * data, fuel_coefs * ptr){
-    string dens;
+float surface_emissions(inputs * data){
+    string cat;
     float sfc, gef_CH4, gef_CO, gef_CO2, gef_N2O, gef_NOx, Se_CO2, Se_CO, Se_CH4, Se_N2O, Se_NOx, GHG_se;
 
-    dens= dens[data->nftype][0];
+    cat= dens[data->nftype][0];
 
     //Escoge los parametros segun naturaleza del combustible
-    if (dens=="Grass"){
+    if (cat=="Grass"){
         gef_CO2= 1613;
         gef_CO= 65;
         gef_CH4= 2.3;
@@ -1010,6 +1011,12 @@ float backfire_ros10_k(fire_struc *hptr, snd_outs *sec)
     
 	// Step 9: Flame Height
     at->fh = flame_height(data, at) ;
+
+    // Step 11: Surface Fuel Consumption
+    at->sfc = surface_fuel_consumption_k(data);
+
+    //step 12: Greenhouse gas emissions
+    at->emissions = surface_emissions(data);
 
 
 	// Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)

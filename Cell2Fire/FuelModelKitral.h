@@ -53,10 +53,10 @@ float active_rate_of_spreadPL04(inputs* data,main_outs *at); //En KITRAL SE USA 
 float crownfractionburn(inputs* data, main_outs* at,int FMC);
 
 //Surface Fuel consumption
-float surface_fuel_consumption_k(inputs * data, fuel_coefs * ptr);
+float surface_fuel_consumption_k(inputs * data);
 
 //Surface Emissions
-float surface_emissions(inputs * data, fuel_oefs * ptr);
+float surface_emissions(inputs * data);
 
 // Back fire with CROS 
 float backfire_ros10_k(fire_struc *hptr, snd_outs *sec) ;
