@@ -236,6 +236,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->crownState = std::vector<int> (this->nCells, 0);
 	this->crownFraction = std::vector<float> (this->nCells, 0);
 	this->surfFraction = std::vector<float> (this->nCells, 0);
+	this->emissions = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
 	this->FlameLengths = std::vector<float> (this->nCells, 0);
@@ -616,11 +617,19 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		this->cfbFolder = this->args.OutFolder + separator() +"CrownFractionBurn" + separator();
 	}
 		//Surf Fraction Burn Folder
-	if (this->args.OutSurfConsumption && this->args.Simulator=="C") {
+	if (this->args.OutSurfConsumption && this->args.Simulator!="S") {
 		CSVWriter CSVFolder("", "");
 		this->sfbFolder = this->args.OutFolder + "SurfFractionBurn" ;
 		CSVFolder.MakeDir(this->sfbFolder);
 		this->sfbFolder = this->args.OutFolder + separator() +"SurfFractionBurn" + separator();
+	}
+
+		//emissions Folder
+	if (this->args.Outemissions && this->args.Simulator!="S") {
+		CSVWriter CSVFolder("", "");
+		this->emissionsFolder = this->args.OutFolder + "emissions" ;
+		CSVFolder.MakeDir(this->emissionsFolder);
+		this->emissionsFolder = this->args.OutFolder + separator() +"emissions" + separator();
 	}
 		
 	// Random Weather 
@@ -769,6 +778,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->crownState = std::vector<int> (this->nCells, 0);
 	this->crownFraction = std::vector<float> (this->nCells, 0);
 	this->surfFraction = std::vector<float> (this->nCells, 0);
+	this->emissions = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
 	this->FlameLengths = std::vector<float> (this->nCells, 0);
@@ -1150,7 +1160,7 @@ std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 			if (!this->args.BBOTuning){  //&df[cell-1] replaced by full df for getting the slopes
 				aux_list = it->second.manageFire(this->fire_period[this->year-1], this->availCells,  df, this->coef_ptr, 
 															   this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod],
-															   &this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells,this->crownState, this->crownFraction,this->surfFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
+															   &this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells,this->crownState, this->crownFraction,this->surfFraction, this->emissions, this->Intensities, this->RateOfSpreads, this->FlameLengths);
 			}
 												
 			
@@ -1159,7 +1169,7 @@ std::unordered_map<int, std::vector<int>> Cell2Fire::SendMessages(){
 				auto factors = BBOFactors.find(NFTypesCells[cell-1]);
 				aux_list = it->second.manageFireBBO(this->fire_period[this->year-1], this->availCells,  & df[cell-1], this->coef_ptr, 
 																		this->coordCells, this->Cells_Obj, this->args_ptr, &wdf[this->weatherPeriod],
-																		&this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells, factors->second,this->crownState, this->crownFraction,this->surfFraction, this->Intensities, this->RateOfSpreads, this->FlameLengths);
+																		&this->FSCell, &this->crownMetrics,this->activeCrown, this->ROSRV,this->perimeterCells, factors->second,this->crownState, this->crownFraction,this->surfFraction, this->emissions, this->Intensities, this->RateOfSpreads, this->FlameLengths);
 			}
 			//std::cout << "Sale de Manage Fire" << std::endl;
 		} 
@@ -1597,8 +1607,8 @@ void Cell2Fire::Results(){
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFraction);
 	}
 
-		// Intensity
-	if ((this->args.OutSurfConsumption) && (this->args.Simulator=="C")) {
+		// Surface Consumption
+	if ((this->args.OutSurfConsumption) && (this->args.Simulator!="S")) {
 		this->sfbFolder = this->args.OutFolder + "SurfFractionBurn"+separator();
 		std::string sfbName;
 		std::ostringstream oss;
@@ -1610,6 +1620,21 @@ void Cell2Fire::Results(){
 		}
 		CSVWriter CSVPloter(sfbName, " ");
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfFraction);
+	}
+
+		// emissions
+	if ((this->args.Outemissions) && (this->args.Simulator!="S")) {
+		this->emissionsFolder = this->args.OutFolder + "emissions"+separator();
+		std::string emissionsName;
+		std::ostringstream oss;
+		oss.str("");
+		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+		emissionsName= this->emissionsFolder+"emissions"+oss.str()+".asc";
+		if (this->args.verbose) {
+			std::cout << "We are generating the emissions to a asc file " << emissionsName << std::endl;
+		}
+		CSVWriter CSVPloter(emissionsName, " ");
+		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->emissions);
 	}
 
 	// Crown

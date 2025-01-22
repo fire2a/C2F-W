@@ -103,6 +103,7 @@ class Cell2Fire {
 		 std::vector<float>Intensities;
 		 std::vector<float>crownFraction;
 		 std::vector<float>surfFraction;
+		 std::vector<float>emissions;//ver si es la funcion o el nombre donde se guarda
 		 std::vector<float>RateOfSpreads;
 		 std::vector<float>FlameLengths;
 		 std::vector<std::vector<int>> IgnitionSets;

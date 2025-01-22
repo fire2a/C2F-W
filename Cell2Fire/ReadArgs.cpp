@@ -89,6 +89,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	bool out_crown = false;
 	bool out_crown_consumption=false;
 	bool out_surf_consumption=false;
+	bool out_emissions = false;
 	bool out_finalgrid = false;
 	bool prom_tuned = false;
 	bool out_stats = false;
@@ -130,6 +131,11 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	if (cmdOptionExists(argv, argv + argc, "--out-sfb")) {
 		out_surf_consumption = true;
 		printf("OutSurfaceConsumption: %d \n", out_surf_consumption);
+	}
+
+	if (cmdOptionExists(argv, argv + argc, "--out-emissions")) {
+		out_emissions = true;
+		printf("Outemissions: %d \n", out_emissions);
 	}
 	
 
@@ -493,6 +499,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	args_ptr->OutCrown = out_crown;
 	args_ptr->OutCrownConsumption = out_crown_consumption;
 	args_ptr->OutSurfConsumption = out_surf_consumption;
+	args_ptr->Outemissions = out_emissions;
 	args_ptr->Trajectories = out_trajectories; 
 	args_ptr->NoOutput = no_output;
 	args_ptr->verbose = verbose_input;
@@ -557,6 +564,7 @@ void printArgs(arguments args){
 	std::cout << "OutCrown: " << args.OutCrown << std::endl;
 	std::cout << "OutCrownConsumption: " << args.OutCrownConsumption << std::endl;
 	std::cout << "OutSurfConsumption: " << args.OutSurfConsumption << std::endl;
+	std::cout << "Outemissions: " << args.Outemissions << std::endl;
 	 
 	std::cout << "TotalYears: " << args.TotalYears << std::endl; 
 	std::cout << "TotalSims: " << args.TotalSims << std::endl; 
