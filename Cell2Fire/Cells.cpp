@@ -365,6 +365,7 @@ Cells::ros_distr(double thetafire, double forward, double flank, double back, do
  * @param thetafire The direction of the fire's spread (in degrees).
  * @param a The semi-major axis of the ellipse representing fire spread.
  * @param b The semi-minor axis of the ellipse representing fire spread.
+ * @param c Not used
  * @param EFactor A scaling factor.
  *
  * @return void

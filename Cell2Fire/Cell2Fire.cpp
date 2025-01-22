@@ -2475,6 +2475,14 @@ Cell2Fire::getFireProgressMatrix()
  *             - `--input-instance-folder <directory>`: Path to the folder containing input data such as fuel and
  * weather.
  *             - `--output-folder <directory>`: Path to the folder where outputs should be saved.
+ *             - `--sim <model code>`: Code for which simulation model should be used. "K" for Kitral,
+ *             "S" for Scott&Burgan and "C" for FBP.
+ *             - `--nsims` <int>: Total number of simulations to run.
+ *             - `--seed` <int>: Seed for the random generator
+ *             - `--nthreads` <int>: Number of threads to use.
+ *
+ *             - `--cros`: True if simulation should consider crown fires, False if not.
+ *             - ``
  *
  * @return Exit status of the program (0 for success).
  *
