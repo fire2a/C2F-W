@@ -730,7 +730,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->cfbFolder = this->args.OutFolder + separator() + "CrownFractionBurn" + separator();
     }
     // Surf Fraction Burn Folder
-    if (this->args.OutSurfConsumption && this->args.Simulator == "C")
+    if (this->args.OutSurfConsumption && this->args.Simulator != "S")
     {
         CSVWriter CSVFolder("", "");
         this->sfbFolder = this->args.OutFolder + "SurfFractionBurn";
@@ -2052,8 +2052,8 @@ Cell2Fire::Results()
             this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFraction);
     }
 
-    // Intensity
-    if ((this->args.OutSurfConsumption) && (this->args.Simulator == "C"))
+    // SurfFraction
+    if ((this->args.OutSurfConsumption) && (this->args.Simulator != "S"))
     {
         this->sfbFolder = this->args.OutFolder + "SurfFractionBurn" + separator();
         std::string sfbName;

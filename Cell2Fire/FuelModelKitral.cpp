@@ -783,7 +783,7 @@ float surface_fuel_consumption_k(inputs * data)
     tmp= data->tmp;
     rh= data->rh;
     wa= fls_david[data->nftype][0];
-    categoria= dens[data->nftype][0];
+    categoria= ctgry[data->nftype][0];
     sigmoid= 1/(1+exp(-0.081*(rh-57.09))); //Calculo de sigmoide.
     ch= (4 + 16 * sigmoid - 0.00982 * tmp);//Calculo de ch V.3 con el sigmoide.
     
