@@ -41,6 +41,9 @@ float flame_height(inputs* data, main_outs* at);
 // byram intensity
 float byram_intensity(inputs* data, main_outs* at);
 
+//Surface Fuel Consumption, fuel_coefs * ptr
+float surface_fuel_consumption_k(inputs * data);
+
 // Type of fire (Crown = 1, SROS = 0)
 bool fire_type(inputs* data, main_outs* atr, int FMC);
 // Active crown

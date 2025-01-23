@@ -680,6 +680,34 @@ byram_intensity(inputs* data, main_outs* at)
     return ib;  // unidad de medida
 }
 
+/*--------- Surface Fuel Consumption ---------, fuel_coefs * ptr*/
+float surface_fuel_consumption_k(inputs * data)
+{
+    float tmp, rh, ch, fch, wa, sigmoid, sfc;
+    string cat;
+
+    tmp= data->tmp;
+    rh= data->rh;
+    wa= fls_david[data->nftype][0];
+    cat= dens[data->nftype][0];
+    sigmoid= 1/(1+exp(-0.081*(rh-57.09))); //Calculo de sigmoide.
+    ch= (4 + 16 * sigma - 0.00982 * tmp);//Calculo de ch V.3 con el sigmoide.
+    fch= (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0)) / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0));
+    // se escoje la curva que corresponda segun el tipo de combustible
+    if (cat=="Grass"){
+    sfc= wa * (1 - exp( (ch - 19.127019)));
+    }
+    if (cat=="Shrub"){
+        sfc= wa * (1 - exp(0.11 * (ch - 19.127019)));
+    }
+    else {
+        sfc= wa * (1 - exp(0.07 * (ch - 19.127019)));
+    }
+    return sfc;
+
+
+}
+
 bool
 fire_type(inputs* data, main_outs* at, int FMC)
 {
