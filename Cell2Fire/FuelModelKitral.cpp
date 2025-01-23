@@ -777,7 +777,7 @@ byram_intensity(inputs* data, main_outs* at)
 /*--------- Surface Fuel Consumption ---------, fuel_coefs * ptr*/
 float surface_fuel_consumption_k(inputs * data)
 {
-    float tmp, rh, ch, fch, wa, sigmoid, sfc;
+    float tmp, rh, ch, fch, wa, sigmoid, sfb;
     string categoria;
 
     tmp= data->tmp;
@@ -789,15 +789,15 @@ float surface_fuel_consumption_k(inputs * data)
     
     // se escoje la curva que corresponda segun el tipo de combustible
     if (categoria=="Grass"){
-    sfc= wa * (1 - exp( (ch - 19.127019)));
+    sfb= wa * (1 - exp( (ch - 19.127019)));
     }
     else if (categoria=="Shrub"){
-        sfc= wa * (1 - exp(0.11 * (ch - 19.127019)));
+        sfb= wa * (1 - exp(0.11 * (ch - 19.127019)));
     }
     else {
-        sfc= wa * (1 - exp(0.07 * (ch - 19.127019)));
+        sfb= wa * (1 - exp(0.07 * (ch - 19.127019)));
     }
-    return sfc;
+    return sfb;
 
 
 }
@@ -982,7 +982,7 @@ calculate_k(inputs* data,
     at->sfi = byram_intensity(data, at);
 
     // Step 7: Suface Fuel Consumption
-    at->sfc = surface_fuel_consumption_k(data);
+    at->sfb = surface_fuel_consumption_k(data);
 
     // Step 8: Flame Length
     at->fl = flame_length(data, at);
