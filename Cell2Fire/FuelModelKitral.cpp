@@ -708,6 +708,49 @@ float surface_fuel_consumption_k(inputs * data)
 
 }
 
+/*------- Emsiones generadas en superficie -------*/
+float surface_emissions(inputs * data){
+    string cat;
+    float sfc, gef_CH4, gef_CO, gef_CO2, gef_N2O, gef_NOx, Se_CO2, Se_CO, Se_CH4, Se_N2O, Se_NOx, GHG_se;
+
+    cat= dens[data->nftype][0];
+
+    //Escoge los parametros segun naturaleza del combustible
+    if (cat=="Grass"){
+        gef_CO2= 1613;
+        gef_CO= 65;
+        gef_CH4= 2.3;
+        gef_N2O= 0.21;
+        gef_NOx= 3.9;
+
+        //Calcula emisiones por componente
+        Se_CO2= sfc * gef_CO2;
+        Se_CO= sfc * gef_CO;
+        Se_CH4= sfc * gef_CH4;
+        Se_N2O= sfc * gef_N2O;
+        Se_NOx= sfc * gef_NOx;
+
+        //Emisiones totales t-CO2-eq
+        GHG_se= Se_CO2 + Se_CH4 * 27 + Se_N2O * 273;
+    }
+    else {
+        gef_CO2= 1569;
+        gef_CO= 107;
+        gef_CH4= 4.7;
+        gef_N2O= 0.26;
+        gef_NOx= 3;
+
+        Se_CO2= sfc * gef_CO2;
+        Se_CO= sfc * gef_CO;
+        Se_CH4= sfc * gef_CH4;
+        Se_N2O= sfc * gef_N2O;
+        Se_NOx= sfc * gef_NOx;
+
+        GHG_se= Se_CO2 + Se_CH4 * 27 + Se_N2O * 273;
+    }
+    return GHG_se;
+}
+
 bool
 fire_type(inputs* data, main_outs* at, int FMC)
 {
