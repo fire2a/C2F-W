@@ -684,20 +684,20 @@ byram_intensity(inputs* data, main_outs* at)
 float surface_fuel_consumption_k(inputs * data)
 {
     float tmp, rh, ch, fch, wa, sigmoid, sfc;
-    string cat;
+    string categoria;
 
     tmp= data->tmp;
     rh= data->rh;
     wa= fls_david[data->nftype][0];
-    cat= dens[data->nftype][0];
+    categoria= dens[data->nftype][0];
     sigmoid= 1/(1+exp(-0.081*(rh-57.09))); //Calculo de sigmoide.
-    ch= (4 + 16 * sigma - 0.00982 * tmp);//Calculo de ch V.3 con el sigmoide.
-    fch= (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0)) / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0));
+    ch= (4 + 16 * sigmoid - 0.00982 * tmp);//Calculo de ch V.3 con el sigmoide.
+    
     // se escoje la curva que corresponda segun el tipo de combustible
-    if (cat=="Grass"){
+    if (categoria=="Grass"){
     sfc= wa * (1 - exp( (ch - 19.127019)));
     }
-    if (cat=="Shrub"){
+    else if (categoria=="Shrub"){
         sfc= wa * (1 - exp(0.11 * (ch - 19.127019)));
     }
     else {
@@ -888,7 +888,7 @@ calculate_k(inputs* data,
     at->sfi = byram_intensity(data, at);
 
     // Step 7: Suface Fuel Consumption
-    at->sfc = surface_fuel_consumption_k(data, at);
+    at->sfc = surface_fuel_consumption_k(data);
 
     // Step 8: Flame Length
     at->fl = flame_length(data, at);
