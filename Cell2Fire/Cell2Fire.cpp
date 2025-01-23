@@ -2457,11 +2457,6 @@ Cell2Fire::getFireProgressMatrix()
     return ProgressMatrix;
 }
 
-/******************************************************************************
-
-                                                                                                                                Main Program
-
-*******************************************************************************/
 /**
  * @brief Entry point for the Cell2Fire simulation program.
  *
@@ -2472,17 +2467,61 @@ Cell2Fire::getFireProgressMatrix()
  *
  * @param argc Number of command line arguments provided
  * @param argv An array of C-style strings representing the command-line arguments.
- *             - `--input-instance-folder <directory>`: Path to the folder containing input data such as fuel and
- * weather.
- *             - `--output-folder <directory>`: Path to the folder where outputs should be saved.
- *             - `--sim <model code>`: Code for which simulation model should be used. "K" for Kitral,
- *             "S" for Scott&Burgan and "C" for FBP.
- *             - `--nsims` <int>: Total number of simulations to run.
- *             - `--seed` <int>: Seed for the random generator
- *             - `--nthreads` <int>: Number of threads to use.
- *
- *             - `--cros`: True if simulation should consider crown fires, False if not.
- *             - ``
+ *             - `--input-instance-folder <path>` (string): Path to the folder containing input data such as fuel and
+ *               weather.
+ *             - `--output-folder <path>` (string): Path to the folder where outputs should be saved.
+ *             - `--sim <model code>` (string): Code for which simulation model should be used. "K" for Kitral,
+ *               "S" for Scott&Burgan, and "C" for FBP.
+ *             - `--nsims <number>` (int): Total number of simulations to run.
+ *             - `--seed <number>` (int): Seed for the random generator.
+ *             - `--nthreads <number>` (int): Number of threads to use.
+ *             - `--cros` (boolean): True if the simulation should consider crown fires, False if not.
+ *             - `--IgnitionRad <number>` (int): If greater than 0, the program selects a point on the circumference
+ *               of radius `IgnitionRad` centered at the ignition point provided. Default is 0.
+ *             - `--fmc <number>` (int): Used in Kitral to calculate critical intensity. Default is 100.
+ *             - `--ROS-CV <number>` (float): If greater than 0, it is used to calculate a random ROSRV (Standard Normal
+ *               RV for Stochastic ROS CV), which is used to weight the ROS. Default is 0.
+ *             - `--ROS-Threshold <number>` (float): Threshold that the ROS must exceed for fire to spread to neighbors
+ *               and for a cell to burn. Default is 0.1.
+ *             - `--HFactor <number>` (float): Factor used to weight the Head ROS. It scales the semi-major axis of the
+ *               ellipse (a) when calculating the ROS towards the neighboring cell. Default is 1.0.
+ *             - `--FFactor <number>` (float): Factor used to weight the Flank ROS. It scales the semi-minor axis of the
+ *               ellipse (b) when calculating the ROS towards the neighboring cell. Default is 1.0.
+ *             - `--BFactor <number>` (float): Factor used to weight the Back ROS and the c of the ellipse when
+ * calculating the ROS towards the neighboring cell. Default is 1.0.
+ *             - `--EFactor <number>` (float): Used to scale the radial distance from the center of the ellipse to its
+ *               perimeter at the angle corresponding to the neighboring cell. Default is 1.0.
+ *             - `--CCFFactor <number>` (float): Used to weight the CCF of the cell when calculating the crown fire ROS
+ * in Scott & Burgan. Default is 0.
+ *             - `--ROS10Factor <number>` (float): Scaling factor for the crown fire ROS. Only used in Scott & Burgan.
+ *               Default is 3.34.
+ *             - `--FirebreakCells <string>`: Provides the simulator with a firebreak plan, setting specified cells to
+ *               "NonBurnable".- `--ignitions`: (boolean) True if the algorithm should read the ignition points from a
+ *               file called "Ignitions.csv". False if ignition points should be chosen randomly.
+ *             - `--ignitionsLog`: (boolean) True if a log with the attempted ignition points should be saved to the
+ *               output directory after the simulations are done.
+ *             - `output-messages`: (boolean) True if cell messages should be saved to the output directory after the
+ *               simulations are done.
+ *             - `--out-fl`: (boolean) True if a raster layer with flame lengths per cell should be saved to the output
+ *               directory after the simulations are done.
+ *             - `--out-intensity`: (boolean) True if a raster layer with Byram intensities should be saved to the
+ *               output directory after the simulations are done.
+ *             - `--out-ros`: (boolean) True if a raster layer with rate of spread per cell should be saved to the
+ *               output directory after the simulations are done.
+ *             - `--out-crown`: (boolean) True if a raster layer showing which cells had crown fires should be saved to
+ *               the output directory after the simulations are done. Only works if `cros` is also True.
+ *             - `--out-cfb`: (boolean) True if a raster layer with crown fire fuel consumption Ratio should be saved to
+ *               the output directory after the simulations are done. Only works if `cros` is also True.
+ *             - `--out-sfb`: (boolean) True if surface burn fraction should be saved to the output directory after the
+ *               simulations are done. Only works if `sim` is "C".
+ *             - `--grids`: (boolean) True if a raster layer with the burn status of each cell per weather period should
+ *               be saved to the output directory after the simulations are done. It will not save the final status of
+ * the cells.
+ *             - `--final-grid`: (boolean) True if a raster layer with the final burn status of the cells should be
+ *               saved to the output directory after the simulations are done.
+ *             - `--bbo`: (boolean) True if user wants to do black box optimization.
+ *             - `--verbose`: (boolean) True if a detailed log of each step should be outputted.
+ *             - ``: (boolean) True if  should be saved to the output directory after the simulations are done.
  *
  * @return Exit status of the program (0 for success).
  *
@@ -2495,6 +2534,10 @@ Cell2Fire::getFireProgressMatrix()
  * conditions are met.
  * - Handling multi-threading for parallel simulations.
  *
+ * @note For detailed usage examples and further information, refer to the project documentation.
+ *
+ * @example ./Cell2Fire --input-instance-folder ./data --output-folder ./output --sim K --nsims 100 --seed 42
+ *                      --nthreads 4 --cros --ignitions --IgnitionRad 10 --fmc 90 --ROS-Threshold 0.15 --out-fl
  */
 int
 main(int argc, char* argv[])
