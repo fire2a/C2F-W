@@ -789,15 +789,15 @@ float surface_fuel_consumption_k(inputs * data)
     
     // se escoje la curva que corresponda segun el tipo de combustible
     if (categoria=="Grass"){
-    sfb= wa * (1 - exp( (ch - 19.127019)));
+    sfc = (1 - exp( (ch - 19.127019)));
     }
     else if (categoria=="Shrub"){
-        sfb= wa * (1 - exp(0.11 * (ch - 19.127019)));
+        sfc = (1 - exp(0.11 * (ch - 19.127019)));
     }
     else {
-        sfb= wa * (1 - exp(0.07 * (ch - 19.127019)));
+        sfc = (1 - exp(0.07 * (ch - 19.127019)));
     }
-    return sfb;
+    return sfc;
 
 
 }
@@ -982,7 +982,7 @@ calculate_k(inputs* data,
     at->sfi = byram_intensity(data, at);
 
     // Step 7: Suface Fuel Consumption
-    at->sfb = surface_fuel_consumption_k(data);
+    at->sfc = surface_fuel_consumption_k(data);
 
     // Step 8: Flame Length
     at->fl = flame_length(data, at);
