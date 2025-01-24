@@ -777,32 +777,30 @@ byram_intensity(inputs* data, main_outs* at)
 /*--------- Surface Fuel Consumption ---------, fuel_coefs * ptr*/
 float surface_fuel_consumption_k(inputs * data, float ros)
 {
-    float tmp, rh, ch, fmc , fv, fch, wa, ws, sigmoid, sfc;
+    float tmp, rh, ch,fch, wa,sigmoid, sfc; /*fmc*/  /*fv*/  /*ws*/
     string categoria;
 
     tmp= data->tmp;
-    //rh= data->rh;
+    rh= data->rh;
     wa= fls_david[data->nftype][0];
-    fmc = fmcs[data->nftype][0] * 60;  // factor de propagacion en m/min
+    //fmc = fmcs[data->nftype][0] * 60;  // factor de propagacion en m/min
     //ws=data->ws;
     categoria= ctgry[data->nftype][0];
-    sigmoid= 1/(1+exp(-0.081*(100-57.09))); //Calculo de sigmoide.
-    ch= (4 + 16 * sigmoid - 0.00982 * 0);//Calculo de ch V.3 con el sigmoide.
-    fch = min(51.43, 52.3342 * pow(ch, -1.3035));//Calculo de fch V.2 con el ch V.3.
-    fv = -12.86 * exp(-0.04316 * 0) + 13.8;
+    sigmoid= 1/(1+exp(-0.081*(rh-57.09))); //Calculo de sigmoide.
+    ch= (4 + 16 * sigmoid - 0.00982 * tmp);//Calculo de ch V.3 con el sigmoide.
+    //fch = min(51.43, 52.3342 * pow(ch, -1.3035));//Calculo de fch V.2 con el ch V.3.
+    //fv = -12.86 * exp(-0.04316 * 0) + 13.8;
 
-    sfc= 1 - exp(-0.09 * (ros - (fmc * fch * fv)));
-
-     /* se escoje la curva que corresponda segun el tipo de combustible
+      //se escoje la curva que corresponda segun el tipo de combustible
     if (categoria=="Grass"){
-    sfc = (1 - exp( (ch - 19.127019)));
+    sfc = (1 - exp( (ch - 20)));
     }
     else if (categoria=="Shrub"){
-        sfc = (1 - exp(0.11 * (ch - 19.127019)));
+        sfc = (1 - exp(0.11 * (ch - 20)));
     }
     else {
-        sfc = (1 - exp(0.07 * (ch - 19.127019)));
-    }*/
+        sfc = (1 - exp(0.07 * (ch - 20)));
+    }
     return sfc;
 
 
