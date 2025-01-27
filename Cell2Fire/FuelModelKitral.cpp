@@ -404,7 +404,7 @@ setup_const()
     fl_pl01.push_back(0.838);
     h_pl01.push_back(18405);
     cbd_pl01.push_back(0.03);
-    ctgry_pl01.push_back("Tree");
+    ctgry_pl01.push_back("Plantation");
     fmcs.insert(std::make_pair(PL01, fmc_pl01));
     cbhs.insert(std::make_pair(PL01, cbh_pl01));
     fls_david.insert(std::make_pair(PL01, fl_pl01));
@@ -424,7 +424,7 @@ setup_const()
     fl_pl02.push_back(3.019);
     h_pl02.push_back(20376);
     cbd_pl02.push_back(0.125);
-    ctgry_pl02.push_back("Tree");
+    ctgry_pl02.push_back("Plantation");
     fmcs.insert(std::make_pair(PL02, fmc_pl02));
     cbhs.insert(std::make_pair(PL02, cbh_pl02));
     fls_david.insert(std::make_pair(PL02, fl_pl02));
@@ -444,7 +444,7 @@ setup_const()
     fl_pl03.push_back(3.333);
     h_pl03.push_back(20376);
     cbd_pl03.push_back(0.218);
-    ctgry_pl03.push_back("Tree");
+    ctgry_pl03.push_back("Plantation");
     fmcs.insert(std::make_pair(PL03, fmc_pl03));
     cbhs.insert(std::make_pair(PL03, cbh_pl03));
     fls_david.insert(std::make_pair(PL03, fl_pl03));
@@ -464,7 +464,7 @@ setup_const()
     fl_pl04.push_back(3.249);
     h_pl04.push_back(20376);
     cbd_pl04.push_back(0.274);
-    ctgry_pl04.push_back("Tree");
+    ctgry_pl04.push_back("Plantation");
     fmcs.insert(std::make_pair(PL04, fmc_pl04));
     cbhs.insert(std::make_pair(PL04, cbh_pl04));
     fls_david.insert(std::make_pair(PL04, fl_pl04));
@@ -484,7 +484,7 @@ setup_const()
     fl_pl05.push_back(4.087);
     h_pl05.push_back(20376);
     cbd_pl05.push_back(0);
-    ctgry_pl05.push_back("Tree");
+    ctgry_pl05.push_back("Plantation");
     fmcs.insert(std::make_pair(PL05, fmc_pl05));
     cbhs.insert(std::make_pair(PL05, cbh_pl05));
     fls_david.insert(std::make_pair(PL05, fl_pl05));
@@ -504,7 +504,7 @@ setup_const()
     fl_pl06.push_back(3.714);
     h_pl06.push_back(20376);
     cbd_pl06.push_back(0);
-    ctgry_pl06.push_back("Tree");
+    ctgry_pl06.push_back("Plantation");
     fmcs.insert(std::make_pair(PL06, fmc_pl06));
     cbhs.insert(std::make_pair(PL06, cbh_pl06));
     fls_david.insert(std::make_pair(PL06, fl_pl06));
@@ -524,7 +524,7 @@ setup_const()
     fl_pl07.push_back(4.063);
     h_pl07.push_back(20376);
     cbd_pl07.push_back(0);
-    ctgry_pl07.push_back("Tree");
+    ctgry_pl07.push_back("Plantation");
     fmcs.insert(std::make_pair(PL07, fmc_pl07));
     cbhs.insert(std::make_pair(PL07, cbh_pl07));
     fls_david.insert(std::make_pair(PL07, fl_pl07));
@@ -544,7 +544,7 @@ setup_const()
     fl_pl08.push_back(0.905);
     h_pl08.push_back(18292);
     cbd_pl08.push_back(0);
-    ctgry_pl08.push_back("Tree");
+    ctgry_pl08.push_back("Plantation");
     fmcs.insert(std::make_pair(PL08, fmc_pl08));
     cbhs.insert(std::make_pair(PL08, cbh_pl08));
     fls_david.insert(std::make_pair(PL08, fl_pl08));
@@ -564,7 +564,7 @@ setup_const()
     fl_pl09.push_back(3.164);
     h_pl09.push_back(20150);
     cbd_pl09.push_back(0);
-    ctgry_pl09.push_back("Tree");
+    ctgry_pl09.push_back("Plantation");
     fmcs.insert(std::make_pair(PL09, fmc_pl09));
     cbhs.insert(std::make_pair(PL09, cbh_pl09));
     fls_david.insert(std::make_pair(PL09, fl_pl09));
@@ -584,7 +584,7 @@ setup_const()
     fl_pl10.push_back(2.742);
     h_pl10.push_back(20150);
     cbd_pl10.push_back(0);
-    ctgry_pl10.push_back("Tree");
+    ctgry_pl10.push_back("Plantation");
     fmcs.insert(std::make_pair(PL10, fmc_pl10));
     cbhs.insert(std::make_pair(PL10, cbh_pl10));
     fls_david.insert(std::make_pair(PL10, fl_pl10));
@@ -604,7 +604,7 @@ setup_const()
     fl_pl11.push_back(2.464);
     h_pl11.push_back(19597);
     cbd_pl11.push_back(0);
-    ctgry_pl11.push_back("Tree");
+    ctgry_pl11.push_back("Plantation");
     fmcs.insert(std::make_pair(PL11, fmc_pl11));
     cbhs.insert(std::make_pair(PL11, cbh_pl11));
     fls_david.insert(std::make_pair(PL11, fl_pl11));
@@ -624,7 +624,7 @@ setup_const()
     fl_dx01.push_back(8.25);
     h_dx01.push_back(19857);
     cbd_dx01.push_back(0);
-    ctgry_dx01.push_back("Tree");
+    ctgry_dx01.push_back("Plantation");
     fmcs.insert(std::make_pair(DX01, fmc_dx01));
     cbhs.insert(std::make_pair(DX01, cbh_dx01));
     fls_david.insert(std::make_pair(DX01, fl_dx01));
@@ -644,7 +644,7 @@ setup_const()
     fl_dx02.push_back(7.125);
     h_dx02.push_back(19463);
     cbd_dx02.push_back(0);
-    ctgry_dx02.push_back("Tree");
+    ctgry_dx02.push_back("Plantation");
     fmcs.insert(std::make_pair(DX02, fmc_dx02));
     cbhs.insert(std::make_pair(DX02, cbh_dx02));
     fls_david.insert(std::make_pair(DX02, fl_dx02));
@@ -775,31 +775,35 @@ byram_intensity(inputs* data, main_outs* at)
 }
 
 /*--------- Surface Fuel Consumption ---------, fuel_coefs * ptr*/
-float surface_fuel_consumption_k(inputs * data, float ros)
+float surface_fuel_consumption_k(inputs * data, main_outs * at)
 {
-    float tmp, rh, ch,fch, wa,sigmoid, sfc; /*fmc*/  /*fv*/  /*ws*/
+    float  sfc, ros; /*fch*/ /*tmp*/ /*rh*/ /*fmc*/  /*fv*/  /*ws*/ /*ch*/ /*wa,sigmoid*/
     string categoria;
 
-    tmp= data->tmp;
-    rh= data->rh;
-    wa= fls_david[data->nftype][0];
+    //tmp= data->tmp;
+    //rh= data->rh;
+    //wa= fls_david[data->nftype][0];
+    ros = at->rss;
     //fmc = fmcs[data->nftype][0] * 60;  // factor de propagacion en m/min
     //ws=data->ws;
     categoria= ctgry[data->nftype][0];
-    sigmoid= 1/(1+exp(-0.081*(rh-57.09))); //Calculo de sigmoide.
-    ch= (4 + 16 * sigmoid - 0.00982 * tmp);//Calculo de ch V.3 con el sigmoide.
+    //sigmoid= 1/(1+exp(-0.081*(rh-57.09))); //Calculo de sigmoide.
+    //ch= (4 + 16 * sigmoid - 0.00982 * tmp);//Calculo de ch V.3 con el sigmoide.
     //fch = min(51.43, 52.3342 * pow(ch, -1.3035));//Calculo de fch V.2 con el ch V.3.
     //fv = -12.86 * exp(-0.04316 * 0) + 13.8;
 
       //se escoje la curva que corresponda segun el tipo de combustible
     if (categoria=="Grass"){
-    sfc = (1 - exp( (ch - 20)));
+    sfc = (1 - exp(-0.09 * (ros)));
     }
     else if (categoria=="Shrub"){
-        sfc = (1 - exp(0.11 * (ch - 20)));
+        sfc = (1 - exp(-0.055 * (ros)));
     }
-    else {
-        sfc = (1 - exp(0.07 * (ch - 20)));
+    else if (categoria=="Plantation"){
+        sfc = (1 - exp(-0.06 * (ros)));
+    }
+    else{
+        sfc = (1 - exp(-0.085 * (ros)));
     }
     return sfc;
 
@@ -986,7 +990,7 @@ calculate_k(inputs* data,
     at->sfi = byram_intensity(data, at);
 
     // Step 7: Suface Fuel Consumption
-    at->sfc = surface_fuel_consumption_k(data, hptr->rss);
+    at->sfc = surface_fuel_consumption_k(data, at);
 
     // Step 8: Flame Length
     at->fl = flame_length(data, at);
