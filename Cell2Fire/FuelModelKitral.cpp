@@ -797,7 +797,6 @@ checkActive(inputs* data, main_outs* at, int FMC) // En KITRAL SE USA PL04
     float ros_critical, cbd, H, wa, i0, cbh;
     bool active;
     cbh = data->cbh;
-
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
     wa = fls_david[data->nftype][0];
