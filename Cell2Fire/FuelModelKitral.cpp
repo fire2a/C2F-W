@@ -698,26 +698,11 @@ float
 crownfractionburn(inputs* data, main_outs* at, int FMC)
 {  // generar output de cfb
     float a, cbd, ros, ros0, H, wa, i0, cbh, cfb;
-    if (std::isnan(data->cbh))
-    {
-        cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        cbh = data->cbh;
-    }
+    cbh = cbhs[data->nftype][0];
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
     wa = fls_david[data->nftype][0];
-    if (std::isnan(data->cbd))
-    {
-        cbd = cbds[data->nftype][0];
-    }
-    else
-    {
-        cbd = data->cbd;
-    }
-
+    cbd = cbds[data->nftype][0];
     ros0 = 60 * i0 / (H * wa);
     ros = at->rss;
     if (cbd != 0)
@@ -782,26 +767,15 @@ checkActive(inputs* data, main_outs* at, int FMC)  // En KITRAL SE USA PL04
 {
     float ros_critical, cbd, H, wa, i0, cbh;
     bool active;
-    if (std::isnan(data->cbh))
-    {
-        cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        cbh = data->cbh;
-    }
+    cbh = cbhs[data->nftype][0];
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
     wa = fls_david[data->nftype][0];
+    cbd = cbds[data->nftype][0];
     ros_critical = 60 * i0 / (H * wa);
-    if (std::isnan(data->cbd))
-    {
-        cbd = cbds[data->nftype][0];
-    }
-    else
-    {
-        cbd = data->cbd;
-    }
+
+    cbd = cbds[data->nftype][0];
+
     active = cbd * ros_critical >= 3;
     return active;
 }
@@ -896,7 +870,7 @@ calculate_k(inputs* data,
 
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not
     // want to include it)
-    if (args->AllowCROS && (data->cbh != 0 || cbhs[data->nftype][0] != 0))
+    if (args->AllowCROS && cbhs[data->nftype][0] != 0)
     {
         if (activeCrown)
         {  // si el fuego esta activo en copas chequeamos condiciones
