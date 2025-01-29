@@ -680,64 +680,6 @@ byram_intensity(inputs* data, main_outs* at)
     return ib;  // unidad de medida
 }
 
-/**
- * Calculates byram fire intensity when there is active crown fire.
- * In order for this to be calculated, the input folder must contain
- * files with CBD, CBH and tree height data for each cell.
- * @param at Structure containing the cell's output data.
- * @param data Structure containing the cell's input data.
- * @return Fire intensity.
- */
-
-float
-crown_byram_intensity_k(main_outs* at, inputs* data)
-{
-    float cbd, cbh;
-    if (std::isnan(data->cbh))
-    {
-        cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        cbh = data->cbh;
-    }
-    float canopy_height = cbh * 2;  // TODO: use real tree height
-    if (canopy_height < 0)
-    {
-        throw std::runtime_error("Tree height is lower than canopy base height, "
-                                 "please provide valid files.");
-    }
-    if (std::isnan(data->cbd))
-    {
-        cbd = cbds[data->nftype][0];
-    }
-    else
-    {
-        cbd = data->cbd;
-    }
-    return std::ceil((hs[data->nftype][0] / 60) * cbd * canopy_height * at->ros_active * 100.0) / 100.0;
-}
-
-/**
- * @brief Calculates the flame length of a cell when there is crown fire.
- * @param intensity Byram intensity for crown fires
- * @return the flame length
- */
-
-float
-crown_flame_length_k(float intensity)
-{
-    float fl = 0.1 * pow(intensity, 0.5);
-    if (fl < 0.01)
-    {
-        return 0;
-    }
-    else
-    {
-        return std::ceil(fl * 100.0) / 100.0;
-    }
-}
-
 bool
 fire_type(inputs* data, main_outs* at, int FMC)
 {
@@ -858,7 +800,6 @@ checkActive(inputs* data, main_outs* at, int FMC)  // En KITRAL SE USA PL04
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
     wa = fls_david[data->nftype][0];
-    cbd = cbds[data->nftype][0];
     ros_critical = 60 * i0 / (H * wa);
     if (std::isnan(data->cbd))
     {
@@ -1003,8 +944,6 @@ calculate_k(inputs* data,
         at->rss = hptr->ros;
         bptr->ros = backfire_ros10_k(hptr, sec);
         fptr->ros = flankfire_ros_k(hptr->ros, bptr->ros, sec->lb);
-        at->crown_intensity = crown_byram_intensity_k(at, data);
-        at->crown_flame_length = crown_flame_length_k(at->crown_intensity);
 
         if (args->verbose)
         {
@@ -1027,8 +966,6 @@ calculate_k(inputs* data,
         at->rss = hptr->ros;
         bptr->ros = backfire_ros10_k(hptr, sec);
         fptr->ros = flankfire_ros_k(hptr->ros, bptr->ros, sec->lb);
-        at->crown_intensity = crown_byram_intensity_k(at, data);
-        at->crown_flame_length = crown_flame_length_k(at->crown_intensity);
 
         if (args->verbose)
         {
@@ -1115,8 +1052,6 @@ determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main
         if (crownFire)
         {
             metrics->cfb = crownfractionburn(data, metrics, FMC);
-            metrics->crown_intensity = crown_byram_intensity_k(metrics, data);
-            metrics->crown_flame_length = crown_flame_length_k(metrics->crown_intensity);
         }
         if (args->verbose)
         {
