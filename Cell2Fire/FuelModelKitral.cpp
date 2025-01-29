@@ -686,14 +686,7 @@ fire_type(inputs* data, main_outs* at, int FMC)
     float intensity, critical_intensity, cbh;
     bool crownFire = false;
     intensity = at->sfi;
-    if (std::isnan(data->cbh))
-    {
-        cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        cbh = data->cbh;
-    }
+    cbh = get_nonan(cbhs[data->nftype][0], data->cbh);
     // cbh = data->cbh;
     critical_intensity = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     if ((intensity > critical_intensity) && cbh != 0)
@@ -705,25 +698,11 @@ float
 crownfractionburn(inputs* data, main_outs* at, int FMC)
 {  // generar output de cfb
     float a, cbd, ros, ros0, H, wa, i0, cbh, cfb;
-    if (std::isnan(data->cbh))
-    {
-        cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        cbh = data->cbh;
-    }
+    cbh = get_nonan(cbhs[data->nftype][0], data->cbh);
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
     wa = fls_david[data->nftype][0];
-    if (std::isnan(data->cbd))
-    {
-        cbd = cbds[data->nftype][0];
-    }
-    else
-    {
-        cbd = data->cbd;
-    }
+    cbd = get_nonan(cbds[data->nftype][0], data->cbd);
 
     ros0 = 60 * i0 / (H * wa);
     ros = at->rss;
@@ -789,26 +768,12 @@ checkActive(inputs* data, main_outs* at, int FMC)  // En KITRAL SE USA PL04
 {
     float ros_critical, cbd, H, wa, i0, cbh;
     bool active;
-    if (std::isnan(data->cbh))
-    {
-        cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        cbh = data->cbh;
-    }
+    cbh = get_nonan(cbhs[data->nftype][0], data->cbh);
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
     wa = fls_david[data->nftype][0];
     ros_critical = 60 * i0 / (H * wa);
-    if (std::isnan(data->cbd))
-    {
-        cbd = cbds[data->nftype][0];
-    }
-    else
-    {
-        cbd = data->cbd;
-    }
+    cbd = get_nonan(cbds[data->nftype][0], data->cbd);
     active = cbd * ros_critical >= 3;
     return active;
 }
@@ -861,14 +826,7 @@ calculate_k(inputs* data,
     FMC = args->FMC;
     ptr->nftype = data->nftype;
     ptr->fmc = fmcs[data->nftype][0];
-    if (isnan(data->cbh))
-    {
-        ptr->cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        ptr->cbh = data->cbh;
-    }
+    ptr->cbh = get_nonan(cbhs[data->nftype][0], data->cbh);
     // cout << "   cbh " << ptr->cbh << "\n";
 
     ptr->fl = fls_david[data->nftype][0];
@@ -1064,4 +1022,10 @@ determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main
     }
 
     metrics->crown = int(crownFire);
+}
+
+float
+get_nonan(float default_value, float actual_value)
+{
+    return std::isnan(actual_value) ? default_value : actual_value;
 }

@@ -73,4 +73,6 @@ void calculate_k(inputs* data,
 
 void determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* at);
 
+float get_nonan(float default_value, float actual_value);
+
 #endif
