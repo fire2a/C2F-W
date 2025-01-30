@@ -701,7 +701,8 @@ crown_byram_intensity_k(main_outs* at, inputs* data)
     {
         cbh = data->cbh;
     }
-    float canopy_height = cbh * 2;  // TODO: use real tree height
+    // CBH is 0,1012 * Height^(1,4822)
+    float canopy_height = std::pow(cbh / 0.1012, 1 / 1.4822) - cbh;
     if (canopy_height < 0)
     {
         throw std::runtime_error("Tree height is lower than canopy base height, "
