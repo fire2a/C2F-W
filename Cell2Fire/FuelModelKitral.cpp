@@ -559,6 +559,10 @@ setup_const()
     cbds.insert(std::make_pair(DX02, cbd_dx02));
 }
 
+/**
+ * @brief Sets default value for crown constants when no raster files are provided for them.
+ * @param data Cell data
+ */
 void
 setup_crown_const(inputs* data)
 {
