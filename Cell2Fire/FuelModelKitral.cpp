@@ -562,11 +562,11 @@ setup_const()
 void
 setup_crown_const(inputs* data)
 {
-    if (std::isnan(data->cbd))
+    if (data->cbd == -999)
     {
         data->cbd = cbds[data->nftype][0];
     }
-    if (std::isnan(data->cbh))
+    if (data->cbh == -999)
     {
         data->cbh = cbhs[data->nftype][0];
     }
@@ -825,7 +825,6 @@ calculate_k(inputs* data,
     // Hack: Initialize coefficients
     setup_const();
     setup_crown_const(data);
-
     // Aux
     float ros, bros, lb, fros;
     int FMC;
@@ -884,7 +883,7 @@ calculate_k(inputs* data,
 
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not
     // want to include it)
-    if (args->AllowCROS && (data->cbh > 0 || cbhs[data->nftype][0] != 0))
+    if (args->AllowCROS && (data->cbh > 0))
     {
         if (activeCrown)
         {  // si el fuego esta activo en copas chequeamos condiciones
@@ -1022,7 +1021,7 @@ determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main
     metrics->fl = flame_length(data, metrics);
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not
     // want to include it)
-    if (args->AllowCROS)
+    if (args->AllowCROS && data->cbh > 0)
     {
         crownFire = fire_type(data, metrics, FMC);
         if (crownFire)
