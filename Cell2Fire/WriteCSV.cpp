@@ -288,6 +288,39 @@ CSVWriter::printIgnitions(std::unordered_map<int, int> ignitionsHistory)
 }
 
 void
+CSVWriter::printStats(std::unordered_map<int, std::vector<float>> statistics)
+{
+    std::ofstream ofs(fileName, std::ofstream::out);
+
+    // Print column titles
+    ofs << "cell,surfaceFlameLength,crownFlameLength,maxFlameLength\n";
+
+    // Iterate through the unordered_map using iterator
+    for (auto it = statistics.begin(); it != statistics.end(); ++it)
+    {
+        int sim = it->first;                                  // The simulation ID (key)
+        const std::vector<float>& flameLengths = it->second;  // The associated flame lengths (value)
+
+        ofs << sim;  // Print the simulation number (key)
+
+        // Print all the flame lengths associated with the current simulation
+        for (size_t j = 0; j < flameLengths.size(); j++)
+        {
+            ofs << "," << flameLengths[j];
+            if (j < flameLengths.size() - 1)
+            {
+                ofs << " ";  // Optional: space between multiple flame lengths
+            }
+        }
+
+        ofs << "\n";  // Move to the next line for each entry
+    }
+
+    // Close the file
+    ofs.close();
+}
+
+void
 CSVWriter::printCSV_V2(int rows, int cols, std::vector<int> statusCells)
 {
     std::ofstream ofs(this->fileName, std::ofstream::out);
