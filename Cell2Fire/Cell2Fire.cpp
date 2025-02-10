@@ -974,41 +974,65 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
     }
 
-    float Cell2Fire::get_co2eq(inputs* df_ptr){
+    float Cell2Fire::get_co2eq(inputs *df_ptr) {
+
         float tfc = 0;
-        float sum=0;
+        float sum = 0;
 
-        if (this->args.Co2eq){
-        
+        if (this->args.Co2eq) {
+
             std::unordered_map<std::string, double> fuel_load = {
-            {"C1", 1.575}, {"C2", 5.08}, {"C3", 5.115}, {"C4", 5.12},
-            {"C5", 5.12}, {"C6", 5.18}, {"C7", 3.55}, {"D1", 1.5},
-            {"M1", 5.08}, {"M2", 5.08}, {"M3", 5.08}, {"M4", 5.08},
-            {"S1", 8.0}, {"S2", 16.0}, {"S3", 32.0}, {"O1a", 0.3}, {"O1b", 0.3}
-            }
+                {"C1", 1.575}, {"C2", 5.08}, {"C3", 5.115}, {"C4", 5.12}, {"C5", 5.12},
+                {"C6", 5.18},  {"C7", 3.55}, {"D1", 1.5},   {"M1", 5.08}, {"M2", 5.08},
+                {"M3", 5.08},  {"M4", 5.08}, {"S1", 8.0},   {"S2", 16.0}, {"S3", 32.0},
+                {"O1a", 0.3},  {"O1b", 0.3}};
 
-            std::vector<std::string> fuelTypes = {"O1a", "O1b", "S1", "S2", "S3", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "D1", "D2", "M1", "M2", "M3", "M4"};
-            std::vector<int> CO2 = {1613, 1613, 1613, 1613, 1613, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569};
-            std::vector<double> CH4 = {2.3, 2.3, 2.3, 2.3, 2.3, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7};
-            std::vector<double> N2O = {0.21, 0.21, 0.21, 0.21, 0.21, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26};
+            // Definir las columnas
+            // Fuente Parametros(Gef): 2006 IPCC Guidelines for National Greenhouse Gas
+            // Inventories Chapter 2, Vol 4
+            std::vector<std::string> fuelTypes = {"O1a", "O1b", "S1", "S2", "S3", "C1",
+                                                "C2",  "C3",  "C4", "C5", "C6", "C7",
+                                                "D1",  "D2",  "M1", "M2", "M3", "M4"};
+            std::vector<int> CO2 = {1613, 1613, 1613, 1613, 1613, 1569,
+                                    1569, 1569, 1569, 1569, 1569, 1569,
+                                    1569, 1569, 1569, 1569, 1569, 1569};
+            std::vector<double> CH4 = {2.3, 2.3, 2.3, 2.3, 2.3, 4.7, 4.7, 4.7, 4.7,
+                                    4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7};
+            std::vector<double> N2O = {0.21, 0.21, 0.21, 0.21, 0.21, 0.26,
+                                    0.26, 0.26, 0.26, 0.26, 0.26, 0.26,
+                                    0.26, 0.26, 0.26, 0.26, 0.26, 0.26};
 
             std::unordered_map<std::string, double> CO2_map;
             std::unordered_map<std::string, double> CH4_map;
             std::unordered_map<std::string, double> N2O_map;
 
             for (size_t i = 0; i < fuelTypes.size(); ++i) {
-                CO2_map[fuelTypes[i]] = CO2[i];
-                CH4_map[fuelTypes[i]] = CH4[i];
-                N2O_map[fuelTypes[i]] = N2O[i];
-                }
-        
-            for (const auto& value : this->burntCells) {
-                std::string cell_ftype = df_ptr[value-1].fueltype;
+            CO2_map[fuelTypes[i]] = CO2[i];
+            CH4_map[fuelTypes[i]] = CH4[i];
+            N2O_map[fuelTypes[i]] = N2O[i];
             }
 
-        return tfc;
+            for (const auto &value : this->burntCells) {
+            std::string cell_ftype = df_ptr[value - 1].fueltype;
+
+            // remove unprintable characters
+            cell_ftype.erase(std::remove(cell_ftype.begin(), cell_ftype.end(), ' '),
+                            cell_ftype.end());
+
+            sum =
+                // this->crownFraction[value-1]+
+                this->surfFraction[value];
+            // Fuente (GWP): Greenhouse Gas Protocol. (2024). Global Warming Potential
+            // Values.
+            tfc += sum *
+                    (CO2_map[cell_ftype] + CH4_map[cell_ftype] * 27.2 +
+                    N2O_map[cell_ftype] * 273) *
+                    (pow(10, -2));
+            }
         }
-    }
+
+        return tfc;
+            }
 }
 
 /**
@@ -2149,6 +2173,10 @@ Cell2Fire::Results()
         CSVWriter ignitionsFile(this->ignitionsFolder + filename);
         ignitionsFile.printIgnitions(IgnitionHistory);
     }
+
+    if (this->Co2eq) {
+        co2_v.push_back(this->Co2eq);
+  }
 }
 
 /**
@@ -2460,6 +2488,15 @@ Cell2Fire::Step(std::default_random_engine generator, int ep)
         printf("\nFire Period: %d", this->fire_period[this->year - 1]);
         printf("\nYear: %d \n\n", this->year);
     }
+
+    if (this->sim > args.TotalSims) {
+        std::string filename = "emissions.csv";
+        CSVWriter co2eqFolder("", "");
+        this->co2eqFolder = this->args.OutFolder + "Co2eq" + separator();
+        co2eqFolder.MakeDir(this->co2eqFolder);
+        CSVWriter co2File(this->co2eqFolder + filename);
+        co2File.printCO2(co2_v);
+  }
 }
 
 void

@@ -85,6 +85,7 @@ class Cell2Fire
     string crownFlameLengthFolder;
     string historyFolder;
     string ignitionsFolder;
+    string co2eqFolder;
 
     // Vectors
     std::vector<int> fire_period;
@@ -113,6 +114,7 @@ class Cell2Fire
     std::vector<float> maxFlameLengths;
     std::vector<std::vector<int>> IgnitionSets;
     // std::vector<int> IgnitionHistory;
+    std::vector<float>co2_v;
 
     // Sets
     std::unordered_set<int> availCells;
