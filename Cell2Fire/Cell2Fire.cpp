@@ -47,6 +47,7 @@ std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;
 std::vector<int> NFTypesCells;
 std::unordered_map<int, int> IgnitionHistory;
+std::vector<float> co2_v;
 
 /******************************************************************************
                                                                                                                                 Utils
@@ -971,6 +972,42 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     if (this->args.verbose)
     {
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+    }
+
+    float Cell2Fire::get_co2eq(inputs* df_ptr){
+        float tfc = 0;
+        float sum=0;
+
+        if (this->args.Co2eq){
+        
+            std::unordered_map<std::string, double> fuel_load = {
+            {"C1", 1.575}, {"C2", 5.08}, {"C3", 5.115}, {"C4", 5.12},
+            {"C5", 5.12}, {"C6", 5.18}, {"C7", 3.55}, {"D1", 1.5},
+            {"M1", 5.08}, {"M2", 5.08}, {"M3", 5.08}, {"M4", 5.08},
+            {"S1", 8.0}, {"S2", 16.0}, {"S3", 32.0}, {"O1a", 0.3}, {"O1b", 0.3}
+            }
+
+            std::vector<std::string> fuelTypes = {"O1a", "O1b", "S1", "S2", "S3", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "D1", "D2", "M1", "M2", "M3", "M4"};
+            std::vector<int> CO2 = {1613, 1613, 1613, 1613, 1613, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569, 1569};
+            std::vector<double> CH4 = {2.3, 2.3, 2.3, 2.3, 2.3, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7, 4.7};
+            std::vector<double> N2O = {0.21, 0.21, 0.21, 0.21, 0.21, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26};
+
+            std::unordered_map<std::string, double> CO2_map;
+            std::unordered_map<std::string, double> CH4_map;
+            std::unordered_map<std::string, double> N2O_map;
+
+            for (size_t i = 0; i < fuelTypes.size(); ++i) {
+                CO2_map[fuelTypes[i]] = CO2[i];
+                CH4_map[fuelTypes[i]] = CH4[i];
+                N2O_map[fuelTypes[i]] = N2O[i];
+                }
+        
+            for (const auto& value : this->burntCells) {
+                std::string cell_ftype = df_ptr[value-1].fueltype;
+            }
+
+        return tfc;
+        }
     }
 }
 
