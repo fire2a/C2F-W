@@ -271,6 +271,7 @@ Cell2Fire::Cell2Fire(arguments _args)
     this->crownIntensities = std::vector<float>(this->nCells, 0);
     this->crownFlameLengths = std::vector<float>(this->nCells, 0);
     this->maxFlameLengths = std::vector<float>(this->nCells, 0);
+    this->Co2eq = 0;
 
     this->ignProb = std::vector<float>(this->nCells, 1);
     CSVParser.parsePROB(this->ignProb, DF, this->nCells);
@@ -329,6 +330,7 @@ Cell2Fire::Cell2Fire(arguments _args)
     this->burningCells.clear();
     this->burntCells.clear();
     this->harvestCells.clear();
+    this->Co2eq = 0;
     for (i = 0; i < this->statusCells.size(); i++)
     {
         if (this->statusCells[i] < 3)
@@ -645,6 +647,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->done = false;
     this->fire_period = vector<int>(this->args.TotalYears, 0);
     this->sim = simExt;
+    this->Co2eq = 0;
     // Initial status grid folder
     if (this->args.OutputGrids || this->args.FinalGrid)
     {
@@ -973,6 +976,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     {
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
     }
+}
 
     float Cell2Fire::get_co2eq(inputs *df_ptr) {
 
@@ -1013,27 +1017,26 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             }
 
             for (const auto &value : this->burntCells) {
-            std::string cell_ftype = df_ptr[value - 1].fueltype;
+                std::string cell_ftype = df_ptr[value - 1].fueltype;
 
-            // remove unprintable characters
-            cell_ftype.erase(std::remove(cell_ftype.begin(), cell_ftype.end(), ' '),
-                            cell_ftype.end());
+                // remove unprintable characters
+                cell_ftype.erase(std::remove(cell_ftype.begin(), cell_ftype.end(), ' '),
+                                cell_ftype.end());
 
-            sum =
-                // this->crownFraction[value-1]+
-                this->surfFraction[value];
-            // Fuente (GWP): Greenhouse Gas Protocol. (2024). Global Warming Potential
-            // Values.
-            tfc += sum *
-                    (CO2_map[cell_ftype] + CH4_map[cell_ftype] * 27.2 +
-                    N2O_map[cell_ftype] * 273) *
-                    (pow(10, -2));
+                sum =
+                    // this->crownFraction[value-1]+
+                    this->surfFraction[value];
+                // Fuente (GWP): Greenhouse Gas Protocol. (2024). Global Warming Potential
+                // Values.
+                tfc += sum *
+                        (CO2_map[cell_ftype] + CH4_map[cell_ftype] * 27.2 +
+                        N2O_map[cell_ftype] * 273) *
+                        (pow(10, -2));
             }
         }
 
         return tfc;
-            }
-}
+    }
 
 /**
  * @brief Simulates the ignition phase of the fire spread model for a single

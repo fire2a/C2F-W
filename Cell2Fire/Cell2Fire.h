@@ -70,6 +70,7 @@ class Cell2Fire
     double areaCells;
     double perimeterCells;
     double ROSRV;
+    float Co2eq;
 
     // Strings
     string gridFolder;
@@ -140,6 +141,7 @@ class Cell2Fire
     void updateWeather();
     void Step(std::default_random_engine generator, int ep);
     void InitHarvested();
+    float get_co2eq(inputs *df_ptr);
 
     // Utils
     std::vector<float> getROSMatrix();
