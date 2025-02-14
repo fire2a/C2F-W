@@ -2177,9 +2177,16 @@ Cell2Fire::Results()
         ignitionsFile.printIgnitions(IgnitionHistory);
     }
 
-    if (this->Co2eq) {
-        co2_v.push_back(this->Co2eq);
+    if (currentSim == args.TotalSims) {
+        std::string filename = "emissions.csv";
+        CSVWriter co2eqFolder("", "");
+        std::cout << "holaaaa" << endl;
+        this->co2eqFolder = this->args.OutFolder + "Co2eq" + separator();
+        co2eqFolder.MakeDir(this->co2eqFolder);
+        CSVWriter co2File(this->co2eqFolder + filename);
+        co2File.printCO2(co2_v);
   }
+  
 }
 
 /**
@@ -2366,6 +2373,7 @@ Cell2Fire::Step(std::default_random_engine generator, int ep)
     // longer than the horizon (should not happen)
     if (this->year > this->args.TotalYears)
     {
+
         if (this->args.verbose)
         {
             printf("\nYear is greater than the Horizon, no more steps");
@@ -2408,6 +2416,7 @@ Cell2Fire::Step(std::default_random_engine generator, int ep)
                 if (this->year > this->args.TotalYears)
                 {
                     // Print-out results to folder
+                    this->Co2eq = this->get_co2eq(df_ptr);
                     this->Results();
                     // Next Sim if max year
                     this->done = true;
@@ -2455,6 +2464,7 @@ Cell2Fire::Step(std::default_random_engine generator, int ep)
     {
         // printf("\n\nEntra a year mayor al total...\n\n");
         //  Print-out results to folder
+        this->Co2eq = this->get_co2eq(df_ptr);
         this->Results();
         // Next Sim if max year
         this->sim += 1;
@@ -2466,10 +2476,15 @@ Cell2Fire::Step(std::default_random_engine generator, int ep)
         // Done
         this->done = true;
         // Print-out results to folder
+        this->Co2eq = this->get_co2eq(df_ptr);
+        co2_v.push_back(this->Co2eq);
         this->Results();
         // Next Sim if max year
         this->sim += 1;
+
     }
+
+    
 
     if ((this->sim > args.TotalSims) && (args.WeatherOpt != "rows"))
     {
@@ -2491,15 +2506,6 @@ Cell2Fire::Step(std::default_random_engine generator, int ep)
         printf("\nFire Period: %d", this->fire_period[this->year - 1]);
         printf("\nYear: %d \n\n", this->year);
     }
-
-    if (this->sim > args.TotalSims) {
-        std::string filename = "emissions.csv";
-        CSVWriter co2eqFolder("", "");
-        this->co2eqFolder = this->args.OutFolder + "Co2eq" + separator();
-        co2eqFolder.MakeDir(this->co2eqFolder);
-        CSVWriter co2File(this->co2eqFolder + filename);
-        co2File.printCO2(co2_v);
-  }
 }
 
 void
