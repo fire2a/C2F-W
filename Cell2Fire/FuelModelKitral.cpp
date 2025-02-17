@@ -559,6 +559,7 @@ setup_const()
     cbds.insert(std::make_pair(DX02, cbd_dx02));
 }
 
+// TODO: citation needed
 float
 rate_of_spread_k(inputs* data,
                  fuel_coefs* ptr,
@@ -595,6 +596,7 @@ rate_of_spread_k(inputs* data,
     return at->rss * (at->rss >= 0);
 }
 
+// TODO: citation needed
 float
 flankfire_ros_k(float ros, float bros, float lb)
 {
@@ -602,6 +604,7 @@ flankfire_ros_k(float ros, float bros, float lb)
 }
 
 /* ----------------- Length-to-Breadth --------------------------*/
+// TODO: citation needed
 float
 l_to_b(float ws, fuel_coefs* ptr)
 {
@@ -613,6 +616,7 @@ l_to_b(float ws, fuel_coefs* ptr)
 }
 
 /* ----------------- Back Rate of Spread --------------------------*/
+// TODO: citation needed
 float
 backfire_ros_k(main_outs* at, snd_outs* sec)
 {
@@ -626,6 +630,7 @@ backfire_ros_k(main_outs* at, snd_outs* sec)
     return bros * (bros >= 0);
 }
 
+// TODO: citation needed
 float
 slope_effect(float elev_i, float elev_j, int cellsize)
 {
@@ -636,6 +641,7 @@ slope_effect(float elev_i, float elev_j, int cellsize)
     return se;
 }
 
+// TODO: citation needed
 float
 flame_length(inputs* data, main_outs* at)  // REVISAR ESTA ECUACI�N
 {
@@ -647,6 +653,7 @@ flame_length(inputs* data, main_outs* at)  // REVISAR ESTA ECUACI�N
     return fl;
 }
 
+// TODO: citation needed
 float
 angleFL(inputs* data, main_outs* at)
 {
@@ -659,6 +666,7 @@ angleFL(inputs* data, main_outs* at)
     return angle;
 }
 
+// TODO: citation needed
 float
 flame_height(inputs* data, main_outs* at)
 {
@@ -668,6 +676,7 @@ flame_height(inputs* data, main_outs* at)
     return fh;
 }
 
+// TODO: citation needed
 float
 byram_intensity(inputs* data, main_outs* at)
 {
@@ -688,12 +697,14 @@ fire_type(inputs* data, main_outs* at, int FMC)
     intensity = at->sfi;
     cbh = cbhs[data->nftype][0];
     // cbh = data->cbh;
+    // TODO: citation needed
     critical_intensity = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     if ((intensity > critical_intensity) && cbh != 0)
         crownFire = true;
     return crownFire;
 }
 
+// TODO: citation needed
 float
 crownfractionburn(inputs* data, main_outs* at, int FMC)
 {  // generar output de cfb
@@ -718,6 +729,7 @@ crownfractionburn(inputs* data, main_outs* at, int FMC)
     return cfb;
 }
 
+// TODO: citation needed
 float
 active_rate_of_spreadPL04(inputs* data,
                           main_outs* at)  // En KITRAL SE USA PL04
@@ -752,6 +764,7 @@ active_rate_of_spreadPL04(inputs* data,
     return ros_active;
 }
 
+// TODO: citation needed
 float
 final_rate_of_spreadPL04(main_outs* at)  // En KITRAL SE USA PL04
 {
@@ -780,6 +793,7 @@ checkActive(inputs* data, main_outs* at, int FMC)  // En KITRAL SE USA PL04
     return active;
 }
 
+// TODO: citation needed
 float
 backfire_ros10_k(fire_struc* hptr, snd_outs* sec)
 {

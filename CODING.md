@@ -1,8 +1,22 @@
 # Coding guidelines
 
+- Follow git [naming conventions](https://github.com/naming-convention/naming-convention-guides/tree/master/git) when creating
+branches and commit messages.
+
+- Pull Request Rules:
+
+    1. **Link to an Issue** – Every pull request must be associated with a corresponding issue that explains the motivation
+       for the change and the expected outcome.
+    2. **Provide a Summary** – Include a comment summarizing the key changes in the pull request description. Highlight any
+       major modifications or impacts.
+    3. **One Feature per Pull Request** – Keep pull requests focused on a single feature, fix, or improvement to ensure
+       clarity and easier review.
+    4. **Scientific citations** - _Fire research deals with real life or death risks;_ If your code involves scientific models or calculations, include citations in [BibText format](https://www.bibtex.com/g/bibtex-format/). More info [Cell2Fire-W/docs/README.md](https://github.com/fire2a/C2F-W/blob/main/docs/README.md)
+
+- Read https://github.com/fire2a#contributing
+
 ## Linter & Fixer
-### TL;DR
-Install the clang-format linter and use it in your IDE or editor, it should automatically use the `.clang-format` file in the project root.
+__TL;DR:__ Install the clang-format linter and use it in your IDE or editor, it should automatically use the `.clang-format` file in the project root.
 
 ### Overview
 For C++ code, `clang-format` is used to ensure consistent code formatting according to the rules specified in the [.clang-format](.clang-format) file. Formatting details can be found in the [documentation](https://clang.llvm.org/docs/ClangFormat.html).

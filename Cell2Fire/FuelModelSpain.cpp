@@ -2192,6 +2192,7 @@ initialize_coeff(int scenario)
     fm_parameters.insert(std::make_pair(189, fp_189));
 }
 
+// TODO: citation needed
 float
 rate_of_spread_s(inputs* data, fuel_coefs* ptr, main_outs* at)
 {
@@ -2207,6 +2208,7 @@ rate_of_spread_s(inputs* data, fuel_coefs* ptr, main_outs* at)
     return at->rss * (at->rss >= 0);
 }
 
+// TODO: citation needed
 float
 flankfire_ros_s(float ros, float bros, float lb)
 {
@@ -2214,6 +2216,7 @@ flankfire_ros_s(float ros, float bros, float lb)
 }
 
 /* ----------------- Length-to-Breadth --------------------------*/
+// TODO: citation needed
 float
 l_to_b(float ws)
 {
@@ -2226,6 +2229,7 @@ l_to_b(float ws)
 }
 
 /* ----------------- Back Rate of Spread --------------------------*/
+// TODO: citation needed
 float
 backfire_ros_s(main_outs* at, snd_outs* sec)
 {
@@ -2239,6 +2243,7 @@ backfire_ros_s(main_outs* at, snd_outs* sec)
     return bros * (bros >= 0);
 }
 
+// TODO: citation needed
 float
 flame_length(inputs* data, fuel_coefs* ptr)
 {
@@ -2259,6 +2264,7 @@ flame_length(inputs* data, fuel_coefs* ptr)
  * @return the flame length
  */
 
+// TODO: citation needed
 float
 crown_flame_length(float intensity)
 {
@@ -2273,6 +2279,7 @@ crown_flame_length(float intensity)
     }
 }
 
+// TODO: citation needed
 float
 angleFL(inputs* data, fuel_coefs* ptr)
 {
@@ -2285,6 +2292,7 @@ angleFL(inputs* data, fuel_coefs* ptr)
     return angle;
 }
 
+// TODO: citation needed
 float
 flame_height(inputs* data, fuel_coefs* ptr)
 {
@@ -2294,6 +2302,7 @@ flame_height(inputs* data, fuel_coefs* ptr)
     return fh;
 }
 
+// TODO: citation needed
 float
 byram_intensity(main_outs* at, fuel_coefs* ptr)
 {
@@ -2312,7 +2321,7 @@ byram_intensity(main_outs* at, fuel_coefs* ptr)
  * @param data Structure containing the cell's input data.
  * @return Fire intensity.
  */
-
+// TODO: citation needed
 float
 crown_byram_intensity(main_outs* at, inputs* data)
 {
@@ -2344,13 +2353,14 @@ fire_type(inputs* data, main_outs* at)
     cbh = data->cbh;
     fmc = fmc_scen(data);
     critical_intensity = pow((0.01 * cbh * (460 + 25.9 * fmc)), 1.5);
-
+    // TODO: citation needed
     if ((intensity > critical_intensity) && cbh != 0)
         crownFire = true;
 
     return crownFire;
 }
 
+// TODO: citation needed
 float
 rate_of_spread10(inputs* data, arguments* args)
 {
@@ -2370,6 +2380,7 @@ rate_of_spread10(inputs* data, arguments* args)
     return (ros);
 }
 
+// TODO: citation needed
 float
 final_rate_of_spread10(inputs* data, main_outs* at)
 {
@@ -2380,6 +2391,7 @@ final_rate_of_spread10(inputs* data, main_outs* at)
     return (ros_final);
 }
 
+// TODO: citation needed
 float
 backfire_ros10_s(fire_struc* hptr, snd_outs* sec)
 {
@@ -2392,6 +2404,7 @@ backfire_ros10_s(fire_struc* hptr, snd_outs* sec)
     return bros;
 }
 
+// TODO: citation needed
 float
 crownfractionburn(inputs* data, main_outs* at)
 {  // generar output de cfb
@@ -2409,7 +2422,6 @@ crownfractionburn(inputs* data, main_outs* at)
     {
         a = -log(0.1) / (0.9 * (3.0 / cbd - ros0));
         // a=0.23;
-
     }
     else
     {
@@ -2423,6 +2435,7 @@ crownfractionburn(inputs* data, main_outs* at)
     return cfb;
 }
 
+// TODO: citation needed
 bool
 checkActive(inputs* data, main_outs* at)  // En s&b se usa fm10
 {
@@ -2505,7 +2518,6 @@ calculate_s(inputs* data,
     // Step 9: Byram Intensity
     at->sfi = byram_intensity(at, ptr);
 
-
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not
     // want to include it)
     if (args->AllowCROS && data->cbh != 0 && data->cbd != 0)
@@ -2552,7 +2564,6 @@ calculate_s(inputs* data,
         at->crown_intensity = crown_byram_intensity(at, data);
         at->crown_flame_length = crown_flame_length(at->crown_intensity);
 
-
         at->a = (hptr->ros + bptr->ros) / 2.;
         at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
         at->c = (hptr->ros - bptr->rss) / 2;
@@ -2569,7 +2580,6 @@ calculate_s(inputs* data,
         fptr->ros = flankfire_ros_s(hptr->ros, bptr->ros, sec->lb);
         at->crown_intensity = crown_byram_intensity(at, data);
         at->crown_flame_length = crown_flame_length(at->crown_intensity);
-
 
         if (args->verbose)
         {
@@ -2665,7 +2675,6 @@ determine_destiny_metrics_s(inputs* data, fuel_coefs* ptr, arguments* args, main
             metrics->cfb = crownfractionburn(data, metrics);
             metrics->crown_intensity = crown_byram_intensity(metrics, data);
             metrics->crown_flame_length = crown_flame_length(metrics->crown_intensity);
-
         }
         if (args->verbose)
         {
