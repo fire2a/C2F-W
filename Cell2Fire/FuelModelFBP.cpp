@@ -11,7 +11,7 @@ Services Fire Behaviour Prediction System. The Canadian Forest Service has gone
 through considerable testing to ensure that these computer functions duplicate
 the system as laid out in ST-X-3 (The Development and Structure of the Canadian
 Forest Fire Behaviour Prediction System (1992)) and the subsequent corrections
-and additions to the system (the draft "FBP Note"), however no guarentte iscell
+and additions to the system (the draft "FBP Note"), however no guarentte is
 given as to the absolute accuracy of the code. This file contains a series of
 functions that go thru all the FBP System calculations. Originally  Written at
 P.N.F.I.  December 91, by Mike Wotton Corrections to version  1.0 1.01  -  b

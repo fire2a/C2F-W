@@ -2,8 +2,8 @@
 
 ```
 sudo apt-get install doxygen
-cd C2F-W
-doxygen docs/Doxyfile
+cd docs/C2F-W
+doxygen Doxyfile
 ```
 
 The generated files will be saved to the docs directory.
