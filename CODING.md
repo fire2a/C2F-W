@@ -66,3 +66,20 @@ _Notice: This is not needed for this project, as we already have a `.clang-forma
     vim .clang-format                                       # modify .clang-format to your liking
     clang-format -i -style=file my-code.cpp                 # format a file
 
+
+# GIT practices
+
+Follow [naming conventions](https://github.com/naming-convention/naming-convention-guides/tree/master/git) when creating
+branches and commit messages.
+
+## Pull Request Rules
+
+1. **Link to an Issue** – Every pull request must be associated with a corresponding issue that explains the motivation
+   for the change and the expected outcome.
+2. **Provide a Summary** – Include a comment summarizing the key changes in the pull request description. Highlight any
+   major modifications or impacts.
+3. **One Feature per Pull Request** – Keep pull requests focused on a single feature, fix, or improvement to ensure
+   clarity and easier review.
+4. **Cite Scientific References for Calculations** – If your code involves scientific calculations, include proper
+   citations. Follow the documentation guidelines in `docs/README.md` to reference sources correctly.
+
