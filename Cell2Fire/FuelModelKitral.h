@@ -72,7 +72,5 @@ void calculate_k(inputs* data,
                  bool& activeCrown);
 
 void determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* at);
-int add(int a, int b);
-int subtract(int a, int b);
 
 #endif
