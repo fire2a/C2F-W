@@ -13,6 +13,12 @@ OBJS = $(SRCS:.cpp=.o)
 
 # Target executable
 TARGET = Cell2Fire
+TEST_DIR = ../test/unit_tests
+TEST_TARGET = test_cell2fire
+
+# Test source files
+TEST_FILES = $(TEST_DIR)/test_kitral.cpp FuelModelKitral.cpp
+#TODO: poner bien los archivos test
 
 # Build rules
 all: $(TARGET)
@@ -20,11 +26,18 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CXX) -o $(TARGET) $(OBJS) $(LDFLAGS)
 
+tests: $(TEST_TARGET)
+	./$(TEST_TARGET)
+
+$(TEST_TARGET): $(TEST_FILES) $(SRCS)
+	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_FILES)
+
+
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) $(TEST_TARGET)
 
 DESTDIR = /usr/local/bin
 install: all
