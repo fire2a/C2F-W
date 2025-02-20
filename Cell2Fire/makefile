@@ -2,7 +2,7 @@
 CXX = g++-12
 
 # Compiler and linker flags
-CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I /usr/include -I /usr/include/eigen3 -I googletest/googletest/include
+CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I /usr/include -I /usr/include/eigen3
 LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff 
 
 # Source files
