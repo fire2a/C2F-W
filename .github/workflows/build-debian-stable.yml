@@ -95,7 +95,11 @@ jobs:
           ls Cell2Fire
           chmod +x Cell2Fire/Cell2Fire*
 
-      - name: Test
+      - name: Bash Test
         run: |
           cd test
           bash test.sh ${{ env.SUFFIX }}
+      - name: Unit Test
+        run: |
+          cd C2F-W/Cell2Fire
+          make tests ${{ env.SUFFIX }}
