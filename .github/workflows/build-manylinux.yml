@@ -100,6 +100,11 @@ jobs:
         run: |
           chmod +x Cell2Fire/Cell2Fire*
 
+      - name: Unit Test
+        run: |
+          cd Cell2Fire
+          make tests
+
       - name: Test ManyLinux
         run: |
           cd test

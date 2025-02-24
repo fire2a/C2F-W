@@ -99,7 +99,12 @@ jobs:
           ldd Cell2Fire
           mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
 
-      - name: Test
+      - name: Unit Test
+        run: |
+          cd Cell2Fire
+          make tests
+
+      - name: Bash Test
         continue-on-error: true
         run: |
           cd test
