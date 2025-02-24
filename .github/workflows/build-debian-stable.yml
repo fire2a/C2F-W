@@ -75,6 +75,18 @@ jobs:
           apt install -y g++-12 make lsb-release unzip libtiff6 libgomp1 libeigen3-dev
           # apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev catch2
 
+      - name: Cache Catch2 header
+        uses: actions/cache@v3
+        with:
+          path: catch.hpp
+          key: ${{ runner.os }}-catch2
+
+      - name: Download Catch2 header
+        run: |
+          if [ ! -f catch.hpp ]; then
+            curl -L https://github.com/catchorg/Catch2/releases/latest/download/catch.hpp -o catch.hpp
+          fi
+
       - name: Get Environment
         id: get_env
         run: |
