@@ -84,6 +84,7 @@ jobs:
       - name: Download Catch2 header
         run: |
           if [ ! -f catch.hpp ]; then
+            mkdir test/unit_tests/catch2
             curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o test/unit_tests/catch2/catch.hpp
           fi
 
