@@ -26,7 +26,15 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CXX) -o $(TARGET) $(OBJS) $(LDFLAGS)
 
-tests: $(TEST_TARGET)
+# Download catch2 header
+download:
+ifeq (,$(wildcard ./tests/catch2/catch2.hpp))
+	mkdir -p tests/catch2 && \
+	wget -O tests/catch2/catch2.hpp https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp
+endif
+
+tests: dowload
+	$(TEST_TARGET)
 	./$(TEST_TARGET)
 
 $(TEST_TARGET): $(TEST_FILES) $(SRCS)
@@ -38,6 +46,7 @@ $(TEST_TARGET): $(TEST_FILES) $(SRCS)
 
 clean:
 	rm -f $(OBJS) $(TARGET) $(TEST_TARGET)
+	rm -rf tests/catch2
 
 DESTDIR = /usr/local/bin
 install: all
