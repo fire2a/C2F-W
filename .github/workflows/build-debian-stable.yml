@@ -72,7 +72,7 @@ jobs:
       - name: Install Dependencies
         run: |
           apt update
-          apt install -y g++-12 make lsb-release unzip libtiff6 libgomp1 catch2
+          apt install -y g++-12 make lsb-release unzip libtiff6 libgomp1 libeigen3 libboost-all catch2
           # apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev catch2
 
       - name: Get Environment
