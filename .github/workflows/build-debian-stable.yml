@@ -102,4 +102,4 @@ jobs:
       - name: Unit Test
         run: |
           cd Cell2Fire
-          make tests ${{ env.SUFFIX }}
+          make tests
