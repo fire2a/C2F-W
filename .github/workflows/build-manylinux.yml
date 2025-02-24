@@ -87,7 +87,7 @@ jobs:
       - name: Install Base Dependencies
         run: |
           apt update
-          apt install -y unzip lsb-release
+          apt install -y unzip lsb-release catch2
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
