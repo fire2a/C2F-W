@@ -84,7 +84,7 @@ jobs:
       - name: Download Catch2 header
         run: |
           if [ ! -f catch.hpp ]; then
-            curl -L https://github.com/catchorg/Catch2/releases/latest/download/catch.hpp -o catch.hpp
+            curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o test/unit_tests/catch2/catch.hpp
           fi
 
       - name: Get Environment
