@@ -87,7 +87,7 @@ jobs:
       - name: Install Base Dependencies
         run: |
           apt update
-          apt install -y unzip g++-12 make lsb-release eigen catch2
+          apt install -y unzip g++-12 make lsb-release libeigen3-dev catch2
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
