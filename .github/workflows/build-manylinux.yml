@@ -24,11 +24,11 @@ jobs:
       - name: Install Build Dependencies
         run: |
           sudo apt update
-          sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev catch2
+          sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
 
       - name: Check Packages Versions
         run: |
-          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev catch2 > new_pkgs_ubuntu.txt
+          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev > new_pkgs_ubuntu.txt
           cat new_pkgs_ubuntu.txt
 
       - name: Get Environment
@@ -87,7 +87,20 @@ jobs:
       - name: Install Base Dependencies
         run: |
           apt update
-          apt install -y unzip g++-12 make lsb-release libeigen3-dev catch2
+          apt install -y unzip g++-12 make lsb-release libeigen3-dev curl
+
+      - name: Cache Catch2 header
+        uses: actions/cache@v3
+        with:
+          path: catch.hpp
+          key: ${{ runner.os }}-catch2
+
+      - name: Download Catch2 header
+        run: |
+          if [ ! -f test/unit_tests/catch2/catch.hpp ]; then
+            mkdir  /usr/include/catch2
+            curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /usr/include/catch2/catch.hpp
+          fi
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
