@@ -16,7 +16,7 @@ else
 	HOMEBREW_PREFIX := /usr/local
 endif
 
-INCLUDE := $(HOMEBREW_PREFIX)/include
+INCLUDE := $(HOMEBREW_PREFIX)/Cellar
 OPT := $(HOMEBREW_PREFIX)/opt
 
 # Compiler and linker flags
