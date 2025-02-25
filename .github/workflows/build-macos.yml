@@ -99,7 +99,7 @@ jobs:
       - name: Unit Test
         run: |
           cd Cell2Fire
-          make tests
+          make  -f makefile.macos tests
 
       - name: Bash Test
         run: |
