@@ -32,7 +32,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install gcc@12 libomp eigen boost libtiff catch2 # llvm ?
+          brew install gcc@12 libomp eigen boost libtiff # llvm ?
 
       - name: Build
         run: |
@@ -69,3 +69,60 @@ jobs:
           path: |
             Cell2Fire/otool_${{ env.suffix }}-static.txt
             Cell2Fire/Cell2Fire_${{ env.suffix }}-static
+  test:
+    needs: build
+    strategy:
+      matrix:
+        runner: [ "macOS-13", "macOS-14" ]
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          brew install gcc@12 libomp eigen boost libtiff curl
+
+      - name: Cache Catch2 header
+        uses: actions/cache@v3
+        with:
+          path: catch.hpp
+          key: ${{ runner.os }}-catch2
+
+      - name: Download Catch2 header
+        run: |
+          if [ ! -f test/unit_tests/catch2/catch.hpp ]; then
+            mkdir  /usr/include/catch2
+            curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /usr/include/catch2/catch.hpp
+          fi
+
+      - name: Get Environment
+        id: get_env
+        run: |
+          DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
+          CODENAME=$( lsb_release --short --codename 2>/dev/null )
+          MACHINE=$( uname --machine 2>/dev/null )
+          echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: binaries${{ env.SUFFIX }}
+          path: Cell2Fire
+          merge-multiple: true
+
+      - name: chmod
+        run: |
+          ls Cell2Fire
+          chmod +x Cell2Fire/Cell2Fire*
+
+      - name: Unit Test
+        run: |
+          cd Cell2Fire
+          make tests
+
+      - name: Bash Test
+        run: |
+          cd test
+          bash test.sh ${{ env.SUFFIX }}

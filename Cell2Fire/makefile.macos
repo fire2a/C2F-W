@@ -42,8 +42,14 @@ $(TARGET): $(OBJS)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+tests: $(TEST_TARGET)
+	./$(TEST_TARGET)
+
+$(TEST_TARGET): $(TEST_FILES) $(SRCS)
+	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_FILES)
+
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) $(TEST_TARGET)
 
 DESTDIR = /usr/local/bin
 install: all
