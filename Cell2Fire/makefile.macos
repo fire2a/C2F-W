@@ -16,11 +16,11 @@ else
 	HOMEBREW_PREFIX := /usr/local
 endif
 
-INCLUDE := $(HOMEBREW_PREFIX)/Cellar
+INCLUDE := $(HOMEBREW_PREFIX)/include
 OPT := $(HOMEBREW_PREFIX)/opt
 
 # Compiler and linker flags
-CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I $(INCLUDE) -I $(INCLUDE)/eigen3 -I $(INCLUDE)/boost
+CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I $(INCLUDE) -I $(INCLUDE)/eigen3 -I $(INCLUDE)/boost -I $(INCLUDE)/catch2
 LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff -L$(OPT)/libtiff/lib
 
 # Source files
