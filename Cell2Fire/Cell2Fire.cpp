@@ -1018,6 +1018,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
 
             for (const auto &value : this->burntCells) {
                 std::string cell_ftype = df_ptr[value - 1].fueltype;
+                //std::cout << value << endl;
 
                 // remove unprintable characters
                 cell_ftype.erase(std::remove(cell_ftype.begin(), cell_ftype.end(), ' '),
@@ -1025,7 +1026,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
 
                 sum =
                     // this->crownFraction[value-1]+
-                    this->surfFraction[value];
+                    this->surfFraction[value-1];
                 // Fuente (GWP): Greenhouse Gas Protocol. (2024). Global Warming Potential
                 // Values.
                 tfc += sum *
@@ -2180,10 +2181,10 @@ Cell2Fire::Results()
     if (currentSim == args.TotalSims) {
         std::string filename = "emissions.csv";
         CSVWriter co2eqFolder("", "");
-        std::cout << "holaaaa" << endl;
         this->co2eqFolder = this->args.OutFolder + "Co2eq" + separator();
         co2eqFolder.MakeDir(this->co2eqFolder);
         CSVWriter co2File(this->co2eqFolder + filename);
+        std::cout << co2_v.size() << endl;
         co2File.printCO2(co2_v);
   }
   
@@ -2358,6 +2359,7 @@ Cell2Fire::Step(std::default_random_engine generator, int ep)
     bool auxC = false;
     this->noMessages = false;
     // Conditions entering the step
+    
     if (this->args.verbose)
     {
         std::cout << "********************************************" << std::endl;
@@ -2465,6 +2467,7 @@ Cell2Fire::Step(std::default_random_engine generator, int ep)
         // printf("\n\nEntra a year mayor al total...\n\n");
         //  Print-out results to folder
         this->Co2eq = this->get_co2eq(df_ptr);
+        co2_v.push_back(this->Co2eq);
         this->Results();
         // Next Sim if max year
         this->sim += 1;
@@ -2477,7 +2480,6 @@ Cell2Fire::Step(std::default_random_engine generator, int ep)
         this->done = true;
         // Print-out results to folder
         this->Co2eq = this->get_co2eq(df_ptr);
-        co2_v.push_back(this->Co2eq);
         this->Results();
         // Next Sim if max year
         this->sim += 1;
