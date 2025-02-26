@@ -3,7 +3,7 @@
 //
 #define CATCH_CONFIG_MAIN
 #include "../../Cell2Fire/FuelModelKitral.h"
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 // #include <catch2/matchers/catch_matchers_floating_point.hpp>
 using Catch::Matchers::WithinAbs;
 
