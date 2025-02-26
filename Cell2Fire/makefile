@@ -5,6 +5,8 @@ CXX = g++-12
 CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I /usr/include -I /usr/include/eigen3
 LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff 
 
+CXXFLAGS += $(shell pkg-config --cflags catch2-with-main)
+LDFLAGS  += $(shell pkg-config --libs catch2-with-main)
 # Source files
 SRCS = Cell2Fire.cpp Cells.cpp FuelModelSpain.cpp FuelModelKitral.cpp FuelModelFBP.cpp Spotting.cpp ReadCSV.cpp ReadArgs.cpp Lightning.cpp WriteCSV.cpp Ellipse.cpp DataGenerator.cpp
 
