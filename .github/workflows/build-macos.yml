@@ -32,7 +32,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install gcc@12 libomp eigen boost libtiff catch2@2 # llvm ?
+          brew install gcc@12 libomp eigen boost libtiff catch2 # llvm ?
 
       - name: Build
         run: |
@@ -52,7 +52,7 @@ jobs:
 
       - name: Install Static Dependencies
         run: |
-          brew install gcc@12 libomp eigen boost libtiff jpeg-turbo xz zstd zlib catch2@2 
+          brew install gcc@12 libomp eigen boost libtiff jpeg-turbo xz zstd zlib catch2
 
       - name: Build Static
         run: |
@@ -82,7 +82,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install gcc@12 libomp eigen boost libtiff catch2@2
+          brew install gcc@12 libomp eigen boost libtiff catch2
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
