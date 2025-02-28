@@ -114,7 +114,7 @@ class Cell2Fire
     std::vector<float> crownFlameLengths;
     std::vector<float> maxFlameLengths;
     std::vector<std::vector<int>> IgnitionSets;
-    std::vector<int> initialPoints;
+    std::unordered_map<int, int> initialPoints;
     // std::vector<int> IgnitionHistory;
     std::vector<float>co2_v;
 

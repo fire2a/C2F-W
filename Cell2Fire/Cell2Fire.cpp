@@ -48,7 +48,7 @@ std::unordered_map<int, std::vector<int>> HarvestedCells;
 std::vector<int> NFTypesCells;
 std::unordered_map<int, int> IgnitionHistory;
 std::vector<float> co2_v;
-std::vector<int> initialPoints;
+std::unordered_map<int, int> initialPoints;
 
 /******************************************************************************
                                                                                                                                 Utils
@@ -344,7 +344,7 @@ Cell2Fire::Cell2Fire(arguments _args)
 
     /* Weather DataFrame */
     this->WeatherDF = this->CSVWeather.getData();
-    std::cout << "\nWeather DataFrame from instance " << this->CSVWeather.fileName << std::endl;
+    //std::cout << "\nWeather DataFrame from instance " << this->CSVWeather.fileName << std::endl;
 
     if (this->args.WeatherOpt.compare("distribution") == 0)
     {
@@ -359,7 +359,7 @@ Cell2Fire::Cell2Fire(arguments _args)
     // Populate WDF
     int WPeriods = WeatherDF.size() - 1;  // -1 due to header
     wdf_ptr = &wdf[0];
-    std::cout << "Weather Periods: " << WPeriods << std::endl;
+    //std::cout << "Weather Periods: " << WPeriods << std::endl;
 
     // Populate the wdf objects
     this->CSVWeather.parseWeatherDF(wdf_ptr, this->args_ptr, this->WeatherDF, WPeriods);
@@ -767,12 +767,12 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             std::cerr << e.what() << std::endl;
             std::abort();
         }
-        std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
+        //std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
 
         // Populate WDF
         int WPeriods = this->WeatherDF.size() - 1;  // -1 due to header
         wdf_ptr = &wdf[0];
-        std::cout << "Weather Periods: " << WPeriods << std::endl;
+        //std::cout << "Weather Periods: " << WPeriods << std::endl;
         std::string weather_name = "";
         for (int i = this->CSVWeather.fileName.size() - 1; i >= 0; i--)
         {
@@ -868,12 +868,12 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             std::cerr << e.what() << std::endl;
             std::abort();
         }
-        std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
+        //std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
 
         // Populate WDF
         int WPeriods = this->WeatherDF.size() - 1;  // -1 due to header
         wdf_ptr = &wdf[0];
-        std::cout << "Weather Periods: " << WPeriods << std::endl;
+        //std::cout << "Weather Periods: " << WPeriods << std::endl;
 
         // Populate the wdf objects
         this->CSVWeather.parseWeatherDF(wdf_ptr, this->args_ptr, this->WeatherDF, WPeriods);
@@ -1204,26 +1204,39 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
     else
     {
 
+        CSVReader reader(args.InFolder+"Ignitions.csv", ",");
+
+        // Step 2: Read the CSV into a data frame (vector of vector of strings)
+        std::unordered_map<int, int> DF = reader.getDataIg();  // Assuming readCSV() exists
+
+        // Step 3: Print the data using printData()
+        //reader.printData(DF);
+
         if (initialPoints.empty())
         {
-            initialPoints = this->IgnitionPoints;
+            std::cout << "estoy vacio" << std::endl;
+            initialPoints = DF;
+            //reader.printData(initialPoints)
         }
-        std::random_device dev;
-        std::mt19937 rng(dev());
-        std::uniform_int_distribution<std::mt19937::result_type> dist(1, initialPoints.size());
-        int rd = dist(rng);
-        int temp = initialPoints[rd - 1];
-        initialPoints.erase(initialPoints.begin() + rd - 1);
+
+        //int temp = initialPoints[];
+        int temp = initialPoints[this->sim];
+        //initialPoints.erase(initialPoints.begin() + rd - 1);
 
         // If ignition Radius != 0, sample from the Radius set
         if (this->args.IgnitionRadius > 0)
         {
             // Pick any at random and set temp with that cell
-            std::uniform_int_distribution<int> udistribution(0, this->IgnitionSets[this->year - 1].size() - 1);
-            temp = this->IgnitionSets[this->year - 1][udistribution(generator)];
+            temp = 5;
+            //std::uniform_int_distribution<int> udistribution(0, this->IgnitionSets[this->year - 1].size() - 1);
+            //temp = this->IgnitionSets[this->year - 1][udistribution(generator)];
         }
 
-        std::cout << "\nSelected ignition point for Year " << this->year << ", sim " << this->sim << ": " << temp;
+        std::cout << "\nsim: " << this->sim << " ip: " << temp << std::endl;
+        //std::cout << "ip: " << temp << std::endl;
+        //std::cout << "weather file:" << this->CSVWeather.fileName << "awa" << std::endl;
+
+        //std::cout << "Selected ignition point for Year " << this->year << ", sim " << this->sim << ": " << temp;
         // this->
         IgnitionHistory[sim] = temp;
 
@@ -1954,7 +1967,7 @@ Cell2Fire::Results()
     float BCells = this->burntCells.size();
     float NBCells = this->nonBurnableCells.size();
     float HCells = this->harvestCells.size();
-
+    /*
     std::cout << "\n----------------------------- Results "
                  "-----------------------------"
               << std::endl;
@@ -1966,7 +1979,7 @@ Cell2Fire::Results()
               << std::endl;
     std::cout << "Total Firebreak Cells: " << HCells << " - % of the Forest: " << HCells / nCells * 100.0 << "%"
               << std::endl;
-
+    */
     // Final Grid
     if (this->args.FinalGrid)
     {
@@ -2171,7 +2184,7 @@ Cell2Fire::Results()
     if (currentSim == args.TotalSims && this->args.IgnitionsLog)
     {
 
-        std::cout << "Writing ignitions log csv..." << endl;
+        //std::cout << "\n Writing ignitions log csv..." << endl;
         if (this->args.verbose)
         {
             std::cout << "(simulation_id, cell_id): ";
@@ -2612,11 +2625,11 @@ main(int argc, char* argv[])
         TID = omp_get_thread_num();
         if (TID == 0 && omp_get_num_threads() < 2)
         {
-            cout << "There are " << omp_get_num_threads() << " threads" << endl;
+            //cout << "There are " << omp_get_num_threads() << " threads" << endl;
         }
         else
         {
-            cout << "Serial version execution" << endl;
+            //cout << "Serial version execution" << endl;
         }
         Cell2Fire Forest = Forests[TID];
         // Random seed
