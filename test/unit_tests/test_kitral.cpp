@@ -4,6 +4,7 @@
 #define CATCH_CONFIG_MAIN
 #include "../../Cell2Fire/FuelModelKitral.h"
 #include <catch2/catch.hpp>
+#define CATCH_CONFIG_MAIN
 
 using Catch::Matchers::WithinAbs;
 
