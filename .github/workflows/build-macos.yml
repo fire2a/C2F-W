@@ -99,9 +99,9 @@ jobs:
 
       - name: Download Catch2 header
         run: |
-          if [ ! -f /opt/homebrew/include/catch2/catch.hpp ]; then
-            mkdir  /opt/homebrew/include/catch2
-            curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /opt/homebrew/include/catch2/catch.hpp
+          if [ ! -f /usr/local/include/catch2/catch.hpp ]; then
+            mkdir -p /usr/local/include/catch2
+            curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /usr/local/include/catch2/catch.hpp
           fi
 
       - name: chmod
