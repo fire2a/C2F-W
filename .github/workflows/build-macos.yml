@@ -32,7 +32,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install gcc@12 libomp eigen boost libtiff catch2 # llvm ?
+          brew install gcc@12 libomp eigen boost libtiff # llvm ?
 
       - name: Build
         run: |
@@ -52,7 +52,7 @@ jobs:
 
       - name: Install Static Dependencies
         run: |
-          brew install gcc@12 libomp eigen boost libtiff jpeg-turbo xz zstd zlib catch2
+          brew install gcc@12 libomp eigen boost libtiff jpeg-turbo xz zstd zlib
 
       - name: Build Static
         run: |
@@ -82,7 +82,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install gcc@12 libomp eigen boost libtiff catch2
+          brew install gcc@12 libomp eigen boost libtiff
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
@@ -90,6 +90,19 @@ jobs:
           pattern: binaries${{ env.SUFFIX }}
           path: Cell2Fire
           merge-multiple: true
+
+      - name: Cache Catch2 header
+        uses: actions/cache@v3
+        with:
+          path: catch.hpp
+          key: ${{ runner.os }}-catch2
+
+      - name: Download Catch2 header
+        run: |
+          if [ ! -f /opt/homebrew/include/catch2/catch.hpp ]; then
+            mkdir  /opt/homebrew/include/catch2
+            curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /opt/homebrew/include/catch2/catch.hpp
+          fi
 
       - name: chmod
         run: |
