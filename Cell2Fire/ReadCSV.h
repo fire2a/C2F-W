@@ -42,7 +42,7 @@ class CSVReader
 
     // Function to fetch data from a CSV File
     std::vector<std::vector<std::string>> getData();
-    std::unordered_map<int, int> getDataIg();
+    std::unordered_map<int, std::pair<int,std::string>> getDataIg();
 
     // Print data to console (Debug)
     void printData(std::vector<std::vector<std::string>>& DF);

@@ -49,6 +49,8 @@ std::vector<int> NFTypesCells;
 std::unordered_map<int, int> IgnitionHistory;
 std::vector<float> co2_v;
 std::unordered_map<int, int> initialPoints;
+std::unordered_map<int, std::pair<int,std::string>> replicationDF;
+std::unordered_map<int, std::pair<int,std::string>> replicationHistory;
 
 /******************************************************************************
                                                                                                                                 Utils
@@ -378,6 +380,10 @@ Cell2Fire::Cell2Fire(arguments _args)
         std::string ignitionFile = args.InFolder + "Ignitions.csv";
         std::string sep = ",";
         CSVReader CSVIgnitions(ignitionFile, sep);
+
+        CSVReader reader(args.InFolder+"Ignitions.csv", ",");
+        replicationDF = reader.getDataIg();  // Assuming readCSV() exists
+        //initialPoints = replicationDF;
 
         // Populate Ignitions vector
         std::vector<std::vector<std::string>> IgnitionsDF = CSVIgnitions.getData();
@@ -791,6 +797,75 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         }
         reverse(weather_name.begin(), weather_name.end());
         WeatherHistory.push_back(weather_name);
+        replicationHistory[this->sim].second = weather_name;
+
+        // Populate the wdf objects
+        this->CSVWeather.parseWeatherDF(wdf_ptr, this->args_ptr, this->WeatherDF, WPeriods);
+        // DEBUGthis->CSVWeather.printData(this->WeatherDF);
+
+        // Check maxFirePeriods and Weather File consistency (reset
+        // MaxFirePeriods and recalculate)
+        int maxFP = this->args.MinutesPerWP / this->args.FirePeriodLen * WPeriods;
+        this->args.MaxFirePeriods = 10000000;
+        // DEBUGstd::cout << "Int MaxFP: " << maxFP << std::endl;
+        // DEBUGstd::cout << "MinutesPerWP: " << this->args.MinutesPerWP <<
+        // std::endl; DEBUGstd::cout << "FirePeriodLen: " <<
+        // this->args.FirePeriodLen << std::endl; DEBUGstd::cout <<
+        // "MaxfirePeriods: " << this->args.MaxFirePeriods << std::endl;
+        if (this->args.MaxFirePeriods > maxFP)
+        {
+            this->args.MaxFirePeriods = maxFP;
+            if (this->args.verbose)
+            {
+                std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
+                          << " based on the weather file, Fire Period Length, "
+                             "and Minutes per WP"
+                          << std::endl;
+            }
+        }
+    }
+
+    if (this->args.WeatherOpt.compare("replication") == 0)
+    {
+        
+        // Random Weather
+        this->CSVWeather.fileName = replicationDF[this->sim].second;
+
+        /* Weather DataFrame */
+        try
+        {
+            this->WeatherDF = this->CSVWeather.getData();
+        }
+        catch (std::invalid_argument& e)
+        {
+            std::cerr << e.what() << std::endl;
+            std::abort();
+        }
+        //std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
+
+        // Populate WDF
+        int WPeriods = this->WeatherDF.size() - 1;  // -1 due to header
+        wdf_ptr = &wdf[0];
+        //std::cout << "Weather Periods: " << WPeriods << std::endl;
+        std::string weather_name = "";
+        for (int i = this->CSVWeather.fileName.size() - 1; i >= 0; i--)
+        {
+            std::string bol = std::to_string(this->CSVWeather.fileName[i]);
+            int bol2 = std::stoi(bol);
+            char check = '\\';
+            int intcheck = (int)check;
+            if (bol2 == intcheck)
+            {
+                break;
+            }
+            else
+            {
+                weather_name.push_back(this->CSVWeather.fileName[i]);
+            }
+        }
+        reverse(weather_name.begin(), weather_name.end());
+        WeatherHistory.push_back(weather_name);
+        replicationHistory[this->sim].second = weather_name;
 
         // Populate the wdf objects
         this->CSVWeather.parseWeatherDF(wdf_ptr, this->args_ptr, this->WeatherDF, WPeriods);
@@ -857,6 +932,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         // Random Weather
         this->CSVWeather.fileName = this->args.InFolder + "Weathers" + separator() + weather_name + ".csv";
         WeatherHistory.push_back(weather_name);
+        replicationHistory[this->sim].second = weather_name;
 
         /* Weather DataFrame */
         try
@@ -1156,6 +1232,7 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
                 if (it->second.getStatus() == "Available" && it->second.fType != 0)
                 {
                     IgnitionHistory[sim] = aux;
+                    replicationHistory[this->sim].first = aux;
                     std::cout << "\nSelected (Random) ignition point for Year " << this->year << ", sim " << this->sim
                               << ": " << aux;
                     std::vector<int> ignPts = { aux };
@@ -1204,23 +1281,9 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
     else
     {
 
-        CSVReader reader(args.InFolder+"Ignitions.csv", ",");
-
-        // Step 2: Read the CSV into a data frame (vector of vector of strings)
-        std::unordered_map<int, int> DF = reader.getDataIg();  // Assuming readCSV() exists
-
-        // Step 3: Print the data using printData()
-        //reader.printData(DF);
-
-        if (initialPoints.empty())
-        {
-            std::cout << "estoy vacio" << std::endl;
-            initialPoints = DF;
-            //reader.printData(initialPoints)
-        }
 
         //int temp = initialPoints[];
-        int temp = initialPoints[this->sim];
+        int temp = replicationDF[this->sim].first;
         //initialPoints.erase(initialPoints.begin() + rd - 1);
 
         // If ignition Radius != 0, sample from the Radius set
@@ -1239,6 +1302,7 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
         //std::cout << "Selected ignition point for Year " << this->year << ", sim " << this->sim << ": " << temp;
         // this->
         IgnitionHistory[sim] = temp;
+        replicationHistory[this->sim].first = temp;
 
         // If cell is available
         if (this->burntCells.find(temp) == this->burntCells.end() && this->statusCells[temp - 1] < 3)
@@ -2183,7 +2247,6 @@ Cell2Fire::Results()
     // Ignition Logfile
     if (currentSim == args.TotalSims && this->args.IgnitionsLog)
     {
-
         //std::cout << "\n Writing ignitions log csv..." << endl;
         if (this->args.verbose)
         {
@@ -2202,6 +2265,18 @@ Cell2Fire::Results()
         ignitionsFile.printIgnitions(IgnitionHistory);
     }
 
+    if (currentSim == args.TotalSims && this->args.IgnitionsLog)
+    {
+
+        std::string filename = "replication.csv";
+        CSVWriter repHistoryFolder("", "");
+        this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory" + separator();
+        repHistoryFolder.MakeDir(this->ignitionsFolder);
+        CSVWriter replicationFile(this->ignitionsFolder + filename);
+        replicationFile.printReplications(replicationHistory);
+    }
+
+    /*
     if (currentSim == args.TotalSims) {
         std::string filename = "emissions.csv";
         CSVWriter co2eqFolder("", "");
@@ -2211,6 +2286,7 @@ Cell2Fire::Results()
         std::cout << co2_v.size() << endl;
         co2File.printCO2(co2_v);
   }
+        */
   
 }
 

@@ -287,6 +287,26 @@ CSVWriter::printIgnitions(std::unordered_map<int, int> ignitionsHistory)
     ofs.close();
 }
 
+void
+CSVWriter::printReplications(std::unordered_map<int, std::pair<int, std::string>> replicationHistory)
+{
+    std::ofstream ofs(fileName, std::ofstream::out);
+    int i;
+
+    // Print column titles
+    ofs << "sim,point,weather\n";
+
+    // Iterate through the map and print key-value pairs
+    for (i = 1; i < replicationHistory.size() + 1; i++)
+    {
+        std::pair<int, std::string> data = replicationHistory[i];
+        ofs << i << "," << data.first << "," << data.second << "\n";
+    }
+
+    // Close file
+    ofs.close();
+}
+
 void CSVWriter::printCO2(std::vector<float> co2History)
 {
 	std::ofstream ofs(this->fileName, std::ofstream::out);

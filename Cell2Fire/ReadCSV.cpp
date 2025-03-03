@@ -190,7 +190,7 @@ CSVReader::getData()
 }
 
 
-std::unordered_map<int, int> CSVReader::getDataIg() {
+std::unordered_map<int, std::pair<int, std::string>> CSVReader::getDataIg() {
     std::string extension = "";  // Initialize extension (if needed)
     this->fileName = this->fileName + extension;
     std::cout << "Reading file: " << this->fileName << '\n';
@@ -201,19 +201,24 @@ std::unordered_map<int, int> CSVReader::getDataIg() {
         return {};  // Return empty map if file can't be opened
     }
 
-    std::unordered_map<int, int> dataList;
+    std::unordered_map<int, std::pair<int, std::string>> dataList;
     std::string line;
 
     while (getline(file, line)) {
         std::vector<std::string> vec;
         boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
 
-        if (vec.size() < 2) continue;  // Ensure at least two columns exist
+        if (vec.size() < 3) {  // Ensure at least three columns exist (key, int, string)
+            std::cerr << "Skipping line (insufficient columns): " << line << '\n';
+            continue;
+        }
 
         try {
             int key = std::stoi(vec[0]);  // Convert first column to int (key)
             int value = std::stoi(vec[1]); // Convert second column to int (value)
-            dataList[key] = value; // Store in unordered_map
+            std::string text = vec[2];  // Third column as a string
+
+            dataList[key] = {value, text}; // Store both values in the map
         } catch (const std::exception &e) {
             std::cerr << "Skipping line (invalid data): " << line << '\n';
         }
