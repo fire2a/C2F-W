@@ -99,9 +99,12 @@ jobs:
 
       - name: Download Catch2 header
         run: |
-          if [ ! -f /usr/local/include/catch2/catch.hpp ]; then
-            mkdir -p /usr/local/include/catch2
-            curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /usr/local/include/catch2/catch.hpp
+          BREW_PREFIX=$(brew --prefix)
+          INCLUDE_DIR="$BREW_PREFIX/include/catch2"
+          
+          if [ ! -f "$INCLUDE_DIR/catch.hpp" ]; then
+          mkdir -p "$INCLUDE_DIR"
+          curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o "$INCLUDE_DIR/catch.hpp"
           fi
 
       - name: chmod
