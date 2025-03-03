@@ -73,7 +73,6 @@ jobs:
         run: |
           apt update
           apt install -y g++-12 make lsb-release unzip libtiff6 libgomp1 libeigen3-dev curl
-          # apt install -y g++-12 make lsb-release unzip libboost-all-dev libeigen3-dev libtiff-dev catch2
 
       - name: Cache Catch2 header
         uses: actions/cache@v3
@@ -83,7 +82,7 @@ jobs:
 
       - name: Download Catch2 header
         run: |
-          if [ ! -f test/unit_tests/catch2/catch.hpp ]; then
+          if [ ! -f /usr/include/catch2/catch.hpp ]; then
             mkdir  /usr/include/catch2
             curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /usr/include/catch2/catch.hpp
           fi

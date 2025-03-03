@@ -2,11 +2,11 @@
 // Created by mati on 20-02-25.
 //
 #include "../../Cell2Fire/FuelModelKitral.h"
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_all.hpp>
+#include <catch2/catch.hpp>
+
+using Catch::Matchers::WithinAbs;
 
 TEST_CASE(
-
     "Slope effect works correctly",
     "[slope_effect]"
     )
