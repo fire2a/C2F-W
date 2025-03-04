@@ -112,12 +112,12 @@ jobs:
           ls Cell2Fire
           chmod +x Cell2Fire/Cell2Fire*
 
+      - name: Bash Test
+        run: |
+          cd test
+          bash test.sh
+
       - name: Unit Test
         run: |
           cd Cell2Fire
           make -f makefile.macos tests
-
-      - name: Bash Test
-        run: |
-          cd test
-          bash test.sh ${{ env.SUFFIX }}
