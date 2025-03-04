@@ -19,7 +19,6 @@ PATH=../Cell2Fire:$PATH
 
 # run
 set -x # enable debug tracing
-echo Cell2Fire$1
 for format in asc tif; do
     for model in fbp kitral sb; do
         echo running $model-$format
