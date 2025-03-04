@@ -87,7 +87,7 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: binaries${{ env.SUFFIX }}
+          pattern: binaries${{ env.suffix }}
           path: Cell2Fire
           merge-multiple: true
 
@@ -120,5 +120,5 @@ jobs:
       - name: Bash Test
         run: |
           cd test
-          echo ${{ env.SUFFIX }}
+          echo ${{ env.suffix }}
           bash test.sh
