@@ -124,5 +124,4 @@ jobs:
       - name: Bash Test
         run: |
           cd test
-          echo ${{ env.suffix }}
-          bash test.sh
+          bash test.sh _${{ env.suffix }}
