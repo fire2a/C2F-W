@@ -32,14 +32,14 @@ separator()
 
 
 /**
- * @brief Reads lookup_table.csv and creates dictionaries for the fuel types and cell's ColorsDict.
+ * @brief Reads the model lookup table and creates dictionaries for the fuel types and cell's ColorsDict.
  *
  * The function will look for either `spain_lookup_table.csv`, `kitral_lookup_table.csv` or `fbp_lookup_table.csv`
  * in the input instance directory, depending on the chosen model.
  *
  * This file should have the following columns:
- * - grid_value: number id for fuel type within grid
- * - export_value: number id for fuel type
+ * - grid_value: numeric id for fuel type within grid
+ * - export_value: numeric id for fuel type
  * - descriptive_name: description of fuel type
  * - fuel_type: code for fuel type
  * - r: red
@@ -52,7 +52,7 @@ separator()
  * The function creates a fuel type map `<grid_value, fuel_type>` and a color map `<grid_value, r, g, b, 1.0>`
  *
  * @param filename Name of file containing the lookup table for the chosen simulation model
- * @return a tuple with a mapping of fuel code per fuel number id, and a mapping of color per fuel number id.
+ * @return a tuple with a mapping of fuel code per fuel numeric id, and a mapping of color per fuel numeric id.
  */
 std::tuple<std::unordered_map<std::string, std::string>,
            std::unordered_map<std::string, std::tuple<float, float, float, float>>>
@@ -136,6 +136,14 @@ Dictionary(const std::string& filename)
 }
 
 // ForestGrid function
+/**
+ * @brief Reads fuels from ASCII raster file and creates a list of cells.
+ *
+ * @param filename Name of file containing raster of fuel type per cell
+ * @param Dictionary Map of fuel numeric ID in raster grid to fuel model code.
+ * @return A tuple with an array of the cells' fuel type numeric ID and an array of the cells' fuel type code,
+ * the number of rows, the number of columns and the size of a cell.
+ */
 std::tuple<std::vector<int>, std::vector<std::string>, int, int, float>
 ForestGrid(const std::string& filename, const std::unordered_map<std::string, std::string>& Dictionary)
 {
@@ -237,7 +245,11 @@ ForestGrid(const std::string& filename, const std::unordered_map<std::string, st
     return std::make_tuple(gridcell3, gridcell4, grid.size(), tcols - 1, cellsize);
 }
 
-// Function to check if a file exists
+/**
+ * @brief checks if a file exists.
+ * @param filename Name of file
+ * @return True if file can be opened, False if not.
+ */
 bool
 fileExists(const std::string& filename)
 {
@@ -309,20 +321,17 @@ DataGrids(const std::string& filename, std::vector<float>& data, int nCells)
     }
 }
 
+/**
+ * @brief Reads fuels raster file in tif format and creates a list of cells.
+ *
+ * @param filename Name of fuel data file.
+ * @param Dictionary Mapping of fuel type numeric ID to fuel type code.
+ * @return A tuple containing: vector of fuel type per cell as numeric ID, vector of fuel type per cell as model code,
+ * number of rows in grid, number of columns in grid, cell size.
+ */
 std::tuple<std::vector<int>, std::vector<std::string>, int, int, float>
 ForestGridTif(const std::string& filename, const std::unordered_map<std::string, std::string>& Dictionary)
 {
-    /*
-    Reads fuel data from a .tif
-    Args:
-       filename (std::string): Name of .tif file.
-       Dictionary (std::unordered_map<std::string, std::string>&): Reference to
-    fuels dictionary
-
-    Returns:
-        Fuel vectors, number of cells y cell size (tuple[std::vector<int>,
-    std::vector<std::string>)
-    */
     // Tries to open file
     std::cout << filename << '\n';
     TIFF* fuelsDataset = TIFFOpen(filename.c_str(), "r");
