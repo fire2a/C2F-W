@@ -30,12 +30,29 @@ separator()
 #endif
 }
 
-// Reads fbp_lookup_table.csv and creates dictionaries for the fuel types and
-// cells' ColorsDict
+
 /**
- * 
+ * @brief Reads lookup_table.csv and creates dictionaries for the fuel types and cell's ColorsDict.
+ *
+ * The function will look for either `spain_lookup_table.csv`, `kitral_lookup_table.csv` or `fbp_lookup_table.csv`
+ * in the input instance directory, depending on the chosen model.
+ *
+ * This file should have the following columns:
+ * - grid_value: number id for fuel type within grid
+ * - export_value: number id for fuel type
+ * - descriptive_name: description of fuel type
+ * - fuel_type: code for fuel type
+ * - r: red
+ * - g: green
+ * - b: blue
+ * - h: hue
+ * - s: saturation
+ * - l: lightness
+ *
+ * The function creates a fuel type map `<grid_value, fuel_type>` and a color map `<grid_value, r, g, b, 1.0>`
+ *
  * @param filename Name of file containing the lookup table for the chosen simulation model
- * @return 
+ * @return a tuple with a mapping of fuel code per fuel number id, and a mapping of color per fuel number id.
  */
 std::tuple<std::unordered_map<std::string, std::string>,
            std::unordered_map<std::string, std::tuple<float, float, float, float>>>
