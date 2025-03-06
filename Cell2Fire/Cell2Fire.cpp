@@ -1368,10 +1368,9 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
     if (!this->noIgnition)
     {
         int newId = it->second.realId;
-        if (this->args.verbose)
-        std:
-            cout << "New ID for burning cell: " << newId << std::endl;
-
+        if (this->args.verbose){
+        std::cout << "New ID for burning cell: " << newId << std::endl;
+        }
         this->nIgnitions++;
         this->burningCells.insert(newId);
         this->burntCells.insert(newId);
@@ -1493,6 +1492,7 @@ Cell2Fire::SendMessages()
 
     // Clean list
     this->burnedOutList.clear();
+    
 
     // Check ending
     if (fire_period[year - 1] == args.MaxFirePeriods - 1 && this->args.verbose)
@@ -1524,7 +1524,12 @@ Cell2Fire::SendMessages()
        (if needed) populates their message
     */
     for (int cell : this->burningCells)
-    {
+    {   
+        int contador = 1;
+        if (this->burningCells.size() > 0){
+        contador = 0;
+        }
+
         std::vector<int> aux_list;
         // Get object from unordered map
         it = this->Cells_Obj.find(cell);
@@ -1605,6 +1610,16 @@ Cell2Fire::SendMessages()
                           << std::endl;
         }
 
+        if (cell == 484 && contador == 0){
+            std::cout << cell << std::endl;
+            int ci;
+            for (ci = 1; ci < aux_list.size() + 1; ci++)
+            {
+                std::cout << aux_list[ci] << endl;
+            }
+        }
+        
+
         // If message and not a true flag
         if (aux_list.size() > 0 && aux_list[0] != -100)
         {
@@ -1646,6 +1661,7 @@ Cell2Fire::SendMessages()
     /* End sending messages loop */
 
     // Check for burnt out updates via sets' difference
+    /*
     for (auto& bc : this->burnedOutList)
     {
         auto lt = this->burningCells.find(bc);
@@ -1654,6 +1670,7 @@ Cell2Fire::SendMessages()
             this->burningCells.erase(bc);
         }
     }
+    */
     if (this->args.verbose)
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
 
