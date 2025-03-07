@@ -51,6 +51,7 @@ std::vector<float> co2_v;
 std::unordered_map<int, int> initialPoints;
 std::unordered_map<int, std::pair<int,std::string>> replicationDF;
 std::unordered_map<int, std::pair<int,std::string>> replicationHistory;
+std::unordered_map<int, vector<int>> globalMessages;
 
 /******************************************************************************
                                                                                                                                 Utils
@@ -1233,8 +1234,8 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
                 {
                     IgnitionHistory[sim] = aux;
                     replicationHistory[this->sim].first = aux;
-                    std::cout << "\nSelected (Random) ignition point for Year " << this->year << ", sim " << this->sim
-                              << ": " << aux;
+                    std::cout << "\nSelected (Random) ignition point for Year " << this->year << ", sim " << this->sim 
+                              << ": " << aux << std::endl;;
                     std::vector<int> ignPts = { aux };
                     if (it->second.ignition(this->fire_period[year - 1],
                                             this->year,
@@ -1609,17 +1610,7 @@ Cell2Fire::SendMessages()
                              "messages"
                           << std::endl;
         }
-
-        if (cell == 484 && contador == 0){
-            std::cout << cell << std::endl;
-            int ci;
-            for (ci = 1; ci < aux_list.size() + 1; ci++)
-            {
-                std::cout << aux_list[ci] << endl;
-            }
-        }
         
-
         // If message and not a true flag
         if (aux_list.size() > 0 && aux_list[0] != -100)
         {
@@ -1661,7 +1652,6 @@ Cell2Fire::SendMessages()
     /* End sending messages loop */
 
     // Check for burnt out updates via sets' difference
-    /*
     for (auto& bc : this->burnedOutList)
     {
         auto lt = this->burningCells.find(bc);
@@ -1670,9 +1660,49 @@ Cell2Fire::SendMessages()
             this->burningCells.erase(bc);
         }
     }
-    */
+    
     if (this->args.verbose)
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+
+    std::vector<int> keysToRemove; // Para almacenar claves que serán eliminadas
+    for (auto it = sendMessageList.begin(); it != sendMessageList.end(); ++it) {
+        int key = it->first;
+        std::vector<int>& values = it->second;
+
+        for (int v : values) {
+            // Si la clave ya existe en globalMessages, verificar si el valor ya está en el vector
+            if (globalMessages.find(key) != globalMessages.end()) {
+                std::vector<int>& existingValues = globalMessages[key];
+
+                // Si el valor ya existe, no lo agregamos
+                if (std::find(existingValues.begin(), existingValues.end(), v) == existingValues.end()) {
+                    existingValues.push_back(v);
+                }
+            } else {
+                // Si la clave no existe, simplemente la agregamos con el nuevo valor
+                globalMessages[key] = {v};
+            }
+        }
+
+        // Marcar la clave para eliminarla de sendMessageList
+        keysToRemove.push_back(key);
+    }
+
+    // Eliminar las claves marcadas de sendMessageList
+    //for (int key : keysToRemove) {
+      //  std::cout << "key: " << key << std::endl;
+        //sendMessageList.erase(key);
+    // /}
+
+    //std::cout << "print de messagesList" << std::endl;
+    for (auto it = sendMessageList.begin(); it != sendMessageList.end(); ++it) {
+        std::cout << "Key: " << it->first << " -> Values: ";
+        
+        for (int v : it->second) {
+            std::cout << v << " ";
+        }
+        std::cout << std::endl;
+    }
 
     return sendMessageList;
 }
@@ -1909,12 +1939,14 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
             this->burningCells.insert(bc);
         }
 
+        
+        //complete graph
         for (auto& bc : burningCells)
         {
             auto lt = this->availCells.find(bc);
             if (lt != this->availCells.end())
             {
-                this->availCells.erase(bc);
+                //this->availCells.erase(bc);
             }
         }
 
