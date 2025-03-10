@@ -116,6 +116,8 @@ class Cell2Fire
     std::vector<std::vector<int>> IgnitionSets;
     std::unordered_map<int, int> initialPoints;
     // std::vector<int> IgnitionHistory;
+    std::unordered_map<int, std::vector<int>> fullMessages;
+    std::unordered_map<int, vector<int>> globalMessages;
     std::vector<float>co2_v;
 
     // Sets

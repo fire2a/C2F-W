@@ -47,6 +47,7 @@ class CSVWriter
     void printReplications(std::unordered_map<int, std::pair<int, std::string>> replicationHistory);
     void printCO2(std::vector<float> co2History);
     void printCSV_V2(int rows, int cols, std::vector<int> statusCells);
+    void printSendMessages(std::unordered_map<int, std::vector<int>> sendMessageList);
     // Function to create a directory
     void MakeDir(std::string pathPlot);
 };

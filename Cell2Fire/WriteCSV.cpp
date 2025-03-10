@@ -287,6 +287,29 @@ CSVWriter::printIgnitions(std::unordered_map<int, int> ignitionsHistory)
     ofs.close();
 }
 
+void 
+CSVWriter::printSendMessages(std::unordered_map<int, std::vector<int>> sendMessageList)
+{
+    
+    // Open the file for the current simulation
+    std::ofstream ofs(fileName, std::ofstream::out);
+
+    // Iterate over each key-value pair in the map
+    for (auto& entry : sendMessageList)
+    {
+        int point = entry.first;
+
+        // Iterate over each int in the vector of each key-value pair
+        for (int val : entry.second)
+        {
+            ofs << point << "," << val << "\n";
+        }
+    }
+
+    // Close the file
+    ofs.close();
+}
+
 void
 CSVWriter::printReplications(std::unordered_map<int, std::pair<int, std::string>> replicationHistory)
 {

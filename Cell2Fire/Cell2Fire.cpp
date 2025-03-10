@@ -51,7 +51,7 @@ std::vector<float> co2_v;
 std::unordered_map<int, int> initialPoints;
 std::unordered_map<int, std::pair<int,std::string>> replicationDF;
 std::unordered_map<int, std::pair<int,std::string>> replicationHistory;
-std::unordered_map<int, vector<int>> globalMessages;
+//std::unordered_map<int, vector<int>> globalMessages;
 
 /******************************************************************************
                                                                                                                                 Utils
@@ -276,6 +276,8 @@ Cell2Fire::Cell2Fire(arguments _args)
     this->crownFlameLengths = std::vector<float>(this->nCells, 0);
     this->maxFlameLengths = std::vector<float>(this->nCells, 0);
     this->Co2eq = 0;
+    this->fullMessages = std::unordered_map<int, std::vector<int>>();
+    this->globalMessages = std::unordered_map<int, vector<int>>();
 
     this->ignProb = std::vector<float>(this->nCells, 1);
     CSVParser.parsePROB(this->ignProb, DF, this->nCells);
@@ -1664,45 +1666,45 @@ Cell2Fire::SendMessages()
     if (this->args.verbose)
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
 
-    std::vector<int> keysToRemove; // Para almacenar claves que serán eliminadas
-    for (auto it = sendMessageList.begin(); it != sendMessageList.end(); ++it) {
+    
+    // ----------------------------- SENDING COMPLETE INFORMATION MESSAGES START ----------------------------------
+
+    for (auto it = sendMessageList.begin(); it != sendMessageList.end(); ) {
         int key = it->first;
         std::vector<int>& values = it->second;
 
-        for (int v : values) {
-            // Si la clave ya existe en globalMessages, verificar si el valor ya está en el vector
-            if (globalMessages.find(key) != globalMessages.end()) {
-                std::vector<int>& existingValues = globalMessages[key];
+        values.erase(
+            std::remove_if(values.begin(), values.end(), [&](int val) {
+                return (this->globalMessages.find(key) != this->globalMessages.end() &&
+                        std::find(this->globalMessages[key].begin(), this->globalMessages[key].end(), val) != this->globalMessages[key].end()) ||
+                       (this->globalMessages.find(val) != this->globalMessages.end() &&
+                        std::find(this->globalMessages[val].begin(), this->globalMessages[val].end(), key) != this->globalMessages[val].end());
+            }),
+            values.end()
+        );
 
-                // Si el valor ya existe, no lo agregamos
-                if (std::find(existingValues.begin(), existingValues.end(), v) == existingValues.end()) {
-                    existingValues.push_back(v);
-                }
-            } else {
-                // Si la clave no existe, simplemente la agregamos con el nuevo valor
-                globalMessages[key] = {v};
-            }
+        if (!values.empty()) {
+            this->globalMessages[key].insert(this->globalMessages[key].end(), values.begin(), values.end());
+            ++it;
+        } else {
+            it = sendMessageList.erase(it);
         }
-
-        // Marcar la clave para eliminarla de sendMessageList
-        keysToRemove.push_back(key);
     }
-
-    // Eliminar las claves marcadas de sendMessageList
-    //for (int key : keysToRemove) {
-      //  std::cout << "key: " << key << std::endl;
-        //sendMessageList.erase(key);
-    // /}
+    
+    // ----------------------------- SENDING COMPLETE INFORMATION MESSAGES FINISH ----------------------------------
 
     //std::cout << "print de messagesList" << std::endl;
     for (auto it = sendMessageList.begin(); it != sendMessageList.end(); ++it) {
-        std::cout << "Key: " << it->first << " -> Values: ";
+        //std::cout << "Key: " << it->first << " -> Values: ";
         
         for (int v : it->second) {
-            std::cout << v << " ";
+            //std::cout << v << " ";
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
     }
+
+    this->fullMessages = sendMessageList;
+
 
     return sendMessageList;
 }
@@ -2110,7 +2112,8 @@ Cell2Fire::Results()
 
     // Messages
     if (this->args.OutMessages)
-    {
+    {   
+        /*
         this->messagesFolder = this->args.OutFolder + "Messages" + separator();
         std::string messagesName;
         std::ostringstream oss;
@@ -2125,6 +2128,16 @@ Cell2Fire::Results()
         // CSVPloter.printCSVDouble_V2(this->FSCell.size() - this->nIgnitions, 4,
         // this->FSCell);
         CSVPloter.printCSVDouble_V2(this->FSCell.size() / 4, 4, this->FSCell);
+        */
+        std::stringstream fileNameStream;
+        fileNameStream << "simulationFile" << this->sim << ".csv";
+        std::string filename = fileNameStream.str();
+        CSVWriter msg2Folder("", "");
+        std::string folder = this->args.OutFolder + "Messages2" + separator();
+        msg2Folder.MakeDir(folder);
+        CSVWriter msg2File(folder + filename);
+        msg2File.printSendMessages(this->globalMessages);
+
     }
 
     // RateOfSpread
@@ -2243,9 +2256,7 @@ Cell2Fire::Results()
         std::string cfbName;
         std::ostringstream oss;
         oss.str("");
-        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        cfbName = this->cfbFolder + "Cfb" + oss.str() + ".asc";
-        if (this->args.verbose)
+        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;if (currentSim == args.TotalSims && this->args.IgnitionsLog)
         {
             std::cout << "We are generating the Crown Fraction Burn to a asc file " << cfbName << std::endl;
         }
