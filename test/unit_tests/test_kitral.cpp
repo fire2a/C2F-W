@@ -17,14 +17,19 @@ TEST_CASE("Slope effect works correctly", "[slope_effect]")
 
 class NativeFuelFixture
 {
-protected:
-    inputs* test_data = {};
-    fuel_coefs* test_coefs = {};
-    main_outs* test_outs = {};
+public:
+    inputs* test_data;
+    fuel_coefs* test_coefs;
+    main_outs* test_outs;
 
 public:
     NativeFuelFixture()
     {
+        setup_const();
+        test_data = new inputs();
+        test_coefs = new fuel_coefs();
+        test_outs = new main_outs();
+
         strcpy(test_data->fueltype, "BN03");
         test_data->nftype = 16;
         test_data->ws = 10;
@@ -71,21 +76,14 @@ public:
         test_outs->crown = 0;
         test_outs->jd_min = 0;
         test_outs->jd = 0;
-    };
+
+    }
+
 };
 
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test rate_of_spread_k", "[rate_of_spread_k]")
 {
-    //rate_of_spread_k(test_data, test_coefs, test_outs);
-    REQUIRE(test_outs->rss==1);
+    rate_of_spread_k(test_data, test_coefs, test_outs);
+    REQUIRE_THAT(test_outs->rss, WithinAbs(1.340, 0.001));
 }
-
-/*
-TEST_CASE_METHOD(NativeFuelFixture, "Test rate_of_spread_k", "[rate_of_spread_k]")
-{
-    rate_of_spread_k(&test_data, &test_coefs, &test_outs);
-    REQUIRE_THAT(test_outs.rss, 0);
-}
-
-*/
