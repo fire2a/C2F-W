@@ -87,3 +87,32 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test rate_of_spread_k", "[rate_of_spread_k]
     rate_of_spread_k(test_data, test_coefs, test_outs);
     REQUIRE_THAT(test_outs->rss, WithinAbs(1.340, 0.001));
 }
+
+
+TEST_CASE_METHOD(NativeFuelFixture, "Test length to breadth", "[l_to_b]")
+{
+    REQUIRE_THAT(l_to_b(10, test_coefs), WithinAbs(1.058, 0.001));
+    REQUIRE_THAT(l_to_b(100, test_coefs), WithinAbs(17.225, 0.001));
+    //REQUIRE_THROWS(l_to_b(-1, test_coefs));
+    // This should throw exception in the future
+}
+
+TEST_CASE_METHOD(NativeFuelFixture, "Test backfire ros", "[backfire_ros_k]")
+{
+    auto sec = new snd_outs();
+    sec->lb = 1.058;
+    test_outs->rss = 8;
+    REQUIRE_THAT(backfire_ros_k(test_outs, sec), WithinAbs(4.061, 0.001));
+    sec->lb = 17.225;
+    REQUIRE_THAT(backfire_ros_k(test_outs, sec), WithinAbs(0.006, 0.001));
+    sec->lb = 17.225;
+    test_outs->rss = 15;
+    REQUIRE_THAT(backfire_ros_k(test_outs, sec), WithinAbs(0.0126, 0.001));
+}
+
+TEST_CASE_METHOD(NativeFuelFixture, "Test flankfire ros", "[flankfire_ros_k]")
+{
+    REQUIRE_THAT(flankfire_ros_k(8, 4, 1.058), WithinAbs(5.671, 0.001));
+    REQUIRE_THAT(flankfire_ros_k(15, 0.126, 17.225), WithinAbs(0.439, 0.001));
+}
+
