@@ -7,14 +7,6 @@
 
 using Catch::Matchers::WithinAbs;
 
-TEST_CASE("Slope effect works correctly", "[slope_effect]")
-{
-    REQUIRE_THAT(slope_effect(156.75, 170, 100), WithinAbs(1.0124, 0.001));
-    REQUIRE_THAT(slope_effect(201.124, 192.543, 100), WithinAbs(0.992, 0.001));
-    REQUIRE_THAT(slope_effect(201.124, 201.124, 100), WithinAbs(1, 0.001));
-    // REQUIRE_THROWS(slope_effect(156.75, 170, 0));
-}
-
 class NativeFuelFixture
 {
 public:
@@ -82,12 +74,42 @@ public:
 };
 
 
-TEST_CASE_METHOD(NativeFuelFixture, "Test rate_of_spread_k", "[rate_of_spread_k]")
+TEST_CASE("Slope effect works correctly", "[slope_effect]")
 {
-    rate_of_spread_k(test_data, test_coefs, test_outs);
-    REQUIRE_THAT(test_outs->rss, WithinAbs(1.340, 0.001));
+    REQUIRE_THAT(slope_effect(156.75, 180, 100), WithinAbs(1.021, 0.001));
+    REQUIRE_THAT(slope_effect(201.124, 182.543, 100), WithinAbs(0.982, 0.001));
+    REQUIRE_THAT(slope_effect(201.124, 201.124, 100), WithinAbs(1, 0.001));
+    // REQUIRE_THROWS(slope_effect(156.75, 170, 0));
 }
 
+TEST_CASE_METHOD(NativeFuelFixture, "Rate of spread changes with slope", "[rate_of_spread_k]")
+{
+    test_outs->se = 1;
+    rate_of_spread_k(test_data, test_coefs, test_outs);
+    REQUIRE_THAT(test_outs->rss, WithinAbs(1.586, 0.001));
+    test_outs->se = 0.5;
+    rate_of_spread_k(test_data, test_coefs, test_outs);
+    REQUIRE_THAT(test_outs->rss, WithinAbs(1.463, 0.001));
+    test_outs->se = 1.5;
+    rate_of_spread_k(test_data, test_coefs, test_outs);
+    REQUIRE_THAT(test_outs->rss, WithinAbs(1.709, 0.001));
+}
+
+TEST_CASE_METHOD(NativeFuelFixture, "Rate of spread changes with wind", "[rate_of_spread_k]")
+{
+    test_outs->se = 1.2;
+    test_data->ws = 10;
+    rate_of_spread_k(test_data, test_coefs, test_outs);
+    REQUIRE_THAT(test_outs->rss, WithinAbs(1.635, 0.001));
+    test_data->ws = 50;
+    rate_of_spread_k(test_data, test_coefs, test_outs);
+    REQUIRE_THAT(test_outs->rss, WithinAbs(3.324, 0.001));
+    test_data->ws = 100;
+    rate_of_spread_k(test_data, test_coefs, test_outs);
+    REQUIRE_THAT(test_outs->rss, WithinAbs(3.648, 0.001));
+}
+
+//TODO: test reaction to temperature, humidity
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test length to breadth", "[l_to_b]")
 {
@@ -116,3 +138,95 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test flankfire ros", "[flankfire_ros_k]")
     REQUIRE_THAT(flankfire_ros_k(15, 0.126, 17.225), WithinAbs(0.439, 0.001));
 }
 
+TEST_CASE_METHOD(NativeFuelFixture, "Test byram intensity", "[byram_intensity]")
+{
+    test_outs->rss = 15;
+    REQUIRE_THAT(byram_intensity(test_data, test_outs), WithinAbs(16873.87, 0.001));
+    test_outs->rss = 5.6;
+    REQUIRE_THAT(byram_intensity(test_data, test_outs), WithinAbs(6299.58, 0.001));
+}
+
+TEST_CASE_METHOD(NativeFuelFixture, "Test surface flame length", "[flame_length]")
+{
+    test_outs->sfi = 16873.87;
+    REQUIRE_THAT(flame_length(test_data, test_outs), WithinAbs(6.82, 0.001));
+    test_outs->sfi = 6299.58;
+    REQUIRE_THAT(flame_length(test_data, test_outs), WithinAbs(4.334, 0.001));
+    test_outs->sfi = 40420;
+    REQUIRE_THAT(flame_length(test_data, test_outs), WithinAbs(10.193, 0.001));
+}
+
+
+TEST_CASE_METHOD(NativeFuelFixture, "Test flame angle", "[angleFL]")
+{
+    test_data->ws = 10;
+    test_outs->fl = 6.82;
+    REQUIRE_THAT(angleFL(test_data, test_outs), WithinAbs(1.127, 0.001));
+    test_outs->fl = 4.334;
+    REQUIRE_THAT(angleFL(test_data, test_outs), WithinAbs(1.033, 0.001));
+    test_outs->fl = 10.193;
+    REQUIRE_THAT(angleFL(test_data, test_outs), WithinAbs(1.2, 0.001));
+}
+
+TEST_CASE_METHOD(NativeFuelFixture, "Test flame angle changes with wind", "[angleFL]")
+{
+    test_data->ws = 100;
+    test_outs->fl = 6.82;
+    REQUIRE_THAT(angleFL(test_data, test_outs), WithinAbs(0.207, 0.001));
+    test_outs->fl = 4.334;
+    REQUIRE_THAT(angleFL(test_data, test_outs), WithinAbs(0.166, 0.001));
+    test_outs->fl = 10.193;
+    REQUIRE_THAT(angleFL(test_data, test_outs), WithinAbs(0.251, 0.001));
+}
+
+TEST_CASE_METHOD(NativeFuelFixture, "Test flame height", "[flame_height]")
+{
+    test_data->ws = 10;
+    test_outs->fl = 6.82;
+    REQUIRE_THAT(flame_height(test_data, test_outs), WithinAbs(6.160, 0.001));
+    test_outs->fl = 4.334;
+    REQUIRE_THAT(flame_height(test_data, test_outs), WithinAbs(3.723, 0.001));
+    test_outs->fl = 10.193;
+    REQUIRE_THAT(flame_height(test_data, test_outs), WithinAbs(9.501, 0.001));
+}
+
+TEST_CASE_METHOD(NativeFuelFixture, "Test flame height changes with wind", "[flame_height]")
+{
+    test_data->ws = 100;
+    test_outs->fl = 6.82;
+    float fl_100 = flame_height(test_data, test_outs);
+    REQUIRE_THAT(fl_100, WithinAbs(1.405, 0.001));
+    test_data->ws = 50;
+    float fl_50 = flame_height(test_data, test_outs);
+    REQUIRE_THAT(fl_50, WithinAbs(2.647, 0.001));
+    REQUIRE(fl_50 > fl_100);
+}
+
+
+TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with slope", "[active_rate_of_spreadPL04]")
+{
+    test_data->ws = 60;
+    test_outs->se = 1;
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs), WithinAbs(17.932, 0.001));
+    test_outs->se = 0.5;
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs), WithinAbs(17.056, 0.001));
+    test_outs->se = 1.8;
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs), WithinAbs(19.333, 0.001));
+}
+
+TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with wind", "[active_rate_of_spreadPL04]")
+{
+    test_outs->se = 1.3;
+    test_data->ws = 10;
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs), WithinAbs(7.496, 0.001));
+    test_data->ws = 50;
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs), WithinAbs(16.951, 0.001));
+    test_data->ws = 100;
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs), WithinAbs(22.445, 0.001));
+}
+
+//TODO: test reaction to temperature, humidity
+//TODO: check active
+//TODO: crown fraction burn
+//TODO: final ros
+//TODO: backfire 10
