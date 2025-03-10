@@ -24,7 +24,7 @@ float flankfire_ros_k(float ros, float bros, float lb);
 float rate_of_spread_k(inputs* data, fuel_coefs* ptr, main_outs* at);
 
 // Length-to-Breadth ratio
-float l_to_b(float ws);
+float l_to_b(float ws, fuel_coefs*);
 
 // BROS
 float backfire_ros_k(main_outs* at, snd_outs* sec);
@@ -48,7 +48,7 @@ bool checkActive(inputs* data, main_outs* at, int FMC);
 // CROS adjustements
 float final_rate_of_spreadPL04(main_outs* at);
 float active_rate_of_spreadPL04(inputs* data,
-                                main_outs* at);  // En KITRAL SE USA PL04
+                                main_outs* at); // En KITRAL SE USA PL04
 float crownfractionburn(inputs* data, main_outs* at, int FMC);
 
 // Back fire with CROS
