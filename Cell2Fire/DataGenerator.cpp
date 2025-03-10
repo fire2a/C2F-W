@@ -1,4 +1,7 @@
 // author = "Matias Vilches"
+/**
+ *@file
+*/
 
 #include "DataGenerator.h"
 
@@ -27,8 +30,30 @@ separator()
 #endif
 }
 
-// Reads fbp_lookup_table.csv and creates dictionaries for the fuel types and
-// cells' ColorsDict
+
+/**
+ * @brief Reads the model lookup table and creates dictionaries for the fuel types and cell's ColorsDict.
+ *
+ * The function will look for either `spain_lookup_table.csv`, `kitral_lookup_table.csv` or `fbp_lookup_table.csv`
+ * in the input instance directory, depending on the chosen model.
+ *
+ * This file should have the following columns:
+ * - grid_value: numeric id for fuel type within grid
+ * - export_value: numeric id for fuel type
+ * - descriptive_name: description of fuel type
+ * - fuel_type: code for fuel type
+ * - r: red
+ * - g: green
+ * - b: blue
+ * - h: hue
+ * - s: saturation
+ * - l: lightness
+ *
+ * The function creates a fuel type map `<grid_value, fuel_type>` and a color map `<grid_value, r, g, b, 1.0>`
+ *
+ * @param filename Name of file containing the lookup table for the chosen simulation model
+ * @return a tuple with a mapping of fuel code per fuel numeric id, and a mapping of color per fuel numeric id.
+ */
 std::tuple<std::unordered_map<std::string, std::string>,
            std::unordered_map<std::string, std::tuple<float, float, float, float>>>
 Dictionary(const std::string& filename)
@@ -95,7 +120,10 @@ Dictionary(const std::string& filename)
             }
 
             ColorsDict[tokens[0]] = std::make_tuple(
-                std::stof(tokens[4]) / 255.0f, std::stof(tokens[5]) / 255.0f, std::stof(tokens[6]) / 255.0f, 1.0f);
+                std::stof(tokens[4]) / 255.0f,
+                std::stof(tokens[5]) / 255.0f,
+                std::stof(tokens[6]) / 255.0f,
+                1.0f);
         }
 
         if (aux == 1)
@@ -108,6 +136,14 @@ Dictionary(const std::string& filename)
 }
 
 // ForestGrid function
+/**
+ * @brief Reads fuels from ASCII raster file and creates a list of cells.
+ *
+ * @param filename Name of file containing raster of fuel type per cell
+ * @param Dictionary Map of fuel numeric ID in raster grid to fuel model code.
+ * @return A tuple with an array of the cells' fuel type numeric ID and an array of the cells' fuel type code,
+ * the number of rows, the number of columns and the size of a cell.
+ */
 std::tuple<std::vector<int>, std::vector<std::string>, int, int, float>
 ForestGrid(const std::string& filename, const std::unordered_map<std::string, std::string>& Dictionary)
 {
@@ -159,8 +195,19 @@ ForestGrid(const std::string& filename, const std::unordered_map<std::string, st
         line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
 
         // Remove leading and trailing whitespaces
-        line.erase(line.begin(), std::find_if(line.begin(), line.end(), [](char c) { return !std::isspace(c); }));
-        line.erase(std::find_if(line.rbegin(), line.rend(), [](char c) { return !std::isspace(c); }).base(),
+        line.erase(line.begin(),
+                   std::find_if(line.begin(),
+                                line.end(),
+                                [](char c)
+                                {
+                                    return !std::isspace(c);
+                                }));
+        line.erase(std::find_if(line.rbegin(),
+                                line.rend(),
+                                [](char c)
+                                {
+                                    return !std::isspace(c);
+                                }).base(),
                    line.end());
 
         std::istringstream iss(line);
@@ -198,7 +245,11 @@ ForestGrid(const std::string& filename, const std::unordered_map<std::string, st
     return std::make_tuple(gridcell3, gridcell4, grid.size(), tcols - 1, cellsize);
 }
 
-// Function to check if a file exists
+/**
+ * @brief checks if a file exists.
+ * @param filename Name of file
+ * @return True if file can be opened, False if not.
+ */
 bool
 fileExists(const std::string& filename)
 {
@@ -206,7 +257,15 @@ fileExists(const std::string& filename)
     return file.good();
 }
 
-// Function to read grid data from ASCII file
+/**
+ * @brief Read grid data from ASCII file into a vector
+ *
+ * Transforms a raster layer into an array of information.
+ *
+ * @param filename name of file to read
+ * @param data vector where information will be stored
+ * @param nCells number of cells
+ */
 void
 DataGrids(const std::string& filename, std::vector<float>& data, int nCells)
 {
@@ -256,26 +315,23 @@ DataGrids(const std::string& filename, std::vector<float>& data, int nCells)
             data[aux++] = std::stof(token);
             if (aux == nCells)
             {
-                return;  // Stop reading if we've filled the data vector
+                return; // Stop reading if we've filled the data vector
             }
         }
     }
 }
 
+/**
+ * @brief Reads fuels raster file in tif format and creates a list of cells.
+ *
+ * @param filename Name of fuel data file.
+ * @param Dictionary Mapping of fuel type numeric ID to fuel type code.
+ * @return A tuple containing: vector of fuel type per cell as numeric ID, vector of fuel type per cell as model code,
+ * number of rows in grid, number of columns in grid, cell size.
+ */
 std::tuple<std::vector<int>, std::vector<std::string>, int, int, float>
 ForestGridTif(const std::string& filename, const std::unordered_map<std::string, std::string>& Dictionary)
 {
-    /*
-    Reads fuel data from a .tif
-    Args:
-       filename (std::string): Name of .tif file.
-       Dictionary (std::unordered_map<std::string, std::string>&): Reference to
-    fuels dictionary
-
-    Returns:
-        Fuel vectors, number of cells y cell size (tuple[std::vector<int>,
-    std::vector<std::string>)
-    */
     // Tries to open file
     std::cout << filename << '\n';
     TIFF* fuelsDataset = TIFFOpen(filename.c_str(), "r");
@@ -403,8 +459,16 @@ ForestGridTif(const std::string& filename, const std::unordered_map<std::string,
     return std::make_tuple(gridcell3, gridcell4, grid.size(), tcols - 1, cellSizeX);
 }
 
-// Function to read grid data from ASCII file
-
+/**
+ * @brief This functionality is not currently available
+ *
+ * Read grid data from Tif file into a vector.
+ * Transforms a raster layer into an array of information.
+ *
+ * @param filename name of file to read
+ * @param data vector where information will be stored
+ * @param nCells number of cells
+ */
 void
 DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells)
 {
@@ -508,12 +572,30 @@ DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells)
             aux++;
             if (aux == nCells)
             {
-                return;  // Stop reading if we've filled the data vector
+                return; // Stop reading if we've filled the data vector
             }
         }
     }
 }
 
+/**
+ * @brief Create input data matrix
+ *
+ * @param GFuelType Array of fuel model codes
+ * @param GFuelTypeN Array of fuel model ids
+ * @param Elevation Array of terrain elevations
+ * @param PS Array of slope
+ * @param SAZ Array of slope azimuth
+ * @param Curing Array of curing levels
+ * @param CBD Array of canopy bulk densities
+ * @param CBH Array of canopy base heights
+ * @param CCF Array of canopy cover fractions
+ * @param PY Array of ignition probabilities
+ * @param FMC Array of foliage moisture content
+ * @param TreeHeight Array of tree heights
+ * @param InFolder Input data directory
+ * @return An array of arrays representing a cell.
+ */
 std::vector<std::vector<std::unique_ptr<std::string>>>
 GenerateDat(const std::vector<std::string>& GFuelType,
             const std::vector<int>& GFuelTypeN,
@@ -531,9 +613,9 @@ GenerateDat(const std::vector<std::string>& GFuelType,
 {
     // DF columns
     std::vector<std::string> Columns
-        = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",     "ps",         "saz",    "cur",
-            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "py",      "jd",         "jd_min", "pc",
-            "pdf",      "time", "ffmc", "bui",    "gfl", "pattern", "tree_height" };
+        = { "fueltype", "lat", "lon", "elev", "ws", "waz", "ps", "saz", "cur",
+            "cbd", "cbh", "ccf", "ftypeN", "fmc", "py", "jd", "jd_min", "pc",
+            "pdf", "time", "ffmc", "bui", "gfl", "pattern", "tree_height" };
 
     // GFL dictionary (FBP)
     std::unordered_map<std::string, float> GFLD = { { "C1", 0.75f },
@@ -577,14 +659,14 @@ GenerateDat(const std::vector<std::string>& GFuelType,
 
     // PDF dictionary (CANADA)
     std::unordered_map<std::string, int> PDFD
-        = { { "M3_5", 5 },     { "M3_10", 10 },   { "M3_15", 15 },   { "M3_20", 20 },   { "M3_25", 25 },
-            { "M3_30", 30 },   { "M3_35", 35 },   { "M3_40", 40 },   { "M3_45", 45 },   { "M3_50", 50 },
-            { "M3_55", 55 },   { "M3_60", 60 },   { "M3_65", 65 },   { "M3_70", 70 },   { "M3_75", 75 },
-            { "M3_80", 80 },   { "M3_85", 85 },   { "M3_90", 90 },   { "M3_95", 95 },   { "M4_5", 5 },
-            { "M4_10", 10 },   { "M4_15", 15 },   { "M4_20", 20 },   { "M4_25", 25 },   { "M4_30", 30 },
-            { "M4_35", 35 },   { "M4_40", 40 },   { "M4_45", 45 },   { "M4_50", 50 },   { "M4_55", 55 },
-            { "M4_60", 60 },   { "M4_65", 65 },   { "M4_70", 70 },   { "M4_75", 75 },   { "M4_80", 80 },
-            { "M4_85", 85 },   { "M4_90", 90 },   { "M4_95", 95 },   { "M3M4_5", 5 },   { "M3M4_10", 10 },
+        = { { "M3_5", 5 }, { "M3_10", 10 }, { "M3_15", 15 }, { "M3_20", 20 }, { "M3_25", 25 },
+            { "M3_30", 30 }, { "M3_35", 35 }, { "M3_40", 40 }, { "M3_45", 45 }, { "M3_50", 50 },
+            { "M3_55", 55 }, { "M3_60", 60 }, { "M3_65", 65 }, { "M3_70", 70 }, { "M3_75", 75 },
+            { "M3_80", 80 }, { "M3_85", 85 }, { "M3_90", 90 }, { "M3_95", 95 }, { "M4_5", 5 },
+            { "M4_10", 10 }, { "M4_15", 15 }, { "M4_20", 20 }, { "M4_25", 25 }, { "M4_30", 30 },
+            { "M4_35", 35 }, { "M4_40", 40 }, { "M4_45", 45 }, { "M4_50", 50 }, { "M4_55", 55 },
+            { "M4_60", 60 }, { "M4_65", 65 }, { "M4_70", 70 }, { "M4_75", 75 }, { "M4_80", 80 },
+            { "M4_85", 85 }, { "M4_90", 90 }, { "M4_95", 95 }, { "M3M4_5", 5 }, { "M3M4_10", 10 },
             { "M3M4_15", 15 }, { "M3M4_20", 20 }, { "M3M4_25", 25 }, { "M3M4_30", 30 }, { "M3M4_35", 35 },
             { "M3M4_40", 40 }, { "M3M4_45", 45 }, { "M3M4_50", 50 }, { "M3M4_55", 55 }, { "M3M4_60", 60 },
             { "M3M4_65", 65 }, { "M3M4_70", 70 }, { "M3M4_75", 75 }, { "M3M4_80", 80 }, { "M3M4_85", 85 },
@@ -592,14 +674,14 @@ GenerateDat(const std::vector<std::string>& GFuelType,
 
     // PCD dictionary (CANADA)
     std::unordered_map<std::string, int> PCD
-        = { { "M3_5", 5 },     { "M3_10", 10 },   { "M3_15", 15 },   { "M3_20", 20 },   { "M3_25", 25 },
-            { "M3_30", 30 },   { "M3_35", 35 },   { "M3_40", 40 },   { "M3_45", 45 },   { "M3_50", 50 },
-            { "M3_55", 55 },   { "M3_60", 60 },   { "M3_65", 65 },   { "M3_70", 70 },   { "M3_75", 75 },
-            { "M3_80", 80 },   { "M3_85", 85 },   { "M3_90", 90 },   { "M3_95", 95 },   { "M4_5", 5 },
-            { "M4_10", 10 },   { "M4_15", 15 },   { "M4_20", 20 },   { "M4_25", 25 },   { "M4_30", 30 },
-            { "M4_35", 35 },   { "M4_40", 40 },   { "M4_45", 45 },   { "M4_50", 50 },   { "M4_55", 55 },
-            { "M4_60", 60 },   { "M4_65", 65 },   { "M4_70", 70 },   { "M4_75", 75 },   { "M4_80", 80 },
-            { "M4_85", 85 },   { "M4_90", 90 },   { "M4_95", 95 },   { "M3M4_5", 5 },   { "M3M4_10", 10 },
+        = { { "M3_5", 5 }, { "M3_10", 10 }, { "M3_15", 15 }, { "M3_20", 20 }, { "M3_25", 25 },
+            { "M3_30", 30 }, { "M3_35", 35 }, { "M3_40", 40 }, { "M3_45", 45 }, { "M3_50", 50 },
+            { "M3_55", 55 }, { "M3_60", 60 }, { "M3_65", 65 }, { "M3_70", 70 }, { "M3_75", 75 },
+            { "M3_80", 80 }, { "M3_85", 85 }, { "M3_90", 90 }, { "M3_95", 95 }, { "M4_5", 5 },
+            { "M4_10", 10 }, { "M4_15", 15 }, { "M4_20", 20 }, { "M4_25", 25 }, { "M4_30", 30 },
+            { "M4_35", 35 }, { "M4_40", 40 }, { "M4_45", 45 }, { "M4_50", 50 }, { "M4_55", 55 },
+            { "M4_60", 60 }, { "M4_65", 65 }, { "M4_70", 70 }, { "M4_75", 75 }, { "M4_80", 80 },
+            { "M4_85", 85 }, { "M4_90", 90 }, { "M4_95", 95 }, { "M3M4_5", 5 }, { "M3M4_10", 10 },
             { "M3M4_15", 15 }, { "M3M4_20", 20 }, { "M3M4_25", 25 }, { "M3M4_30", 30 }, { "M3M4_35", 35 },
             { "M3M4_40", 40 }, { "M3M4_45", 45 }, { "M3M4_50", 50 }, { "M3M4_55", 55 }, { "M3M4_60", 60 },
             { "M3M4_65", 65 }, { "M3M4_70", 70 }, { "M3M4_75", 75 }, { "M3M4_80", 80 }, { "M3M4_85", 85 },
@@ -665,7 +747,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         // Handle special cases 8
         if (std::isnan(Curing[i]) && (GFuelType[i] == "O1a" || GFuelType[i] == "O1b"))
         {
-            rowData.emplace_back(std::make_unique<std::string>("60"));  // "cur"
+            rowData.emplace_back(std::make_unique<std::string>("60")); // "cur"
         }
         else
         {
@@ -740,7 +822,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         // Populate PC 17
         if (PCD.find(GFuelType[i]) != PCD.end())
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PCD[GFuelType[i]])));  // "pc"
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PCD[GFuelType[i]]))); // "pc"
         }
         else
         {
@@ -751,7 +833,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         // Populate PDF 18
         if (PDFD.find(GFuelType[i]) != PDFD.end())
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PDFD[GFuelType[i]])));  // "pdf"
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PDFD[GFuelType[i]]))); // "pdf"
         }
         else
         {
@@ -768,7 +850,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         // GFL 22
         if (GFLD.find(GFuelType[i]) != GFLD.end())
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(GFLD[GFuelType[i]])));  // "gfl"
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(GFLD[GFuelType[i]]))); // "gfl"
         }
         else
         {
@@ -797,16 +879,20 @@ GenerateDat(const std::vector<std::string>& GFuelType,
     return dataGrids;
 }
 
-// Function to write data to a CSV file
+/**
+ * @brief Save data matrix into a CSV file called `Data.csv`.
+ * @param dataGrids Array of arrays storing each cell's input data
+ * @param InFolder Directory where the CSV file will be created.
+ */
 void
 writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids, const std::string& InFolder)
 {
 
     std::ofstream dataFile(InFolder + separator() + "Data.csv");
     std::vector<std::string> Columns
-        = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",     "ps",         "saz",    "cur",
-            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "py",      "jd",         "jd_min", "pc",
-            "pdf",      "time", "ffmc", "bui",    "gfl", "pattern", "tree_height" };
+        = { "fueltype", "lat", "lon", "elev", "ws", "waz", "ps", "saz", "cur",
+            "cbd", "cbh", "ccf", "ftypeN", "fmc", "py", "jd", "jd_min", "pc",
+            "pdf", "time", "ffmc", "bui", "gfl", "pattern", "tree_height" };
     if (dataFile.is_open())
     {
         // Write header
@@ -821,7 +907,7 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
         {
             for (const auto& item : rowData)
             {
-                dataFile << *item << ",";  // Dereference the unique_ptr before writing
+                dataFile << *item << ","; // Dereference the unique_ptr before writing
             }
             dataFile << "\n";
         }
@@ -835,7 +921,31 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
     }
 }
 
-// Main function
+/**
+ * @brief Reads all available input raster files and generates a new file called 'Data.csv' in which each row contains
+ * the input data for a cell.
+ *
+ * If the 'fuels' raster file is in `tif` format, then it assumes all other rasters are also in that format.
+ * Otherwise, it assumes `ascii` format.
+ *
+ * The function looks for the following files in `InFolder`:
+ *  - elevation: terrain elevation [m]
+ *  - saz: slope azimuth
+ *  - slope: terrain slope
+ *  - cur: curing level
+ *  - cbd: canopy bulk density [km/m²]
+ *  - cbh: canopy base height [m]
+ *  - ccf: canopy cover fraction
+ *  - py: ignition probability map [%]
+ *  - fmc: foliage moisture content
+ *  - hm: tree height [m]
+ *  
+ * The generated file contains the following columns: fuel type, latitude, longitude, elevation, wind speed (always blank),
+ * wind direction (always blank), slope, slope azimuth, curing level, canopy bulk density, canopy base height, canopy
+ * cover fraction, fuel type number ,foliage moisture content, ignition probability.
+ * @param InFolder Input data directory
+ * @param Simulator Simulation model code
+ */
 void
 GenDataFile(const std::string& InFolder, const std::string& Simulator)
 {
@@ -953,7 +1063,7 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
 
     std::vector<std::string> filenames
         = { "elevation" + extension, "saz" + extension, "slope" + extension, "cur" + extension, "cbd" + extension,
-            "cbh" + extension,       "ccf" + extension, "py" + extension,    "fmc" + extension, "hm" + extension };
+            "cbh" + extension, "ccf" + extension, "py" + extension, "fmc" + extension, "hm" + extension };
 
     for (const auto& name : filenames)
     {

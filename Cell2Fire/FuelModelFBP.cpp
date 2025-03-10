@@ -425,10 +425,17 @@ ffmc_effect(float ffmc)
 }
 
 /**
- * @brief calculates rate of spread
- * @cite GHISU20151
+ * @brief Computes the rate of spread (ROS) for a given fire scenario.
  *
+ * Uses fuel, wind, and slope effects to determine the ROS based on input parameters.
+ *
+ * @param inp Pointer to input fire environment data.
+ * @param ptr Pointer to fuel coefficient data.
+ * @param at Pointer to output structure storing intermediate and final ROS values.
+ * @return Computed rate of spread as a float.
+ * @cite GHISU20151
  */
+
 float
 rate_of_spread(inputs* inp, fuel_coefs* ptr, main_outs* at)
 {
