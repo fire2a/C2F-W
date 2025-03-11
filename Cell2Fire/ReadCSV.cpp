@@ -271,12 +271,12 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
             cur = std::stof(DF[i][8], &sz);
 
         if (DF[i][9].compare("") == 0)
-            cbd = -999;
+            cbd = -9999;
         else
             cbd = std::stof(DF[i][9], &sz);
 
         if (DF[i][10].compare("") == 0)
-            cbh = -999;
+            cbh = -9999;
         else
             cbh = std::stof(DF[i][10], &sz);
 
