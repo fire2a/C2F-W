@@ -566,11 +566,11 @@ setup_const()
 void
 setup_crown_const(inputs* data)
 {
-    if (data->cbd == -999)
+    if (data->cbd == -9999)
     {
         data->cbd = cbds[data->nftype][0];
     }
-    if (data->cbh == -999)
+    if (data->cbh == -9999)
     {
         data->cbh = cbhs[data->nftype][0];
     }
