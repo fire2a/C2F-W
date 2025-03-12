@@ -1,3 +1,6 @@
+/**
+ *@file
+ */
 /*   Subroutine of  FBP.C   version 4.4   Aug,2007
          Canadian Forest Fire Behaviour Prediction System
 This code is copyright of the Canadian Forest Service, Natural Resources Canada
@@ -411,6 +414,7 @@ get_fueltype_number(fuel_coefs** ptr, char fuel[4])
     return (cover);
 }
 
+// TODO: citation needed
 float
 ffmc_effect(float ffmc)
 {
@@ -419,6 +423,18 @@ ffmc_effect(float ffmc)
     ff = 91.9 * exp(-0.1386 * mc) * (1 + pow(mc, 5.31) / 49300000.0);
     return (ff);
 }
+
+/**
+ * @brief Computes the rate of spread (ROS) for a given fire scenario.
+ *
+ * Uses fuel, wind, and slope effects to determine the ROS based on input parameters.
+ *
+ * @param inp Pointer to input fire environment data.
+ * @param ptr Pointer to fuel coefficient data.
+ * @param at Pointer to output structure storing intermediate and final ROS values.
+ * @return Computed rate of spread as a float.
+ * @cite GHISU20151
+ */
 
 float
 rate_of_spread(inputs* inp, fuel_coefs* ptr, main_outs* at)
@@ -458,6 +474,7 @@ ros_calc(inputs* inp, fuel_coefs* ptr, float isi, float* mult)
     return (conifer(ptr, isi, mult));
 }
 
+// TODO: citation needed
 float
 grass(fuel_coefs* ptr, float cur, float isi, float* mult)
 {
@@ -473,6 +490,7 @@ grass(fuel_coefs* ptr, float cur, float isi, float* mult)
     return (ros);
 }
 
+// TODO: citation needed
 float
 mixed_wood(fuel_coefs* ptr, float isi, float* mu, int pc)
 {
@@ -497,6 +515,7 @@ mixed_wood(fuel_coefs* ptr, float isi, float* mu, int pc)
     return (ros);
 }
 
+// TODO: citation needed
 float
 dead_fir(fuel_coefs* ptr, int pdf, float isi, float* mu)
 {
@@ -524,6 +543,7 @@ dead_fir(fuel_coefs* ptr, int pdf, float isi, float* mu)
     return (ros);
 }
 
+// TODO: citation needed
 float
 D2_ROS(fuel_coefs* ptr, float isi, float bui, float* mu)
 {
@@ -534,6 +554,7 @@ D2_ROS(fuel_coefs* ptr, float isi, float bui, float* mu)
         return (0.0);
 }
 
+// TODO: citation needed
 float
 conifer(fuel_coefs* ptr, float isi, float* mu)
 {
@@ -541,6 +562,7 @@ conifer(fuel_coefs* ptr, float isi, float* mu)
     return (ptr->p1 * pow((1.0 - exp(-1.0 * ptr->p2 * isi)), ptr->p3));
 }
 
+// TODO: citation needed
 float
 bui_effect(fuel_coefs* ptr, main_outs* at, float bui)
 {
@@ -552,6 +574,7 @@ bui_effect(fuel_coefs* ptr, main_outs* at, float bui)
     return (at->be);
 }
 
+// TODO: citation needed
 float
 slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi)
 /* ISI is ISZ really */
@@ -613,6 +636,7 @@ slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi)
     return ((float)(wsv));
 }
 
+// TODO: citation needed
 float
 ISF_mixedwood(fuel_coefs* ptr, float isz, int pc, float sf)
 {
@@ -682,12 +706,14 @@ ISF_deadfir(fuel_coefs* ptr, float isz, int pdf, float sf)
     return (((float)(pdf) / 100.0) * isf_max + (100.0 - (float)(pdf)) / 100.0 * isf_d1);
 }
 
+// TODO: citation needed
 float
 fire_intensity(float fc, float ros)
 {
     return (300.0 * fc * ros);
 }
 
+// TODO: citation needed
 float
 foliar_moisture(inputs* inp, main_outs* at)
 {
@@ -716,6 +742,7 @@ foliar_moisture(inputs* inp, main_outs* at)
     return (85.0 + 0.0189 * nd * nd);
 }
 
+// TODO: citation needed
 float
 surf_fuel_consump(inputs* inp)
 {
@@ -784,6 +811,7 @@ surf_fuel_consump(inputs* inp)
     return (-99);
 }
 
+// TODO: citation needed
 float
 crit_surf_intensity(fuel_coefs* ptr, float fmc)
 {
@@ -798,6 +826,7 @@ crit_surf_intensity(fuel_coefs* ptr, float fmc)
     }
 }
 
+// TODO: citation needed
 float
 critical_ros(char ft[3], float sfc, float csi)
 {
@@ -807,6 +836,7 @@ critical_ros(char ft[3], float sfc, float csi)
         return (0.0);
 }
 
+// TODO: citation needed
 float
 crown_frac_burn(float rss, float rso)
 {
@@ -832,7 +862,7 @@ fire_description(float cfb)
         return ('C');
     return ('*');
 }
-
+// TODO: citation needed
 float
 final_ros(inputs* inp, float fmc, float isi, float cfb, float rss)
 {
@@ -847,6 +877,7 @@ final_ros(inputs* inp, float fmc, float isi, float cfb, float rss)
     return (ros);
 }
 
+// TODO: citation needed
 float
 foliar_mois_effect(float isi, float fmc)
 {
@@ -856,6 +887,7 @@ foliar_mois_effect(float isi, float fmc)
     return (rsc);
 }
 
+// TODO: citation needed
 float
 crown_consump(inputs* inp, fuel_coefs* ptr, float cfb)
 {
@@ -868,6 +900,7 @@ crown_consump(inputs* inp, fuel_coefs* ptr, float cfb)
     return (cfc);
 }
 
+// TODO: citation needed
 float
 l_to_b(char ft[3], float ws)
 {
@@ -884,6 +917,8 @@ set_all(fire_struc* ptr, int time)
     ptr->rost = ptr->ros;
     ptr->dist = time * ptr->ros;
 }
+
+// TODO: citation needed
 float
 backfire_isi(main_outs* at)
 {
@@ -892,6 +927,7 @@ backfire_isi(main_outs* at)
     return (0.208 * at->ff * bfw);
 }
 
+// TODO: citation needed
 float
 backfire_ros(inputs* inp, fuel_coefs* ptr, main_outs* at, float bisi)
 {
@@ -901,6 +937,7 @@ backfire_ros(inputs* inp, fuel_coefs* ptr, main_outs* at, float bisi)
     return (bros);
 }
 
+// TODO: citation needed
 float
 area(float dt, float df)
 {
@@ -910,6 +947,7 @@ area(float dt, float df)
     return (a * b * 3.1415926 / 10000.0);
 }
 
+// TODO: citation needed
 float
 perimeter(fire_struc* h, fire_struc* b, snd_outs* sec, float lb)
 {
@@ -933,15 +971,16 @@ acceleration(inputs* inp, float cfb)
     if (canopy == 'o')
         return (0.115);
     else
-        return (0.115 - 18.8 * pow(cfb, 2.5) * exp(-8.0 * cfb));
+        return (0.115 - 18.8 * pow(cfb, 2.5) * exp(-8.0 * cfb));  // TODO: citation needed
 }
 
 float
 flankfire_ros(float ros, float bros, float lb)
 {
-    return ((ros + bros) / (lb * 2.0));
+    return ((ros + bros) / (lb * 2.0));  // TODO: citation needed
 }
 
+// TODO: citation needed
 float
 flank_spread_distance(
     inputs* inp, fire_struc* ptr, snd_outs* sec, float hrost, float brost, float hd, float bd, float lb, float a)
@@ -951,6 +990,7 @@ flank_spread_distance(
     return ((hd + bd) / (2.0 * sec->lbt));
 }
 
+// TODO: citation needed
 float
 spread_distance(inputs* inp, fire_struc* ptr, float a)
 {

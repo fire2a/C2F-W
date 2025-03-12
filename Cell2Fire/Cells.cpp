@@ -282,6 +282,7 @@ Cells::ros_distr_old(double thetafire, double forward, double flank, double back
  * @return The radial distance from the ellipse's center to its perimeter at
  * the given angle.
  */
+// TODO: citation needed
 double
 Cells::rhoTheta(double theta, double a, double b)
 {
