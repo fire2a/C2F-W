@@ -13,12 +13,11 @@ OBJS = $(SRCS:.cpp=.o)
 
 # Target executable
 TARGET = Cell2Fire
-TEST_DIR = ../test/unit_tests
 TEST_TARGET = test_cell2fire
 
 # Test source files
-TEST_FILES = $(TEST_DIR)/test_kitral.cpp FuelModelKitral.cpp
-#TODO: poner bien los archivos test
+TEST_DIR = ../test/unit_tests
+TEST_FILES = $(TEST_DIR)/*.cpp FuelModelKitral.cpp
 
 # Build rules
 all: $(TARGET)
