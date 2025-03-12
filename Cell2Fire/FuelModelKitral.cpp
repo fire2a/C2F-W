@@ -775,8 +775,8 @@ active_rate_of_spreadPL04(inputs* data,
     {
         rospl04 = fmc * fch * (fv + ps);
     }
-    ros_active = 3.34 * rospl04;  // if rac*cbd>3.0, aplicar
-                                  // ros_final=3.34*rospl04
+    ros_active = 3.34 * rospl04; // if rac*cbd>3.0, aplicar
+    // ros_final=3.34*rospl04
     return ros_active;
 }
 
