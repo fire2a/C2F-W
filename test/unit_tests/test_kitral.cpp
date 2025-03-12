@@ -46,7 +46,7 @@ class NativeFuelFixture
         // Initialize fuel_coefs
         test_coefs->nftype = 16;
         test_coefs->fmc = 0.000979;
-        test_coefs->cbh = 0;
+        test_coefs->cbh = 13.8;
         test_coefs->fl = 3.544;
         test_coefs->h = 19045;
 
@@ -278,9 +278,9 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test crown fraction burn", "[crownfractionb
     int FMC = 100;  // Default value in ReadArgs.cpp
     test_data->cbd = 0.15;
     test_outs->rss = 8;
-    REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.524, 0.001));
+    REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.841, 0.001));
     test_outs->rss = 15;
-    REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.835, 0.001));
+    REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.968, 0.001));
     test_outs->rss = 30;
     REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.982, 0.001));
 }
