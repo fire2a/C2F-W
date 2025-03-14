@@ -149,15 +149,15 @@ jobs:
       - name: Cache Catch2 header
         uses: actions/cache@v3
         with:
-          path: Cell2Fire/include/catch2/catch.hpp
+          path: Cell2Fire\include\catch2\catch.hpp
           key: windows-catch2
 
       - name: Download Catch2 header
         run: |
-          cd Cell2Fire/include
-          if (!(Test-Path "catch2/catch.hpp")) {
+          cd Cell2Fire\include
+          if (!(Test-Path "catch2\catch.hpp")) {
             New-Item -ItemType Directory -Path "catch2" -Force
-            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp" -OutFile "catch2/catch.hpp"
+            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp" -OutFile "catch2\catch.hpp"
           }
 
       - name: Download Artifacts
