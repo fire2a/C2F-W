@@ -167,7 +167,7 @@ jobs:
           path: Cell2Fire
 
       - name: Build and Run Unit Tests
-      run: |
-        cd Cell2Fire
-        msbuild Cell2FireTests.vcxproj /p:Configuration=Release /t:Build
-        msbuild Cell2FireTests.vcxproj /p:Configuration=Release /t:RunTests
+        run: |
+          cd Cell2Fire
+          msbuild Cell2FireTests.vcxproj /p:Configuration=Release /t:Build
+          msbuild Cell2FireTests.vcxproj /p:Configuration=Release /t:RunTests
