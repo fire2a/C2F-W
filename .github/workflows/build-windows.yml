@@ -138,36 +138,36 @@ jobs:
         name: binaries-Windows-x86_64
         path: binaries
 
-windows_test:
-    needs: windows_build
-    runs-on: windows-latest
+  windows_test:
+      needs: windows_build
+      runs-on: windows-latest
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Cache Catch2 header
-      uses: actions/cache@v3
-      with:
-        path: Cell2Fire/include/catch2/catch.hpp
-        key: windows-catch2
+      - name: Cache Catch2 header
+        uses: actions/cache@v3
+        with:
+          path: Cell2Fire/include/catch2/catch.hpp
+          key: windows-catch2
 
-    - name: Download Catch2 header
+      - name: Download Catch2 header
+        run: |
+          cd Cell2Fire/include
+          if (!(Test-Path "catch2/catch.hpp")) {
+            New-Item -ItemType Directory -Path "catch2" -Force
+            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp" -OutFile "catch2/catch.hpp"
+          }
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries-Windows-x86_64
+          path: Cell2Fire
+
+      - name: Build and Run Unit Tests
       run: |
-        cd Cell2Fire/include
-        if (!(Test-Path "catch2/catch.hpp")) {
-          New-Item -ItemType Directory -Path "catch2" -Force
-          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp" -OutFile "catch2/catch.hpp"
-        }
-
-    - name: Download Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: binaries-Windows-x86_64
-        path: Cell2Fire
-
-    - name: Build and Run Unit Tests
-    run: |
-      cd Cell2Fire
-      msbuild Cell2FireTests.vcxproj /p:Configuration=Release /t:Build
-      msbuild Cell2FireTests.vcxproj /p:Configuration=Release /t:RunTests
+        cd Cell2Fire
+        msbuild Cell2FireTests.vcxproj /p:Configuration=Release /t:Build
+        msbuild Cell2FireTests.vcxproj /p:Configuration=Release /t:RunTests
