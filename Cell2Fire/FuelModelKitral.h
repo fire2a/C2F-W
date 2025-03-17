@@ -17,6 +17,9 @@
 // Initialize coefficients
 void setup_const();
 
+// Initialized raster data
+void setup_crown_const(inputs* data);
+
 // Calculate flank fire
 float flankfire_ros_k(float ros, float bros, float lb);
 
