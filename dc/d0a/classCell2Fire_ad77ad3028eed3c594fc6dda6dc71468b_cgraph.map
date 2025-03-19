@@ -1,0 +1,15 @@
+<map id="Cell2Fire::Cell2Fire" name="Cell2Fire::Cell2Fire">
+<area shape="rect" id="Node000001" title="Constructs and initializes the Cell2Fire object to run a simulation." alt="" coords="5,104,149,129"/>
+<area shape="rect" id="Node000002" href="$d0/db0/classCSVReader.html#a2dea725de823f6932ae29552aa05b97d" title="Reads and parses data from a CSV, ASCII or TIFF file into a 2D vector." alt="" coords="207,5,362,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,102,139,71,196,40,215,32,216,37,198,44,142,75,97,106"/>
+<area shape="rect" id="Node000004" href="$d0/db0/classCSVReader.html#a681e66cc91738e7368d89a3d57510517" title="Populates an instance of inputs using information contained in a 2D vector." alt="" coords="207,55,363,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="131,101,217,81,218,86,132,107"/>
+<area shape="rect" id="Node000005" href="$d0/db0/classCSVReader.html#a0ef4aaf9006bd22e9df3d5f2010c7294" title="Populates a vector of size NCells with fuel type number per cell." alt="" coords="201,104,368,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="150,114,187,114,187,119,150,119"/>
+<area shape="rect" id="Node000006" href="$d0/db0/classCSVReader.html#a1caa59d8e9bce0e5d9394879c5a2c419" title="Not currently supported. Populates a vector of size NCells with ignition probability per cell." alt="" coords="197,153,372,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="132,127,218,147,217,153,131,132"/>
+<area shape="rect" id="Node000007" href="$d0/db0/classCSVReader.html#a1e2a1a757df21a7ffd1c73f2a4cb6cf6" title="print data contained in 2D vector to console row by row" alt="" coords="203,203,366,228"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="97,127,142,157,198,188,220,196,218,201,196,192,139,162,94,132"/>
+<area shape="rect" id="Node000003" href="$d4/d3b/DataGenerator_8cpp.html#afdd89841220a8b18e39e0844a833a18b" title="checks if a file exists." alt="" coords="420,5,501,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="362,15,406,15,406,21,362,21"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="Cell2Fire::reset" name="Cell2Fire::reset">
+<area shape="rect" id="Node000001" title="Resets the simulation environment for a new run." alt="" coords="5,5,125,31"/>
+<area shape="rect" id="Node000002" href="$d0/db0/classCSVReader.html#a2dea725de823f6932ae29552aa05b97d" title="Reads and parses data from a CSV, ASCII or TIFF file into a 2D vector." alt="" coords="173,5,328,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,15,160,15,160,21,125,21"/>
+<area shape="rect" id="Node000003" href="$d4/d3b/DataGenerator_8cpp.html#afdd89841220a8b18e39e0844a833a18b" title="checks if a file exists." alt="" coords="376,5,457,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="328,15,362,15,362,21,328,21"/>
+</map>

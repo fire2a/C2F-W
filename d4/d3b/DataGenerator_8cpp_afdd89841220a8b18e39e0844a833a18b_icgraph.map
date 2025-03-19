@@ -1,0 +1,11 @@
+<map id="fileExists" name="fileExists">
+<area shape="rect" id="Node000001" title="checks if a file exists." alt="" coords="400,31,481,56"/>
+<area shape="rect" id="Node000002" href="$d4/d3b/DataGenerator_8cpp.html#a3d4d442b950e2039349a9773e711be15" title="Reads all available input raster files and generates a new file called &#39;Data.csv&#39; in which each row c..." alt="" coords="223,5,326,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="386,38,326,28,327,23,387,32"/>
+<area shape="rect" id="Node000003" href="$d0/db0/classCSVReader.html#a2dea725de823f6932ae29552aa05b97d" title="Reads and parses data from a CSV, ASCII or TIFF file into a 2D vector." alt="" coords="197,55,352,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="387,54,353,59,352,53,386,48"/>
+<area shape="rect" id="Node000004" href="$dc/d0a/classCell2Fire.html#ad77ad3028eed3c594fc6dda6dc71468b" title="Constructs and initializes the Cell2Fire object to run a simulation." alt="" coords="5,29,149,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="183,58,149,54,150,49,184,53"/>
+<area shape="rect" id="Node000005" href="$dc/d0a/classCell2Fire.html#a81d712a5c08100dda45094261b1c995c" title="Resets the simulation environment for a new run." alt="" coords="17,79,137,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="184,81,138,87,137,81,183,76"/>
+</map>
