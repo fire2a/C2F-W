@@ -19,7 +19,7 @@ using namespace std;
 std::unordered_map<int, std::vector<float>> p_coeff;
 std::unordered_map<int, std::vector<float>> q_coeff;
 std::unordered_map<int, std::vector<float>> fm_parameters;
-int16_t HEAT_YIELD = 18000;  // unidad kJ/kg
+int16_t HEAT_YIELD = 18000; // unidad kJ/kg
 
 /**
  *
@@ -2328,8 +2328,9 @@ crown_byram_intensity(main_outs* at, inputs* data)
     float canopy_height = data->tree_height - data->cbh;
     if (canopy_height < 0)
     {
-        throw std::runtime_error("Tree height is lower than canopy base height, "
-                                 "please provide valid files.");
+        std::cerr << "Tree height is lower than canopy base height, "
+            "please provide valid files." << endl;
+        throw std::runtime_error("Could not calculate crown Byram intensity due to invalid input data.");
     }
     return std::ceil((HEAT_YIELD / 60) * data->cbd * canopy_height * at->ros_active * 100.0) / 100.0;
 }
@@ -2407,10 +2408,10 @@ backfire_ros10_s(fire_struc* hptr, snd_outs* sec)
 // TODO: citation needed
 float
 crownfractionburn(inputs* data, main_outs* at)
-{  // generar output de cfb
+{
+    // generar output de cfb
     float a, cbd, ros, ros0, H, wa, i0, cbh, FMC, cfb;
-    FMC = fmc_scen(data);
-    ;  // modificar para ingresar manualmente
+    FMC = fmc_scen(data);; // modificar para ingresar manualmente
     cbh = data->cbh;
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     wa = fm_parameters[data->nftype][0];
@@ -2437,19 +2438,18 @@ crownfractionburn(inputs* data, main_outs* at)
 
 // TODO: citation needed
 bool
-checkActive(inputs* data, main_outs* at)  // En s&b se usa fm10
+checkActive(inputs* data, main_outs* at) // En s&b se usa fm10
 {
     float rac, cbd, H, wa, i0, cbh, fmc;
     bool active;
     // rac = at->ros_active;
-    fmc = fmc_scen(data);
-    ;  // modificar para ingresar manualmente
+    fmc = fmc_scen(data);; // modificar para ingresar manualmente
     cbh = data->cbh;
     i0 = pow((0.01 * cbh * (460 + 25.9 * fmc)), 1.5);
     wa = fm_parameters[data->nftype][0];
     H = fm_parameters[data->nftype][1];
     cbd = data->cbd;
-    rac = 60 * i0 / (H * wa);  // rate active crown
+    rac = 60 * i0 / (H * wa); // rate active crown
 
     active = cbd * rac >= 3;
     return active;
@@ -2573,7 +2573,7 @@ calculate_s(inputs* data,
     else if (activeCrown)
     {
         at->cfb = crownfractionburn(data,
-                                    at);  // lo calculamos igual porque lo necesitamos para el output
+                                    at); // lo calculamos igual porque lo necesitamos para el output
         hptr->ros = at->ros_active;
         at->rss = hptr->ros;
         bptr->ros = backfire_ros10_s(hptr, sec);

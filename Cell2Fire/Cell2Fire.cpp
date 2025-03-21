@@ -39,8 +39,8 @@ using namespace std;
 // Global Variables (DFs with cells and weather info)
 inputs* df_ptr;
 weatherDF* wdf_ptr;
-weatherDF wdf[100000];  // hard to dynamic allocate memory since it changes from
-                        // file to file, better to keep constant size;
+weatherDF wdf[100000]; // hard to dynamic allocate memory since it changes from
+// file to file, better to keep constant size;
 inputs* df;
 int currentSim = 0;
 std::unordered_map<int, std::vector<float>> BBOFactors;
@@ -247,14 +247,14 @@ Cell2Fire::Cell2Fire(arguments _args)
     df = new inputs[this->nCells];
 
     // Create empty df with size of NCells
-    df_ptr = &df[0];  // access reference for the first element of df
+    df_ptr = &df[0]; // access reference for the first element of df
 
     // Populate the df [nCells] objects
     CSVParser.parseDF(df_ptr,
                       DF,
                       this->args_ptr,
-                      this->nCells);  // iterates from the first element of df, using DF,
-                                      // args_ptr and the number of cells
+                      this->nCells); // iterates from the first element of df, using DF,
+    // args_ptr and the number of cells
 
     // Initialize and populate relevant vectors
     this->fTypeCells = std::vector<int>(this->nCells, 1);
@@ -353,7 +353,7 @@ Cell2Fire::Cell2Fire(arguments _args)
     this->counter_wt = 0;
 
     // Populate WDF
-    int WPeriods = WeatherDF.size() - 1;  // -1 due to header
+    int WPeriods = WeatherDF.size() - 1; // -1 due to header
     wdf_ptr = &wdf[0];
     std::cout << "Weather Periods: " << WPeriods << std::endl;
 
@@ -528,7 +528,7 @@ Cell2Fire::Cell2Fire(arguments _args)
     // Global parameters for the loop
     this->year = 1;
     this->weatherPeriod = 0;
-    this->noIgnition = true;  // None = -1
+    this->noIgnition = true; // None = -1
     this->activeCrown = false;
     this->gridNumber = 0;
     this->fire_period = vector<int>(this->args.TotalYears, 0);
@@ -543,9 +543,9 @@ Cell2Fire::Cell2Fire(arguments _args)
             if (this->args.verbose)
             {
                 std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
-                          << " based on the weather file, Fire Period Length, "
-                             "and Minutes per WP"
-                          << std::endl;
+                    << " based on the weather file, Fire Period Length, "
+                    "and Minutes per WP"
+                    << std::endl;
             }
         }
     }
@@ -637,7 +637,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     // Reset global parameters for the simulation
     this->year = 1;
     this->weatherPeriod = 0;
-    this->noIgnition = true;  // None = -1
+    this->noIgnition = true; // None = -1
     this->nIgnitions = 0;
     this->gridNumber = 0;
     this->activeCrown = false;
@@ -765,7 +765,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
 
         // Populate WDF
-        int WPeriods = this->WeatherDF.size() - 1;  // -1 due to header
+        int WPeriods = this->WeatherDF.size() - 1; // -1 due to header
         wdf_ptr = &wdf[0];
         std::cout << "Weather Periods: " << WPeriods << std::endl;
         std::string weather_name = "";
@@ -806,9 +806,9 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             if (this->args.verbose)
             {
                 std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
-                          << " based on the weather file, Fire Period Length, "
-                             "and Minutes per WP"
-                          << std::endl;
+                    << " based on the weather file, Fire Period Length, "
+                    "and Minutes per WP"
+                    << std::endl;
             }
         }
     }
@@ -821,8 +821,8 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         while (!selectWeather)
         {
             std::default_random_engine generator3(args.seed * simExt
-                                                  * time(NULL));  // creates a different generator solving cases when
-                                                                  // parallel running creates simulations at same time
+                                                  * time(NULL)); // creates a different generator solving cases when
+            // parallel running creates simulations at same time
             std::uniform_int_distribution<int> distribution(1, this->WDist.size() - 1);
             int weather_idx = distribution(generator3);
 
@@ -832,7 +832,8 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             // DEBUGstd::cout<<"weather_idx: "<<(weather_idx)<<std::endl;
             // DEBUGstd::cout<<"rdnumber: "<<(rd_number)<<std::endl;
             if (probability_weather > rd_number)
-            {  // rd_number cannot be 1, but can be 0. So if prob weather has
+            {
+                // rd_number cannot be 1, but can be 0. So if prob weather has
                 // prob=0 it does not have a chance of being selected, and if it
                 // is 1, it will always be selected
                 weather_name = this->WDist[weather_idx][0];
@@ -866,7 +867,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
 
         // Populate WDF
-        int WPeriods = this->WeatherDF.size() - 1;  // -1 due to header
+        int WPeriods = this->WeatherDF.size() - 1; // -1 due to header
         wdf_ptr = &wdf[0];
         std::cout << "Weather Periods: " << WPeriods << std::endl;
 
@@ -890,9 +891,9 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             if (this->args.verbose)
             {
                 std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
-                          << " based on the weather file, Fire Period Length, "
-                             "and Minutes per WP"
-                          << std::endl;
+                    << " based on the weather file, Fire Period Length, "
+                    "and Minutes per WP"
+                    << std::endl;
             }
         }
     }
@@ -921,7 +922,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->maxFlameLengths = std::vector<float>(this->nCells, 0);
 
     this->FSCell.clear();
-    this->crownMetrics.clear();  // intensity and crown
+    this->crownMetrics.clear(); // intensity and crown
 
     // Non burnable types: populate relevant fields such as status and ftype
     std::string NoFuel = "NF ";
@@ -1037,9 +1038,9 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
     int microloops = 0;
     this->noIgnition = false;
     currentSim = currentSim + 1;
-    std::default_random_engine generator2(args.seed * ep * this->nCells);  // * time(NULL)); //creates a different
-                                                                           // generator solving cases when parallel
-                                                                           // running creates simulations at same time
+    std::default_random_engine generator2(args.seed * ep * this->nCells); // * time(NULL)); //creates a different
+    // generator solving cases when parallel
+    // running creates simulations at same time
     std::unordered_map<int, Cells>::iterator it;
     std::uniform_int_distribution<int> distribution(1, this->nCells);
 
@@ -1091,7 +1092,7 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
                 {
                     IgnitionHistory[sim] = aux;
                     std::cout << "\nSelected (Random) ignition point for Year " << this->year << ", sim " << this->sim
-                              << ": " << aux;
+                        << ": " << aux << endl;
                     std::vector<int> ignPts = { aux };
                     if (it->second.ignition(this->fire_period[year - 1],
                                             this->year,
@@ -1108,7 +1109,7 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
                         {
                             std::cout << "Cell " << it->second.realId << " Ignites" << std::endl;
                             std::cout << "Cell " << it->second.realId << " Status: " << it->second.getStatus()
-                                      << std::endl;
+                                << std::endl;
                         }
 
                         // Status
@@ -1203,8 +1204,8 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
             if (this->args.verbose)
             {
                 std::cout << "No ignition during year " << this->year << ", Cell "
-                          << this->IgnitionPoints[this->year - 1] << " is already burnt or non-burnable type"
-                          << std::endl;
+                    << this->IgnitionPoints[this->year - 1] << " is already burnt or non-burnable type"
+                    << std::endl;
             }
             this->year++;
             this->weatherPeriod = 0;
@@ -1228,7 +1229,11 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
         if (this->args.verbose)
         {
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells,
+                this->nonBurnableCells,
+                this->burningCells,
+                this->burntCells,
+                this->harvestCells);
         }
     }
 
@@ -1258,8 +1263,8 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
 
         if (this->args.WeatherOpt.compare("constant") == 0)
             std::cout << "(NOTE: current weather is not used for ROS with "
-                         "constant option)"
-                      << std::endl;
+                "constant option)"
+                << std::endl;
 
         // End of the ignition step
         std::cout << "\nNext Fire Period: " << this->fire_period[year - 1] << std::endl;
@@ -1273,13 +1278,13 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
         {
             std::cout << "No ignition in year " << this->year << std::endl;
             std::cout << "------------------------------------------------------"
-                         "-------------------\n"
-                      << std::endl;
+                "-------------------\n"
+                << std::endl;
             std::cout << "                           End of the fire year " << this->year << "               "
-                      << std::endl;
+                << std::endl;
             std::cout << "------------------------------------------------------"
-                         "-------------------"
-                      << std::endl;
+                "-------------------"
+                << std::endl;
         }
 
         // Next year
@@ -1358,8 +1363,8 @@ Cell2Fire::SendMessages()
     if (this->args.verbose)
     {
         std::cout << "\n---------------------- Step 2: Sending Messages from "
-                     "Ignition ----------------------"
-                  << std::endl;
+            "Ignition ----------------------"
+            << std::endl;
         std::cout << "Current Fire Period:" << this->fire_period[this->year - 1] << std::endl;
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
     }
@@ -1389,7 +1394,8 @@ Cell2Fire::SendMessages()
         {
             // std::cout << "Entra a Manage Fire" << std::endl;
             if (!this->args.BBOTuning)
-            {  //&df[cell-1] replaced by full df for getting the slopes
+            {
+                //&df[cell-1] replaced by full df for getting the slopes
                 aux_list = it->second.manageFire(this->fire_period[this->year - 1],
                                                  this->availCells,
                                                  df,
@@ -1447,9 +1453,9 @@ Cell2Fire::SendMessages()
         {
             if (this->args.verbose)
                 std::cout << "\nCell " << cell
-                          << " does not have any neighbor available for receiving "
-                             "messages"
-                          << std::endl;
+                    << " does not have any neighbor available for receiving "
+                    "messages"
+                    << std::endl;
         }
 
         // If message and not a true flag
@@ -1465,8 +1471,8 @@ Cell2Fire::SendMessages()
                 for (auto& msg : sendMessageList[it->second.realId])
                 {
                     std::cout << "  Fire reaches the center of the cell " << msg
-                              << "  Distance to cell (in meters) was 100.0"
-                              << " " << std::endl;
+                        << "  Distance to cell (in meters) was 100.0"
+                        << " " << std::endl;
                 }
             }
         }
@@ -1485,8 +1491,8 @@ Cell2Fire::SendMessages()
             if (this->args.verbose)
             {
                 std::cout << "\nMessage and Aux Lists are empty; adding to "
-                             "BurnedOutList"
-                          << std::endl;
+                    "BurnedOutList"
+                    << std::endl;
             }
         }
     }
@@ -1559,8 +1565,8 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
     if (this->args.verbose)
     {
         std::cout << "\n---------------------- Step 3: Receiving and processing "
-                     "messages from Ignition ----------------------"
-                  << std::endl;
+            "messages from Ignition ----------------------"
+            << std::endl;
         std::cout << "Current Fire Period: " << this->fire_period[this->year - 1] << std::endl;
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
     }
@@ -1585,7 +1591,7 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
     {
         if (this->args.verbose)
             std::cout << "Messages have been sent, next step. Current period: " << this->fire_period[this->year - 1]
-                      << std::endl;
+                << std::endl;
         this->repeatFire = false;
     }
 
@@ -1609,7 +1615,11 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
         this->burningCells.clear();
         if (this->args.verbose)
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells,
+                this->nonBurnableCells,
+                this->burningCells,
+                this->burntCells,
+                this->harvestCells);
     }
 
     // Mesages and no repeat
@@ -1696,7 +1706,7 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
                 if (this->args.verbose)
                 {
                     std::cout << "\nCell " << it->second.realId << " got burnt (1 true, 0 false): " << checkBurnt
-                              << std::endl;
+                        << std::endl;
                 }
 
                 // Update the burntlist
@@ -1712,7 +1722,7 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
                         int origToNew = angle.first;
                         // Which neighbor am I to the burnt cell
                         int newToOrig = (origToNew + 180) % 360;
-                        int adjCellNum = angle.second;  // Check
+                        int adjCellNum = angle.second; // Check
                         auto adjIt = Cells_Obj.find(adjCellNum);
                         if (adjIt != Cells_Obj.end())
                         {
@@ -1752,7 +1762,11 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
         if (this->args.verbose)
         {
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells,
+                this->nonBurnableCells,
+                this->burningCells,
+                this->burntCells,
+                this->harvestCells);
         }
 
         /*
@@ -1768,8 +1782,8 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
         if (this->args.WeatherOpt.compare("constant") == 0 && this->args.verbose)
         {
             std::cout << "(NOTE: current weather is not used for ROS with "
-                         "constant option)"
-                      << std::endl;
+                "constant option)"
+                << std::endl;
         }
     }
 }
@@ -1880,16 +1894,16 @@ Cell2Fire::Results()
     float HCells = this->harvestCells.size();
 
     std::cout << "\n----------------------------- Results "
-                 "-----------------------------"
-              << std::endl;
+        "-----------------------------"
+        << std::endl;
     std::cout << "Total Available Cells:    " << ACells << " - % of the Forest: " << ACells / nCells * 100.0 << "%"
-              << std::endl;
+        << std::endl;
     std::cout << "Total Burnt Cells:        " << BCells << " - % of the Forest: " << BCells / nCells * 100.0 << "%"
-              << std::endl;
+        << std::endl;
     std::cout << "Total Non-Burnable Cells: " << NBCells << " - % of the Forest: " << NBCells / nCells * 100.0 << "%"
-              << std::endl;
+        << std::endl;
     std::cout << "Total Firebreak Cells: " << HCells << " - % of the Forest: " << HCells / nCells * 100.0 << "%"
-              << std::endl;
+        << std::endl;
 
     // Final Grid
     if (this->args.FinalGrid)
@@ -1940,7 +1954,12 @@ Cell2Fire::Results()
         }
         CSVWriter CSVPloter(rosName, " ");
         CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->RateOfSpreads);
+            this->rows,
+            this->cols,
+            this->xllcorner,
+            this->yllcorner,
+            this->cellSide,
+            this->RateOfSpreads);
     }
 
     // Intensity
@@ -1959,7 +1978,12 @@ Cell2Fire::Results()
         }
         CSVWriter CSVPloter(intensityName, " ");
         CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfaceIntensities);
+            this->rows,
+            this->cols,
+            this->xllcorner,
+            this->yllcorner,
+            this->cellSide,
+            this->surfaceIntensities);
     }
 
     // Crown Intensity
@@ -1977,7 +2001,12 @@ Cell2Fire::Results()
         }
         CSVWriter CSVPloter(intensityName, " ");
         CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownIntensities);
+            this->rows,
+            this->cols,
+            this->xllcorner,
+            this->yllcorner,
+            this->cellSide,
+            this->crownIntensities);
     }
 
     // Surface Flame Length
@@ -1995,7 +2024,12 @@ Cell2Fire::Results()
         }
         CSVWriter CSVPloter(flName, " ");
         CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfaceFlameLengths);
+            this->rows,
+            this->cols,
+            this->xllcorner,
+            this->yllcorner,
+            this->cellSide,
+            this->surfaceFlameLengths);
     }
 
     // Crown Flame length
@@ -2013,7 +2047,12 @@ Cell2Fire::Results()
         }
         CSVWriter CSVPloter(fileName, " ");
         CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFlameLengths);
+            this->rows,
+            this->cols,
+            this->xllcorner,
+            this->yllcorner,
+            this->cellSide,
+            this->crownFlameLengths);
     }
 
     // Max Flame length
@@ -2031,7 +2070,12 @@ Cell2Fire::Results()
         }
         CSVWriter CSVPloter(fileName, " ");
         CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->maxFlameLengths);
+            this->rows,
+            this->cols,
+            this->xllcorner,
+            this->yllcorner,
+            this->cellSide,
+            this->maxFlameLengths);
     }
 
     // Intensity
@@ -2049,7 +2093,12 @@ Cell2Fire::Results()
         }
         CSVWriter CSVPloter(cfbName, " ");
         CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFraction);
+            this->rows,
+            this->cols,
+            this->xllcorner,
+            this->yllcorner,
+            this->cellSide,
+            this->crownFraction);
     }
 
     // Intensity
@@ -2067,7 +2116,12 @@ Cell2Fire::Results()
         }
         CSVWriter CSVPloter(sfbName, " ");
         CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfFraction);
+            this->rows,
+            this->cols,
+            this->xllcorner,
+            this->yllcorner,
+            this->cellSide,
+            this->surfFraction);
     }
 
     // Crown
@@ -2088,7 +2142,12 @@ Cell2Fire::Results()
         // this->yllcorner, this->cellSide, this->crownMetrics, statusCells2);
         // /OLD VERSION
         CSVPloter.printASCIIInt(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownState);
+            this->rows,
+            this->cols,
+            this->xllcorner,
+            this->yllcorner,
+            this->cellSide,
+            this->crownState);
     }
 
     // Ignition Logfile
@@ -2161,7 +2220,7 @@ Cell2Fire::outputGrid()
 {
     // FileName
     std::string gridName;
-    std::vector<int> statusCells2(this->nCells, 0);  //(long int, int);
+    std::vector<int> statusCells2(this->nCells, 0); //(long int, int);
 
     // Update status
     for (auto& bc : this->burningCells)
@@ -2220,7 +2279,7 @@ Cell2Fire::updateWeather()
 {
     if (this->args.WeatherOpt != "constant"
         && this->fire_period[this->year - 1] * this->args.FirePeriodLen / this->args.MinutesPerWP
-               > this->weatherPeriod + 1)
+        > this->weatherPeriod + 1)
     {
         this->weatherPeriod++;
         if (this->args.OutputGrids)
@@ -2499,7 +2558,7 @@ main(int argc, char* argv[])
     // TODO)
     int num_threads = args.nthreads;
     int TID = 0;
-    Cell2Fire Forest2(args);  // generate Forest object
+    Cell2Fire Forest2(args); // generate Forest object
     std::vector<Cell2Fire> Forests(num_threads, Forest2);
 
     // Multigenerator
@@ -2509,7 +2568,7 @@ main(int argc, char* argv[])
         generators.emplace_back(default_random_engine(args.seed * stop));
     }
 
-// Parallel zone
+    // Parallel zone
 #pragma omp parallel num_threads(num_threads)
     {
         // Number of threads
@@ -2524,14 +2583,14 @@ main(int argc, char* argv[])
         }
         Cell2Fire Forest = Forests[TID];
         // Random seed
-        std::default_random_engine& generator = generators[TID];  // generators[args.nthreads]
+        std::default_random_engine& generator = generators[TID]; // generators[args.nthreads]
         // Random generator and distributions
-        std::uniform_int_distribution<int> udistribution(1, args.NWeatherFiles);  // Get random weather
-        std::normal_distribution<double> ndistribution(0.0, 1.0);                 // ROSRV
+        std::uniform_int_distribution<int> udistribution(1, args.NWeatherFiles); // Get random weather
+        std::normal_distribution<double> ndistribution(0.0, 1.0);                // ROSRV
         // Random numbers (weather file and ROS-CV)
         int rnumber;
         double rnumber2;
-        std::uniform_int_distribution<int> udistributionIgnition(1, Forest.nCells);  // Get random ignition point
+        std::uniform_int_distribution<int> udistributionIgnition(1, Forest.nCells); // Get random ignition point
         // Steps and stop
         int ep = 0;
         int tstep = 0;
@@ -2541,7 +2600,7 @@ main(int argc, char* argv[])
         {
             TID = omp_get_thread_num();
             // Reset environment (passing new random numbers)
-            generator = generators[TID];  // generators[args.nthreads]
+            generator = generators[TID]; // generators[args.nthreads]
             rnumber = udistribution(generator);
             rnumber2 = ndistribution(generator);
             // Reset
