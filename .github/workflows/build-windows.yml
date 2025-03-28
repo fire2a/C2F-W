@@ -165,9 +165,12 @@ jobs:
             New-Item -ItemType Directory -Path "include\catch2" -Force
             Invoke-WebRequest -Uri "https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp" -OutFile "include\catch2\catch.hpp"
           }
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
       - name: Build and Run Unit Tests
         run: |
           cd Cell2Fire
-          msbuild Cell2FireTests.vcxproj /p:Configuration=Release /t:Build
-          msbuild Cell2FireTests.vcxproj /p:Configuration=Release /t:RunTests
+          msbuild Cell2Fire.sln /p:Configuration=Release
+          cd x64/Release
+          ./WindowsTests.exe
