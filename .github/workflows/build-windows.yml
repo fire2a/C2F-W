@@ -38,16 +38,6 @@ jobs:
         restore-keys: |
           dirent-${{ runner.os }}-
 
-    - name: Cache Eigen
-      id: cache-eigen
-      uses: actions/cache@v4
-      with:
-        path: |
-          Cell2Fire/include/eigen3
-        key: eigen-${{ runner.os }}-776d86d8df175b7036467a0ef131bd34755f847d
-        restore-keys: |
-          eigen-${{ runner.os }}-
-
     - name: Cache vcpkg
       id: cache-vcpkg
       uses: actions/cache@v4
@@ -59,11 +49,10 @@ jobs:
           vcpkg-${{ runner.os }}-
 
     - name: Download dependencies
-      if: steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-eigen.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true'
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true'
       env:
         CACHE_BOOST: ${{ steps.cache-boost.outputs.cache-hit }}
         CACHE_DIRENT: ${{ steps.cache-dirent.outputs.cache-hit }}
-        CACHE_EIGEN: ${{ steps.cache-eigen.outputs.cache-hit }}
         CACHE_VCPKG: ${{ steps.cache-vcpkg.outputs.cache-hit }}
       run: |
         cd Cell2Fire
@@ -87,19 +76,6 @@ jobs:
           Expand-Archive -Path .\dirent-1.24.zip -DestinationPath include
         } else {
           echo "Dirent already cached"
-        }
-
-        # eigen
-        if ($CACHE_EIGEN -ne 'true') {
-          $project_id = 15462818
-          $commit_sha = "776d86d8df175b7036467a0ef131bd34755f847d"
-          $path = "Eigen"
-          $url = "https://gitlab.com/api/v4/projects/$project_id/repository/archive?sha=$commit_sha&path=$path"
-          Invoke-WebRequest -Uri $url -OutFile eigen.tar.gz
-          tar -xzf eigen.tar.gz
-          mv eigen-$commit_sha-$commit_sha-Eigen include\eigen3
-        } else {
-          echo "Eigen already cached"
         }
 
         # tiffio

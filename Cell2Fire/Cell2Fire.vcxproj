@@ -103,7 +103,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\include\boost_1_84_0;.\include\dirent-1.24\include;.\include\eigen3;.\include\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include\boost_1_84_0;.\include\dirent-1.24\include;.\include\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
@@ -113,7 +113,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\include\dirent-1.24\include;.\include\boost_1_84_0;.\include\eigen3;.\include\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include\dirent-1.24\include;.\include\boost_1_84_0;.\include\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
@@ -125,7 +125,6 @@
     <ClCompile Include="Cell2Fire.cpp" />
     <ClCompile Include="Cells.cpp" />
     <ClCompile Include="DataGenerator.cpp" />
-    <ClCompile Include="Ellipse.cpp" />
     <ClCompile Include="Forest.cpp" />
     <ClCompile Include="FuelModelFBP.cpp" />
     <ClCompile Include="FuelModelKitral.cpp" />
@@ -140,7 +139,6 @@
     <ClInclude Include="Cell2Fire.h" />
     <ClInclude Include="Cells.h" />
     <ClInclude Include="DataGenerator.h" />
-    <ClInclude Include="Ellipse.h" />
     <ClInclude Include="Forest.h" />
     <ClInclude Include="FuelModelFBP.h" />
     <ClInclude Include="FuelModelKitral.h" />
