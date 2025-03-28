@@ -24,11 +24,11 @@ jobs:
       - name: Install Build Dependencies
         run: |
           sudo apt update
-          sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
+          sudo apt install -y g++-12 libboost-all-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
 
       - name: Check Packages Versions
         run: |
-          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev > new_pkgs_ubuntu.txt
+          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev > new_pkgs_ubuntu.txt
           cat new_pkgs_ubuntu.txt
 
       - name: Get Environment
@@ -87,7 +87,7 @@ jobs:
       - name: Install Base Dependencies
         run: |
           apt update
-          apt install -y unzip g++-12 make lsb-release libeigen3-dev curl
+          apt install -y unzip g++-12 make lsb-release curl
 
       - name: Cache Catch2 header
         uses: actions/cache@v3
