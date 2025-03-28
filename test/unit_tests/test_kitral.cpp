@@ -4,6 +4,7 @@
 #define CATCH_CONFIG_MAIN
 #include "../../Cell2Fire/FuelModelKitral.h"
 #include <catch2/catch.hpp>
+#include <string.h>
 
 using Catch::Matchers::WithinAbs;
 
@@ -21,8 +22,7 @@ public:
         test_data = new inputs();
         test_coefs = new fuel_coefs();
         test_outs = new main_outs();
-
-        strcpy(test_data->fueltype, "BN03");
+        strncpy(test_data->fueltype, "BN03", 4);
         test_data->nftype = 16;
         test_data->ws = 10;
         test_data->waz = 45;
