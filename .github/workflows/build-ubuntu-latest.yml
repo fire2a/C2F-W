@@ -21,11 +21,11 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y g++-12 libboost-all-dev libeigen3-dev libtiff-dev catch2
+          sudo apt install -y g++-12 libboost-all-dev libtiff-dev catch2
 
       - name: Check Packages Versions
         run: |
-          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libeigen3-dev libtiff-dev catch2 > new_pkgs_ubuntu.txt
+          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libtiff-dev catch2 > new_pkgs_ubuntu.txt
           if [ -n "$(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)" ]; then
             echo "::warning:: apt packages versions diff! $(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)"
             diff_output=$(diff --side-by-side --suppress-common-lines new_pkgs_ubuntu.txt pkgs_ubuntu.txt || true)
