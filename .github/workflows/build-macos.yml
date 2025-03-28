@@ -32,7 +32,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install gcc@12 libomp eigen boost libtiff # llvm ?
+          brew install gcc@12 libomp boost libtiff # llvm ?
 
       - name: Build
         run: |
@@ -52,7 +52,7 @@ jobs:
 
       - name: Install Static Dependencies
         run: |
-          brew install gcc@12 libomp eigen boost libtiff jpeg-turbo xz zstd zlib
+          brew install gcc@12 libomp boost libtiff jpeg-turbo xz zstd zlib
 
       - name: Build Static
         run: |
@@ -82,7 +82,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install gcc@12 libomp eigen boost libtiff
+          brew install gcc@12 libomp boost libtiff
 
       - name: Get Environment
         run: |
