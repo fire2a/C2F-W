@@ -123,8 +123,6 @@ jobs:
           exit $exitCode
         shell: pwsh
 
-
-
       - name: Gather output
         run: |
           mkdir binaries
