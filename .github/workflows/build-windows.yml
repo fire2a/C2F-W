@@ -118,9 +118,8 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          $process = Start-Process -FilePath "Cell2Fire\x64\Release\WindowsTests.exe" -NoNewWindow -PassThru -Wait
-          if ($process.ExitCode -ne 0) { exit $process.ExitCode }
-        shell: pwsh
+          & "Cell2Fire\x64\Release\WindowsTests.exe"
+          exit $LASTEXITCODE
 
 
       - name: Gather output
