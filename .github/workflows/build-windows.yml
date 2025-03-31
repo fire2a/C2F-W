@@ -118,8 +118,14 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          & "Cell2Fire\x64\Release\WindowsTests.exe"
-          exit $LASTEXITCODE
+          $logFile = "$env:GITHUB_WORKSPACE\test_output.log"
+          New-Item -Path $logFile -ItemType File -Force | Out-Null
+          & "Cell2Fire\x64\Release\WindowsTests.exe" *>&1 | Tee-Object -FilePath $logFile
+          $exitCode = $LASTEXITCODE
+          if (Test-Path $logFile) { Get-Content $logFile }
+          exit $exitCode
+        shell: pwsh
+
 
 
       - name: Gather output
