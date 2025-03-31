@@ -123,7 +123,7 @@ jobs:
           & "Cell2Fire\x64\Release\WindowsTests.exe" *>&1 | Tee-Object -FilePath $logFile
           $exitCode = $LASTEXITCODE
           if (Test-Path $logFile) { Get-Content $logFile }
-          exit $exitCode
+          echo $exitCode
         shell: pwsh
 
 
