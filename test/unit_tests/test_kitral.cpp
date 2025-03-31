@@ -8,6 +8,16 @@
 
 using Catch::Matchers::WithinAbs;
 
+void
+set_fueltype(inputs* test_data, string ftype)
+{
+#if defined _WIN32 || defined __CYGWIN__
+    strcpy_s(test_data->fueltype, ftype);
+#else
+    strcpy(test_data->fueltype, ftype.c_str());
+#endif
+}
+
 class NativeFuelFixture
 {
 public:
@@ -22,7 +32,7 @@ public:
         test_data = new inputs();
         test_coefs = new fuel_coefs();
         test_outs = new main_outs();
-        strncpy(test_data->fueltype, "BN03", 4);
+        set_fueltype(test_data, "BN03");
         test_data->nftype = 16;
         test_data->ws = 10;
         test_data->waz = 45;
