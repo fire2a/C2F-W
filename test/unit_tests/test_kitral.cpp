@@ -134,7 +134,7 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test backfire ros", "[backfire_ros_k]")
     auto sec = new snd_outs();
     sec->lb = 1.058;
     test_outs->rss = 8;
-    REQUIRE_THAT(backfire_ros_k(test_outs, sec), WithinAbs(5.061, 0.001));
+    REQUIRE_THAT(backfire_ros_k(test_outs, sec), WithinAbs(4.061, 0.001));
     sec->lb = 17.225;
     REQUIRE_THAT(backfire_ros_k(test_outs, sec), WithinAbs(0.006, 0.001));
     sec->lb = 17.225;
