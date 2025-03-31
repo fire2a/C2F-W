@@ -118,8 +118,11 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          & "Cell2Fire\x64\Release\WindowsTests.exe"
-          exit $LASTEXITCODE
+          $logFile = "test_output.log"
+          & "Cell2Fire\x64\Release\WindowsTests.exe" *>&1 | Tee-Object -FilePath $logFile
+          $exitCode = $LASTEXITCODE
+          Get-Content $logFile
+          echo $exitCode
 
 
       - name: Gather output
