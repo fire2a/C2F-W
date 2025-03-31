@@ -117,7 +117,7 @@ jobs:
           msbuild Cell2Fire.sln /p:Configuration=Release
 
       - name: Run Unit Tests
-        run: Start-Process "Cell2Fire\x64\Release\WindowsTest.exe" "powershell" -Verb RunAs
+        run: Start-Process "Cell2Fire\x64\Release\WindowsTests.exe" "powershell" -Verb RunAs
 
       - name: Gather output
         run: |
