@@ -658,6 +658,9 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->fire_period = vector<int>(this->args.TotalYears, 0);
     this->sim = simExt;
     this->Co2eq = 0;
+    this->fullMessages = std::unordered_map<int, std::vector<int>>();
+    this->globalMessages = std::unordered_map<int, vector<int>>();
+
     // Initial status grid folder
     if (this->args.OutputGrids || this->args.FinalGrid)
     {
@@ -1666,9 +1669,8 @@ Cell2Fire::SendMessages()
     if (this->args.verbose)
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
 
-    
     // ----------------------------- SENDING COMPLETE INFORMATION MESSAGES START ----------------------------------
-
+    /*
     for (auto it = sendMessageList.begin(); it != sendMessageList.end(); ) {
         int key = it->first;
         std::vector<int>& values = it->second;
@@ -1690,18 +1692,18 @@ Cell2Fire::SendMessages()
             it = sendMessageList.erase(it);
         }
     }
-    
+    */
     // ----------------------------- SENDING COMPLETE INFORMATION MESSAGES FINISH ----------------------------------
 
     //std::cout << "print de messagesList" << std::endl;
-    for (auto it = sendMessageList.begin(); it != sendMessageList.end(); ++it) {
+   // for (auto it = sendMessageList.begin(); it != sendMessageList.end(); ++it) {
         //std::cout << "Key: " << it->first << " -> Values: ";
         
-        for (int v : it->second) {
+     //   for (int v : it->second) {
             //std::cout << v << " ";
-        }
+      //  }
         //std::cout << std::endl;
-    }
+    //}
 
     this->fullMessages = sendMessageList;
 
@@ -1948,7 +1950,7 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
             auto lt = this->availCells.find(bc);
             if (lt != this->availCells.end())
             {
-                //this->availCells.erase(bc);
+                this->availCells.erase(bc);
             }
         }
 
@@ -2113,7 +2115,7 @@ Cell2Fire::Results()
     // Messages
     if (this->args.OutMessages)
     {   
-        /*
+        
         this->messagesFolder = this->args.OutFolder + "Messages" + separator();
         std::string messagesName;
         std::ostringstream oss;
@@ -2128,15 +2130,17 @@ Cell2Fire::Results()
         // CSVPloter.printCSVDouble_V2(this->FSCell.size() - this->nIgnitions, 4,
         // this->FSCell);
         CSVPloter.printCSVDouble_V2(this->FSCell.size() / 4, 4, this->FSCell);
-        */
-        std::stringstream fileNameStream;
-        fileNameStream << "simulationFile" << this->sim << ".csv";
-        std::string filename = fileNameStream.str();
-        CSVWriter msg2Folder("", "");
-        std::string folder = this->args.OutFolder + "Messages2" + separator();
-        msg2Folder.MakeDir(folder);
-        CSVWriter msg2File(folder + filename);
-        msg2File.printSendMessages(this->globalMessages);
+        
+        
+       // std::stringstream fileNameStream;
+        //fileNameStream << "simulationFile" << this->sim << ".csv";
+       // std::string filename = fileNameStream.str();
+       // CSVWriter msg2Folder("", "");
+       // std::string folder = this->args.OutFolder + "Messages2" + separator();
+       // msg2Folder.MakeDir(folder);
+       // CSVWriter msg2File(folder + filename);
+        //msg2File.printSendMessages(this->globalMessages);
+        
 
     }
 
