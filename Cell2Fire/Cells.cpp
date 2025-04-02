@@ -67,16 +67,16 @@ Cells::Cells(int _id,
     this->FTypeD[2] = "Burnable";
 
     // Initialize fields of the Cell object
-    this->id = _id; // identifier for programming purposes: goes from 0 to size
-    // of landscape-1
+    this->id = _id;  // identifier for programming purposes: goes from 0 to size
+                     // of landscape-1
     this->area = _area;
     this->coord = _coord;
     this->fType = _fType;
     this->fType2 = _fType2;
     this->perimeter = _perimeter;
     this->status = _status;
-    this->realId = _realId; // real identifier of the landscape (goes from 1 to
-    // the size of the landscape)
+    this->realId = _realId;  // real identifier of the landscape (goes from 1 to
+                             // the size of the landscape)
     this->_ctr2ctrdist = std::sqrt(this->area);
 
     if (std::abs(4 * this->_ctr2ctrdist - this->perimeter) > 0.01 * this->perimeter)
@@ -120,11 +120,10 @@ Cells::Cells(int _id,
  * @return void
  */
 void
-Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,
-                            // TODO: should probably make a coordinate type
+Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,  // TODO: should probably make a coordinate type
                             std::unordered_set<int>& availSet,
                             int cols,
-                            int rows) // WORKING CHECK OK
+                            int rows)  // WORKING CHECK OK
 {
     std::vector<int> adj = adjacentCells(this->realId, rows, cols);
 
@@ -238,8 +237,7 @@ adjacentCells(int cell, int nrows, int ncols)
  */
 void
 Cells::ros_distr_old(double thetafire, double forward, double flank, double back)
-{
-    // WORKING CHECK OK
+{  // WORKING CHECK OK
     for (auto& angle : this->ROSAngleDir)
     {
         double offset = std::abs(angle.first - thetafire);
@@ -300,7 +298,6 @@ Cells::rhoTheta(double theta, double a, double b)
     return r;
 }
 
-
 /**
  * @brief Distributes the Rate of Spread (ROS) across the cell's neighbors
  * based on fire direction and ellipse geometry.
@@ -340,8 +337,7 @@ Cells::ros_distr_V2(double thetafire, double a, double b, double c, double EFact
 
 double
 Cells::allocate(double offset, double base, double ros1, double ros2)
-{
-    // WORKING CHECK OK
+{  // WORKING CHECK OK
     double d = (offset - base) / 90;
     return (1 - d) * ros1 + d * ros2;
 }
@@ -451,13 +447,13 @@ Cells::manageFire(int period,
     df_ptr[this->realId - 1].bui = wdf_ptr->bui;
     df_ptr[this->realId - 1].ffmc = wdf_ptr->ffmc;
 
-    int head_cell = angleToNb[wdf_ptr->waz]; // head cell for slope calculation
-    if (head_cell <= 0)                      // solve boundaries case
+    int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+    if (head_cell <= 0)                       // solve boundaries case
     {
-        head_cell = this->realId; // as it is used only for slope calculation, if
-        // it is a boundary cell, it uses the
-        // same
-        // cell, so it uses a no slope scenario
+        head_cell = this->realId;  // as it is used only for slope calculation, if
+                                   // it is a boundary cell, it uses the
+                                   // same
+                                   // cell, so it uses a no slope scenario
     }
     // Compute main angle and ROSs: forward, flanks and back
     main_outs mainstruct = {};
@@ -539,7 +535,7 @@ Cells::manageFire(int period,
     }
     /*                         */
 
-    double cartesianAngle = 270 - wdf_ptr->waz; // - 90;   // CHECK!!!!!
+    double cartesianAngle = 270 - wdf_ptr->waz;  // - 90;   // CHECK!!!!!
     if (cartesianAngle < 0)
     {
         cartesianAngle += 360;
@@ -641,7 +637,7 @@ Cells::manageFire(int period,
                 }
 
                 // Workaround PeriodLen in 60 minutes
-                this->fireProgress[nb] += ros * args->FirePeriodLen * se; // Updates fire progress
+                this->fireProgress[nb] += ros * args->FirePeriodLen * se;  // Updates fire progress
             }
             else
                 this->fireProgress[nb] += ros * args->FirePeriodLen;
@@ -716,8 +712,8 @@ Cells::manageFire(int period,
                 if (args->verbose)
                 {
                     std::cout << "A Repeat = TRUE flag is sent in order to "
-                        "continue with the current fire....."
-                        << std::endl;
+                                 "continue with the current fire....."
+                              << std::endl;
                     std::cout << "Main workaround of the new sim logic....." << std::endl;
                 }
                 msg_list_aux[0] = repeat;
@@ -746,15 +742,15 @@ Cells::manageFire(int period,
 
         else
         {
-            this->status = 2; // we are done sending messages, call us burned
+            this->status = 2;  // we are done sending messages, call us burned
         }
     }
 
     if (args->verbose)
     {
         std::cout << " ----------------- End of new manageFire function "
-            "-----------------"
-            << std::endl;
+                     "-----------------"
+                  << std::endl;
     }
     return msg_list;
 }
@@ -807,12 +803,12 @@ Cells::manageFireBBO(int period,
     df_ptr->ffmc = wdf_ptr->ffmc;
     df_ptr->tmp = wdf_ptr->tmp;
     df_ptr->rh = wdf_ptr->rh;
-    int head_cell = angleToNb[wdf_ptr->waz]; // head cell for slope calculation
-    if (head_cell <= 0)                      // solve boundaries case
+    int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+    if (head_cell <= 0)                       // solve boundaries case
     {
-        head_cell = this->realId; // as it is used only for slope calculation, if
-        // it is a boundary cell, it uses the same
-        // cell, so it uses a no slope scenario
+        head_cell = this->realId;  // as it is used only for slope calculation, if
+                                   // it is a boundary cell, it uses the same
+                                   // cell, so it uses a no slope scenario
     }
     // Calculate parameters
 
@@ -885,7 +881,7 @@ Cells::manageFireBBO(int period,
     }
     /*                         */
 
-    double cartesianAngle = 270 - wdf_ptr->waz; // - 90;   // CHECK!!!!!
+    double cartesianAngle = 270 - wdf_ptr->waz;  // - 90;   // CHECK!!!!!
     if (cartesianAngle < 0)
     {
         cartesianAngle += 360;
@@ -974,7 +970,7 @@ Cells::manageFireBBO(int period,
             }
 
             // Workaround PeriodLen in 60 minutes
-            this->fireProgress[nb] += ros * args->FirePeriodLen; // Updates fire progress
+            this->fireProgress[nb] += ros * args->FirePeriodLen;  // Updates fire progress
 
             // If the message arrives to the adjacent cell's center, send a
             // message
@@ -1023,8 +1019,8 @@ Cells::manageFireBBO(int period,
                 if (args->verbose)
                 {
                     std::cout << "A Repeat = TRUE flag is sent in order to "
-                        "continue with the current fire....."
-                        << std::endl;
+                                 "continue with the current fire....."
+                              << std::endl;
                     std::cout << "Main workaround of the new sim logic....." << std::endl;
                 }
                 msg_list_aux[0] = repeat;
@@ -1053,15 +1049,15 @@ Cells::manageFireBBO(int period,
 
         else
         {
-            this->status = 2; // we are done sending messages, call us burned
+            this->status = 2;  // we are done sending messages, call us burned
         }
     }
 
     if (args->verbose)
     {
         std::cout << " ----------------- End of new manageFire function "
-            "-----------------"
-            << std::endl;
+                     "-----------------"
+                  << std::endl;
     }
     return msg_list;
 }
@@ -1116,12 +1112,12 @@ Cells::get_burned(int period,
     df[this->id].ws = wdf_ptr->ws;
     df[this->id].tmp = wdf_ptr->tmp;
     df[this->id].rh = wdf_ptr->rh;
-    int head_cell = angleToNb[wdf_ptr->waz]; // head cell for slope calculation
-    if (head_cell <= 0)                      // solve boundaries case
+    int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+    if (head_cell <= 0)                       // solve boundaries case
     {
-        head_cell = this->realId; // as it is used only for slope calculation, if
-        // it is a boundary cell, it uses the same
-        // cell, so it uses a no slope scenario
+        head_cell = this->realId;  // as it is used only for slope calculation, if
+                                   // it is a boundary cell, it uses the same
+                                   // cell, so it uses a no slope scenario
     }
     // Calculate parameters
     if (args->Simulator == "K")
@@ -1141,15 +1137,7 @@ Cells::get_burned(int period,
     else if (args->Simulator == "S")
     {
         calculate_s(
-            &(df[this->id]),
-            coef,
-            args,
-            &mainstruct,
-            &sndstruct,
-            &headstruct,
-            &flankstruct,
-            &backstruct,
-            activeCrown);
+            &(df[this->id]), coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
     }
 
     else if (args->Simulator == "C")
@@ -1241,8 +1229,7 @@ bool
 Cells::ignition(int period,
                 int year,
                 std::vector<int>& ignitionPoints,
-                inputs* df_ptr,
-                // WORKING CHECK OK
+                inputs* df_ptr,  // WORKING CHECK OK
                 fuel_coefs* coef,
                 arguments* args,
                 weatherDF* wdf_ptr,
@@ -1277,12 +1264,12 @@ Cells::ignition(int period,
         df_ptr->ws = wdf_ptr->ws;
         df_ptr->bui = wdf_ptr->bui;
         df_ptr->ffmc = wdf_ptr->ffmc;
-        int head_cell = angleToNb[wdf_ptr->waz]; // head cell for slope calculation
-        if (head_cell <= 0)                      // solve boundaries case
+        int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+        if (head_cell <= 0)                       // solve boundaries case
         {
-            head_cell = this->realId; // as it is used only for slope calculation, if
-            // it is a boundary cell, it uses the same cell,
-            // so it uses a no slope scenario
+            head_cell = this->realId;  // as it is used only for slope calculation, if
+                                       // it is a boundary cell, it uses the same cell,
+                                       // so it uses a no slope scenario
         }
         // Calculate parameters
         if (args->Simulator == "K")
@@ -1314,13 +1301,7 @@ Cells::ignition(int period,
         else if (args->Simulator == "C")
         {
             calculate_fbp(
-                &df_ptr[this->realId - 1],
-                coef,
-                &mainstruct,
-                &sndstruct,
-                &headstruct,
-                &flankstruct,
-                &backstruct);
+                &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
         }
 
         if (args->verbose)
@@ -1338,7 +1319,7 @@ Cells::ignition(int period,
             if (args->verbose)
             {
                 std::cout << "Head (ROS, FI) values of: (" << headstruct.ros * args->HFactor << ", " << headstruct.fi
-                    << ") are enough for ignition" << std::endl;
+                          << ") are enough for ignition" << std::endl;
             }
 
             this->status = 1;
@@ -1372,8 +1353,7 @@ Cells::harvested(int id, int period)
 */
 void
 Cells::print_info()
-{
-    // WORKING CHECK OK
+{  // WORKING CHECK OK
     std::cout << "Cell Information" << std::endl;
     std::cout << "ID = " << this->id << std::endl;
     std::cout << "In Forest ID = " << this->realId << std::endl;
