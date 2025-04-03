@@ -8,21 +8,31 @@
 
 using Catch::Matchers::WithinAbs;
 
+void
+set_fueltype(inputs* test_data, string ftype)
+{
+#if defined _WIN32 || defined __CYGWIN__
+    strcpy_s(test_data->fueltype, ftype.c_str());
+#else
+    strcpy(test_data->fueltype, ftype.c_str());
+#endif
+}
+
 class NativeFuelFixture
 {
-public:
+  public:
     inputs* test_data;
     fuel_coefs* test_coefs;
     main_outs* test_outs;
 
-public:
+  public:
     NativeFuelFixture()
     {
         setup_const();
         test_data = new inputs();
         test_coefs = new fuel_coefs();
         test_outs = new main_outs();
-        strncpy(test_data->fueltype, "BN03", 4);
+        set_fueltype(test_data, "BN03");
         test_data->nftype = 16;
         test_data->ws = 10;
         test_data->waz = 45;
@@ -68,11 +78,8 @@ public:
         test_outs->crown = 0;
         test_outs->jd_min = 0;
         test_outs->jd = 0;
-
     }
-
 };
-
 
 TEST_CASE("Slope effect works correctly", "[slope_effect]")
 {
@@ -109,14 +116,14 @@ TEST_CASE_METHOD(NativeFuelFixture, "Rate of spread changes with wind", "[rate_o
     REQUIRE_THAT(test_outs->rss, WithinAbs(3.648, 0.001));
 }
 
-//TODO: test reaction to temperature, humidity
+// TODO: test reaction to temperature, humidity
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test length to breadth", "[l_to_b]")
 {
     REQUIRE_THAT(l_to_b(10, test_coefs), WithinAbs(1.058, 0.001));
     REQUIRE_THAT(l_to_b(100, test_coefs), WithinAbs(17.225, 0.001));
-    //REQUIRE_THROWS(l_to_b(-1, test_coefs));
-    // This should throw exception in the future
+    // REQUIRE_THROWS(l_to_b(-1, test_coefs));
+    //  This should throw exception in the future
 }
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test backfire ros", "[backfire_ros_k]")
@@ -155,7 +162,6 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test surface flame length", "[flame_length]
     test_outs->sfi = 40420;
     REQUIRE_THAT(flame_length(test_data, test_outs), WithinAbs(10.193, 0.001));
 }
-
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test flame angle", "[angleFL]")
 {
@@ -201,7 +207,6 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test flame height changes with wind", "[fla
     REQUIRE_THAT(fl_50, WithinAbs(2.647, 0.001));
     REQUIRE(fl_50 > fl_100);
 }
-
 
 TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with slope", "[active_rate_of_spreadPL04]")
 {
@@ -263,14 +268,14 @@ TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with humidity
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test check for active fire", "[checkActive]")
 {
-    int FMC = 100; // Default value in ReadArgs.cpp
-    REQUIRE(checkActive(test_data, test_outs, FMC)==false);
-    //TODO: use real cbd and cbh values
+    int FMC = 100;  // Default value in ReadArgs.cpp
+    REQUIRE(checkActive(test_data, test_outs, FMC) == false);
+    // TODO: use real cbd and cbh values
 }
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test crown fraction burn", "[crownfractionburn]")
 {
-    int FMC = 100; // Default value in ReadArgs.cpp
+    int FMC = 100;  // Default value in ReadArgs.cpp
     test_data->cbd = 0.15;
     test_outs->rss = 8;
     REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.524, 0.001));
@@ -282,7 +287,7 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test crown fraction burn", "[crownfractionb
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test crown fraction burn changes with CBD", "[crownfractionburn]")
 {
-    int FMC = 100; // Default value in ReadArgs.cpp
+    int FMC = 100;  // Default value in ReadArgs.cpp
     test_outs->rss = 8;
     test_data->cbd = 0.15;
     REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.524, 0.001));
@@ -293,7 +298,6 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test crown fraction burn changes with CBD",
     test_data->cbd = 0;
     REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.677, 0.001));
 }
-
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test final ros changes with ros", "[final_rate_of_spreadPL04]")
 {

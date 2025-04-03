@@ -120,7 +120,8 @@ Cells::Cells(int _id,
  * @return void
  */
 void
-Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,  // TODO: should probably make a coordinate type
+Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,
+                            // TODO: should probably make a coordinate type
                             std::unordered_set<int>& availSet,
                             int cols,
                             int rows)  // WORKING CHECK OK
@@ -237,7 +238,8 @@ adjacentCells(int cell, int nrows, int ncols)
  */
 void
 Cells::ros_distr_old(double thetafire, double forward, double flank, double back)
-{  // WORKING CHECK OK
+{
+    // WORKING CHECK OK
     for (auto& angle : this->ROSAngleDir)
     {
         double offset = std::abs(angle.first - thetafire);
@@ -337,7 +339,7 @@ Cells::ros_distr_V2(double thetafire, double a, double b, double c, double EFact
 
 double
 Cells::allocate(double offset, double base, double ros1, double ros2)
-{  // WORKING CHECK OK
+{
     double d = (offset - base) / 90;
     return (1 - d) * ros1 + d * ros2;
 }
@@ -1229,7 +1231,7 @@ bool
 Cells::ignition(int period,
                 int year,
                 std::vector<int>& ignitionPoints,
-                inputs* df_ptr,  // WORKING CHECK OK
+                inputs* df_ptr,
                 fuel_coefs* coef,
                 arguments* args,
                 weatherDF* wdf_ptr,
@@ -1342,7 +1344,6 @@ Cells::ignition(int period,
 void
 Cells::harvested(int id, int period)
 {
-    // WORKING CHECK OK
     // TODO: unused param
     this->status = 3;
     this->harvestStarts = period;
@@ -1353,7 +1354,7 @@ Cells::harvested(int id, int period)
 */
 void
 Cells::print_info()
-{  // WORKING CHECK OK
+{
     std::cout << "Cell Information" << std::endl;
     std::cout << "ID = " << this->id << std::endl;
     std::cout << "In Forest ID = " << this->realId << std::endl;

@@ -26,7 +26,7 @@ typedef struct
 
 typedef struct
 {
-    char fueltype[4];
+    char fueltype[5];
     float ws, saz, cur, ps, cbh, ccf, cbd, elev, tmp, rh, lat, lon, ffmc, bui, gfl,
         tree_height;  // David: some variables only used on C2FK and not on C2FSB and
                       // viceversa
@@ -185,7 +185,7 @@ class Cells
     bool ignition(int period,
                   int year,
                   std::vector<int>& ignitionPoints,
-                  inputs* df_ptr,  // WORKING CHECK OK
+                  inputs* df_ptr,
                   fuel_coefs* coef,
                   arguments* args,
                   weatherDF* wdf_ptr,
