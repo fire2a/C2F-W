@@ -250,9 +250,11 @@ Cell2Fire::Cell2Fire(arguments _args)
     df_ptr = &df[0];  // access reference for the first element of df
 
     // Populate the df [nCells] objects
-    CSVParser.parseDF(df_ptr, DF, this->args_ptr,
+    CSVParser.parseDF(df_ptr,
+                      DF,
+                      this->args_ptr,
                       this->nCells);  // iterates from the first element of df, using DF,
-    // args_ptr and the number of cells
+                                      // args_ptr and the number of cells
 
     // Initialize and populate relevant vectors
     this->fTypeCells = std::vector<int>(this->nCells, 1);
@@ -820,7 +822,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         {
             std::default_random_engine generator3(args.seed * simExt
                                                   * time(NULL));  // creates a different generator solving cases when
-            // parallel running creates simulations at same time
+                                                                  // parallel running creates simulations at same time
             std::uniform_int_distribution<int> distribution(1, this->WDist.size() - 1);
             int weather_idx = distribution(generator3);
 
@@ -1037,8 +1039,8 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
     this->noIgnition = false;
     currentSim = currentSim + 1;
     std::default_random_engine generator2(args.seed * ep * this->nCells);  // * time(NULL)); //creates a different
-    // generator solving cases when parallel
-    // running creates simulations at same time
+                                                                           // generator solving cases when parallel
+                                                                           // running creates simulations at same time
     std::unordered_map<int, Cells>::iterator it;
     std::uniform_int_distribution<int> distribution(1, this->nCells);
 
@@ -1610,7 +1612,7 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
         this->burningCells.clear();
         if (this->args.verbose)
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells, );
+                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
     }
 
     // Mesages and no repeat
