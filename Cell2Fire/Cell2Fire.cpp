@@ -607,6 +607,20 @@ Cell2Fire::InitCell(int id)
         it2->second.print_info();
 }
 
+string
+Cell2Fire::createOutputFolder(string metric, bool fireSeason)
+{
+    cout << "Creating output folder: " << metric << endl;
+    CSVWriter CSVFolder("", "");
+    string tempName = this->args.OutFolder + metric + separator();
+    cout << tempName << endl;
+    CSVFolder.MakeDir(tempName);
+    tempName = this->args.OutFolder + metric + separator() + metric + std::to_string(this->sim) + separator();
+    cout << tempName << endl;
+    CSVFolder.MakeDir(tempName);
+    return tempName;
+}
+
 /**
  * @brief Resets the simulation environment for a new run.
  *
@@ -653,6 +667,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->gridFolder
             = this->args.OutFolder + "Grids" + separator() + "Grids" + std::to_string(this->sim) + separator();
         CSVFolder.MakeDir(this->gridFolder);
+        this->gridFolder = Cell2Fire::createOutputFolder("Grids", false);
         // DEBUGstd::cout << "\nInitial Grid folder was generated in " <<
         // this->gridFolder << std::endl;
     }
@@ -660,82 +675,52 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     // Messages Folder
     if (this->args.OutMessages)
     {
-        CSVWriter CSVFolder("", "");
-        this->messagesFolder = this->args.OutFolder + "Messages";
-        CSVFolder.MakeDir(this->messagesFolder);
-        this->messagesFolder = this->args.OutFolder + "Messages" + separator();
+        this->messagesFolder = Cell2Fire::createOutputFolder("Messages", false);
     }
     // ROS Folder
     if (this->args.OutRos)
     {
-        CSVWriter CSVFolder("", "");
-        this->rosFolder = this->args.OutFolder + "RateOfSpread";
-        CSVFolder.MakeDir(this->rosFolder);
-        this->rosFolder = this->args.OutFolder + "RateOfSpread" + separator();
+        this->rosFolder = Cell2Fire::createOutputFolder("RateOfSpread", false);
     }
     // Surface Byram Intensity Folder
     if (this->args.OutIntensity)
     {
-        CSVWriter CSVFolder("", "");
-        this->surfaceIntensityFolder = this->args.OutFolder + "SurfaceIntensity";
-        CSVFolder.MakeDir(this->surfaceIntensityFolder);
-        this->surfaceIntensityFolder = this->args.OutFolder + "SurfaceIntensity" + separator();
+        this->surfaceIntensityFolder = Cell2Fire::createOutputFolder("SurfaceIntensity", false);
     }
     // Crown Byram Intensity Folder
     if ((this->args.OutIntensity) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
-        CSVWriter CSVFolder("", "");
-        this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity";
-        CSVFolder.MakeDir(this->crownIntensityFolder);
-        this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
+        this->crownIntensityFolder = Cell2Fire::createOutputFolder("CrownIntensity", false);
     }
     // Surface Flame Length Folder
     if (this->args.OutFl)
     {
-        CSVWriter CSVFolder("", "");
-        this->surfaceFlameLengthFolder = this->args.OutFolder + "SurfaceFlameLength";
-        CSVFolder.MakeDir(this->surfaceFlameLengthFolder);
-        this->surfaceFlameLengthFolder = this->args.OutFolder + "SurfaceFlameLength" + separator();
+        this->surfaceFlameLengthFolder = Cell2Fire::createOutputFolder("SurfaceFlameLength", false);
     }
     // Crown Flame Length Folder
     if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
-        CSVWriter CSVFolder("", "");
-        this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength";
-        CSVFolder.MakeDir(this->crownFlameLengthFolder);
-        this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
+        this->crownFlameLengthFolder = Cell2Fire::createOutputFolder("CrownFlameLength", false);
     }
     // max Flame Length Folder
     if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
-        CSVWriter CSVFolder("", "");
-        this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength";
-        CSVFolder.MakeDir(this->maxFlameLengthFolder);
-        this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength" + separator();
+        this->maxFlameLengthFolder = Cell2Fire::createOutputFolder("MaxFlameLength", false);
     }
     // Crown Folder
     if (this->args.OutCrown && this->args.AllowCROS)
     {
-        CSVWriter CSVFolder("", "");
-        this->crownFolder = this->args.OutFolder + "CrownFire";
-        CSVFolder.MakeDir(this->crownFolder);
-        this->crownFolder = this->args.OutFolder + "CrownFire" + separator();
+        this->crownFolder = Cell2Fire::createOutputFolder("CrownFire", false);
     }
     // Crown Fraction Burn Folder
     if (this->args.OutCrownConsumption && this->args.AllowCROS)
     {
-        CSVWriter CSVFolder("", "");
-        this->cfbFolder = this->args.OutFolder + "CrownFractionBurn";
-        CSVFolder.MakeDir(this->cfbFolder);
-        this->cfbFolder = this->args.OutFolder + separator() + "CrownFractionBurn" + separator();
+        this->cfbFolder = Cell2Fire::createOutputFolder("CrownFractionBurn", false);
     }
     // Surf Fraction Burn Folder
     if (this->args.OutSurfConsumption && this->args.Simulator == "C")
     {
-        CSVWriter CSVFolder("", "");
-        this->sfbFolder = this->args.OutFolder + "SurfFractionBurn";
-        CSVFolder.MakeDir(this->sfbFolder);
-        this->sfbFolder = this->args.OutFolder + separator() + "SurfFractionBurn" + separator();
+        this->sfbFolder = Cell2Fire::createOutputFolder("SurfFractionBurn", false);
     }
 
     // Random Weather
@@ -1901,9 +1886,7 @@ Cell2Fire::Results()
         if (this->args.OutFolder.empty())
             this->gridFolder = this->args.InFolder + "simOuts" + separator() + "Grids" + separator() + "Grids"
                                + std::to_string(this->sim) + separator();
-        else
-            this->gridFolder
-                = this->args.OutFolder + "Grids" + separator() + "Grids" + std::to_string(this->sim) + separator();
+
         // std::string gridName = this->gridFolder + "FinalStatus_" +
         // std::to_string(this->sim) + ".csv";
         outputGrid();
@@ -1912,7 +1895,6 @@ Cell2Fire::Results()
     // Messages
     if (this->args.OutMessages)
     {
-        this->messagesFolder = this->args.OutFolder + "Messages" + separator();
         std::string messagesName;
         std::ostringstream oss;
         oss.str("");
@@ -1931,7 +1913,6 @@ Cell2Fire::Results()
     // RateOfSpread
     if (this->args.OutRos)
     {
-        this->rosFolder = this->args.OutFolder + "RateOfSpread" + separator();
         std::string rosName;
         std::ostringstream oss;
         oss.str("");
