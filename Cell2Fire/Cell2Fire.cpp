@@ -832,7 +832,8 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             // DEBUGstd::cout<<"weather_idx: "<<(weather_idx)<<std::endl;
             // DEBUGstd::cout<<"rdnumber: "<<(rd_number)<<std::endl;
             if (probability_weather > rd_number)
-            {  // rd_number cannot be 1, but can be 0. So if prob weather has
+            {
+                // rd_number cannot be 1, but can be 0. So if prob weather has
                 // prob=0 it does not have a chance of being selected, and if it
                 // is 1, it will always be selected
                 weather_name = this->WDist[weather_idx][0];
@@ -1091,7 +1092,7 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
                 {
                     IgnitionHistory[sim] = aux;
                     std::cout << "\nSelected (Random) ignition point for Year " << this->year << ", sim " << this->sim
-                              << ": " << aux;
+                              << ": " << aux << std::endl;
                     std::vector<int> ignPts = { aux };
                     if (it->second.ignition(this->fire_period[year - 1],
                                             this->year,
@@ -1147,7 +1148,8 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
             temp = this->IgnitionSets[this->year - 1][udistribution(generator)];
         }
 
-        std::cout << "\nSelected ignition point for Year " << this->year << ", sim " << this->sim << ": " << temp;
+        std::cout << "\nSelected ignition point for Year " << this->year << ", sim " << this->sim << ": " << temp
+                  << std::endl;
         // this->
         IgnitionHistory[sim] = temp;
 
@@ -1389,7 +1391,8 @@ Cell2Fire::SendMessages()
         {
             // std::cout << "Entra a Manage Fire" << std::endl;
             if (!this->args.BBOTuning)
-            {  //&df[cell-1] replaced by full df for getting the slopes
+            {
+                //&df[cell-1] replaced by full df for getting the slopes
                 aux_list = it->second.manageFire(this->fire_period[this->year - 1],
                                                  this->availCells,
                                                  df,
@@ -1879,7 +1882,7 @@ Cell2Fire::Results()
     float NBCells = this->nonBurnableCells.size();
     float HCells = this->harvestCells.size();
 
-    std::cout << "\n----------------------------- Results "
+    std::cout << "----------------------------- Results "
                  "-----------------------------"
               << std::endl;
     std::cout << "Total Available Cells:    " << ACells << " - % of the Forest: " << ACells / nCells * 100.0 << "%"
@@ -2509,7 +2512,7 @@ main(int argc, char* argv[])
         generators.emplace_back(default_random_engine(args.seed * stop));
     }
 
-// Parallel zone
+    // Parallel zone
 #pragma omp parallel num_threads(num_threads)
     {
         // Number of threads

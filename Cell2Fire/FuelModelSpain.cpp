@@ -2328,8 +2328,10 @@ crown_byram_intensity(main_outs* at, inputs* data)
     float canopy_height = data->tree_height - data->cbh;
     if (canopy_height < 0)
     {
-        throw std::runtime_error("Tree height is lower than canopy base height, "
-                                 "please provide valid files.");
+        std::cerr << "Tree height is lower than canopy base height, please provide valid files.\n"
+                     "Could not calculate crown Byram intensity due to invalid input data"
+                  << std::endl;
+        throw std::runtime_error("Could not calculate crown Byram intensity due to invalid input data");
     }
     return std::ceil((HEAT_YIELD / 60) * data->cbd * canopy_height * at->ros_active * 100.0) / 100.0;
 }
