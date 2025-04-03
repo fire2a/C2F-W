@@ -2,7 +2,6 @@
 #define CELLS
 
 // include stuff
-#include "Ellipse.h"
 #include "ReadArgs.h"
 
 #include <math.h>
@@ -30,7 +29,7 @@ typedef struct
     char fueltype[4];
     float ws, saz, cur, ps, cbh, ccf, cbd, elev, tmp, rh, lat, lon, ffmc, bui, gfl,
         tree_height;  // David: some variables only used on C2FK and not on C2FSB and
-              // viceversa
+                      // viceversa
     int waz, nftype, FMC, time, pattern, mon, jd, jd_min, pc, pdf;
 } inputs;  // David: Moved here to simplify inclusion
 
@@ -121,7 +120,6 @@ class Cells
                               int rows);  // TODO: need TYPE
     void ros_distr_old(double thetafire, double forward, double flank, double back);
     double rhoTheta(double theta, double a, double b);
-    void ros_distr(double thetafire, double forward, double flank, double back, double EFactor);
     void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
 
     std::vector<int> manageFire(int period,

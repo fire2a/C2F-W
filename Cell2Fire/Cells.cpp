@@ -1,6 +1,5 @@
 // Include classes
 #include "Cells.h"
-#include "Ellipse.h"
 #include "FuelModelFBP.h"
 #include "FuelModelKitral.h"
 #include "FuelModelSpain.h"
@@ -297,61 +296,6 @@ Cells::rhoTheta(double theta, double a, double b)
     r2 = 1 - e * std::cos(theta * pi / 180.0);
     r = r1 / r2;
     return r;
-}
-
-/**
- *
- * @param thetafire
- * @param forward
- * @param flank
- * @param back
- * @param EFactor
- */
-void
-Cells::ros_distr(double thetafire, double forward, double flank, double back, double EFactor)
-{  // WORKING CHECK OK
-
-    // Ellipse points
-    // std::cout << "Dentro de ROS dist" << std::endl;
-    // std::cout << "thetafire:" << thetafire << std::endl;
-    // std::cout << "forward:" << forward << std::endl;
-    // std::cout << "flank:" << flank << std::endl;
-    // std::cout << "back:" << back << std::endl;
-    // std::cout << "EFactor:" << EFactor << std::endl;
-
-    // std::cout << "Previo Data" << std::endl;
-    double a = (forward + back) / 2;
-    double b;
-    std::vector<double> _x = { 0.0, back, back, (forward + back) / 2., (forward + back) / 2., (forward + back) };
-    std::vector<double> _y = { 0.0, std::pow(flank, 2) / a, -(std::pow(flank, 2) / a), flank, -flank, 0.0 };
-    // std::cout << "Post data" << std::endl;
-
-    // Fit the Ellipse
-    // std::cout << "Previo Ellipse" << std::endl;
-    Ellipse SqlEllipse(_x, _y);  // DEBUGGING
-    // std::cout << "Inicializo" << std::endl;
-    std::vector<double> params = SqlEllipse.get_parameters();
-    a = params[0];
-    b = params[1];
-
-    // std::cout << "a:" << a << std::endl;
-    // std::cout << "b:" << b << std::endl;
-
-    // Ros allocation for each angle inside the dictionary
-    for (auto& angle : this->ROSAngleDir)
-    {
-        double offset = angle.first - thetafire;
-
-        if (offset < 0)
-        {
-            offset += 360;
-        }
-        if (offset > 360)
-        {
-            offset -= 360;
-        }
-        this->ROSAngleDir[angle.first] = rhoTheta(offset, a, b) * EFactor;
-    }
 }
 
 /**
@@ -1397,7 +1341,8 @@ Cells::ignition(int period,
 */
 void
 Cells::harvested(int id, int period)
-{  // WORKING CHECK OK
+{
+    // WORKING CHECK OK
     // TODO: unused param
     this->status = 3;
     this->harvestStarts = period;
