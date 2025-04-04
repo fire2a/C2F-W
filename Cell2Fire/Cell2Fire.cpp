@@ -607,6 +607,17 @@ Cell2Fire::InitCell(int id)
         it2->second.print_info();
 }
 
+/**
+ * @brief Creates a directory for storing fire metric outputs within the output folder.
+ *
+ * This function generates a directory inside the specified output folder based on the given fire metric name.
+ * If the metric corresponds to a type that produces multiple files (e.g., "Grids"), it creates a
+ * nested directory for each simulation run.
+ *
+ * @param metric Name of the fire metric for which an output directory will be created.
+ * @return The path to the created output folder for the given metric.
+ *
+ */
 string
 Cell2Fire::createOutputFolder(string metric)
 {
