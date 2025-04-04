@@ -1,0 +1,5 @@
+<map id="Cell2Fire::createOutputFolder" name="Cell2Fire::createOutputFolder">
+<area shape="rect" id="Node000001" title="Creates a directory for storing fire metric outputs within the output folder." alt="" coords="173,5,385,31"/>
+<area shape="rect" id="Node000002" href="$dc/d0a/classCell2Fire.html#a81d712a5c08100dda45094261b1c995c" title="Resets the simulation environment for a new run." alt="" coords="5,5,125,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,21,125,21,125,15,160,15"/>
+</map>
