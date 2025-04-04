@@ -205,4 +205,4 @@ test/test_results
 test/target_results
 docs/html
 docs/latex
-data/**/**/Data.csv
+data/**/Data.csv
