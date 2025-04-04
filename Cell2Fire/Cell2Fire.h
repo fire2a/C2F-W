@@ -129,7 +129,7 @@ class Cell2Fire
 
     // Methods
     void InitCell(int id);
-    string createOutputFolder(string metric, bool fireSeason);
+    string createOutputFolder(string metric);
     void reset(int rnumber, double rnumber2, int simExt);
     bool RunIgnition(std::default_random_engine generator, int ep);
     std::unordered_map<int, std::vector<int>> SendMessages();

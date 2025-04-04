@@ -608,16 +608,16 @@ Cell2Fire::InitCell(int id)
 }
 
 string
-Cell2Fire::createOutputFolder(string metric, bool fireSeason)
+Cell2Fire::createOutputFolder(string metric)
 {
-    cout << "Creating output folder: " << metric << endl;
     CSVWriter CSVFolder("", "");
     string tempName = this->args.OutFolder + metric + separator();
-    cout << tempName << endl;
     CSVFolder.MakeDir(tempName);
-    tempName = this->args.OutFolder + metric + separator() + metric + std::to_string(this->sim) + separator();
-    cout << tempName << endl;
-    CSVFolder.MakeDir(tempName);
+    if (metric.compare("Grids") == 0)
+    {
+        tempName = this->args.OutFolder + metric + separator() + metric + std::to_string(this->sim) + separator();
+        CSVFolder.MakeDir(tempName);
+    }
     return tempName;
 }
 
@@ -661,66 +661,58 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     // Initial status grid folder
     if (this->args.OutputGrids || this->args.FinalGrid)
     {
-        CSVWriter CSVFolder("", "");
-        this->gridFolder = this->args.OutFolder + "Grids" + separator();
-        CSVFolder.MakeDir(this->gridFolder);
-        this->gridFolder
-            = this->args.OutFolder + "Grids" + separator() + "Grids" + std::to_string(this->sim) + separator();
-        CSVFolder.MakeDir(this->gridFolder);
-        this->gridFolder = Cell2Fire::createOutputFolder("Grids", false);
-        // DEBUGstd::cout << "\nInitial Grid folder was generated in " <<
-        // this->gridFolder << std::endl;
+        this->gridFolder = Cell2Fire::createOutputFolder("Grids");
     }
 
     // Messages Folder
     if (this->args.OutMessages)
     {
-        this->messagesFolder = Cell2Fire::createOutputFolder("Messages", false);
+        this->messagesFolder = Cell2Fire::createOutputFolder("Messages");
     }
     // ROS Folder
     if (this->args.OutRos)
     {
-        this->rosFolder = Cell2Fire::createOutputFolder("RateOfSpread", false);
+        this->rosFolder = Cell2Fire::createOutputFolder("RateOfSpread");
     }
     // Surface Byram Intensity Folder
     if (this->args.OutIntensity)
     {
-        this->surfaceIntensityFolder = Cell2Fire::createOutputFolder("SurfaceIntensity", false);
+        this->surfaceIntensityFolder = Cell2Fire::createOutputFolder("SurfaceIntensity");
     }
     // Crown Byram Intensity Folder
     if ((this->args.OutIntensity) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
-        this->crownIntensityFolder = Cell2Fire::createOutputFolder("CrownIntensity", false);
+        this->crownIntensityFolder = Cell2Fire::createOutputFolder("CrownIntensity");
     }
     // Surface Flame Length Folder
     if (this->args.OutFl)
     {
-        this->surfaceFlameLengthFolder = Cell2Fire::createOutputFolder("SurfaceFlameLength", false);
+        this->surfaceFlameLengthFolder = Cell2Fire::createOutputFolder("SurfaceFlameLength");
     }
     // Crown Flame Length Folder
     if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
-        this->crownFlameLengthFolder = Cell2Fire::createOutputFolder("CrownFlameLength", false);
+        this->crownFlameLengthFolder = Cell2Fire::createOutputFolder("CrownFlameLength");
     }
     // max Flame Length Folder
     if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
     {
-        this->maxFlameLengthFolder = Cell2Fire::createOutputFolder("MaxFlameLength", false);
+        this->maxFlameLengthFolder = Cell2Fire::createOutputFolder("MaxFlameLength");
     }
     // Crown Folder
     if (this->args.OutCrown && this->args.AllowCROS)
     {
-        this->crownFolder = Cell2Fire::createOutputFolder("CrownFire", false);
+        this->crownFolder = Cell2Fire::createOutputFolder("CrownFire");
     }
     // Crown Fraction Burn Folder
     if (this->args.OutCrownConsumption && this->args.AllowCROS)
     {
-        this->cfbFolder = Cell2Fire::createOutputFolder("CrownFractionBurn", false);
+        this->cfbFolder = Cell2Fire::createOutputFolder("CrownFractionBurn");
     }
     // Surf Fraction Burn Folder
     if (this->args.OutSurfConsumption && this->args.Simulator == "C")
     {
-        this->sfbFolder = Cell2Fire::createOutputFolder("SurfFractionBurn", false);
+        this->sfbFolder = Cell2Fire::createOutputFolder("SurfFractionBurn");
     }
 
     // Random Weather
