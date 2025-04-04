@@ -123,6 +123,12 @@ jobs:
         exit $exitCode
       shell: pwsh
 
+    - name: Run Regression Test
+      run: |
+        cd test
+        ./test.ps1
+      shell: pwsh
+
     - name: Gather output
       run: |
         mkdir binaries
