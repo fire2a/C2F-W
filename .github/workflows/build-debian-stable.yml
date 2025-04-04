@@ -75,7 +75,7 @@ jobs:
           apt install -y g++-12 make lsb-release unzip libtiff6 libgomp1 curl
 
       - name: Cache Catch2 header
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: catch.hpp
           key: ${{ runner.os }}-catch2
