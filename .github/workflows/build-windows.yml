@@ -95,7 +95,7 @@ jobs:
         # Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
 
     - name: Cache Catch2 header
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: Cell2Fire\include\catch2\catch.hpp
         key: windows-catch2

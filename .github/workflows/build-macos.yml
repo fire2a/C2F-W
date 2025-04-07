@@ -96,7 +96,7 @@ jobs:
           merge-multiple: true
 
       - name: Cache Catch2 header
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: catch.hpp
           key: ${{ runner.os }}-catch2
