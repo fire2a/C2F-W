@@ -26,8 +26,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd docs/html
-          git config --global user.name 'Fdo Bad Vel'
-          git config --global user.email 'fbadilla@ing.uchile.cl'
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
           git init -b gh-pages
           git add -A
           git commit -m "Deploy to GitHub Pages"
