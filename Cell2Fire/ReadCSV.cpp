@@ -25,10 +25,9 @@ CSVReader::CSVReader(std::string filename, std::string delm)
     this->delimeter = delm;
 }
 
-
 /**
  * @brief Reads and parses data from a CSV, ASCII or TIFF file into a 2D vector.
- * 
+ *
  * Checks for the existence of the input file with either a `.tif` or `.asc` extension
  * and processes it accordingly.
  * If the file is in CSV format, it is read line by line and split using
@@ -40,7 +39,8 @@ CSVReader::CSVReader(std::string filename, std::string delm)
  *         - For ASC and CSV files, each row is stored as a vector of strings.
  *         - For TIFF files, metadata is stored in the first few rows, followed by pixel values.
  *
- * @throws std::runtime_error If the file type is unsupported, memory allocation fails, or an error occurs during file reading.
+ * @throws std::runtime_error If the file type is unsupported, memory allocation fails, or an error occurs during file
+ * reading.
  */
 std::vector<std::vector<std::string>>
 CSVReader::getData()
@@ -204,7 +204,6 @@ CSVReader::getData()
     return dataList;
 }
 
-
 /**
  * @brief print data contained in 2D vector to console row by row
  * @param DF 2D vector of strings
@@ -221,13 +220,12 @@ CSVReader::printData(std::vector<std::vector<std::string>>& DF)
                 std::cout << " " << data << " ";
             else
                 std::cout << " "
-                    << "NaN"
-                    << " ";
+                          << "NaN"
+                          << " ";
         }
         std::cout << std::endl;
     }
 }
-
 
 /**
  * @brief Populates an instance of inputs using information contained in a 2D vector
@@ -252,7 +250,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
 
     // CChar
     const char* faux;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= NCells; i++)
@@ -274,7 +272,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
         if (DF[i][5].compare("") == 0)
             waz = 0;
         else
-            waz = std::stoi(DF[i][5], &sz) + 180.; // + 2*90;  // CHECK!!!!
+            waz = std::stoi(DF[i][5], &sz) + 180.;  // + 2*90;  // CHECK!!!!
         if (waz >= 360)
             waz = waz - 360;
 
@@ -373,7 +371,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
         if (DF[i][23].compare("") == 0)
             pattern = 0;
         else
-            pattern = 1; // std::stoi (DF[i][18], &sz);
+            pattern = 1;  // std::stoi (DF[i][18], &sz);
 
         if (DF[i][24].compare("") == 0)
             tree_height = 0;
@@ -411,7 +409,6 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
     }
 }
 
-
 /**
  * @brief Populates a vector of size NCells with fuel type number per cell
  * @param NFTypes vector of fuel type per cell
@@ -426,7 +423,7 @@ CSVReader::parseNDF(std::vector<int>& NFTypes, std::vector<std::vector<std::stri
     int FType;
     // CChar
     const char* faux;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= NCells; i++)
@@ -460,7 +457,7 @@ CSVReader::parsePROB(std::vector<float>& probabilities, std::vector<std::vector<
 
     // CChar
     const char* faux;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= NCells; i++)
@@ -477,8 +474,22 @@ CSVReader::parsePROB(std::vector<float>& probabilities, std::vector<std::vector<
     }
 }
 
-/*
- * Populate Weather DF Spain
+/**
+ * @brief copy weather "dataframe" into array
+ * Reads a string vector representing a weather data frame (`DF`),
+ * extracts and converts relevant weather values based on the simulation model selected
+ * (Kitral or FBP), and stores them into a `weatherDF` array.
+ *
+ * For the Kitral model ("K"), it reads temperature and relative humidity.
+ * For the FBP model ("C"), it reads precipitation, temperature, RH, wind speed, wind direction,
+ * and FWI components (FFMC, DMC, DC, ISI, BUI, FWI).
+ *
+ * Missing or empty fields are defaulted to 0.
+ *
+ * @param wdf_ptr pointer to the array with weather data to be populated
+ * @param args_ptr pointer to the array of inputted command line arguments, including the simulation model code
+ * @param DF vector of weather data extracted from CSV file
+ * @param WPeriods number of weather periods (rows)
  */
 void
 CSVReader::parseWeatherDF(weatherDF* wdf_ptr,
@@ -489,7 +500,7 @@ CSVReader::parseWeatherDF(weatherDF* wdf_ptr,
     int i;
 
     // Strings
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Floats
     float ws, waz, tmp = 27, rh = 40;
@@ -502,7 +513,7 @@ CSVReader::parseWeatherDF(weatherDF* wdf_ptr,
             waz = 0;
         else
         {
-            waz = std::stoi(DF[i][3], &sz); //+ 180/2;   // DEBUGGING THE ANGLE
+            waz = std::stoi(DF[i][3], &sz);  //+ 180/2;   // DEBUGGING THE ANGLE
             if (waz >= 360)
             {
                 waz = waz - 360;
@@ -513,7 +524,7 @@ CSVReader::parseWeatherDF(weatherDF* wdf_ptr,
             ws = 0;
         else
             ws = std::stof(DF[i][2], &sz);
-
+        // Kitral
         if (args_ptr->Simulator == "K")
         {
             if (DF[i][4].compare("") == 0)
@@ -526,6 +537,7 @@ CSVReader::parseWeatherDF(weatherDF* wdf_ptr,
             else
                 rh = std::stof(DF[i][5], &sz);
         }
+        // FBP
         else if (args_ptr->Simulator == "C")
         {
 
@@ -534,7 +546,7 @@ CSVReader::parseWeatherDF(weatherDF* wdf_ptr,
             else
             {
                 waz = std::stoi(DF[i][6],
-                                &sz); //+ 180/2;   // DEBUGGING THE ANGLE
+                                &sz);  //+ 180/2;   // DEBUGGING THE ANGLE
                 if (waz >= 360)
                 {
                     waz = waz - 360;
@@ -608,15 +620,24 @@ CSVReader::parseWeatherDF(weatherDF* wdf_ptr,
     }
 }
 
-/*
- * Populate IgnitionDF
+/**
+ * @brief Parses the ignition data frame and populates ignition cell indices.
+ *
+ * Reads ignition cell indices from a string vector (`DF`) and
+ * stores them in the provided integer vector `ig`. It assumes the ignition cell
+ * index is located in the second column (`DF[i][1]`) of each row.
+ *
+ * @param ig Reference to the vector that will be populated with ignition cell indices.
+ * @param DF String vector representing the input ignition data table.
+ * @param IgPeriods Number of ignition periods (rows) to parse in the data frame.
  */
+
 void
 CSVReader::parseIgnitionDF(std::vector<int>& ig, std::vector<std::vector<std::string>>& DF, int IgPeriods)
 {
     // Integers
     int i, igcell;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= IgPeriods; i++)
@@ -632,8 +653,22 @@ CSVReader::parseIgnitionDF(std::vector<int>& ig, std::vector<std::vector<std::st
     }
 }
 
-/*
- * Populate HarvestedDF
+/**
+ * @brief Parses harvested cell data and maps them to simulation periods for firebreak designation.
+ *
+ * Reads a string vector (`DF`) containing harvested (firebreak) cell indices and populates an unordered map (`hc`),
+ * where each key represents a simulation year (starting from 1) and the value is a vector of cell indices
+ * harvested in that year. A year is a "fire season".
+ *
+ * This data is later used to mark harvested cells as firebreaks by updating their fuel type and status
+ * in the simulation (e.g., making them non-burnable).
+ *
+ * Assumes the first row of `DF` contains headers and skips it. Each subsequent row corresponds to one year,
+ * and columns (from index 1 onward) contain harvested cell indices.
+ *
+ * @param hc Output map linking each year to the list of harvested cell indices.
+ * @param DF Input data frame containing harvested cell information.
+ * @param HPeriods Number of harvest periods to parse (i.e., rows excluding the header).
  */
 void
 CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
@@ -643,7 +678,7 @@ CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
     // Integers
     int i, j, hcell;
     std::vector<int> toHarvestCells;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= HPeriods; i++)
@@ -665,9 +700,23 @@ CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
     }
 }
 
-/*
- * Populate BBO Tuning factors
+/**
+ * @brief Parses a Black Box Optimization (BBO) configuration table for forest fuel types.
+ *
+ * This function reads a table (data frame) containing BBO tuning factors associated with each forest fuel type.
+ * Each row in the table corresponds to a specific fuel type and includes four BBO factors used to guide
+ * fire behavior modeling or simulation tuning.
+ *
+ * The resulting data structure is an unordered map where the key is the fuel type ID, and the value is
+ * a vector of four floating-point BBO factors.
+ *
+ * @param bbo Output map that will store BBO factors for each fuel type. Key: fuel type ID, Value: vector of BBO
+ * factors.
+ * @param DF 2D string vector representing the parsed CSV file (first column: fuel type, next four columns: BBO
+ * factors).
+ * @param NFTypes Number of fuel types (i.e., number of rows in the input table, excluding headers).
  */
+
 void
 CSVReader::parseBBODF(std::unordered_map<int, std::vector<float>>& bbo,
                       std::vector<std::vector<std::string>>& DF,
@@ -677,7 +726,7 @@ CSVReader::parseBBODF(std::unordered_map<int, std::vector<float>>& bbo,
     int i, j, ftype;
     int ffactors = 4;
     std::vector<float> bboFactors;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= NFTypes; i++)
@@ -698,6 +747,27 @@ CSVReader::parseBBODF(std::unordered_map<int, std::vector<float>>& bbo,
     }
 }
 
+/**
+ * @brief Parses forest structure and spatial metadata from a data frame and populates a forestDF object.
+ *
+ * Reads metadata from the input data frame `DF`, including the number of
+ * columns and rows in the grid, cell size, and lower-left corner coordinates (xllcorner, yllcorner). It uses
+ * this information to initialize the geometry of the forest grid.
+ *
+ * The function also computes and stores the (x, y) grid coordinates for each cell in row-major order, assuming
+ * the origin (0,0) is at the lower-left and that Y increases upwards.
+ *
+ * @param frt_ptr Pointer to the forestDF structure to populate with parsed metadata and cell coordinates.
+ * @param DF Input data frame containing the forest metadata and layout information.
+ *
+ * Expected `DF` format:
+ * - Row 0: ["ncols", <int>]
+ * - Row 1: ["nrows", <int>]
+ * - Row 2: ["xllcorner", <double>]
+ * - Row 3: ["yllcorner", <double>]
+ * - Row 4: ["cellsize", <int>]
+ * - Rows 5+: Actual cell data (not parsed in this function).
+ */
 void
 CSVReader::parseForestDF(forestDF* frt_ptr, std::vector<std::vector<std::string>>& DF)
 {
@@ -706,7 +776,7 @@ CSVReader::parseForestDF(forestDF* frt_ptr, std::vector<std::vector<std::string>
     int i, j;
     double xllcorner, yllcorner;
     // std::string xllcorner;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
     std::unordered_map<std::string, int> Aux;
     std::vector<int> Aux2;
     cols = std::stoi(DF[0][1], &sz);
@@ -768,6 +838,10 @@ CSVReader::parseForestDF(forestDF* frt_ptr, std::vector<std::vector<std::string>
     frt_ptr->yllcorner = yllcorner;
 }
 
+/**
+ * @brief Prints input data.
+ * @param df Structure containing input data.
+ */
 void
 CSVReader::printDF(inputs df)
 {
@@ -785,6 +859,10 @@ CSVReader::printDF(inputs df)
     std::cout << " " << df.FMC << std::endl;
 }
 
+/**
+ * Prints windspeed and wind direction
+ * @param wdf structure with weather data
+ */
 void
 CSVReader::printWeatherDF(weatherDF wdf)
 {
