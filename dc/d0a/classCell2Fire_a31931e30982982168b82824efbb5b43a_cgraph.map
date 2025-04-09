@@ -1,0 +1,15 @@
+<map id="Cell2Fire::GetMessages" name="Cell2Fire::GetMessages">
+<area shape="rect" id="Node000001" title="Processes incoming fire messages to determine the ignition and progression of fire in cells." alt="" coords="5,31,180,56"/>
+<area shape="rect" id="Node000002" href="$dc/d0a/classCell2Fire.html#a990b7d2ddcac2076870dbc2aa412162d" title="Initializes a cell within the simulation and adds it to the cell collection." alt="" coords="255,5,388,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,31,241,24,241,29,180,36"/>
+<area shape="rect" id="Node000003" href="$dc/d0a/classCell2Fire.html#ad80754c3229512c88f0346d813c6f632" title="Updates the weather conditions during the simulation based on specified criteria." alt="" coords="228,55,415,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,50,215,53,214,59,180,55"/>
+<area shape="rect" id="Node000004" href="$dc/d0a/classCell2Fire.html#af98cbe0fc95eb0b05955249f3eb03691" title="Outputs the current state of the forest grid to a CSV file." alt="" coords="487,29,643,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="414,55,473,49,473,54,415,60"/>
+<area shape="rect" id="Node000007" href="$d0/db0/classCSVReader.html#a873bbd56cfbc3b2a2016d815d0754900" title=" " alt="" coords="463,79,667,104"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="415,74,449,77,449,83,414,79"/>
+<area shape="rect" id="Node000005" href="$dc/de6/classCSVWriter.html#aa05f095c8ddf96f049c88fa052e5371b" title="Writes a 2D grid of cell statuses to a CSV file." alt="" coords="715,29,867,55"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="643,39,701,39,701,45,643,45"/>
+<area shape="rect" id="Node000006" href="$dc/de6/classCSVWriter.html#a0cce89d5a8bb0de529f6bee7b9d4d21e" title="Writes a row of data to a file Takes a range of values and appends them as a single row to the output..." alt="" coords="915,29,1105,55"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="867,39,901,39,901,45,867,45"/>
+</map>

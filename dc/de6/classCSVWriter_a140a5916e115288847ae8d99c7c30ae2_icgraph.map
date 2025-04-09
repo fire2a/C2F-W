@@ -1,0 +1,5 @@
+<map id="CSVWriter::printWeather" name="CSVWriter::printWeather">
+<area shape="rect" id="Node000001" title="writes the weather file history onto an output file" alt="" coords="169,5,349,31"/>
+<area shape="rect" id="Node000002" href="$dc/d0a/classCell2Fire.html#a01ed2559f9d53e0ab5deb3cd83983c1a" title="Executes a single simulation step in the forest fire model." alt="" coords="5,5,121,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,21,121,21,121,15,156,15"/>
+</map>

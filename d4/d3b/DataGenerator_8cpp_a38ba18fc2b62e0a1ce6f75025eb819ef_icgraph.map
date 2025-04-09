@@ -1,0 +1,11 @@
+<map id="Dictionary" name="Dictionary">
+<area shape="rect" id="Node000001" title="Reads the model lookup table and creates dictionaries for the fuel types and cell&#39;s ColorsDict." alt="" coords="311,56,400,81"/>
+<area shape="rect" id="Node000002" href="$d4/d3b/DataGenerator_8cpp.html#aeba5e10776a24617f15bd71850d52d59" title="Reads fuels from ASCII raster file and creates a list of cells." alt="" coords="165,5,254,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="304,54,246,33,248,28,306,49"/>
+<area shape="rect" id="Node000003" href="$d4/d3b/DataGenerator_8cpp.html#a3d4d442b950e2039349a9773e711be15" title="Reads all available input raster files and generates a new file called &#39;Data.csv&#39; in which each row c..." alt="" coords="5,56,108,81"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="297,71,108,71,108,66,297,66"/>
+<area shape="rect" id="Node000004" href="$d4/d3b/DataGenerator_8cpp.html#a255b39df43ec2d37fff46c27910c37b7" title="Reads fuels raster file in tif format and creates a list of cells." alt="" coords="156,107,263,132"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="306,88,248,109,246,104,304,83"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="158,38,97,58,95,53,157,33"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="157,105,95,84,97,79,158,100"/>
+</map>

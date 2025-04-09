@@ -1,0 +1,26 @@
+<map id="CSVWriter::addDatainRow" name="CSVWriter::addDatainRow">
+<area shape="rect" id="Node000001" title="Writes a row of data to a file Takes a range of values and appends them as a single row to the output..." alt="" coords="1060,56,1251,81"/>
+<area shape="rect" id="Node000002" href="$dc/de6/classCSVWriter.html#a83a581abb0a67f16f39728600f755fd6" title="Writes a raster layer with float data in ASCII format onto a file." alt="" coords="627,5,787,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1076,56,1012,46,894,33,787,25,787,20,894,28,1012,41,1077,51"/>
+<area shape="rect" id="Node000005" href="$dc/de6/classCSVWriter.html#a7d6316dcfcfa7972f7d39046401173a1" title="Writes a raster layer with int data in ASCII format onto a file." alt="" coords="835,56,1012,81"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1046,71,1012,71,1012,66,1046,66"/>
+<area shape="rect" id="Node000006" href="$dc/de6/classCSVWriter.html#aa05f095c8ddf96f049c88fa052e5371b" title="Writes a 2D grid of cell statuses to a CSV file." alt="" coords="847,105,999,131"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="1082,87,984,108,983,103,1081,82"/>
+<area shape="rect" id="Node000003" href="$dc/d0a/classCell2Fire.html#a110e597b5839df19e2525a19699daf3d" title="Generates and outputs simulation results, including fire behavior metrics, final grid status,..." alt="" coords="418,56,553,81"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="637,36,542,59,541,53,636,31"/>
+<area shape="rect" id="Node000004" href="$dc/d0a/classCell2Fire.html#a01ed2559f9d53e0ab5deb3cd83983c1a" title="Executes a single simulation step in the forest fire model." alt="" coords="5,108,121,133"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="405,75,293,84,170,99,114,111,113,105,169,94,292,79,404,70"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="821,71,553,71,553,66,821,66"/>
+<area shape="rect" id="Node000007" href="$dc/d0a/classCell2Fire.html#af98cbe0fc95eb0b05955249f3eb03691" title="Outputs the current state of the forest grid to a CSV file." alt="" coords="629,107,785,132"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="834,121,785,122,785,116,834,116"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="636,106,541,84,542,79,637,101"/>
+<area shape="rect" id="Node000008" href="$dc/d0a/classCell2Fire.html#aaed4b85f57d3c3122c5574d2b171da44" title="Simulates the ignition phase of the fire spread model for a single simulation year." alt="" coords="176,108,337,133"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="615,122,338,123,338,118,615,117"/>
+<area shape="rect" id="Node000009" href="$dc/d0a/classCell2Fire.html#ad80754c3229512c88f0346d813c6f632" title="Updates the weather conditions during the simulation based on specified criteria." alt="" coords="392,157,579,183"/>
+<area shape="poly" id="edge11_Node000007_Node000009" title=" " alt="" coords="637,138,542,160,541,155,636,133"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="162,123,121,123,121,118,162,118"/>
+<area shape="poly" id="edge14_Node000009_Node000008" title=" " alt="" coords="412,157,316,136,317,131,413,152"/>
+<area shape="rect" id="Node000010" href="$dc/d0a/classCell2Fire.html#a31931e30982982168b82824efbb5b43a" title="Processes incoming fire messages to determine the ignition and progression of fire in cells." alt="" coords="169,157,344,183"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="378,173,344,173,344,167,378,167"/>
+<area shape="poly" id="edge13_Node000010_Node000004" title=" " alt="" coords="193,157,114,136,115,131,194,151"/>
+</map>

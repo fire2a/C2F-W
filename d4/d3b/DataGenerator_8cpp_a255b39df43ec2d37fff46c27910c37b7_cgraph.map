@@ -1,0 +1,5 @@
+<map id="ForestGridTif" name="ForestGridTif">
+<area shape="rect" id="Node000001" title="Reads fuels raster file in tif format and creates a list of cells." alt="" coords="5,5,112,31"/>
+<area shape="rect" id="Node000002" href="$d4/d3b/DataGenerator_8cpp.html#a38ba18fc2b62e0a1ce6f75025eb819ef" title="Reads the model lookup table and creates dictionaries for the fuel types and cell&#39;s ColorsDict." alt="" coords="160,5,249,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,15,146,15,146,21,112,21"/>
+</map>

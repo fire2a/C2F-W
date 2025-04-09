@@ -1,0 +1,22 @@
+<map id="Cell2Fire::Results" name="Cell2Fire::Results">
+<area shape="rect" id="Node000001" title="Generates and outputs simulation results, including fire behavior metrics, final grid status,..." alt="" coords="5,104,140,129"/>
+<area shape="rect" id="Node000002" href="$dc/de6/classCSVWriter.html#aad4d734d27ab21053aab9a41194ae435" title="Creates the directory for a given path." alt="" coords="204,5,355,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,102,131,71,187,40,205,32,207,37,189,44,134,75,92,106"/>
+<area shape="rect" id="Node000003" href="$dc/d0a/classCell2Fire.html#af98cbe0fc95eb0b05955249f3eb03691" title="Outputs the current state of the forest grid to a CSV file." alt="" coords="201,55,357,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="126,101,211,81,213,86,127,107"/>
+<area shape="rect" id="Node000006" href="$dc/de6/classCSVWriter.html#a83a581abb0a67f16f39728600f755fd6" title="Writes a raster layer with float data in ASCII format onto a file." alt="" coords="199,104,359,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="140,114,186,114,186,119,140,119"/>
+<area shape="rect" id="Node000008" href="$dc/de6/classCSVWriter.html#a7d6316dcfcfa7972f7d39046401173a1" title="Writes a raster layer with int data in ASCII format onto a file." alt="" coords="191,153,368,179"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="127,127,213,147,211,153,126,132"/>
+<area shape="rect" id="Node000009" href="$dc/de6/classCSVWriter.html#a3e4a83a9ce7c1bcef486c54411fccbe5" title="writes the ignition point history onto an output file" alt="" coords="188,203,371,228"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="92,127,135,157,189,188,211,196,209,201,187,192,132,162,89,132"/>
+<area shape="rect" id="Node000004" href="$dc/de6/classCSVWriter.html#aa05f095c8ddf96f049c88fa052e5371b" title="Writes a 2D grid of cell statuses to a CSV file." alt="" coords="429,52,581,77"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="357,64,415,63,416,68,358,69"/>
+<area shape="rect" id="Node000005" href="$dc/de6/classCSVWriter.html#a0cce89d5a8bb0de529f6bee7b9d4d21e" title="Writes a row of data to a file Takes a range of values and appends them as a single row to the output..." alt="" coords="640,103,831,128"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="565,75,664,97,663,102,563,80"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="360,114,626,113,626,118,360,119"/>
+<area shape="rect" id="Node000007" href="$dc/de6/classCSVWriter.html#ab1456badc5aeb8f2133dc07bfb1e5495" title="Writes the ascii header onto a raster file." alt="" coords="419,153,592,179"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="339,127,434,148,432,153,338,132"/>
+<area shape="poly" id="edge9_Node000008_Node000005" title=" " alt="" coords="328,176,383,187,449,196,521,197,591,187,623,177,653,164,704,134,707,138,655,168,625,182,593,193,521,203,449,201,382,193,327,181"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="368,163,405,163,405,169,368,169"/>
+</map>

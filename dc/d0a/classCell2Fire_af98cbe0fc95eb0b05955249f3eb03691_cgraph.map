@@ -1,0 +1,7 @@
+<map id="Cell2Fire::outputGrid" name="Cell2Fire::outputGrid">
+<area shape="rect" id="Node000001" title="Outputs the current state of the forest grid to a CSV file." alt="" coords="5,5,161,31"/>
+<area shape="rect" id="Node000002" href="$dc/de6/classCSVWriter.html#aa05f095c8ddf96f049c88fa052e5371b" title="Writes a 2D grid of cell statuses to a CSV file." alt="" coords="209,5,361,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,15,196,15,196,21,162,21"/>
+<area shape="rect" id="Node000003" href="$dc/de6/classCSVWriter.html#a0cce89d5a8bb0de529f6bee7b9d4d21e" title="Writes a row of data to a file Takes a range of values and appends them as a single row to the output..." alt="" coords="409,5,600,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="362,15,396,15,396,21,362,21"/>
+</map>

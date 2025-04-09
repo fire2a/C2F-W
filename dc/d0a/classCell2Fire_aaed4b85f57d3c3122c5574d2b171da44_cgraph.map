@@ -1,0 +1,17 @@
+<map id="Cell2Fire::RunIgnition" name="Cell2Fire::RunIgnition">
+<area shape="rect" id="Node000001" title="Simulates the ignition phase of the fire spread model for a single simulation year." alt="" coords="5,81,167,107"/>
+<area shape="rect" id="Node000002" href="$dc/d0a/classCell2Fire.html#a990b7d2ddcac2076870dbc2aa412162d" title="Initializes a cell within the simulation and adds it to the cell collection." alt="" coords="241,5,375,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,79,256,33,258,38,125,84"/>
+<area shape="rect" id="Node000003" href="$dc/d0a/classCell2Fire.html#af98cbe0fc95eb0b05955249f3eb03691" title="Outputs the current state of the forest grid to a CSV file." alt="" coords="473,83,629,108"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="167,91,401,91,459,92,459,97,401,97,167,96"/>
+<area shape="rect" id="Node000006" href="$d0/db0/classCSVReader.html#a873bbd56cfbc3b2a2016d815d0754900" title=" " alt="" coords="449,132,653,157"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="112,104,159,125,215,142,271,150,328,154,436,153,436,158,328,159,270,155,214,147,157,130,110,109"/>
+<area shape="rect" id="Node000007" href="$dc/d0a/classCell2Fire.html#ad80754c3229512c88f0346d813c6f632" title="Updates the weather conditions during the simulation based on specified criteria." alt="" coords="215,107,401,132"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="167,101,202,105,201,110,167,106"/>
+<area shape="rect" id="Node000004" href="$dc/de6/classCSVWriter.html#aa05f095c8ddf96f049c88fa052e5371b" title="Writes a 2D grid of cell statuses to a CSV file." alt="" coords="701,83,853,108"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="630,93,688,93,688,98,630,98"/>
+<area shape="rect" id="Node000005" href="$dc/de6/classCSVWriter.html#a0cce89d5a8bb0de529f6bee7b9d4d21e" title="Writes a row of data to a file Takes a range of values and appends them as a single row to the output..." alt="" coords="901,83,1092,108"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="854,93,888,93,888,98,854,98"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="401,108,459,102,460,107,402,113"/>
+<area shape="poly" id="edge8_Node000007_Node000006" title=" " alt="" coords="402,126,436,130,435,135,401,132"/>
+</map>

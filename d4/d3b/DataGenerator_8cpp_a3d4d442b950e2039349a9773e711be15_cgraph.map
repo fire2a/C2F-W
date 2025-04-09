@@ -1,0 +1,19 @@
+<map id="GenDataFile" name="GenDataFile">
+<area shape="rect" id="Node000001" title="Reads all available input raster files and generates a new file called &#39;Data.csv&#39; in which each row c..." alt="" coords="5,156,108,181"/>
+<area shape="rect" id="Node000002" href="$d4/d3b/DataGenerator_8cpp.html#a98d98680db3e0a4ecd535276774208b9" title="Read grid data from ASCII file into a vector." alt="" coords="174,5,261,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,154,100,105,126,75,154,48,173,35,176,39,158,52,129,79,104,108,68,157"/>
+<area shape="rect" id="Node000003" href="$d4/d3b/DataGenerator_8cpp.html#a38ba18fc2b62e0a1ce6f75025eb819ef" title="Reads the model lookup table and creates dictionaries for the fuel types and cell&#39;s ColorsDict." alt="" coords="327,156,416,181"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="68,154,104,120,128,104,155,92,189,81,217,78,246,81,280,92,320,115,352,143,348,147,317,119,278,96,245,86,217,83,190,87,157,96,131,109,107,125,72,157"/>
+<area shape="rect" id="Node000004" href="$d4/d3b/DataGenerator_8cpp.html#afdd89841220a8b18e39e0844a833a18b" title="checks if a file exists." alt="" coords="177,107,258,132"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="98,153,163,133,165,138,99,159"/>
+<area shape="rect" id="Node000005" href="$d4/d3b/DataGenerator_8cpp.html#aeba5e10776a24617f15bd71850d52d59" title="Reads fuels from ASCII raster file and creates a list of cells." alt="" coords="173,156,262,181"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="108,166,159,166,159,171,108,171"/>
+<area shape="rect" id="Node000006" href="$d4/d3b/DataGenerator_8cpp.html#a255b39df43ec2d37fff46c27910c37b7" title="Reads fuels raster file in tif format and creates a list of cells." alt="" coords="164,205,271,231"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="99,179,163,199,161,204,98,184"/>
+<area shape="rect" id="Node000007" href="$d4/d3b/DataGenerator_8cpp.html#ac34210cb5668e11e909276651fdfc15c" title="Create input data matrix." alt="" coords="165,255,270,280"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="75,180,111,209,157,240,171,247,168,251,155,244,108,213,71,184"/>
+<area shape="rect" id="Node000008" href="$d4/d3b/DataGenerator_8cpp.html#abb617e07b8b89d235032b20cd1514a6d" title="Save data matrix into a CSV file called Data.csv." alt="" coords="156,304,279,329"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="67,180,102,232,128,262,158,289,167,296,164,300,154,293,124,266,98,235,63,183"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="262,166,313,166,313,171,262,171"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="257,203,317,183,318,188,258,208"/>
+</map>

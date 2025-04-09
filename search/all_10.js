@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['parsebbodf_0',['parseBBODF',['../d0/db0/classCSVReader.html#aef4c158acce34e5aee737dd409c8b8e3',1,'CSVReader']]],
+  ['parsedf_1',['parseDF',['../d0/db0/classCSVReader.html#a681e66cc91738e7368d89a3d57510517',1,'CSVReader']]],
+  ['parseforestdf_2',['parseForestDF',['../d0/db0/classCSVReader.html#a21c778c7c8c902ef6a2ec22fb6463935',1,'CSVReader']]],
+  ['parseharvesteddf_3',['parseHarvestedDF',['../d0/db0/classCSVReader.html#a629a726bb2ca38d39638db98f085160d',1,'CSVReader']]],
+  ['parseignitiondf_4',['parseIgnitionDF',['../d0/db0/classCSVReader.html#adbda977f8ea97f380934e1cea09a671e',1,'CSVReader']]],
+  ['parsendf_5',['parseNDF',['../d0/db0/classCSVReader.html#a0ef4aaf9006bd22e9df3d5f2010c7294',1,'CSVReader']]],
+  ['parseprob_6',['parsePROB',['../d0/db0/classCSVReader.html#a1caa59d8e9bce0e5d9394879c5a2c419',1,'CSVReader']]],
+  ['parseweatherdf_7',['parseWeatherDF',['../d0/db0/classCSVReader.html#a7d548b5b04b00c42913f88f880814d64',1,'CSVReader']]],
+  ['plugin_8',['vim using ALE plugin',['../d6/da9/md__2home_2runner_2work_2C2F-W_2C2F-W_2CODING.html#autotoc_md38',1,'']]],
+  ['previncat_20s_20zone_2060_20catalonian_20instance_20_3a_20forest_20and_20a_20simulated_20fire_20spread_20with_20its_20corresponding_20scar_20and_20growth_20propagation_20tree_9',['Previncat&apos;s Zone 60 (Catalonian Instance): forest and a simulated fire spread with its corresponding scar and growth propagation tree.',['../index.html#autotoc_md25',1,'']]],
+  ['printascii_10',['printASCII',['../dc/de6/classCSVWriter.html#a83a581abb0a67f16f39728600f755fd6',1,'CSVWriter']]],
+  ['printasciiint_11',['printASCIIInt',['../dc/de6/classCSVWriter.html#a7d6316dcfcfa7972f7d39046401173a1',1,'CSVWriter']]],
+  ['printcsv_12',['printCSV',['../dc/de6/classCSVWriter.html#aa05f095c8ddf96f049c88fa052e5371b',1,'CSVWriter']]],
+  ['printdata_13',['printData',['../d0/db0/classCSVReader.html#a1e2a1a757df21a7ffd1c73f2a4cb6cf6',1,'CSVReader']]],
+  ['printdf_14',['printDF',['../d0/db0/classCSVReader.html#a36922cc65390933b137f9e3ec84d1220',1,'CSVReader']]],
+  ['printignitions_15',['printIgnitions',['../dc/de6/classCSVWriter.html#a3e4a83a9ce7c1bcef486c54411fccbe5',1,'CSVWriter']]],
+  ['printweather_16',['printWeather',['../dc/de6/classCSVWriter.html#a140a5916e115288847ae8d99c7c30ae2',1,'CSVWriter']]],
+  ['printweatherdf_17',['printWeatherDF',['../d0/db0/classCSVReader.html#a873bbd56cfbc3b2a2016d815d0754900',1,'CSVReader']]],
+  ['probability_20bp_20betweenness_20centrality_20bc_20downstream_20protection_20value_20dpv_20and_20growth_20propagation_20tree_20gpt_18',['Risk metrics: Burn Probability (BP), Betweenness Centrality (BC), Downstream Protection Value (DPV), and Growth Propagation Tree (GPT).',['../index.html#autotoc_md26',1,'']]],
+  ['propagation_20tree_19',['Previncat&apos;s Zone 60 (Catalonian Instance): forest and a simulated fire spread with its corresponding scar and growth propagation tree.',['../index.html#autotoc_md25',1,'']]],
+  ['propagation_20tree_20gpt_20',['Risk metrics: Burn Probability (BP), Betweenness Centrality (BC), Downstream Protection Value (DPV), and Growth Propagation Tree (GPT).',['../index.html#autotoc_md26',1,'']]],
+  ['protection_20value_20dpv_20and_20growth_20propagation_20tree_20gpt_21',['Risk metrics: Burn Probability (BP), Betweenness Centrality (BC), Downstream Protection Value (DPV), and Growth Propagation Tree (GPT).',['../index.html#autotoc_md26',1,'']]]
+];
