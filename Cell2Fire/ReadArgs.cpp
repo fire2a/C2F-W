@@ -8,6 +8,10 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief Returns the file path separator used in the current operating system.
+ * @return Directory path delimiter
+ */
 inline char
 separator()
 {
@@ -18,6 +22,13 @@ separator()
 #endif
 }
 
+/**
+ * Find a specific option in the command line arguments array and return its value.
+ * @param begin beginning of array to traverse
+ * @param end end of array
+ * @param option string to find in array
+ * @return value corresponding to the searched option
+ */
 char*
 getCmdOption(char** begin, char** end, const std::string& option)
 {
@@ -29,12 +40,26 @@ getCmdOption(char** begin, char** end, const std::string& option)
     return 0;
 }
 
+/**
+ * Check if a given option is in the command line arguments array.
+ * @param begin beginning of array to traverse
+ * @param end end of array
+ * @param option string to find in array
+ * @return True if the option is included in the array, false if not
+ */
 bool
 cmdOptionExists(char** begin, char** end, const std::string& option)
 {
     return std::find(begin, end, option) != end;
 }
 
+/**
+ * Get all inputted command line arguments and store their value in `args_ptr`. If no value is provided for an option,
+ * a default one is used.
+ * @param argc number of inputted options
+ * @param argv array of command line arguments inputted by the user
+ * @param args_ptr pointer to array with all command line options
+ */
 void
 parseArgs(int argc, char* argv[], arguments* args_ptr)
 {
@@ -666,6 +691,14 @@ printArgs(arguments args)
     std::cout << "nthreads: " << args.nthreads << std::endl;
 }
 
+/**
+ * Count the number of weather files that exist in a given path. A file is determined to be a weather file if its name
+ * begins with "Weather" and is a `csv` file.
+ *
+ * If the given directory could not be accessed, it returns -1.
+ * @param directory_path Directory where weather files will be counted
+ * @return number of weather files found in the directory.
+ */
 int
 countWeathers(const std::string directory_path)
 {
