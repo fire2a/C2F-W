@@ -100,7 +100,7 @@ printSets(std::unordered_set<int> availCells,
     std::cout << std::endl;
 }
 
-// Output grids
+// not used
 void
 CSVGrid(int rows, int cols, int gridNumber, std::string gridFolder, std::vector<int>& statusCellsCSV, bool verbose)
 {
