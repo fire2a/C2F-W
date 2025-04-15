@@ -18,6 +18,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 
 // Include libraries
 #include <algorithm>
+#include <boost/random.hpp>
 #include <chrono>
 #include <cmath>
 #include <iomanip>
@@ -1016,7 +1017,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
  */
 
 bool
-Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
+Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
 {
     if (this->args.verbose)
     {
@@ -1038,11 +1039,14 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
     int microloops = 0;
     this->noIgnition = false;
     currentSim = currentSim + 1;
-    std::default_random_engine generator2(args.seed * ep * this->nCells);  // * time(NULL)); //creates a different
-                                                                           // generator solving cases when parallel
-                                                                           // running creates simulations at same time
+    boost::random::mt19937 generator2 = boost::random::mt19937(args.seed * ep * this->nCells);
+    boost::random::uniform_int_distribution<int> distribution(1, this->nCells);
+
+    // std::default_random_engine generator2(args.seed * ep * this->nCells);  // * time(NULL)); //creates a different
+    //  generator solving cases when parallel
+    //  running creates simulations at same time
     std::unordered_map<int, Cells>::iterator it;
-    std::uniform_int_distribution<int> distribution(1, this->nCells);
+    // std::uniform_int_distribution<int> distribution(1, this->nCells);
 
     // No Ignitions provided
     if (this->args.Ignitions == 0)
@@ -2278,7 +2282,7 @@ Cell2Fire::updateWeather()
  *
  */
 void
-Cell2Fire::Step(std::default_random_engine generator, int ep)
+Cell2Fire::Step(boost::random::mt19937 generator, int ep)
 {
     // Iterator
     // Declare an iterator to unordered_map
@@ -2494,29 +2498,19 @@ main(int argc, char* argv[])
     parseArgs(argc, argv, args_ptr);
     GenDataFile(args.InFolder, args.Simulator);
     int ep = 0;
-    int tstep = 0;
-    int stop = 0;
     // Episodes loop (episode = replication)
     // CP: Modified to account the case when no ignition occurs and no grids are
     // generated (currently we are not generating grid when no ignition happened,
     // TODO)
     int num_threads = args.nthreads;
-    int TID = 0;
     Cell2Fire Forest2(args);  // generate Forest object
     std::vector<Cell2Fire> Forests(num_threads, Forest2);
-
-    // Multigenerator
-    std::vector<std::default_random_engine> generators;
-    for (stop = 0; stop < args.TotalSims; ++stop)
-    {
-        generators.emplace_back(default_random_engine(args.seed * stop));
-    }
 
     // Parallel zone
 #pragma omp parallel num_threads(num_threads)
     {
         // Number of threads
-        TID = omp_get_thread_num();
+        int TID = omp_get_thread_num();
         if (TID == 0 && omp_get_num_threads() < 2)
         {
             cout << "There are " << omp_get_num_threads() << " threads" << endl;
@@ -2527,30 +2521,27 @@ main(int argc, char* argv[])
         }
         Cell2Fire Forest = Forests[TID];
         // Random seed
-        std::default_random_engine& generator = generators[TID];  // generators[args.nthreads]
-        // Random generator and distributions
-        std::uniform_int_distribution<int> udistribution(1, args.NWeatherFiles);  // Get random weather
-        std::normal_distribution<double> ndistribution(0.0, 1.0);                 // ROSRV
+
         // Random numbers (weather file and ROS-CV)
         int rnumber;
         double rnumber2;
-        std::uniform_int_distribution<int> udistributionIgnition(1, Forest.nCells);  // Get random ignition point
-        // Steps and stop
-        int ep = 0;
-        int tstep = 0;
-        int stop = 0;
 #pragma omp for
-        for (ep = 1; ep <= args.TotalSims; ep++)
+        for (int ep = 1; ep <= args.TotalSims; ep++)
         {
+
+            boost::random::mt19937 generator = boost::random::mt19937(args.seed * ep);
+            // Random generator and distributions
+            boost::random::uniform_int_distribution<int> udistribution(1, args.NWeatherFiles);
+            boost::random::normal_distribution<> ndistribution(0.0, 1.0);
+            boost::random::uniform_int_distribution<int> udistributionIgnition(1, Forest.nCells);
+
             TID = omp_get_thread_num();
-            // Reset environment (passing new random numbers)
-            generator = generators[TID];  // generators[args.nthreads]
             rnumber = udistribution(generator);
             rnumber2 = ndistribution(generator);
             // Reset
             Forest.reset(rnumber, rnumber2, ep);
             // Time steps during horizon (or until we break it)
-            for (tstep = 0; tstep <= Forest.args.MaxFirePeriods * Forest.args.TotalYears; tstep++)
+            for (int tstep = 0; tstep <= Forest.args.MaxFirePeriods * Forest.args.TotalYears; tstep++)
             {
                 Forest.Step(generator, ep);
 
