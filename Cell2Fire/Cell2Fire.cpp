@@ -821,10 +821,9 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         std::string weather_name;
         while (!selectWeather)
         {
-            std::default_random_engine generator3(args.seed * simExt
-                                                  * time(NULL));  // creates a different generator solving cases when
-                                                                  // parallel running creates simulations at same time
-            std::uniform_int_distribution<int> distribution(1, this->WDist.size() - 1);
+            boost::random::mt19937 generator3 = boost::random::mt19937(args.seed * simExt * time(NULL));
+            // Random generator and distributions
+            boost::random::uniform_int_distribution<int> distribution(1, this->WDist.size() - 1);
             int weather_idx = distribution(generator3);
 
             float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
@@ -1148,7 +1147,8 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
         if (this->args.IgnitionRadius > 0)
         {
             // Pick any at random and set temp with that cell
-            std::uniform_int_distribution<int> udistribution(0, this->IgnitionSets[this->year - 1].size() - 1);
+            boost::random::uniform_int_distribution<int> udistribution(0,
+                                                                       this->IgnitionSets[this->year - 1].size() - 1);
             temp = this->IgnitionSets[this->year - 1][udistribution(generator)];
         }
 
