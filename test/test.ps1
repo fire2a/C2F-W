@@ -1,8 +1,10 @@
 # Unzip target results
 Expand-Archive -Path "target_results.zip" -DestinationPath "."
 
-# Enable debug tracing
-$DebugPreference = "Continue"
+
+$DebugPreference = "SilentlyContinue"
+$WarningPreference = "SilentlyContinue"
+
 
 # Run simulations
 foreach ($format in "asc", "tif") {
@@ -45,9 +47,15 @@ foreach ($format in "asc", "tif") {
         if ($additionalArgs) {
             $cmdArgs += $additionalArgs.Split(" ")
         }
+        $logFile = "$outputDir/log.txt"
 
         # Run the simulation and tee the output to a log file
-        & .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> "$outputDir/log.txt" 2>&1
+        Start-Process -FilePath "..\Cell2Fire\x64\Release\Cell2Fire.exe" `
+-ArgumentList $cmdArgs `
+-RedirectStandardOutput $logFile `
+-NoNewWindow -Wait
+        #(Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
+        #& .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> "$outputDir/log.txt" 2>&1
     }
 }
 
@@ -82,7 +90,7 @@ foreach ($file1 in $dir1_files) {
         exit 1
     }
 
-    $diff = Compare-Object -ReferenceObject (Get-Content $file1.FullName) -DifferenceObject (Get-Content $file2_path)
+    $diff = Compare-Object -ReferenceObject (Get-Content $file1.FullName).Replace("\\","/") -DifferenceObject (Get-Content $file2_path)
     if ($diff) {
         Write-Output " Files differ: $($file1.FullName)"
         Write-Output $diff
@@ -93,7 +101,6 @@ foreach ($file1 in $dir1_files) {
         exit 1
     }
 }
-
 Write-Output "All files match!"
 
 # Cleanup
