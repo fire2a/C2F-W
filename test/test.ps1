@@ -54,7 +54,7 @@ foreach ($format in "asc", "tif") {
 -ArgumentList $cmdArgs `
 -RedirectStandardOutput $logFile `
 -NoNewWindow -Wait
-        #(Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
+        (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
         #& .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> "$outputDir/log.txt" 2>&1
     }
 }
@@ -90,7 +90,7 @@ foreach ($file1 in $dir1_files) {
         exit 1
     }
 
-    $diff = Compare-Object -ReferenceObject (Get-Content $file1.FullName).Replace("\\","/") -DifferenceObject (Get-Content $file2_path)
+    $diff = Compare-Object -ReferenceObject (Get-Content $file1.FullName) -DifferenceObject (Get-Content $file2_path)
     if ($diff) {
         Write-Output " Files differ: $($file1.FullName)"
         Write-Output $diff
