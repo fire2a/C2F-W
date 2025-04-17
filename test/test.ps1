@@ -50,11 +50,7 @@ foreach ($format in "asc", "tif") {
         $logFile = "$outputDir/log.txt"
 
         # Run the simulation and tee the output to a log file
-        #Start-Process -FilePath "..\Cell2Fire\x64\Release\Cell2Fire.exe" `
-        #    -ArgumentList $cmdArgs `
-        #    -RedirectStandardOutput $logFile `
-        #    -NoNewWindow -Wait
-        & .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> $logFile
+        & .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> $logFile 2>$null
         (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
     }
 }
