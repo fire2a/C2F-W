@@ -54,7 +54,7 @@ foreach ($format in "asc", "tif") {
         #    -ArgumentList $cmdArgs `
         #    -RedirectStandardOutput $logFile `
         #    -NoNewWindow -Wait
-        & .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> $logFile 2>$null
+        & .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> $logFile
         (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
     }
 }
@@ -84,11 +84,6 @@ foreach ($file1 in $dir1_files) {
 
     if (-not (Test-Path $file2_path)) {
         Write-Output "Missing file in target: $file2_path"
-        exit 1
-    }
-
-    if (-not (Test-Path $file1.FullName)) {
-        Write-Output "Missing file in test: $file1"
         exit 1
     }
 
