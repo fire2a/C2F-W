@@ -87,7 +87,7 @@ foreach ($file1 in $dir1_files) {
         exit 1
     }
 
-    $diff = Compare-Object -ReferenceObject (Get-Content $file1.FullName) -DifferenceObject (Get-Content $file2_path)
+    $diff = Compare-Object -ReferenceObject @((Get-Content $file1.FullName)|Select-Object) -DifferenceObject @((Get-Content $file2_path)|Select-Object)
     if ($diff) {
         Write-Output " Files differ: $($file1.FullName)"
         Write-Output $diff
