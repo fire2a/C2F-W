@@ -2369,8 +2369,15 @@ rate_of_spread10(inputs* data, arguments* args)
     const float p1 = 0.2802;
     const float p2 = 0.07786;
     const float p3 = 0.01123;
-    float ros10 = 1. / (p1 * exp(-p2 * data->ws * 0.4) + p3);
-    float ros = args->ROS10Factor * ros10 + args->CCFFactor * data->ccf + args->CBDFactor * data->cbd;
+    float ws = data->ws;
+    float ros10 = 1. / (p1 * exp(-p2 * ws * 0.4) + p3);
+
+    float ROS10Factor = args->ROS10Factor;
+    float CCFFactor = args->CCFFactor;
+    float CBDFactor = args->CBDFactor;
+    float ccf = data->ccf;
+    float cbd = data->cbd;
+    float ros = ROS10Factor * ros10 + CCFFactor * ccf + CBDFactor * cbd;
     return (ros);
 }
 
