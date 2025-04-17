@@ -2366,19 +2366,11 @@ fire_type(inputs* data, main_outs* at)
 float
 rate_of_spread10(inputs* data, arguments* args)
 {
-    // FM 10 coef
-    float p1 = 0.2802, p2 = 0.07786, p3 = 0.01123;
-    float ros, ros10, ws, ffros, fcbd, fccf;
-
-    ffros = args->ROS10Factor;
-    fcbd = args->CBDFactor;
-    fccf = args->CCFFactor;
-
-    ws = data->ws;
-    ros10 = 1. / (p1 * exp(-p2 * ws * 0.4) + p3);
-
-    ros = ffros * ros10 + fccf * data->ccf + fcbd * data->cbd;
-
+    const float p1 = 0.2802;
+    const float p2 = 0.07786;
+    const float p3 = 0.01123;
+    float ros10 = 1. / (p1 * exp(-p2 * data->ws * 0.4) + p3);
+    float ros = args->ROS10Factor * ros10 + args->CCFFactor * data->ccf + args->CBDFactor * data->cbd;
     return (ros);
 }
 
