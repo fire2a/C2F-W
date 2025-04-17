@@ -50,17 +50,14 @@ foreach ($format in "asc", "tif") {
         $logFile = "$outputDir/log.txt"
 
         # Run the simulation and tee the output to a log file
-        Start-Process -FilePath "..\Cell2Fire\x64\Release\Cell2Fire.exe" `
--ArgumentList $cmdArgs `
--RedirectStandardOutput $logFile `
--NoNewWindow -Wait
+        #Start-Process -FilePath "..\Cell2Fire\x64\Release\Cell2Fire.exe" `
+        #    -ArgumentList $cmdArgs `
+        #    -RedirectStandardOutput $logFile `
+        #    -NoNewWindow -Wait
+        & .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> $logFile 2>$null
         (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
-        #& .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> "$outputDir/log.txt" 2>&1
     }
 }
-
-# Disable debug tracing
-$DebugPreference = "SilentlyContinue"
 
 # Define directories to compare
 $dir1 = "test_results"
@@ -87,6 +84,11 @@ foreach ($file1 in $dir1_files) {
 
     if (-not (Test-Path $file2_path)) {
         Write-Output "Missing file in target: $file2_path"
+        exit 1
+    }
+
+    if (-not (Test-Path $file1.FullName)) {
+        Write-Output "Missing file in test: $file1"
         exit 1
     }
 
