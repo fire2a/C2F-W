@@ -2501,14 +2501,18 @@ main(int argc, char* argv[])
     {
         // Number of threads
         TID = omp_get_thread_num();
-        if (TID == 0 && omp_get_num_threads() < 2)
+        if (TID == 0)
         {
-            cout << "There are " << omp_get_num_threads() << " threads" << endl;
+            if (omp_get_num_threads() >= 2)
+            {
+                cout << "There are " << omp_get_num_threads() << " threads" << endl;
+            }
+            else
+            {
+                cout << "Serial version execution" << endl;
+            }
         }
-        else
-        {
-            cout << "Serial version execution" << endl;
-        }
+
         Cell2Fire Forest = Forests[TID];
         // Random seed
         std::default_random_engine& generator = generators[TID];  // generators[args.nthreads]
