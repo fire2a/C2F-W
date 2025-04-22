@@ -595,14 +595,7 @@ Cells::manageFire(int period,
         }
 
         // ROS distribution method
-        // ros_distr(mainstruct.raz,  headstruct.ros, flankstruct.ros,
-        // backstruct.ros); std::cout << "Entra a Ros Dist" << std::endl;
-        /*ros_distr(cartesianAngle,
-                                  headstruct.ros * args->HFactor,
-                                  flankstruct.ros * args->FFactor,
-                                  backstruct.ros * args->BFactor,
-                                  args->EFactor);
-        */
+
         ros_distr_V2(cartesianAngle,
                      mainstruct.a * args->HFactor,
                      mainstruct.b * args->FFactor,
@@ -618,7 +611,8 @@ Cells::manageFire(int period,
         {
             double angle = _angle.first;
             int nb = angleToNb[angle];
-            double ros = (1 + args->ROSCV * ROSRV) * _angle.second;
+            float ros = (1 + args->ROSCV * ROSRV) * _angle.second;
+            float roundedRos = static_cast<float>(std::ceil(ros * 100.0) / 100.0);
 
             if (std::isnan(ros))
             {
@@ -652,7 +646,7 @@ Cells::manageFire(int period,
                 FSCell->push_back(double(this->realId));
                 FSCell->push_back(double(nb));
                 FSCell->push_back(double(period));
-                FSCell->push_back(std::ceil(ros * 100.0) / 100.0);
+                FSCell->push_back(roundedRos);
                 df_ptr[nb - 1].waz = wdf_ptr->waz;
                 df_ptr[nb - 1].ws = wdf_ptr->ws;
                 df_ptr[nb - 1].tmp = wdf_ptr->tmp;
@@ -673,8 +667,8 @@ Cells::manageFire(int period,
                 }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
-                RateOfSpreads[this->realId - 1] = double(std::ceil(ros * 100.0) / 100.0);
-                RateOfSpreads[nb - 1] = double(std::ceil(ros * 100.0) / 100.0);
+                RateOfSpreads[this->realId - 1] = roundedRos;  // max(roundedRos, RateOfSpreads[this->realId - 1]);
+                RateOfSpreads[nb - 1] = roundedRos;
                 Intensities[this->realId - 1] = mainstruct.sfi;
                 Intensities[nb - 1] = metrics.sfi;
                 crownFraction[this->realId - 1] = mainstruct.cfb;
