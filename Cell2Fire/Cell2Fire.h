@@ -14,6 +14,7 @@
 
 // Include libraries
 #include <algorithm>
+#include <boost/random.hpp>
 #include <cmath>
 #include <iostream>
 #include <math.h>
@@ -131,13 +132,13 @@ class Cell2Fire
     void InitCell(int id);
     string createOutputFolder(string metric);
     void reset(int rnumber, double rnumber2, int simExt);
-    bool RunIgnition(std::default_random_engine generator, int ep);
+    bool RunIgnition(boost::random::mt19937 generator, int ep);
     std::unordered_map<int, std::vector<int>> SendMessages();
     void GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList);
     void Results();
     void outputGrid();
     void updateWeather();
-    void Step(std::default_random_engine generator, int ep);
+    void Step(boost::random::mt19937 generator, int ep);
     void InitHarvested();
 
     // Utils
