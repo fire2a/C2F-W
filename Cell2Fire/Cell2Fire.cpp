@@ -2496,7 +2496,7 @@ main(int argc, char* argv[])
     {
         // Number of threads
         int TID = omp_get_thread_num();
-        if (TID == 0 && omp_get_num_threads() < 2)
+        if (TID == 0)
         {
             if (omp_get_num_threads() >= 2)
             {
