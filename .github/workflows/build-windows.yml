@@ -27,9 +27,9 @@ jobs:
         Write-Host "Setting version to $version"
         
         $path = "Cell2Fire\Cell2Fire.h"
-        (Get-Content $path) -replace 'C2F2_VERSION\s*=\s*".*?"', "C2F2_VERSION = `"$version`"" | Set-Content $path
+        (Get-Content $path) -replace 'C2FW_VERSION\s*=\s*".*?"', "C2FW_VERSION = `"$version`"" | Set-Content $path
         
-        Select-String 'C2F2_VERSION' $path
+        Select-String 'C2FW_VERSION' $path
 
     - name: Cache Boost
       id: cache-boost

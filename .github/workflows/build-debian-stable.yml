@@ -24,7 +24,7 @@ jobs:
         run: |
           version="${GITHUB_REF##*/}"
           echo "Setting version to $version"
-          sed -i -E 's/(C2F2_VERSION\s*=\s*")[^"]+(")/\1'"$version"'\2/' Cell2Fire/Cell2Fire.h  
+          sed -i -E 's/(C2FW_VERSION\s*=\s*")[^"]+(")/\1'"$version"'\2/' Cell2Fire/Cell2Fire.h  
 
       - name: Install Dependencies
         run: |
