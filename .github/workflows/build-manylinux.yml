@@ -1,7 +1,7 @@
 name: build manylinux
 
 on:
-  # pull_request:
+  # pull _request:
   #   branches:
   #     - main
   workflow_dispatch:
