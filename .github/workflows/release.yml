@@ -15,7 +15,6 @@ permissions:
 
 jobs:
 
-  #bump: se sube el cell2fire.h como artefacto y se baja en el build on la nueva version
   build_manylinux:
       uses: ./.github/workflows/build-manylinux.yml
 
