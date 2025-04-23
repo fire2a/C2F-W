@@ -1,0 +1,38 @@
+name: test-version-bump
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-13]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Simulate github.ref
+        shell: bash
+        run: echo "GITHUB_REF=refs/tags/v9.9.9" >> $GITHUB_ENV
+
+      - name: Bump version in header (Linux/macOS)
+        if: ${{ runner.os != 'Windows' }}
+        run: |
+          version="v9.9.9"
+          echo "Setting version to $version"
+          sed -i '' -E "s/(C2F2_VERSION\s*=\s*\")[^\"]+(\")/\1${version}\2/" Cell2Fire/Cell2Fire.h || \
+          sed -i -E "s/(C2F2_VERSION\s*=\s*\")[^\"]+(\")/\1${version}\2/" Cell2Fire/Cell2Fire.h
+          grep C2F2_VERSION Cell2Fire/Cell2Fire.h
+
+      - name: Bump version in header (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        shell: pwsh
+        run: |
+          $version = "v9.9.9"
+          Write-Host "Setting version to $version"
+          $path = "Cell2Fire\Cell2Fire.h"
+          (Get-Content $path) -replace 'C2F2_VERSION\s*=\s*".*?"', "C2F2_VERSION = `"$version`"" | Set-Content $path
+          Select-String 'C2F2_VERSION' $path
