@@ -19,7 +19,7 @@ jobs:
         run: echo "GITHUB_REF=refs/tags/v9.9.9" >> $GITHUB_ENV
 
       - name: Bump version in header (Linux)
-        if: ${{ runner.os == 'Ubuntu' }}
+        if: ${{ runner.os == 'Linux' }}
         run: |
           version="v9.9.9"
           echo "Setting version to $version"
@@ -37,7 +37,7 @@ jobs:
           Select-String 'C2FW_VERSION' $path
 
       - name: Bump version in header (macOS)
-        if: ${{ runner.os == 'macOS-13'}}
+        if: ${{ runner.os == 'macOS'}}
         run: |
           version="v9.9.9"
           echo "Setting version to $version"
