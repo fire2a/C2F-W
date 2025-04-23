@@ -2471,6 +2471,7 @@ Cell2Fire::getFireProgressMatrix()
 int
 main(int argc, char* argv[])
 {
+    printf("version: %s\n", C2FW_VERSION.c_str());
     // Read Arguments
     std::cout << "------ Command line values ------\n";
     arguments args;
