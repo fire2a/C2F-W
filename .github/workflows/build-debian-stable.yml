@@ -19,6 +19,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Bump version in code
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          version="${GITHUB_REF##*/}"
+          echo "Setting version to $version"
+          sed -i -E 's/(C2F2_VERSION\s*=\s*")[^"]+(")/\1'"$version"'\2/' Cell2Fire/Cell2Fire.h  
+
       - name: Install Dependencies
         run: |
           apt update

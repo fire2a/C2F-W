@@ -18,6 +18,19 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Bump version in header (Windows)
+      if: startsWith(github.ref, 'refs/tags/')
+      shell: pwsh
+      run: |
+        $ref = "${{ github.ref }}"
+        $version = $ref.Split("/")[-1]
+        Write-Host "Setting version to $version"
+        
+        $path = "Cell2Fire\Cell2Fire.h"
+        (Get-Content $path) -replace 'C2F2_VERSION\s*=\s*".*?"', "C2F2_VERSION = `"$version`"" | Set-Content $path
+        
+        Select-String 'C2F2_VERSION' $path
+
     - name: Cache Boost
       id: cache-boost
       uses: actions/cache@v4
