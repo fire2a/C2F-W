@@ -1,0 +1,39 @@
+name: version bump
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-\w+'
+    branches:
+      - main
+  workflow_dispatch:
+
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set Version
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version=${{ github.sha }}
+          else
+            version=${{ github.ref_name }}
+          fi
+          echo "version: ${version}"
+          sed -i "s/C2F2_VERSION.*/C2F2_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add Cell2Fire/Cell2Fire.h
+          git commit -m "Automated commit: updated simulator version"
+          git push
