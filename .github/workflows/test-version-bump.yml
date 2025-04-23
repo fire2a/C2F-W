@@ -23,9 +23,10 @@ jobs:
         run: |
           version="v9.9.9"
           echo "Setting version to $version"
-          sed -i '' -E "s/(C2F2_VERSION\s*=\s*\")[^\"]+(\")/\1${version}\2/" Cell2Fire/Cell2Fire.h || \
-          sed -i -E "s/(C2F2_VERSION\s*=\s*\")[^\"]+(\")/\1${version}\2/" Cell2Fire/Cell2Fire.h
-          grep C2F2_VERSION Cell2Fire/Cell2Fire.h
+          sed -i '' -E "s/(C2FW_VERSION\s*=\s*\")[^\"]+(\")/\1${version}\2/" Cell2Fire/Cell2Fire.h 2>/dev/null || \
+          sed -i -E "s/(C2FW_VERSION\s*=\s*\")[^\"]+(\")/\1${version}\2/" Cell2Fire/Cell2Fire.h
+
+    grep C2FW_VERSION Cell2Fire/Cell2Fire.h
 
       - name: Bump version in header (Windows)
         if: ${{ runner.os == 'Windows' }}
@@ -34,5 +35,5 @@ jobs:
           $version = "v9.9.9"
           Write-Host "Setting version to $version"
           $path = "Cell2Fire\Cell2Fire.h"
-          (Get-Content $path) -replace 'C2F2_VERSION\s*=\s*".*?"', "C2F2_VERSION = `"$version`"" | Set-Content $path
-          Select-String 'C2F2_VERSION' $path
+          (Get-Content $path) -replace 'C2FW_VERSION\s*=\s*".*?"', "C2FW_VERSION = `"$version`"" | Set-Content $path
+          Select-String 'C2FW_VERSION' $path
