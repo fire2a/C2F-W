@@ -1238,7 +1238,12 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
                 if (it->second.getStatus() == "Available" && it->second.fType != 0)
                 {
                     IgnitionHistory[sim] = aux;
-                    replicationHistory[this->sim].first = aux;
+                    
+                    if (replicationHistory.size() < args.TotalSims)
+                        {
+                            replicationHistory[this->sim].first = aux;
+                        }
+                        
                     std::cout << "\nSelected (Random) ignition point for Year " << this->year << ", sim " << this->sim 
                               << ": " << aux << std::endl;;
                     std::vector<int> ignPts = { aux };
@@ -1308,7 +1313,10 @@ Cell2Fire::RunIgnition(std::default_random_engine generator, int ep)
         //std::cout << "Selected ignition point for Year " << this->year << ", sim " << this->sim << ": " << temp;
         // this->
         IgnitionHistory[sim] = temp;
-        replicationHistory[this->sim].first = temp;
+        if (replicationHistory.size() < args.TotalSims)
+        {
+            replicationHistory[this->sim].first = temp;
+        }
 
         // If cell is available
         if (this->burntCells.find(temp) == this->burntCells.end() && this->statusCells[temp - 1] < 3)
@@ -2321,37 +2329,24 @@ Cell2Fire::Results()
             }
         }
 
-        std::string filename = "ignitions_log.csv";
-        CSVWriter igHistoryFolder("", "");
-        this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory" + separator();
-        igHistoryFolder.MakeDir(this->ignitionsFolder);
-        CSVWriter ignitionsFile(this->ignitionsFolder + filename);
-        ignitionsFile.printIgnitions(IgnitionHistory);
+        //std::string filename = "ignitions_log.csv";
+        //CSVWriter igHistoryFolder("", "");
+        //this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory" + separator();
+        //igHistoryFolder.MakeDir(this->ignitionsFolder);
+        //CSVWriter ignitionsFile(this->ignitionsFolder + filename);
+        //ignitionsFile.printIgnitions(IgnitionHistory);
     }
 
     if (currentSim == args.TotalSims && this->args.IgnitionsLog)
-    {
+    {   
 
         std::string filename = "replication.csv";
         CSVWriter repHistoryFolder("", "");
         this->ignitionsFolder = this->args.OutFolder + "IgnitionsHistory" + separator();
         repHistoryFolder.MakeDir(this->ignitionsFolder);
         CSVWriter replicationFile(this->ignitionsFolder + filename);
-        replicationFile.printReplications(replicationHistory);
+        replicationFile.printReplications(replicationHistory,args.TotalSims);
     }
-
-    /*
-    if (currentSim == args.TotalSims) {
-        std::string filename = "emissions.csv";
-        CSVWriter co2eqFolder("", "");
-        this->co2eqFolder = this->args.OutFolder + "Co2eq" + separator();
-        co2eqFolder.MakeDir(this->co2eqFolder);
-        CSVWriter co2File(this->co2eqFolder + filename);
-        std::cout << co2_v.size() << endl;
-        co2File.printCO2(co2_v);
-  }
-        */
-  
 }
 
 /**

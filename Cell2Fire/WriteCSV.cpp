@@ -311,7 +311,7 @@ CSVWriter::printSendMessages(std::unordered_map<int, std::vector<int>> sendMessa
 }
 
 void
-CSVWriter::printReplications(std::unordered_map<int, std::pair<int, std::string>> replicationHistory)
+CSVWriter::printReplications(std::unordered_map<int, std::pair<int, std::string>> replicationHistory, int sims)
 {
     std::ofstream ofs(fileName, std::ofstream::out);
     int i;
@@ -319,8 +319,10 @@ CSVWriter::printReplications(std::unordered_map<int, std::pair<int, std::string>
     // Print column titles
     ofs << "sim,point,weather\n";
 
+    std::cout << "size: " << replicationHistory.size() << std::endl;
+
     // Iterate through the map and print key-value pairs
-    for (i = 1; i < replicationHistory.size() + 1; i++)
+    for (i = 1; i < sims + 1; i++)
     {
         std::pair<int, std::string> data = replicationHistory[i];
         ofs << i << "," << data.first << "," << data.second << "\n";

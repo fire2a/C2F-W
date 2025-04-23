@@ -44,7 +44,7 @@ class CSVWriter
     void asciiHeader(int rows, int cols, double xllcorner, double yllcorner, int cellside);
     void printWeather(std::vector<std::string> weatherHistory);
     void printIgnitions(std::unordered_map<int, int> ignitionsHistory);
-    void printReplications(std::unordered_map<int, std::pair<int, std::string>> replicationHistory);
+    void printReplications(std::unordered_map<int, std::pair<int, std::string>> replicationHistory, int sims);
     void printCO2(std::vector<float> co2History);
     void printCSV_V2(int rows, int cols, std::vector<int> statusCells);
     void printSendMessages(std::unordered_map<int, std::vector<int>> sendMessageList);
