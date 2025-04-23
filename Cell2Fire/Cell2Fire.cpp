@@ -2495,7 +2495,7 @@ main(int argc, char* argv[])
 #pragma omp parallel num_threads(num_threads)
     {
         // Number of threads
-        TID = omp_get_thread_num();
+        int TID = omp_get_thread_num();
         if (TID == 0)
         {
             if (omp_get_num_threads() >= 2)
