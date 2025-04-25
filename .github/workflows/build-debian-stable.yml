@@ -21,7 +21,8 @@ jobs:
 
       - name: Bump version in code
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "${{github.event_name}}" =~ ^(pull_request|workflow_dispatch)$ ]]; then
+          #if [ ("${{github.event_name}}" = "pull_request") || ("${{ github.event_name }}" = "workflow_dispatch") ]; then
             version=${{ github.sha }}
           else
             version=${{ github.ref_name }}
