@@ -40,7 +40,7 @@ foreach ($format in "asc", "tif") {
             "--input-instance-folder", "model/$model-$format",
             "--output-folder", $outputDir,
             "--nsims", "113",
-            "--output-messages", "--grids", "--out-ros", "--out-intensity", "--ignitionsLog",
+            "--output-messages", "--grids", "--out-intensity", "--ignitionsLog",
             "--sim", $simCode,
             "--seed", "123"
         )
