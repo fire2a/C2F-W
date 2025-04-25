@@ -19,11 +19,17 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Bump version in header (Windows)
-      if: startsWith(github.ref, 'refs/tags/')
       shell: pwsh
       run: |
-        $ref = "${{ github.ref }}"
-        $version = $ref.Split("/")[-1]
+        if ("${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "workflow_dispatch" ){
+            $version = "${{ github.sha }}"
+        }
+          else {
+            $ref = "${{ github.ref }}"
+            $version = $ref.Split("/")[-1]
+        }
+        echo "Setting version to $version"
+        
         Write-Host "Setting version to $version"
         
         $path = "Cell2Fire\Cell2Fire.h"

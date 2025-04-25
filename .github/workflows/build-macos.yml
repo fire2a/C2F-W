@@ -22,10 +22,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Bump version in code
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           brew install gsed
-          version="${GITHUB_REF##*/}"
+          if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version=${{ github.sha }}
+          else
+            version=${{ github.ref_name }}
+          fi
           echo "Setting version to $version"
           sed -i -e "s/C2FW_VERSION.*/C2FW_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
           grep C2FW_VERSION Cell2Fire/Cell2Fire.h
