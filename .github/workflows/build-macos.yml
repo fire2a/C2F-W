@@ -27,7 +27,7 @@ jobs:
           brew install gsed
           version="${GITHUB_REF##*/}"
           echo "Setting version to $version"
-          gsed -i -e "s/(C2FW_VERSION\s*=\s*\")[^\"]+(\")/\1${version}\2/" Cell2Fire/Cell2Fire.h
+          sed -i -e "s/C2FW_VERSION.*/C2FW_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
           grep C2FW_VERSION Cell2Fire/Cell2Fire.h
 
       - name: Check Runner
