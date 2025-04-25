@@ -52,6 +52,7 @@ foreach ($format in "asc", "tif") {
         # Run the simulation and tee the output to a log file
         & .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> $logFile 2>$null
         (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
+        (Get-Content $logFile | Select-String -pattern 'version:' -notmatch) | Set-Content $logFile
     }
 }
 
