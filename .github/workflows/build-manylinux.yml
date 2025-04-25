@@ -29,8 +29,8 @@ jobs:
           else
             version=${{ github.ref_name }}
           fi
-          echo "Setting version to $version"
-          sed -i -E "s/C2FW_VERSION.*/C2FW_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
+          echo "Setting version to ${version}"
+          sed -i "s/C2FW_VERSION.*/C2FW_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
 
       - name: Install Build Dependencies
         run: |
