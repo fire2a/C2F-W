@@ -21,12 +21,15 @@ jobs:
     - name: Bump version in header (Windows)
       shell: pwsh
       run: |
-        if (("${{ github.event_name }}" == "pull_request") -or ("${{ github.event_name }}" == "workflow_dispatch" )){
-            $version = "${{ github.sha }}"
+        if ( "${{ github.event_name }}" -eq "pull_request" ){
+          $version="${{ github.sha }}"
         }
-          else {
-            $ref = "${{ github.ref }}"
-            $version = $ref.Split("/")[-1]
+        if ("${{ github.event_name }}" -eq "workflow_dispatch" ){
+          $version="${{ github.sha }}"
+        } 
+        if ( ("${{github.event_name}}" -eq "create") -and ("${{github.event.ref_type}}" -eq "tag" )){
+          $ref="${{ github.ref }}"
+          $version=$ref.Split("/")[-1]
         }
         
         Write-Host "Setting version to $version"

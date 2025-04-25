@@ -20,11 +20,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Bump version in code
+        shell: bash
         run: |
-          if [[ "${{github.event_name}}" =~ ^(pull_request|workflow_dispatch)$ ]]; then
-          #if [ ("${{github.event_name}}" = "pull_request") || ("${{ github.event_name }}" = "workflow_dispatch") ]; then
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             version=${{ github.sha }}
-          else
+          fi
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version=${{ github.sha }}
+          fi  
+          if [[ "${{github.event_name}}" == "create" && "${{github.event.ref_type}}" == "tag" ]]; then
             version=${{ github.ref_name }}
           fi
           echo "Setting version to ${version}"
