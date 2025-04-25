@@ -53,7 +53,7 @@ jobs:
         pattern: binaries*
         path: Cell2Fire
         merge-multiple: true
-          
+
     - name: Zip Binaries
       run: |
         cd Cell2Fire
