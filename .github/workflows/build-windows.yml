@@ -27,7 +27,7 @@ jobs:
         if ("${{ github.event_name }}" -eq "workflow_dispatch" ){
           $version="${{ github.sha }}"
         } 
-        if ( ("${{github.event_name}}" -eq "create") -and ("${{github.ref_type}}" -eq "tag" )){
+        if ( ("${{github.event_name}}" -eq "push") -and ("${{github.ref_type}}" -eq "tag" )){
           $ref="${{ github.ref }}"
           $version=$ref.Split("/")[-1]
         }
