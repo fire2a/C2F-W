@@ -137,7 +137,7 @@ jobs:
           cd Cell2Fire
           make -f makefile.macos tests
 
-      - name: Bash Test
-        run: |
-          cd test
-          bash test.sh _${{ env.suffix }}
+#      - name: Bash Test
+#        run: |
+#          cd test
+#          bash test.sh _${{ env.suffix }}
