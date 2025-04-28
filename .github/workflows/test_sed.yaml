@@ -1,0 +1,40 @@
+name: Test sed Command
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'       # Matches semantic version tags like v1.0.0
+      - 'v[0-9]+.[0-9]+.[0-9]+-\w+'   # Matches pre-release tags like v1.0.0-beta
+  workflow_dispatch:
+
+jobs:
+  test-sed:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set the version variable
+      - name: Set version variable
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      # Step 3: Run sed to update the version
+      - name: Update C2FW_VERSION in Cell2Fire.h
+        run: |
+          sed -i "s/C2FW_VERSION.*/C2FW_VERSION = \"${{ env.VERSION }}\";/" Cell2Fire/Cell2Fire.h
+
+      # Step 4: Verify the change
+      - name: Verify the change
+        run: |
+          grep "C2FW_VERSION = \"${{ env.VERSION }}\";" Cell2Fire/Cell2Fire.h || exit 1
+
+      # Step 5: Upload the modified Cell2Fire.h as an artifact
+      - name: Upload modified Cell2Fire.h
+        uses: actions/upload-artifact@v3
+        with:
+          name: Modified-Cell2Fire.h
+          path: Cell2Fire/Cell2Fire.h
