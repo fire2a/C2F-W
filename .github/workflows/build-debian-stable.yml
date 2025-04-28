@@ -28,7 +28,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             version=${{ github.sha }}
           fi  
-          if [[ "${{github.event.ref_type}}" == "tag" ]]; then
+          if [[ "${{github.event_name}}" == "create" && "${{github.ref_type}}" == "tag" ]]; then
             version=${{ github.ref_name }}
           fi
           echo "Setting version to ${version}"
