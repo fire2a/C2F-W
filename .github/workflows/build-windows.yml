@@ -18,6 +18,27 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Bump version in header (Windows)
+      shell: pwsh
+      run: |
+        if ( "${{ github.event_name }}" -eq "pull_request" ){
+          $version="${{ github.sha }}"
+        }
+        if ("${{ github.event_name }}" -eq "workflow_dispatch" ){
+          $version="${{ github.sha }}"
+        } 
+        if ( ("${{github.event_name}}" -eq "push") -and ("${{github.ref_type}}" -eq "tag" )){
+          $ref="${{ github.ref }}"
+          $version=$ref.Split("/")[-1]
+        }
+        
+        Write-Host "Setting version to $version"
+        
+        $path = "Cell2Fire\Cell2Fire.h"
+        (Get-Content $path) -replace 'C2FW_VERSION\s*=\s*".*?"', "C2FW_VERSION = `"$version`"" | Set-Content $path
+        
+        Select-String 'C2FW_VERSION' $path
+
     - name: Cache Boost
       id: cache-boost
       uses: actions/cache@v4

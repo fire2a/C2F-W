@@ -29,6 +29,7 @@
 #include <vector>
 
 using namespace std;
+string C2FW_VERSION = "v0.0.0";
 
 class Cell2Fire
 {

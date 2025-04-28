@@ -21,6 +21,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Bump version in code
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            version=${{ github.sha }}
+          fi
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version=${{ github.sha }}
+          fi  
+          if [[ "${{github.event_name}}" == "push" && "${{github.ref_type}}" == "tag" ]]; then
+            version=${{ github.ref_name }}
+          fi
+          echo "Setting version to ${version}"
+          sed -i "s/C2FW_VERSION.*/C2FW_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
+
       - name: Install Build Dependencies
         run: |
           sudo apt update

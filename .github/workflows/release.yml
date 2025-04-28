@@ -6,14 +6,16 @@ on:
   #   - main
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-\w+'
+      - 'v[0-9]+.[0-9]+.[0-9]+' # Matches semantic version tags like v1.0.0
+      - 'v[0-9]+.[0-9]+.[0-9]+-\w+' # Matches pre-release tags like v1.0.0-beta
+      - 'v[0-9]+.[0-9]+.[0-9]+\w+' # Matches pre-release tags like v1.0.0beta
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+
   build_manylinux:
       uses: ./.github/workflows/build-manylinux.yml
 
@@ -52,7 +54,7 @@ jobs:
         pattern: binaries*
         path: Cell2Fire
         merge-multiple: true
-          
+
     - name: Zip Binaries
       run: |
         cd Cell2Fire
