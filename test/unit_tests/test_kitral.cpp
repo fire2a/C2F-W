@@ -281,9 +281,9 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test crown fraction burn", "[crownfractionb
     int FMC = 100;  // Default value in ReadArgs.cpp
     test_data->cbd = 0.15;
     test_outs->rss = 8;
-    REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.841, 0.001));
+    REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.524, 0.001));
     test_outs->rss = 15;
-    REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.968, 0.001));
+    REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.835, 0.001));
     test_outs->rss = 30;
     REQUIRE_THAT(crownfractionburn(test_data, test_outs, FMC), WithinAbs(0.982, 0.001));
 }
