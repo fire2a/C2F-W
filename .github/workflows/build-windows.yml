@@ -54,8 +54,8 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          Cell2Fire/include/dirent-1.24
-        key: dirent-${{ runner.os }}-1.24
+          Cell2Fire/include/dirent-1.25
+        key: dirent-${{ runner.os }}-1.25
         restore-keys: |
           dirent-${{ runner.os }}-
 
@@ -93,8 +93,8 @@ jobs:
 
         # dirent
         if ($CACHE_DIRENT -ne 'true') {
-          Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.24.zip -OutFile dirent-1.24.zip
-          Expand-Archive -Path .\dirent-1.24.zip -DestinationPath include
+          Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.25.zip -OutFile dirent-1.25.zip
+          Expand-Archive -Path .\dirent-1.25.zip -DestinationPath include
         } else {
           echo "Dirent already cached"
         }
