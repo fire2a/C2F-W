@@ -28,7 +28,7 @@ CSVReader::CSVReader(std::string filename, std::string delm)
 
 /**
  * @brief Reads and parses data from a CSV, ASCII or TIFF file into a 2D vector.
- * 
+ *
  * Checks for the existence of the input file with either a `.tif` or `.asc` extension
  * and processes it accordingly.
  * If the file is in CSV format, it is read line by line and split using
