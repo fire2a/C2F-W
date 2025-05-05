@@ -20,7 +20,7 @@ PATH=../Cell2Fire:$PATH
 # run
 set -x # enable debug tracing
 echo running Portillo
-$output_folder=kitral_test_results/portillo
+output_folder=kitral_test_results/portillo
 mkdir -p $output_folder
 
 Cell2Fire$1 --input-instance-folder ../data/Kitral/Portillo-asc/ --output-folder $output_folder --grids  --output-messages --ignitions --out-fl --out-intensity  --ignitionsLog  --out-  --sim K --nsims 50 --seed 24 --fmc 50 --weather rows > $output_folder/log.txt
@@ -33,11 +33,11 @@ set +x # disable debug tracing
 target="kitral_target_results"
 
 # get the list of files in each directory
-$target_files=$(find ${target} -type f | sort)
-$target_num_files=$(ls -1 $target_files | wc -l)
+target_files=$(find ${target} -type f | sort)
+target_num_files=$(ls -1 $target_files | wc -l)
 # echo $target_files $target_num_files
-$output_folder_files=$(find "$output_folder" -type f | sort)
-$output_folder_num_files=$(ls -1 $output_folder_files | wc -l)
+output_folder_files=$(find ${output_folder} -type f | sort)
+output_folder_num_files=$(ls -1 $output_folder_files | wc -l)
 # echo $output_folder_files $output_folder_num_files
 
 # check if the number of files in each directory is equal
