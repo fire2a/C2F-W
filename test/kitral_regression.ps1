@@ -47,17 +47,17 @@ foreach ($run in $runs) {
         -DifferenceObject (Get-ChildItem $outputFolder -Recurse -File | ForEach-Object { Get-Content $_.FullName })
 
     if ($diffOutput.Count -eq 0) {
-        Write-Host "$name: Directories are equal"
+        Write-Host "${name}: Directories are equal"
     }
     else {
-        Write-Host "$name: Differences found"
+        Write-Host "${name}: Differences found"
         foreach ($file1 in $targetFiles) {
             $relativePath = $file1.FullName.Substring($target.Length)
             $file2 = Join-Path $outputFolder $relativePath
             if (Test-Path $file2) {
                 $diff = Compare-Object (Get-Content $file1.FullName) (Get-Content $file2)
                 if ($diff) {
-                    Write-Host "Difference in file: $($file1.FullName)"
+                    Write-Host "Difference in file: ${file1}"
                     $diff | Format-Table
                     exit 1
                 }
