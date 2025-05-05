@@ -141,3 +141,4 @@ jobs:
 #        run: |
 #          cd test
 #          bash test.sh _${{ env.suffix }}
+#          bash kitral_regression.sh ${{ env.SUFFIX }}
