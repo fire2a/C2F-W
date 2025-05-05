@@ -11,6 +11,7 @@ PATH=../Cell2Fire:$PATH
 runs=(
     "portillo|../data/Kitral/Portillo-asc/|--nsims 1 --seed 24 --fmc 50 --ignitions"
     "villarrica|../data/Kitral/Villarrica-tif/|--nsims 10 --seed 42 --fmc 66 --FirebreakCells ../data/Kitral/Villarrica-tif/harvested_Random.csv"
+    "biobio|../data/Kitral/biobio/|--nsims 3 --seed 5 --fmc 50 --cros --out-crown --out-cfb"
     # add more runs here following the same pattern
 )
 
