@@ -137,6 +137,7 @@ jobs:
         run: |
           cd test
           bash test.sh
+          bash kitral_regression.sh
 
       - name: Get Environment
         if: ${{ env.do_dynamic == 'true' }}
