@@ -24,7 +24,7 @@ foreach ($run in $runs) {
     $logFile = "$outputFolder/log.txt"
     # enable debug tracing
     Write-Host "Executing Cell2Fire..."
-    & .\..\Cell2Fire\x64\Release\Cell2Fire.exe --input-instance-folder $inputFolder --output-folder $outputFolder --output-messages --out-fl --out-intensity --ignitionsLog --sim K --weather rows $extraArgs *> $logFile
+    & .\..\Cell2Fire\x64\Release\Cell2Fire.exe --input-instance-folder $inputFolder --output-folder $outputFolder --output-messages --out-fl --out-intensity --ignitionsLog --sim K --weather rows --grids $extraArgs *> $logFile
     (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
     (Get-Content $logFile | Select-String -pattern 'version:' -notmatch) | Set-Content $logFile
 
