@@ -9,10 +9,10 @@ PATH=../Cell2Fire:$PATH
 
 # define runs: name|input_folder|extra_args
 runs=(
-    "portillo|../data/Kitral/Portillo-asc/|--nsims 1 --seed 24 --fmc 50 --ignitions"
+    "portillo|../data/Kitral/Portillo-asc/|--nsims 1 --seed 24 --fmc 50 --ignitions --cros --out-crown --out-cfb"
     "villarrica|../data/Kitral/Villarrica-tif/|--nsims 10 --seed 42 --fmc 66 --FirebreakCells ../data/Kitral/Villarrica-tif/harvested_Random.csv"
-    "biobio|../data/Kitral/biobio/|--nsims 3 --seed 5 --fmc 50 --cros --out-crown --out-cfb"
-    # add more runs here following the same pattern
+    #"biobio|../data/Kitral/biobio/|--nsims 3 --seed 5 --fmc 50 --cros --out-crown --out-cfb"
+    "portezuelo|../data/Kitral/Portezuelo-asc/|--nsims 1 --seed 5 --fmc 50 --ignitions"
 )
 
 # loop over each run
