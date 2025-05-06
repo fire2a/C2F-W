@@ -1,5 +1,5 @@
 # unzip target results
-#Expand-Archive -Path kitral_target_results.zip -DestinationPath "."
+Expand-Archive -Path kitral_target_results.zip -DestinationPath "."
 
 # add Cell2Fire to PATH
 $env:PATH = "..\Cell2Fire;$env:PATH"
