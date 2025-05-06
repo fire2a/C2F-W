@@ -1,12 +1,12 @@
 # unzip target results
-Expand-Archive -Path kitral_target_results.zip -DestinationPath kitral_target_results -Force
+#Expand-Archive -Path kitral_target_results.zip -DestinationPath "."
 
 # add Cell2Fire to PATH
 $env:PATH = "..\Cell2Fire;$env:PATH"
 
 # define runs: name|input_folder|extra_args
 $runs = @(
-    @{ name = "portillo"; input = "..\data\Kitral\Portillo-asc\"; extra = "--nsims 1 --seed 24 --fmc 50 --ignitions" }
+    @{ name = "portillo"; input = "..\data\Kitral\Portillo-asc\"; extra = @("--nsims", "1", "--seed", "24", "--fmc", "50", "--ignitions") }
     @{ name = "villarrica"; input = "..\data\Kitral\Villarrica-tif\"; extra = "--nsims 10 --seed 42 --fmc 66 --FirebreakCells ..\data\Kitral\Villarrica-tif\harvested_Random.csv" }
     @{ name = "biobio"; input = "..\data\Kitral\biobio\"; extra = "--nsims 3 --seed 5 --fmc 50 --cros --out-crown --out-cfb" }
     # add more runs here
@@ -24,50 +24,48 @@ foreach ($run in $runs) {
     $logFile = "$outputFolder/log.txt"
     # enable debug tracing
     Write-Host "Executing Cell2Fire..."
-    & .\..\Cell2Fire\x64\Release\Cell2Fire.exe --input-instance-folder $inputFolder --output-folder $outputFolder --grids --output-messages --out-fl --out-intensity --ignitionsLog --sim K --weather rows $extraArgs *> $logFile
+    & .\..\Cell2Fire\x64\Release\Cell2Fire.exe --input-instance-folder $inputFolder --output-folder $outputFolder --output-messages --out-fl --out-intensity --ignitionsLog --sim K --weather rows $extraArgs *> $logFile
     (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
     (Get-Content $logFile | Select-String -pattern 'version:' -notmatch) | Set-Content $logFile
 
     # compare number of files
     $target = "kitral_target_results\$name"
-    $targetFiles = Get-ChildItem -Path $target -Recurse -File
-    $outputFiles = Get-ChildItem -Path $outputFolder -Recurse -File
+    # Recursively get all files in each directory
+$dir1_files = Get-ChildItem -Path $target -Recurse -File
+$dir2_files = Get-ChildItem -Path $outputFolder -Recurse -File
 
-    if ($targetFiles.Count -ne $outputFiles.Count) {
-        Write-Host "Mismatch in file count for $name"
-        Write-Host "Target: $($targetFiles.Count) files"
-        Write-Host "Output: $($outputFiles.Count) files"
+# Count and compare number of files
+$dir1_num_files = $dir1_files.Count
+$dir2_num_files = $dir2_files.Count
+
+if ($dir1_num_files -ne $dir2_num_files) {
+    Write-Output " Directories have different file counts:"
+    Write-Output "  ${target}: ${dir1_num_files} files"
+    Write-Output "  ${outputFolder}: ${dir2_num_files} files"
+    exit 1
+}
+
+# Compare file contents
+foreach ($file1 in $dir1_files) {
+    $file2_path = $file1.FullName.Replace($target, $outputFolder)
+
+    if (-not (Test-Path $file2_path)) {
+        Write-Output "Missing file in output: $file2_path"
         exit 1
     }
 
-
-    # diff directories
-    $diffOutput = Compare-Object `
-        -ReferenceObject (Get-ChildItem $target -Recurse -File | ForEach-Object { Get-Content $_.FullName }) `
-        -DifferenceObject (Get-ChildItem $outputFolder -Recurse -File | ForEach-Object { Get-Content $_.FullName })
-
-    if ($diffOutput.Count -eq 0) {
-        Write-Host "${name}: Directories are equal"
+    $diff = Compare-Object -ReferenceObject @((Get-Content $file1.FullName)|Select-Object) -DifferenceObject @((Get-Content $file2_path)|Select-Object)
+    if ($diff) {
+        Write-Output " Files differ: $($file1.FullName)"
+        Write-Output $diff
+        Write-Output "`nIf this is expected, you can update targets with:"
+        Write-Output "Remove-Item -Recurse -Force kitral_target_results"
+        Write-Output "Rename-Item test_results kitral_target_results"
+        Write-Output "Compress-Archive kitral_target_results kitral_target_results.zip -Force"
+        exit 1
     }
-    else {
-        Write-Host "${name}: Differences found"
-        foreach ($file1 in $targetFiles) {
-            $relativePath = $file1.FullName.Substring($target.Length)
-            $file2 = Join-Path $outputFolder $relativePath
-            if (Test-Path $file2) {
-                $diff = Compare-Object (Get-Content $file1.FullName) (Get-Content $file2)
-                if ($diff) {
-                    Write-Host "Difference in file: ${file1}"
-                    $diff | Format-Table
-                    exit 1
-                }
-            }
-            else {
-                Write-Host "File missing in output: $relativePath"
-                exit 1
-            }
-        }
-    }
+}
+
 
     # optionally clean up after each run
     Remove-Item -Recurse -Force $outputFolder
