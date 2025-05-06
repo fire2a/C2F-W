@@ -7,8 +7,8 @@ $env:PATH = "..\Cell2Fire;$env:PATH"
 # define runs: name|input_folder|extra_args
 $runs = @(
     @{ name = "portillo"; input = "..\data\Kitral\Portillo-asc\"; extra = @("--nsims", "1", "--seed", "24", "--fmc", "50", "--ignitions") }
-    @{ name = "villarrica"; input = "..\data\Kitral\Villarrica-tif\"; extra = "--nsims 10 --seed 42 --fmc 66 --FirebreakCells ..\data\Kitral\Villarrica-tif\harvested_Random.csv" }
-    @{ name = "biobio"; input = "..\data\Kitral\biobio\"; extra = "--nsims 3 --seed 5 --fmc 50 --cros --out-crown --out-cfb" }
+    @{ name = "villarrica"; input = "..\data\Kitral\Villarrica-tif\"; extra = @("--nsims", "10", "--seed", "42", "--fmc", "66", "--FirebreakCells", "..\data\Kitral\Villarrica-tif\harvested_Random.csv") }
+    @{ name = "biobio"; input = "..\data\Kitral\biobio\"; extra = @("--nsims", "3", "--seed", "5", "--fmc", "50", "--cros", "--out-crown", "--out-cfb") }
     # add more runs here
 )
 
