@@ -947,7 +947,7 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
 void
 GenDataFile(const std::string& InFolder, const std::string& Simulator)
 {
-    std::cout << "\n------ Data inputs ------\n";
+    std::cout << "\n------ Reading input data ------\n\n";
     std::unordered_map<std::string, std::string> FBPDict;
     std::unordered_map<std::string, std::tuple<float, float, float, float>> ColorsDict;
 
