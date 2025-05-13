@@ -911,8 +911,6 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
             }
             dataFile << "\n";
         }
-
-        std::cout << "Data file generated successfully" << std::endl;
         dataFile.close();
     }
     else
@@ -949,6 +947,7 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
 void
 GenDataFile(const std::string& InFolder, const std::string& Simulator)
 {
+    std::cout << "\n------ Data inputs ------\n";
     std::unordered_map<std::string, std::string> FBPDict;
     std::unordered_map<std::string, std::tuple<float, float, float, float>> ColorsDict;
 
@@ -1129,5 +1128,5 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
         = GenerateDat(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, PY, FMC, TreeHeight, InFolder);
 
     writeDataToFile(result, InFolder);
-    std::cout << "File Generated";
+    std::cout << "Generated data file" << std::endl;
 }

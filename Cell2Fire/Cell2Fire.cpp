@@ -209,7 +209,7 @@ Cell2Fire::Cell2Fire(arguments _args)
     // Create forest structure
     forestDF frdf;
     // DEBUG
-    std::cout << "------------------Forest Data ----------------------\n" << std::endl;
+    std::cout << "\n------------------Forest Data ----------------------\n" << std::endl;
     std::vector<std::vector<std::string>> FDF = this->CSVForest.getData();
     // DEBUGthis->CSVForest.printData(FDF);
     this->CSVForest.parseForestDF(&frdf, FDF);
@@ -308,19 +308,16 @@ Cell2Fire::Cell2Fire(arguments _args)
         CSVHPlan.parseHarvestedDF(HarvestedCells, HarvestedDF, HCellsP);
 
         // Print-out
-        std::cout << "\nFirebreak Cells :" << std::endl;
+        std::cout << "Number of Firebreak Cells :" << HarvestedCells.size() << std::endl;
         for (auto it = HarvestedCells.begin(); it != HarvestedCells.end(); it++)
         {
-            std::cout << " " << it->first << ": ";
             for (auto& it2 : it->second)
             {
-                std::cout << it2 << " ";
                 this->fTypeCells[it2 - 1] = 0;
                 this->fTypeCells2[it2 - 1] = "NonBurnable";
                 this->statusCells[it2 - 1] = 3;
             }
         }
-        std::cout << std::endl;
     }
 
     // Relevant sets: Initialization
@@ -341,7 +338,7 @@ Cell2Fire::Cell2Fire(arguments _args)
 
     /* Weather DataFrame */
     this->WeatherDF = this->CSVWeather.getData();
-    std::cout << "\nWeather DataFrame from instance " << this->CSVWeather.fileName << std::endl;
+    //std::cout << "\nWeather DataFrame from instance " << this->CSVWeather.fileName << std::endl;
 
     if (this->args.WeatherOpt.compare("distribution") == 0)
     {
@@ -670,6 +667,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->done = false;
     this->fire_period = vector<int>(this->args.TotalYears, 0);
     this->sim = simExt;
+    cout << "\nSimulation " << this->sim << endl;
     // Initial status grid folder
     if (this->args.OutputGrids || this->args.FinalGrid)
     {
@@ -751,7 +749,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             std::cerr << e.what() << std::endl;
             std::abort();
         }
-        std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
+        std::cout << "Weather file selected: " << this->CSVWeather.fileName << std::endl;
 
         // Populate WDF
         int WPeriods = this->WeatherDF.size() - 1;  // -1 due to header
@@ -852,7 +850,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
             std::cerr << e.what() << std::endl;
             std::abort();
         }
-        std::cout << "\nWeather file selected: " << this->CSVWeather.fileName << std::endl;
+        std::cout << "Selected weather file: " << this->CSVWeather.fileName << std::endl;
 
         // Populate WDF
         int WPeriods = this->WeatherDF.size() - 1;  // -1 due to header
@@ -1008,9 +1006,6 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
 {
     if (this->args.verbose)
     {
-        printf("\n----------------------------- Simulating Year %d "
-               "-----------------------------\n",
-               this->year);
         printf("---------------------- Step 1: Ignition ----------------------\n");
     }
     /*******************************************************************
@@ -1082,8 +1077,7 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
                 if (it->second.getStatus() == "Available" && it->second.fType != 0)
                 {
                     IgnitionHistory[sim] = aux;
-                    std::cout << "\nSelected (Random) ignition point for Year " << this->year << ", sim " << this->sim
-                              << ": " << aux << std::endl;
+                    std::cout << "Selected (Random) ignition point: " << aux << std::endl;
                     std::vector<int> ignPts = { aux };
                     if (it->second.ignition(this->fire_period[year - 1],
                                             this->year,
@@ -1129,18 +1123,18 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
     // Ignitions with provided points from CSV
     else
     {
-        int temp = IgnitionPoints[this->year - 1];
+        int temp = IgnitionPoints[0];
 
         // If ignition Radius != 0, sample from the Radius set
         if (this->args.IgnitionRadius > 0)
         {
             // Pick any at random and set temp with that cell
             boost::random::uniform_int_distribution<int> udistribution(0,
-                                                                       this->IgnitionSets[this->year - 1].size() - 1);
-            temp = this->IgnitionSets[this->year - 1][udistribution(generator)];
+                                                                       this->IgnitionSets[0].size() - 1);
+            temp = this->IgnitionSets[0][udistribution(generator)];
         }
 
-        std::cout << "\nSelected ignition point for Year " << this->year << ", sim " << this->sim << ": " << temp
+        std::cout << "Selected ignition point: " << temp
                   << std::endl;
         // this->
         IgnitionHistory[sim] = temp;
@@ -1193,14 +1187,6 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
         else
         {
             this->noIgnition = true;
-            std::cout << "Next year..." << std::endl;
-            if (this->args.verbose)
-            {
-                std::cout << "No ignition during year " << this->year << ", Cell "
-                          << this->IgnitionPoints[this->year - 1] << " is already burnt or non-burnable type"
-                          << std::endl;
-            }
-            this->year++;
             this->weatherPeriod = 0;
         }
     }
@@ -1265,19 +1251,11 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
     {
         if (this->args.verbose)
         {
-            std::cout << "No ignition in year " << this->year << std::endl;
+            std::cout << "No ignition"<< std::endl;
             std::cout << "------------------------------------------------------"
                          "-------------------\n"
                       << std::endl;
-            std::cout << "                           End of the fire year " << this->year << "               "
-                      << std::endl;
-            std::cout << "------------------------------------------------------"
-                         "-------------------"
-                      << std::endl;
         }
-
-        // Next year
-        this->year += 1;
     }
 
     // std::cout << endl << "el punto de ignicion es: " << aux << std::endl;
@@ -1874,17 +1852,6 @@ Cell2Fire::Results()
     float NBCells = this->nonBurnableCells.size();
     float HCells = this->harvestCells.size();
 
-    std::cout << "----------------------------- Results "
-                 "-----------------------------"
-              << std::endl;
-    std::cout << "Total Available Cells:    " << ACells << " - % of the Forest: " << ACells / nCells * 100.0 << "%"
-              << std::endl;
-    std::cout << "Total Burnt Cells:        " << BCells << " - % of the Forest: " << BCells / nCells * 100.0 << "%"
-              << std::endl;
-    std::cout << "Total Non-Burnable Cells: " << NBCells << " - % of the Forest: " << NBCells / nCells * 100.0 << "%"
-              << std::endl;
-    std::cout << "Total Firebreak Cells: " << HCells << " - % of the Forest: " << HCells / nCells * 100.0 << "%"
-              << std::endl;
 
     // Final Grid
     if (this->args.FinalGrid)
@@ -2477,7 +2444,7 @@ main(int argc, char* argv[])
 {
     printf("version: %s\n", C2FW_VERSION.c_str());
     // Read Arguments
-    std::cout << "------ Command line values ------\n";
+    std::cout << "\n------ Command line values ------\n";
     arguments args;
     arguments* args_ptr = &args;
     parseArgs(argc, argv, args_ptr);
@@ -2514,6 +2481,7 @@ main(int argc, char* argv[])
         // Random numbers (weather file and ROS-CV)
         int rnumber;
         double rnumber2;
+        cout << "-------Running simulations-------" << endl;
 #pragma omp for
         for (int ep = 1; ep <= args.TotalSims; ep++)
         {

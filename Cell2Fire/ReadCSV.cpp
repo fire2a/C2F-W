@@ -54,17 +54,18 @@ CSVReader::getData()
     if (fileExists(this->fileName + ".tif"))
     {
         extension = ".tif";
+        std::cout << this->fileName + extension << '\n';
     }
     else if (fileExists(this->fileName + ".asc"))
     {
         extension = ".asc";
+        std::cout << this->fileName + extension << '\n';
     }
     else
     {
         extension = "";
     }
     this->fileName = this->fileName + extension;
-    std::cout << this->fileName << '\n';
     std::ifstream file(this->fileName);
     std::vector<std::vector<std::string>> dataList;
     std::string line = "";
