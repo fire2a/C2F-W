@@ -1126,15 +1126,15 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
     // Ignitions with provided points from CSV
     else
     {
-        int temp = IgnitionPoints[0];
+        int temp = IgnitionPoints[this->year - 1];
 
         // If ignition Radius != 0, sample from the Radius set
         if (this->args.IgnitionRadius > 0)
         {
             // Pick any at random and set temp with that cell
             boost::random::uniform_int_distribution<int> udistribution(0,
-                                                                       this->IgnitionSets[0].size() - 1);
-            temp = this->IgnitionSets[0][udistribution(generator)];
+                                                                       this->IgnitionSets[this->year - 1].size() - 1);
+            temp = this->IgnitionSets[this->year - 1][udistribution(generator)];
         }
 
         //std::cout << "Selected ignition point: " << temp << std::endl;
@@ -1258,6 +1258,9 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
                          "-------------------\n"
                       << std::endl;
         }
+
+        // Next year
+        this->year += 1;
     }
 
     // std::cout << endl << "el punto de ignicion es: " << aux << std::endl;
@@ -1854,6 +1857,17 @@ Cell2Fire::Results()
     float NBCells = this->nonBurnableCells.size();
     float HCells = this->harvestCells.size();
 
+    std::cout << "----------------------------- Results "
+                 "-----------------------------"
+            << "\nSimulation " << this->sim << "\n"
+            << "Total Available Cells:    " << ACells << " - % of the Forest: " << ACells / nCells * 100.0 << "%"
+            << "\n"
+            << "Total Burnt Cells:        " << BCells << " - % of the Forest: " << BCells / nCells * 100.0 << "%"
+            <<  "\n"
+            << "Total Non-Burnable Cells: " << NBCells << " - % of the Forest: " << NBCells / nCells * 100.0 << "%"
+            << "\n"
+            << "Total Firebreak Cells: " << HCells << " - % of the Forest: " << HCells / nCells * 100.0 << "%"
+            << std::endl;
 
     // Final Grid
     if (this->args.FinalGrid)
@@ -2442,6 +2456,17 @@ Cell2Fire::chooseWeather(string weatherOpt, int rnumber, int simExt)
 
         // Populate the wdf objects
         this->CSVWeather.parseWeatherDF(wdf_ptr, this->args_ptr, this->WeatherDF, WPeriods);
+        int maxFP = this->args.MinutesPerWP / this->args.FirePeriodLen * WPeriods;
+        if (this->args.MaxFirePeriods > maxFP){
+            this->args.MaxFirePeriods = maxFP;
+            if (this->args.verbose)
+            {
+                std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
+                          << " based on the weather file, Fire Period Length, "
+                             "and Minutes per WP"
+                          << std::endl;
+            }
+        }
     }
     else if (weatherOpt == "random")
     {
