@@ -37,6 +37,8 @@ class Cell2Fire
   private:
     CSVReader CSVWeather;
     CSVReader CSVForest;
+    weatherDF* wdf_ptr;
+    vector<weatherDF> wdf;
 
   public:
     // Main inputs
@@ -71,7 +73,7 @@ class Cell2Fire
     double cellSide;
     double areaCells;
     double perimeterCells;
-    double ROSRV;
+    double ROSRV{};
 
     // Strings
     string gridFolder;
@@ -94,12 +96,11 @@ class Cell2Fire
     std::vector<std::unordered_map<std::string, int>> adjCells;
     std::vector<std::vector<std::string>> DF;
     std::vector<std::vector<std::string>> WDist;
-    std::vector<std::string> WeatherHistory;
     std::vector<float> ignProb;       // (long int&, int);
     std::vector<int> statusCells;     //(long int, int);
     std::vector<int> fTypeCells;      // (long int&, int);
     std::vector<string> fTypeCells2;  // (long int&, const char [9]);
-    std::vector<std::vector<std::string>> WeatherDF;
+    std::vector<std::vector<std::string>> WeatherData;
     std::vector<int> IgnitionPoints;
     vector<int> burnedOutList;
     std::vector<double> FSCell;
@@ -145,7 +146,7 @@ class Cell2Fire
     // Utils
     std::vector<float> getROSMatrix();
     std::vector<float> getFireProgressMatrix();
-    void chooseWeather(string weatherOpt, int rnumber, int simExt);
+    void chooseWeather(const string& weatherOpt, int rnumber, int simExt);
 };
 
 #endif
