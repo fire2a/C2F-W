@@ -883,29 +883,7 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
         while (true)
         {
             microloops = 0;
-            while (true)
-            {
-                selected = distribution(generator2);
-                float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
-                // DEBUGstd::cout << "selectedPoint: " << selected << std::endl;
-                // DEBUGstd::cout << "selectedProbability: " <<
-                // ignProb[selected-1] << std::endl; DEBUGstd::cout <<
-                // "randomNumber: " << rd_number << std::endl; if
-                // (ignProb[selected - 1] / static_cast<float>(100) > rd_number)
-                // {    //If probabilities enter as integers, e.g: 80 as 0.8
-                if (this->ignProb[selected - 1] > rd_number)
-                {
-                    aux = selected;
-                    // DEBUSstd::cout << "selected_point" << std::endl;
-                    break;
-                }
-                microloops++;
-                if (microloops > this->nCells * 100)
-                {
-                    this->noIgnition = true;
-                    break;
-                }
-            }
+            aux = distribution(generator2);
             // Check information (Debugging)
             if (this->args.verbose)
             {
@@ -1233,8 +1211,7 @@ Cell2Fire::SendMessages()
                                                  this->surfaceFlameLengths,
                                                  this->crownFlameLengths,
                                                  this->crownIntensities,
-                                                 this->maxFlameLengths,
-                                                 this->sim);
+                                                 this->maxFlameLengths);
             }
 
             else
@@ -1641,11 +1618,11 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
  *
  * ### Example Output:
  * ```
- * ----------------------------- Results -----------------------------
- * Total Available Cells:    120 - % of the Forest: 40.0%
- * Total Burnt Cells:        80 - % of the Forest: 26.67%
- * Total Non-Burnable Cells: 100 - % of the Forest: 33.33%
- * Total Firebreak Cells:    10 - % of the Forest: 3.33%
+ * Simulation 3 Results
+ *  Total Available Cells:    120 - % of the Forest: 40.0%
+ *  Total Burnt Cells:        80 - % of the Forest: 26.67%
+ *  Total Non-Burnable Cells: 100 - % of the Forest: 33.33%
+ *  Total Firebreak Cells:    10 - % of the Forest: 3.33%
  * ```
  *
  * ### Notes:
@@ -2221,21 +2198,7 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
         // Next Sim if max year
         this->sim += 1;
     }
-/*
-    if ((this->sim > args.TotalSims) && (args.WeatherOpt != "rows"))
-    {
-        this->counter_wt += 1;
-        if (this->counter_wt <= 1)
-        {
-            // Weather History Folder
-            std::string filename = "WeatherHistory.csv";
-            CSVWriter WtHistoryFolder("", "");
-            this->historyFolder = this->args.OutFolder + "WeatherHistory" + separator();
-            WtHistoryFolder.MakeDir(this->historyFolder);
-            CSVWriter WtFile(this->historyFolder + filename);
-            WtFile.printWeather(WeatherHistory);
-        }
-    }*/
+
     // Print current status
     if (!this->done && this->args.verbose)
     {
@@ -2375,91 +2338,8 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
                           << std::endl;
             }
         }
-        WeatherHistory[simExt] = weatherFilename;
     }
-/*
-    else if (weatherOpt == "distribution")
-    {
-        bool selectWeather = false;
-        int countCases = 0;
-        std::string weather_name;
-        while (!selectWeather)
-        {
-            boost::random::mt19937 generator3 = boost::random::mt19937(args.seed * simExt * time(NULL));
-            // Random generator and distributions
-            boost::random::uniform_int_distribution<int> distribution(1, this->WDist.size() - 1);
-            int weather_idx = distribution(generator3);
-
-            float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
-            float probability_weather = std::stof(this->WDist[weather_idx][1]);
-            // DEBUGstd::cout<<"prob: "<<(probability_weather)<<std::endl;
-            // DEBUGstd::cout<<"weather_idx: "<<(weather_idx)<<std::endl;
-            // DEBUGstd::cout<<"rdnumber: "<<(rd_number)<<std::endl;
-            if (probability_weather > rd_number)
-            {
-                // rd_number cannot be 1, but can be 0. So if prob weather has
-                // prob=0 it does not have a chance of being selected, and if it
-                // is 1, it will always be selected
-                weather_name = this->WDist[weather_idx][0];
-                // DEBUGstd::cout << "Weather name selected: " << weather_name <<
-                // std::endl;
-                selectWeather = true;
-            }
-            countCases++;
-            if (countCases > 1000)
-            {
-                weather_name = this->WDist[weather_idx][0];
-                selectWeather = true;
-            }
-            selectWeather = true;
-        }
-
-        // Random Weather
-        this->CSVWeather.fileName = this->args.InFolder + "Weathers" + separator() + weather_name + ".csv";
-        WeatherHistory.push_back(weather_name);
-
-        try
-        {
-            this->WeatherData = this->CSVWeather.getData();
-        }
-        catch (std::invalid_argument& e)
-        {
-            std::cerr << e.what() << std::endl;
-            std::abort();
-        }
-        //std::cout << "Selected weather file: " << this->CSVWeather.fileName << std::endl;
-
-        // Populate WDF
-        int WPeriods = this->WeatherData.size() - 1;  // -1 due to header
-        this->wdf_ptr = &wdf[0];
-        //std::cout << "Weather Periods: " << WPeriods << std::endl;
-
-        // Populate the wdf objects
-        this->CSVWeather.parseWeatherDF(this->wdf_ptr, this->args_ptr, this->WeatherData, WPeriods);
-        // DEBUGthis->CSVWeather.printData(this->WeatherData);
-
-        // Check maxFirePeriods and Weather File consistency (reset
-        // MaxFirePeriods and recalculate)
-        int maxFP = this->args.MinutesPerWP / this->args.FirePeriodLen * WPeriods;
-        this->args.MaxFirePeriods = 10000000;
-        // DEBUGstd::cout << "Int MaxFP: " << maxFP << std::endl;
-        // DEBUGstd::cout << "MinutesPerWP: " << this->args.MinutesPerWP <<
-        // std::endl; DEBUGstd::cout << "FirePeriodLen: " <<
-        // this->args.FirePeriodLen << std::endl; DEBUGstd::cout <<
-        // "MaxfirePeriods: " << this->args.MaxFirePeriods << std::endl;
-
-        if (this->args.MaxFirePeriods > maxFP)
-        {
-            this->args.MaxFirePeriods = maxFP;
-            if (this->args.verbose)
-            {
-                std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
-                          << " based on the weather file, Fire Period Length, "
-                             "and Minutes per WP"
-                          << std::endl;
-            }
-        }
-    }*/
+    WeatherHistory[simExt] = weatherFilename;
 }
 
 /******************************************************************************
