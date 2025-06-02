@@ -268,7 +268,8 @@ CSVWriter::printWeather(std::vector<std::string> weatherHistory)
 }
 
 void
-CSVWriter::printIgnitions(std::unordered_map<int, int> ignitionsHistory, std::unordered_map<int, std::string> weatherHistory)
+CSVWriter::printIgnitions(std::unordered_map<int, int> ignitionsHistory,
+                          std::unordered_map<int, std::string> weatherHistory)
 {
     std::ofstream ofs(fileName, std::ofstream::out);
     int i;
@@ -279,7 +280,7 @@ CSVWriter::printIgnitions(std::unordered_map<int, int> ignitionsHistory, std::un
     // Iterate through the map and print key-value pairs
     for (i = 1; i < ignitionsHistory.size() + 1; i++)
     {
-        ofs << i << "," << ignitionsHistory[i] <<","<< weatherHistory[i] << "\n";
+        ofs << i << "," << ignitionsHistory[i] << "," << weatherHistory[i] << "\n";
     }
 
     // Close file

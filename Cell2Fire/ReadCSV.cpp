@@ -31,15 +31,15 @@ CSVReader::CSVReader()
     this->delimeter = ",";
 }
 
-
-void CSVReader::setFilename(std::string name){
+void
+CSVReader::setFilename(std::string name)
+{
     this->fileName = name;
 }
 
-
 /**
  * @brief Reads and parses data from a CSV, ASCII or TIFF file into a 2D vector.
- * 
+ *
  * Checks for the existence of the input file with either a `.tif` or `.asc` extension
  * and processes it accordingly.
  * If the file is in CSV format, it is read line by line and split using
@@ -51,7 +51,8 @@ void CSVReader::setFilename(std::string name){
  *         - For ASC and CSV files, each row is stored as a vector of strings.
  *         - For TIFF files, metadata is stored in the first few rows, followed by pixel values.
  *
- * @throws std::runtime_error If the file type is unsupported, memory allocation fails, or an error occurs during file reading.
+ * @throws std::runtime_error If the file type is unsupported, memory allocation fails, or an error occurs during file
+ * reading.
  */
 std::vector<std::vector<std::string>>
 CSVReader::getData(string filename)
@@ -216,7 +217,6 @@ CSVReader::getData(string filename)
     return dataList;
 }
 
-
 /**
  * @brief print data contained in 2D vector to console row by row
  * @param DF 2D vector of strings
@@ -233,13 +233,12 @@ CSVReader::printData(std::vector<std::vector<std::string>>& DF)
                 std::cout << " " << data << " ";
             else
                 std::cout << " "
-                    << "NaN"
-                    << " ";
+                          << "NaN"
+                          << " ";
         }
         std::cout << std::endl;
     }
 }
-
 
 /**
  * @brief Populates an instance of inputs using information contained in a 2D vector
@@ -264,7 +263,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
 
     // CChar
     const char* faux;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= NCells; i++)
@@ -286,7 +285,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
         if (DF[i][5].compare("") == 0)
             waz = 0;
         else
-            waz = std::stoi(DF[i][5], &sz) + 180.; // + 2*90;  // CHECK!!!!
+            waz = std::stoi(DF[i][5], &sz) + 180.;  // + 2*90;  // CHECK!!!!
         if (waz >= 360)
             waz = waz - 360;
 
@@ -385,7 +384,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
         if (DF[i][23].compare("") == 0)
             pattern = 0;
         else
-            pattern = 1; // std::stoi (DF[i][18], &sz);
+            pattern = 1;  // std::stoi (DF[i][18], &sz);
 
         if (DF[i][24].compare("") == 0)
             tree_height = 0;
@@ -423,7 +422,6 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
     }
 }
 
-
 /**
  * @brief Populates a vector of size NCells with fuel type number per cell
  * @param NFTypes vector of fuel type per cell
@@ -438,7 +436,7 @@ CSVReader::parseNDF(std::vector<int>& NFTypes, std::vector<std::vector<std::stri
     int FType;
     // CChar
     const char* faux;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= NCells; i++)
@@ -472,7 +470,7 @@ CSVReader::parsePROB(std::vector<float>& probabilities, std::vector<std::vector<
 
     // CChar
     const char* faux;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= NCells; i++)
@@ -492,12 +490,13 @@ CSVReader::parsePROB(std::vector<float>& probabilities, std::vector<std::vector<
 /*
  * Populate Weather DF Spain
  */
-void CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
+void
+CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
                           arguments* args_ptr,
                           std::vector<std::vector<std::string>>& DF,
                           int WPeriods)
 {
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     float ws, waz, tmp = 27, rh = 40;
     float apcp = 0, ffmc = 0, dmc = 0, dc = 0, isi = 0, bui = 0, fwi = 0;
@@ -526,23 +525,24 @@ void CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
         if (args_ptr->Simulator == "K")
         {
             tmp = DF[i][4].empty() ? 0 : std::stof(DF[i][4], &sz);
-            rh  = DF[i][5].empty() ? 0 : std::stof(DF[i][5], &sz);
+            rh = DF[i][5].empty() ? 0 : std::stof(DF[i][5], &sz);
         }
         else if (args_ptr->Simulator == "C")
         {
-            waz  = DF[i][6].empty() ? 0 : std::stoi(DF[i][6], &sz);
-            if (waz >= 360) waz -= 360;
+            waz = DF[i][6].empty() ? 0 : std::stoi(DF[i][6], &sz);
+            if (waz >= 360)
+                waz -= 360;
 
             apcp = DF[i][2].empty() ? 0 : std::stof(DF[i][2], &sz);
-            tmp  = DF[i][3].empty() ? 0 : std::stof(DF[i][3], &sz);
-            rh   = DF[i][4].empty() ? 0 : std::stof(DF[i][4], &sz);
-            ws   = DF[i][5].empty() ? 0 : std::stof(DF[i][5], &sz);
+            tmp = DF[i][3].empty() ? 0 : std::stof(DF[i][3], &sz);
+            rh = DF[i][4].empty() ? 0 : std::stof(DF[i][4], &sz);
+            ws = DF[i][5].empty() ? 0 : std::stof(DF[i][5], &sz);
             ffmc = DF[i][7].empty() ? 0 : std::stof(DF[i][7], &sz);
-            dmc  = DF[i][8].empty() ? 0 : std::stof(DF[i][8], &sz);
-            dc   = DF[i][9].empty() ? 0 : std::stof(DF[i][9], &sz);
-            isi  = DF[i][10].empty() ? 0 : std::stof(DF[i][10], &sz);
-            bui  = DF[i][11].empty() ? 0 : std::stof(DF[i][11], &sz);
-            fwi  = DF[i][12].empty() ? 0 : std::stof(DF[i][12], &sz);
+            dmc = DF[i][8].empty() ? 0 : std::stof(DF[i][8], &sz);
+            dc = DF[i][9].empty() ? 0 : std::stof(DF[i][9], &sz);
+            isi = DF[i][10].empty() ? 0 : std::stof(DF[i][10], &sz);
+            bui = DF[i][11].empty() ? 0 : std::stof(DF[i][11], &sz);
+            fwi = DF[i][12].empty() ? 0 : std::stof(DF[i][12], &sz);
         }
 
         // Assign parsed values
@@ -560,7 +560,6 @@ void CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
     }
 }
 
-
 /*
  * Populate IgnitionDF
  */
@@ -569,7 +568,7 @@ CSVReader::parseIgnitionDF(std::vector<int>& ig, std::vector<std::vector<std::st
 {
     // Integers
     int i, igcell;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= IgPeriods; i++)
@@ -596,7 +595,7 @@ CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
     // Integers
     int i, j, hcell;
     std::vector<int> toHarvestCells;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= HPeriods; i++)
@@ -630,7 +629,7 @@ CSVReader::parseBBODF(std::unordered_map<int, std::vector<float>>& bbo,
     int i, j, ftype;
     int ffactors = 4;
     std::vector<float> bboFactors;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= NFTypes; i++)
@@ -659,7 +658,7 @@ CSVReader::parseForestDF(forestDF* frt_ptr, std::vector<std::vector<std::string>
     int i, j;
     double xllcorner, yllcorner;
     // std::string xllcorner;
-    std::string::size_type sz; // alias of size_t
+    std::string::size_type sz;  // alias of size_t
     std::unordered_map<std::string, int> Aux;
     std::vector<int> Aux2;
     cols = std::stoi(DF[0][1], &sz);

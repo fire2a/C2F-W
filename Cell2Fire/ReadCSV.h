@@ -57,11 +57,10 @@ class CSVReader
     void parsePROB(std::vector<float>& probabilities, std::vector<std::vector<std::string>>& DF, int NCells);
 
     // Populate Weather DF (Spanish version)
-    void
-    parseWeatherDF(std::vector<weatherDF>& wdf,
-                   arguments* args_ptr,
-                   std::vector<std::vector<std::string>>& DF,
-                   int WPeriods);
+    void parseWeatherDF(std::vector<weatherDF>& wdf,
+                        arguments* args_ptr,
+                        std::vector<std::vector<std::string>>& DF,
+                        int WPeriods);
 
     // Populate Ignition Points
     void parseIgnitionDF(std::vector<int>& ig, std::vector<std::vector<std::string>>& DF, int IgPeriods);

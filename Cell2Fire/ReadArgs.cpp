@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#define btoa(x) ((x)?"true":"false")
+#define btoa(x) ((x) ? "true" : "false")
 
 inline char
 separator()
