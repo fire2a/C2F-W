@@ -2370,7 +2370,7 @@ main(int argc, char* argv[])
             // Reset
             Forest.reset(rnumber, rnumber2, ep);
             // Time steps during horizon (or until we break it)
-            for (int tstep = 0; tstep <= Forest.args.MaxFirePeriods * Forest.args.TotalYears; tstep++)
+            for (int tstep = 0; tstep <= Forest.totalFirePeriods * Forest.args.TotalYears; tstep++)
             {
                 Forest.Step(generator, ep);
 
