@@ -200,6 +200,8 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     // fuel_coefs coefs[18];
     this->coef_ptr = &this->coefs[0];
 
+    this->totalFirePeriods = this->args.MaxFirePeriods;
+
     /********************************************************************
                                     Global Values (Forest) and Instance (in
     memory for the moment)
@@ -533,25 +535,6 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->activeCrown = false;
     this->gridNumber = 0;
     this->fire_period = vector<int>(this->args.TotalYears, 0);
-
-    // Check maxFirePeriods and Weather File consistency
-    /*
-    if (this->args.WeatherOpt == "rows" || this->args.WeatherOpt == "random")
-    {
-        int maxFP = this->args.MinutesPerWP / this->args.FirePeriodLen * WPeriods;
-        if (this->args.MaxFirePeriods > maxFP)
-        {
-            this->args.MaxFirePeriods = maxFP;
-            if (this->args.verbose)
-            {
-                std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
-                          << " based on the weather file, Fire Period Length, "
-                             "and Minutes per WP"
-                          << std::endl;
-            }
-        }
-    }
-     */
 }
 
 /******************************************************************************
@@ -1139,9 +1122,9 @@ Cell2Fire::SendMessages()
     this->burnedOutList.clear();
 
     // Check ending
-    if (fire_period[year - 1] == args.MaxFirePeriods - 1 && this->args.verbose)
+    if (fire_period[year - 1] == this->totalFirePeriods - 1 && this->args.verbose)
     {
-        std::cout << "*** WARNING!!! About to hit MaxFirePeriods: " << this->args.MaxFirePeriods << std::endl;
+        std::cout << "*** WARNING!!! About to hit MaxFirePeriods: " << this->totalFirePeriods << std::endl;
     }
 
     /// Send messages logic
@@ -2078,7 +2061,7 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
         std::cout << "Year: " << this->year << std::endl;
         std::cout << "Fire Period: " << this->fire_period[this->year - 1] << std::endl;
         std::cout << "WeatherPeriod: " << this->weatherPeriod << std::endl;
-        std::cout << "MaxFirePeriods: " << this->args.MaxFirePeriods << std::endl;
+        std::cout << "MaxFirePeriods: " << this->totalFirePeriods << std::endl;
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
         std::cout << "********************************************" << std::endl;
     }
@@ -2153,7 +2136,7 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
         }
     }
     // Ending conditions
-    if (this->fire_period[std::min(this->year, int(fire_period.size())) - 1] >= this->args.MaxFirePeriods)
+    if (this->fire_period[std::min(this->year, int(fire_period.size())) - 1] >= this->totalFirePeriods)
     {
         // Extra breaking condition: Max fire periods then go to next year
         if (this->args.verbose)
@@ -2257,18 +2240,6 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
 
         // Populate the wdf objects
         this->CSVWeather.parseWeatherDF(this->wdf, this->args_ptr, this->WeatherData, WPeriods);
-        int maxFP = this->args.MinutesPerWP / this->args.FirePeriodLen * WPeriods;
-        if (this->args.MaxFirePeriods > maxFP)
-        {
-            this->args.MaxFirePeriods = maxFP;
-            if (this->args.verbose)
-            {
-                std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
-                          << " based on the weather file, Fire Period Length, "
-                             "and Minutes per WP"
-                          << std::endl;
-            }
-        }
     }
     else if (weatherOpt == "random")
     {
@@ -2313,28 +2284,22 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
 
         // Populate the wdf object
         this->CSVWeather.parseWeatherDF(this->wdf, this->args_ptr, this->WeatherData, WPeriods);
-        // DEBUGthis->CSVWeather.printData(this->WeatherData);
-
-        // Check maxFirePeriods and Weather File consistency (reset
-        // MaxFirePeriods and recalculate)
-        int maxFP = this->args.MinutesPerWP / this->args.FirePeriodLen * WPeriods;
-        this->args.MaxFirePeriods = 10000000;
-        // DEBUGstd::cout << "Int MaxFP: " << maxFP << std::endl;
-        // DEBUGstd::cout << "MinutesPerWP: " << this->args.MinutesPerWP <<
-        // std::endl; DEBUGstd::cout << "FirePeriodLen: " <<
-        // this->args.FirePeriodLen << std::endl; DEBUGstd::cout <<
-        // "MaxfirePeriods: " << this->args.MaxFirePeriods << std::endl;
-        if (this->args.MaxFirePeriods > maxFP)
+    }
+    int maxFP = this->args.MinutesPerWP / this->args.FirePeriodLen * WPeriods;
+    if (this->args.MaxFirePeriods > maxFP || this->args.MaxFirePeriods < 0)
+    {
+        this->totalFirePeriods = maxFP;
+        if (this->args.verbose)
         {
-            this->args.MaxFirePeriods = maxFP;
-            if (this->args.verbose)
-            {
-                std::cout << "Maximum fire periods are set to: " << this->args.MaxFirePeriods
-                          << " based on the weather file, Fire Period Length, "
-                             "and Minutes per WP"
-                          << std::endl;
-            }
+            std::cerr << "Maximum fire periods are set to: " << this->totalFirePeriods
+                      << " based on the weather file, Fire Period Length, "
+                         "and Minutes per WP"
+                      << std::endl;
         }
+    }
+    else
+    {
+        this->totalFirePeriods = this->args.MaxFirePeriods;
     }
     WeatherHistory[simExt] = weatherFilename;
 }

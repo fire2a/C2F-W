@@ -230,7 +230,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     int dsim_years = 1;
     int dnsims = 1;
     int dweather_period_len = 60;
-    int dmax_fire_periods = 1000;
+    int dmax_fire_periods = -1;
     int dseed = 123;
     int diradius = 0;
     int dnthreads = 1;
