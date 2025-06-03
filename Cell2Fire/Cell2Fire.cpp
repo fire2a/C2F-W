@@ -1868,9 +1868,9 @@ Cell2Fire::Results()
     if (currentSim == args.TotalSims && this->args.IgnitionsLog)
     {
 
-        std::cout << "Writing ignitions log csv..." << endl;
         if (this->args.verbose)
         {
+            std::cout << "Writing ignitions log csv..." << endl;
             std::cout << "(simulation_id, cell_id): ";
             for (i = 1; i < IgnitionHistory.size() + 1; i++)
             {
@@ -1878,7 +1878,7 @@ Cell2Fire::Results()
             }
         }
 
-        std::string filename = "ignitions_log.csv";
+        std::string filename = "ignition_weather_log.csv";
         CSVWriter ignitionsFile(this->args.OutFolder + filename);
         ignitionsFile.printIgnitions(IgnitionHistory, WeatherHistory);
     }
@@ -2117,9 +2117,9 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
             }
             else
             {
-                cout << "\nSimulation " << this->sim << ":\n\tweather file: " << WeatherHistory[this->sim]
+                cout << "\nSimulation " << this->sim << " Start:\n\tweather file: " << WeatherHistory[this->sim]
                      << "\n\tweather periods: " << this->WeatherData.size() - 1
-                     << "\n\tignition point: " << IgnitionHistory[this->sim] << endl;
+                     << "\n\tignition cell: " << IgnitionHistory[this->sim] << endl;
                 // Start sending messages
                 std::unordered_map<int, std::vector<int>> SendMessageList = this->SendMessages();
                 // Get Message
