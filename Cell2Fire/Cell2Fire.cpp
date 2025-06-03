@@ -353,8 +353,6 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         CSVWeatherDistribution.printData(WDist);
     }
 
-    this->counter_wt = 0;
-
     // Populate WDF
     // int WPeriods = WeatherData.size() - 1;  // -1 due to header
     // wdf_ptr = &wdf[0];
@@ -2221,6 +2219,7 @@ void
 Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
 {
     string weatherFilename;
+    int WPeriods;
     if (weatherOpt == "rows")
     {
         weatherFilename = this->args.InFolder + "Weather" + ".csv";
@@ -2235,7 +2234,7 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
         }
         // std::cout << "\nWeather DataFrame from instance " << this->CSVWeather.fileName << std::endl;
 
-        int WPeriods = WeatherData.size() - 1;  // -1 due to header
+        WPeriods = WeatherData.size() - 1;  // -1 due to header
         // this->wdf_ptr = &(this->wdf[0]);
 
         // Populate the wdf objects
@@ -2261,26 +2260,9 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
         // std::cout << "Weather file selected: " << this->CSVWeather.fileName << std::endl;
 
         // Populate WDF
-        int WPeriods = this->WeatherData.size() - 1;  // -1 due to header
+        WPeriods = this->WeatherData.size() - 1;  // -1 due to header
         // this->wdf_ptr = &(this->wdf[0]);
         // std::cout << "Weather Periods: " << WPeriods << std::endl;
-        std::string weather_name = "";
-        for (int i = weatherFilename.size() - 1; i >= 0; i--)
-        {
-            std::string bol = std::to_string(weatherFilename[i]);
-            int bol2 = std::stoi(bol);
-            char check = '\\';
-            int intcheck = (int)check;
-            if (bol2 == intcheck)
-            {
-                break;
-            }
-            else
-            {
-                weather_name.push_back(weatherFilename[i]);
-            }
-        }
-        reverse(weather_name.begin(), weather_name.end());
 
         // Populate the wdf object
         this->CSVWeather.parseWeatherDF(this->wdf, this->args_ptr, this->WeatherData, WPeriods);

@@ -56,7 +56,6 @@ class Cell2Fire
     int year = 1;
     int gridNumber = 0;
     int weatherperiod = 0;
-    int counter_wt = 0;
     long int nCells;
     int nIgnitions = 0;
     double xllcorner;
