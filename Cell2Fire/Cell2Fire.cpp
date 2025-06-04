@@ -2117,9 +2117,11 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
             }
             else
             {
-                cout << "\nSimulation " << this->sim << " Start:\n\tweather file: " << WeatherHistory[this->sim]
+                cout << "\nSimulation " << this->sim << " Start:"
+                     << "\n\tweather file: " << WeatherHistory[this->sim]
                      << "\n\tweather periods: " << this->WeatherData.size() - 1
-                     << "\n\tignition cell: " << IgnitionHistory[this->sim] << endl;
+                     << "\n\tignition cell: " << IgnitionHistory[this->sim]
+                     << "\n\ttotal fire periods: " << this->totalFirePeriods << endl;
                 // Start sending messages
                 std::unordered_map<int, std::vector<int>> SendMessageList = this->SendMessages();
                 // Get Message
