@@ -1883,11 +1883,10 @@ Cell2Fire::Results()
 
         if (this->args.verbose)
         {
-            std::cout << "Writing ignitions log csv..." << endl;
-            std::cout << "(simulation_id, cell_id): ";
+            std::cout << "\nWriting (simulation, cell & weather ids): ";
             for (i = 1; i < IgnitionHistory.size() + 1; i++)
             {
-                std::cout << i << "," << IgnitionHistory[i] << "\t";
+                std::cout << "(" << i << "," << IgnitionHistory[i] << "," << WeatherHistory[i] << ")\t";
             }
         }
 
