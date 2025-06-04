@@ -1878,8 +1878,7 @@ Cell2Fire::Results()
             }
         }
 
-        std::string filename = "ignition_weather_log.csv";
-        CSVWriter ignitionsFile(this->args.OutFolder + filename);
+        CSVWriter ignitionsFile(this->args.OutFolder + sim_log_filename);
         ignitionsFile.printIgnitions(IgnitionHistory, WeatherHistory);
     }
 }
