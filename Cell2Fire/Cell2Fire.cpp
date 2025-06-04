@@ -2117,10 +2117,10 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
             else
             {
                 cout << "\nSimulation " << this->sim << " Start:"
-                     << "\n\tignition cell: " << IgnitionHistory[this->sim]
                      << "\n\tweather file: " << WeatherHistory[this->sim]
-                     << "\n\tweather periods: " << this->WeatherData.size() - 1
-                     << "\n\ttotal fire periods: " << this->totalFirePeriods << endl;
+                     << "\n\tignition cell: " << IgnitionHistory[this->sim]
+                     << "\n\tmax time periods: " << this->totalFirePeriods << endl;
+
                 // Start sending messages
                 std::unordered_map<int, std::vector<int>> SendMessageList = this->SendMessages();
                 // Get Message
@@ -2272,13 +2272,6 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
     if (this->args.MaxFirePeriods > maxFP || this->args.MaxFirePeriods < 0)
     {
         this->totalFirePeriods = maxFP;
-        if (this->args.verbose)
-        {
-            std::cerr << "Maximum fire periods are set to: " << this->totalFirePeriods
-                      << " based on the weather file, Fire Period Length, "
-                         "and Minutes per WP"
-                      << std::endl;
-        }
     }
     else
     {
