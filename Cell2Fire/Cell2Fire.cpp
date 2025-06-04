@@ -1597,11 +1597,14 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
  *
  * ### Example Output:
  * ```
- * Simulation 3 Results
- *  Total Available Cells:    120 - % of the Forest: 40.0%
- *  Total Burnt Cells:        80 - % of the Forest: 26.67%
- *  Total Non-Burnable Cells: 100 - % of the Forest: 33.33%
- *  Total Firebreak Cells:    10 - % of the Forest: 3.33%
+ * Simulation 3 Results:
+ *         Cell Status            Count     Percent
+ *         ----------------------------------------
+ *         Available               2916      45.56%
+ *         Burnt                   3456      54.00%
+ *         Non-Burnable              28       0.44%
+ *         Firebreak                  0       0.00%
+ *         Total                   6400     100.00%
  * ```
  *
  * ### Notes:
@@ -1659,15 +1662,25 @@ Cell2Fire::Results()
     float HCells = this->harvestCells.size();
 
     std::cout << "\nSimulation " << this->sim << " Results:\n"
-              << "\tTotal Available Cells:    " << ACells << " - % of the Forest: " << ACells / nCells * 100.0 << "%"
-              << "\n"
-              << "\tTotal Burnt Cells:        " << BCells << " - % of the Forest: " << BCells / nCells * 100.0 << "%"
-              << "\n"
-              << "\tTotal Non-Burnable Cells: " << NBCells << " - % of the Forest: " << NBCells / nCells * 100.0 << "%"
-              << "\n"
-              << "\tTotal Firebreak Cells: " << HCells << " - % of the Forest: " << HCells / nCells * 100.0 << "%"
-              << std::endl;
-
+              << "\t" << std::left << std::setw(16) << "Cell Status" << std::right << std::setw(12) << "Count"
+              << std::right << std::setw(12) << "Percent"
+              << "\n";
+    std::cout << "\t" << std::string(40, '-') << "\n";
+    std::cout << "\t" << std::left << std::setw(16) << "Available" << std::right << std::setw(12)
+              << static_cast<int>(ACells) << std::right << std::setw(11) << std::fixed << std::setprecision(2)
+              << ACells / nCells * 100.0 << "%\n";
+    std::cout << "\t" << std::left << std::setw(16) << "Burnt" << std::right << std::setw(12)
+              << static_cast<int>(BCells) << std::right << std::setw(11) << std::fixed << std::setprecision(2)
+              << BCells / nCells * 100.0 << "%\n";
+    std::cout << "\t" << std::left << std::setw(16) << "Non-Burnable" << std::right << std::setw(12)
+              << static_cast<int>(NBCells) << std::right << std::setw(11) << std::fixed << std::setprecision(2)
+              << NBCells / nCells * 100.0 << "%\n";
+    std::cout << "\t" << std::left << std::setw(16) << "Firebreak" << std::right << std::setw(12)
+              << static_cast<int>(HCells) << std::right << std::setw(11) << std::fixed << std::setprecision(2)
+              << HCells / nCells * 100.0 << "%\n";
+    std::cout << "\t" << std::left << std::setw(16) << "Total" << std::right << std::setw(12)
+              << static_cast<int>(nCells) << std::right << std::setw(11) << std::fixed << std::setprecision(2) << 100.0
+              << "%\n";
     // Final Grid
     if (this->args.FinalGrid)
     {
