@@ -275,7 +275,7 @@ CSVWriter::printIgnitions(std::unordered_map<int, int> ignitionsHistory,
     int i;
 
     // Print column titles
-    ofs << "sim,point,weather\n";
+    ofs << "simulation,ignition,weather\n";
 
     // Iterate through the map and print key-value pairs
     for (i = 1; i < ignitionsHistory.size() + 1; i++)
