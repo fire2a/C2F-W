@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#define btoa(x) ((x) ? "true" : "false")
+
 inline char
 separator()
 {
@@ -109,45 +111,45 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     if (cmdOptionExists(argv, argv + argc, "--output-messages"))
     {
         out_messages = true;
-        printf("OutMessages: %d \n", out_messages);
+        printf("OutMessages: %s \n", btoa(out_messages));
     }
 
     //--fire-behavior
     if (cmdOptionExists(argv, argv + argc, "--out-fl"))
     {
         out_fl = true;
-        printf("OutFlameLength: %d \n", out_fl);
+        printf("OutFlameLength: %s \n", btoa(out_fl));
     }
     //--fire-behavior
     if (cmdOptionExists(argv, argv + argc, "--out-intensity"))
     {
         out_intensity = true;
-        printf("OutIntensity: %d \n", out_intensity);
+        printf("OutIntensity: %s \n", btoa(out_intensity));
     }
 
     //--fire-behavior
     if (cmdOptionExists(argv, argv + argc, "--out-ros"))
     {
         out_ros = true;
-        printf("OutROS: %d \n", out_ros);
+        printf("OutROS: %s \n", btoa(out_ros));
     }
     //--fire-behavior
     if (cmdOptionExists(argv, argv + argc, "--out-crown"))
     {
         out_crown = true;
-        printf("OutCrown: %d \n", out_crown);
+        printf("OutCrown: %s \n", btoa(out_crown));
     }
 
     if (cmdOptionExists(argv, argv + argc, "--out-cfb"))
     {
         out_crown_consumption = true;
-        printf("OutCrownConsumption: %d \n", out_crown_consumption);
+        printf("OutCrownConsumption: %s \n", btoa(out_crown_consumption));
     }
 
     if (cmdOptionExists(argv, argv + argc, "--out-sfb"))
     {
         out_surf_consumption = true;
-        printf("OutSurfaceConsumption: %d \n", out_surf_consumption);
+        printf("OutSurfaceConsumption: %s \n", btoa(out_surf_consumption));
     }
 
     //--trajectories
@@ -166,35 +168,35 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     if (cmdOptionExists(argv, argv + argc, "--verbose"))
     {
         verbose_input = true;
-        printf("verbose: %d \n", verbose_input);
+        printf("verbose: %s \n", btoa(verbose_input));
     }
 
     // --ignitionsLog
     if (cmdOptionExists(argv, argv + argc, "--ignitionsLog"))
     {
         iplog_input = true;
-        printf("Ignition Points Log: %d \n", iplog_input);
+        printf("Ignition Points Log: %s \n", btoa(iplog_input));
     }
 
     //--ignitions
     if (cmdOptionExists(argv, argv + argc, "--ignitions"))
     {
         input_ignitions = true;
-        printf("Ignitions: %d \n", input_ignitions);
+        printf("Ignitions: %s \n", btoa(input_ignitions));
     }
 
     //--grids
     if (cmdOptionExists(argv, argv + argc, "--grids"))
     {
         out_grids = true;
-        printf("OutputGrids: %d \n", out_grids);
+        printf("OutputGrids: %s \n", btoa(out_grids));
     }
 
     //--final-grid
     if (cmdOptionExists(argv, argv + argc, "--final-grid"))
     {
         out_finalgrid = true;
-        printf("FinalGrid: %d \n", out_finalgrid);
+        printf("FinalGrid: %s \n", btoa(out_finalgrid));
     }
 
     //--Prom_tuned
@@ -213,14 +215,14 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     if (cmdOptionExists(argv, argv + argc, "--bbo"))
     {
         bbo_tuning = true;
-        printf("BBOTuning: %d \n", out_stats);
+        printf("BBOTuning: %s \n", btoa(out_stats));
     }
 
     //--cros
     if (cmdOptionExists(argv, argv + argc, "--cros"))
     {
         allow_cros = true;
-        printf("CrownROS: %d \n", allow_cros);
+        printf("CrownROS: %s \n", btoa(allow_cros));
     }
 
     // Floats and ints
@@ -228,7 +230,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     int dsim_years = 1;
     int dnsims = 1;
     int dweather_period_len = 60;
-    int dmax_fire_periods = 1000;
+    int dmax_fire_periods = -1;
     int dseed = 123;
     int diradius = 0;
     int dnthreads = 1;
