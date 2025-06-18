@@ -106,6 +106,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     bool out_stats = false;
     bool bbo_tuning = false;
     bool allow_cros = false;
+    bool all_messages = false;
 
     //--out-messages
     if (cmdOptionExists(argv, argv + argc, "--output-messages"))
@@ -197,6 +198,13 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     {
         out_finalgrid = true;
         printf("FinalGrid: %s \n", btoa(out_finalgrid));
+    }
+
+    //--all-messages
+    if (cmdOptionExists(argv, argv + argc, "--all-messages"))
+    {
+        all_messages = true;
+        printf("Save all messages: %d \n", all_messages);
     }
 
     //--Prom_tuned
@@ -597,6 +605,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->Stats = out_stats;
     args_ptr->BBOTuning = bbo_tuning;
     args_ptr->AllowCROS = allow_cros;
+    args_ptr->AllMessages = all_messages;
 }
 
 void
