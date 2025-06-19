@@ -91,4 +91,5 @@ fi
 
 rm -rf target_results
 rm -rf test_results
+find . -name "Data.csv" -type f -delete
 exit 0
