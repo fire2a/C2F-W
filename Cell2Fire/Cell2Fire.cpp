@@ -19,6 +19,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 // Include libraries
 #include <algorithm>
 #include <boost/random.hpp>
+#include <boost/filesystem.hpp>
 #include <chrono>
 #include <cmath>
 #include <iomanip>
@@ -36,6 +37,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include <vector>
 
 using namespace std;
+namespace fs = boost::filesystem;
 
 // Global Variables (DFs with cells and weather info)
 inputs* df_ptr;
@@ -2289,7 +2291,10 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
     {
         this->totalFirePeriods = this->args.MaxFirePeriods;
     }
-    WeatherHistory[simExt] = weatherFilename;
+    fs::path weather_path(weatherFilename);
+    fs::path in_folder(this->args.InFolder);
+    fs::path relative_path = fs::relative(weather_path, in_folder);
+    WeatherHistory[simExt] = relative_path.string();
 }
 
 /******************************************************************************
