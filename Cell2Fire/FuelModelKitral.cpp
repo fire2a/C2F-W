@@ -579,7 +579,7 @@ setup_crown_const(inputs* data)
 float
 rate_of_spread_k(inputs* data,
                  fuel_coefs* ptr,
-                 main_outs* at) // incluir efecto pendiente aqui y no afuera
+                 main_outs* at)  // incluir efecto pendiente aqui y no afuera
 {
     float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps, fp;
 
@@ -587,7 +587,7 @@ rate_of_spread_k(inputs* data,
     ws = data->ws;
     tmp = data->tmp;
     rh = data->rh;
-    ps = at->se; // hacerlo con elevaciones
+    ps = at->se;  // hacerlo con elevaciones
     p1 = -12.86;
     p2 = 0.04316;
     p3 = 13.8;
@@ -595,7 +595,7 @@ rate_of_spread_k(inputs* data,
     float steepness = 0.081;
     float sigmoid = 1.0 / (1.0 + exp(-steepness * (rh - midpoint)));
     ch = 4 + 16 * sigmoid - 0.00982 * tmp;
-    fmc = fmcs[data->nftype][0] * 60; // factor de propagacion en m/min
+    fmc = fmcs[data->nftype][0] * 60;  // factor de propagacion en m/min
     fch = min(51.43, 52.3342 * pow(ch, -1.3035));
     fv = p1 * exp(-p2 * ws) + p3;
     if (ps == 0)
@@ -625,8 +625,8 @@ float
 l_to_b(float ws, fuel_coefs* ptr)
 {
     float l1, l2, lb;
-    l1 = 2.233;    // 1.411; // ptr->l1 ;
-    l2 = -0.01031; // 0.01745; // ptr->l2 ;
+    l1 = 2.233;     // 1.411; // ptr->l1 ;
+    l2 = -0.01031;  // 0.01745; // ptr->l2 ;
     lb = 1.0 + pow(l1 * exp(-l2 * ws) - l1, 2.0);
     return lb;
 }
@@ -650,7 +650,7 @@ backfire_ros_k(main_outs* at, snd_outs* sec)
 float
 slope_effect(float elev_i, float elev_j, int cellsize)
 {
-    float ps_ij = (elev_j - elev_i) / (cellsize / 4.); // cellsize corresponds to the perimeter of the cell
+    float ps_ij = (elev_j - elev_i) / (cellsize / 4.);  // cellsize corresponds to the perimeter of the cell
     float se;
     se = 1. + 0.023322 * ps_ij + 0.00013585 * std::pow(ps_ij, 2);
 
@@ -659,7 +659,7 @@ slope_effect(float elev_i, float elev_j, int cellsize)
 
 // TODO: citation needed
 float
-flame_length(inputs* data, main_outs* at) // REVISAR ESTA ECUACI�N
+flame_length(inputs* data, main_outs* at)  // REVISAR ESTA ECUACI�N
 {
     float ib, fl;
 
@@ -702,7 +702,7 @@ byram_intensity(inputs* data, main_outs* at)
     wa = fls_david[data->nftype][0];
     ib = H * wa * ros / 60;
     ib = std::ceil(ib * 100.0) / 100.0;
-    return ib; // unidad de medida
+    return ib;  // unidad de medida
 }
 
 bool
@@ -748,7 +748,7 @@ crownfractionburn(inputs* data, main_outs* at, int FMC)
 // TODO: citation needed
 float
 active_rate_of_spreadPL04(inputs* data,
-                          main_outs* at) // En KITRAL SE USA PL04
+                          main_outs* at)  // En KITRAL SE USA PL04
 {
     float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps, ros_active, rospl04, fp, ros_final, ros;
 
@@ -762,9 +762,9 @@ active_rate_of_spreadPL04(inputs* data,
     p3 = 13.8;
 
     ch = (-2.97374 + 0.262 * rh - 0.00982 * tmp);
-    fmc = 0.002712 * 60; // factor de propagacion en m/min de PL04
+    fmc = 0.002712 * 60;  // factor de propagacion en m/min de PL04
     fch = (389.1624 + 14.3 * ch + 0.02 * pow(ch, 2.0))
-          / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0)); // es -14.3 segun el libro
+          / (3.559 + 1.6615 * ch + 2.62392 * pow(ch, 2.0));  // es -14.3 segun el libro
     fv = p1 * exp(-p2 * ws * 0.4) + p3;
     // fp = 1.0 + 0.023322 * data->ps + 0.00013585 * pow(data->ps, 2.0);
     if (ps == 0)
@@ -775,14 +775,14 @@ active_rate_of_spreadPL04(inputs* data,
     {
         rospl04 = fmc * fch * (fv + ps);
     }
-    ros_active = 3.34 * rospl04; // if rac*cbd>3.0, aplicar
+    ros_active = 3.34 * rospl04;  // if rac*cbd>3.0, aplicar
     // ros_final=3.34*rospl04
     return ros_active;
 }
 
 // TODO: citation needed
 float
-final_rate_of_spreadPL04(main_outs* at) // En KITRAL SE USA PL04
+final_rate_of_spreadPL04(main_outs* at)  // En KITRAL SE USA PL04
 {
     float ros_active, ros_final, ros;
     ros = at->rss;
@@ -792,7 +792,7 @@ final_rate_of_spreadPL04(main_outs* at) // En KITRAL SE USA PL04
 }
 
 bool
-checkActive(inputs* data, main_outs* at, int FMC) // En KITRAL SE USA PL04
+checkActive(inputs* data, main_outs* at, int FMC)  // En KITRAL SE USA PL04
 {
     float ros_critical, cbd, H, wa, i0, cbh;
     bool active;
@@ -951,9 +951,8 @@ calculate_k(inputs* data,
     }
     else if (activeCrown)
     {
-        at->cfb = crownfractionburn(data,
-                                    at,
-                                    FMC); // lo calculamos igual porque lo necesitamos para el output
+        at->cfb = crownfractionburn(data, at,
+                                    FMC);  // lo calculamos igual porque lo necesitamos para el output
         hptr->ros = at->ros_active;
         at->rss = hptr->ros;
         bptr->ros = backfire_ros10_k(hptr, sec);

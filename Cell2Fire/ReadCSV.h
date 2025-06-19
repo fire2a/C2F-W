@@ -39,9 +39,10 @@ class CSVReader
 
     // Constructor
     CSVReader(std::string filename, std::string delm = ",");
+    CSVReader();
 
     // Function to fetch data from a CSV File
-    std::vector<std::vector<std::string>> getData();
+    std::vector<std::vector<std::string>> getData(string filename);
 
     // Print data to console (Debug)
     void printData(std::vector<std::vector<std::string>>& DF);
@@ -56,8 +57,10 @@ class CSVReader
     void parsePROB(std::vector<float>& probabilities, std::vector<std::vector<std::string>>& DF, int NCells);
 
     // Populate Weather DF (Spanish version)
-    void
-    parseWeatherDF(weatherDF* wt_ptr, arguments* args_ptr, std::vector<std::vector<std::string>>& DF, int WPeriods);
+    void parseWeatherDF(std::vector<weatherDF>& wdf,
+                        arguments* args_ptr,
+                        std::vector<std::vector<std::string>>& DF,
+                        int WPeriods);
 
     // Populate Ignition Points
     void parseIgnitionDF(std::vector<int>& ig, std::vector<std::vector<std::string>>& DF, int IgPeriods);
@@ -80,6 +83,7 @@ class CSVReader
 
     // Prints individual weather row info
     void printWeatherDF(weatherDF wdf);
+    void setFilename(string name);
 };
 
 #endif
