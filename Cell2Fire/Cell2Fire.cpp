@@ -1410,7 +1410,8 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
                     InitCell(bc);
                     it = this->Cells_Obj.find(bc);
                 }
-                if (this->burntCells.find(bc) == this->burntCells.end())
+                if ((this->burntCells.find(bc) == this->burntCells.end() && !this->args_ptr->AllMessages)
+                    || this->args_ptr->AllMessages)
                 {
                     if (this->Cells_Obj.find(bc) == this->Cells_Obj.end())
                     {
@@ -1451,12 +1452,6 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
                     if (checkBurnt)
                     {
                         burntList.insert(it->second.realId);
-                        auto lt = this->availCells.find(bc);
-                        if (lt != this->availCells.end())
-                        {
-                            this->availCells.erase(bc);
-                            // cout << this->fire_period[0] << " erased from availCells " << bc << endl;
-                        }
                         auto emitter = this->Cells_Obj.find(sublist.first);
                         // emitter->second.ROSAngleDir.erase()
                         // std::cout << "step " << this->fire_period[this->year - 1] << " Cell " << it->second.realId
@@ -1465,11 +1460,22 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
                         if (this->args_ptr->AllMessages)
                         {
                             emitter->second.ROSAngleDir.erase(emitter->second.angleDict[it->second.realId]);
-                            // cout << "[all messages] from " << emitter->second.realId << " erased " <<
-                            // it->second.realId << endl;
+                            it->second.ROSAngleDir.erase(it->second.angleDict[sublist.first]);
+                            /*cout << "burned " << bc << endl;
+                            cout << "\t from " << emitter->second.realId << " erased " << it->second.realId << " angle "
+                                 << emitter->second.angleDict[it->second.realId] << endl;
+                            cout << "\t from " << it->second.realId << " erased " << emitter->second.realId << " angle "
+                                 << it->second.angleDict[emitter->second.realId] << endl;
+                                 */
                         }
                         else
                         {
+                            auto lt = this->availCells.find(bc);
+                            if (lt != this->availCells.end())
+                            {
+                                this->availCells.erase(bc);
+                                // cout << this->fire_period[0] << " erased from availCells " << bc << endl;
+                            }
                             for (auto& angle : it->second.angleToNb)
                             {
                                 int origToNew = angle.first;
