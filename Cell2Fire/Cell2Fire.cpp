@@ -1452,13 +1452,14 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
                     if (checkBurnt)
                     {
                         burntList.insert(it->second.realId);
-                        auto emitter = this->Cells_Obj.find(sublist.first);
+
                         // emitter->second.ROSAngleDir.erase()
                         // std::cout << "step " << this->fire_period[this->year - 1] << " Cell " << it->second.realId
                         //          << " got burnt by  " << emitter->second.realId << " with emitter angle to nb "
                         //          << emitter->second.angleDict[it->second.realId] << endl;
                         if (this->args_ptr->AllMessages)
                         {
+                            auto emitter = this->Cells_Obj.find(sublist.first);
                             emitter->second.ROSAngleDir.erase(emitter->second.angleDict[it->second.realId]);
                             it->second.ROSAngleDir.erase(it->second.angleDict[sublist.first]);
                             /*cout << "burned " << bc << endl;
