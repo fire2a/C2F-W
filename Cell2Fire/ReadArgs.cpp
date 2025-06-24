@@ -207,6 +207,13 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         printf("Save all messages: %d \n", all_messages);
     }
 
+    //--all-messages
+    if (cmdOptionExists(argv, argv + argc, "--all-messages"))
+    {
+        all_messages = true;
+        printf("Save all messages: %d \n", all_messages);
+    }
+
     //--Prom_tuned
     // if (cmdOptionExists(argv, argv + argc, "--PromTuned")) {
     //	prom_tuned = true;
