@@ -1395,107 +1395,95 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
     if (this->messagesSent && !this->repeatFire)
     {
 
-        // frequency array
-        std::unordered_map<int, int> globalMessagesList;
-        for (auto& sublist : sendMessageList)
-        {
-            for (int val : sublist.second)
-            {
-                if (globalMessagesList.find(val) == globalMessagesList.end())
-                {
-                    globalMessagesList[val] = 1;
-                }
-                else
-                {
-                    globalMessagesList[val] = globalMessagesList[val] + 1;
-                }
-            }
-        }
-
-        // Initialize cells if needed (getting messages)
-        for (auto& _bc : globalMessagesList)
-        {
-            int bc = _bc.first;
-            if (this->Cells_Obj.find(bc) == this->Cells_Obj.end()
-                && this->burntCells.find(bc) == this->burntCells.end())
-            {
-                // Initialize cell, insert it inside the unordered map
-                InitCell(bc);
-                it = this->Cells_Obj.find(bc);
-            }
-        }
-
-        // Get burnt loop
-        if (this->args.verbose)
-        {
-            for (auto& _bc : globalMessagesList)
-            {
-                printf("CELL %d inside global message list \n", _bc.first);
-            }
-        }
-
         std::unordered_set<int> burntList;
         bool checkBurnt;
-        for (auto& _bc : globalMessagesList)
+        // frequency array
+        // std::unordered_map<int, int> globalMessagesList;
+        for (auto& sublist : sendMessageList)
         {
-            // printf("\n\nWE ARE DEBUGGING!!!! CELL TO BE ANALYZED GET BURNT IS
-            // %d\n", _bc.first);
-            int bc = _bc.first;
-            if (this->burntCells.find(bc) == this->burntCells.end())
+            for (int bc : sublist.second)
             {
-                if (this->Cells_Obj.find(bc) == this->Cells_Obj.end())
+                if (this->Cells_Obj.find(bc) == this->Cells_Obj.end()
+                    && this->burntCells.find(bc) == this->burntCells.end())
                 {
-
                     // Initialize cell, insert it inside the unordered map
                     InitCell(bc);
                     it = this->Cells_Obj.find(bc);
                 }
-                else
-                    it = this->Cells_Obj.find(bc);
-
-                // Check if burnable, then check potential ignition
-                if (it->second.fType != 0)
+                if (this->burntCells.find(bc) == this->burntCells.end())
                 {
-                    checkBurnt = it->second.get_burned(this->fire_period[this->year - 1],
-                                                       1,
-                                                       this->year,
-                                                       df,
-                                                       this->coef_ptr,
-                                                       this->args_ptr,
-                                                       &this->wdf[this->weatherPeriod],
-                                                       this->activeCrown,
-                                                       this->perimeterCells);
-                }
-                else
-                {
-                    checkBurnt = false;
-                }
-
-                // Print-out regarding the burnt cell
-                if (this->args.verbose)
-                {
-                    std::cout << "\nCell " << it->second.realId << " got burnt (1 true, 0 false): " << checkBurnt
-                              << std::endl;
-                }
-
-                // Update the burntlist
-                if (checkBurnt)
-                {
-                    burntList.insert(it->second.realId);
-
-                    // Cleaning step
-                    // Fire can't be propagated back
-                    int cellNum = it->second.realId - 1;
-                    for (auto& angle : it->second.angleToNb)
+                    if (this->Cells_Obj.find(bc) == this->Cells_Obj.end())
                     {
-                        int origToNew = angle.first;
-                        // Which neighbor am I to the burnt cell
-                        int newToOrig = (origToNew + 180) % 360;
-                        int adjCellNum = angle.second;  // Check
-                        auto adjIt = Cells_Obj.find(adjCellNum);
-                        if (adjIt != Cells_Obj.end())
+
+                        // Initialize cell, insert it inside the unordered map
+                        InitCell(bc);
+                        it = this->Cells_Obj.find(bc);
+                    }
+                    else
+                        it = this->Cells_Obj.find(bc);
+
+                    // Check if burnable, then check potential ignition
+                    if (it->second.fType != 0)
+                    {
+                        checkBurnt = it->second.get_burned(this->fire_period[this->year - 1],
+                                                           1,
+                                                           this->year,
+                                                           df,
+                                                           this->coef_ptr,
+                                                           this->args_ptr,
+                                                           &this->wdf[this->weatherPeriod],
+                                                           this->activeCrown,
+                                                           this->perimeterCells);
+                    }
+                    else
+                    {
+                        checkBurnt = false;
+                    }
+
+                    // Print-out regarding the burnt cell
+                    if (this->args.verbose)
+                    {
+                        std::cout << "\nCell " << it->second.realId << " got burnt (1 true, 0 false): " << checkBurnt
+                                  << std::endl;
+                    }
+
+                    // Update the burntlist
+                    if (checkBurnt)
+                    {
+                        burntList.insert(it->second.realId);
+                        auto lt = this->availCells.find(bc);
+                        if (lt != this->availCells.end())
                         {
-                            adjIt->second.ROSAngleDir.erase(newToOrig);
+                            this->availCells.erase(bc);
+                            // cout << this->fire_period[0] << " erased from availCells " << bc << endl;
+                        }
+                        auto emitter = this->Cells_Obj.find(sublist.first);
+                        // emitter->second.ROSAngleDir.erase()
+                        // std::cout << "step " << this->fire_period[this->year - 1] << " Cell " << it->second.realId
+                        //          << " got burnt by  " << emitter->second.realId << " with emitter angle to nb "
+                        //          << emitter->second.angleDict[it->second.realId] << endl;
+                        if (this->args_ptr->AllMessages)
+                        {
+                            emitter->second.ROSAngleDir.erase(emitter->second.angleDict[it->second.realId]);
+                            // cout << "[all messages] from " << emitter->second.realId << " erased " <<
+                            // it->second.realId << endl;
+                        }
+                        else
+                        {
+                            for (auto& angle : it->second.angleToNb)
+                            {
+                                int origToNew = angle.first;
+                                // Which neighbor am I to the burnt cell
+                                int newToOrig = (origToNew + 180) % 360;
+                                int adjCellNum = angle.second;  // Check
+                                auto adjIt = Cells_Obj.find(adjCellNum);
+                                if (adjIt != Cells_Obj.end())
+                                {
+                                    adjIt->second.ROSAngleDir.erase(newToOrig);
+                                    // cout << "from " << adjIt->second.realId << " erased " << it->second.realId <<
+                                    // endl;
+                                }
+                            }
                         }
                     }
                 }
@@ -1516,15 +1504,6 @@ Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList
         for (auto& bc : burntList)
         {
             this->burningCells.insert(bc);
-        }
-
-        for (auto& bc : burningCells)
-        {
-            auto lt = this->availCells.find(bc);
-            if (lt != this->availCells.end())
-            {
-                this->availCells.erase(bc);
-            }
         }
 
         // Display info for debugging
