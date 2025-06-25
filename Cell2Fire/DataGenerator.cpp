@@ -311,9 +311,8 @@ DataGrids(const std::string& filename, std::vector<float>& data, int nCells)
  *
  * @param filename Name of fuel data file.
  * @param Dictionary Mapping of fuel type numeric ID to fuel type code.
- * @return A tuple containing: vector of fuel type per cell as numeric ID,
- * vector of fuel type per cell as model code, number of rows in grid, number of
- * columns in grid, cell size.
+ * @return A tuple containing: vector of fuel type per cell as numeric ID, vector of fuel type per cell as model code,
+ * number of rows in grid, number of columns in grid, cell size.
  */
 std::tuple<std::vector<int>, std::vector<std::string>, int, int, float>
 ForestGridTif(const std::string& filename, const std::unordered_map<std::string, std::string>& Dictionary)

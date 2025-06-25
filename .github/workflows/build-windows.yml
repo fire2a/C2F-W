@@ -1,4 +1,4 @@
-name: build windows
+name: build and test windows
 
 on:
   # pull_request:
@@ -18,6 +18,27 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Bump version in header (Windows)
+      shell: pwsh
+      run: |
+        if ( "${{ github.event_name }}" -eq "pull_request" ){
+          $version="${{ github.sha }}"
+        }
+        if ("${{ github.event_name }}" -eq "workflow_dispatch" ){
+          $version="${{ github.sha }}"
+        } 
+        if ( ("${{github.event_name}}" -eq "push") -and ("${{github.ref_type}}" -eq "tag" )){
+          $ref="${{ github.ref }}"
+          $version=$ref.Split("/")[-1]
+        }
+        
+        Write-Host "Setting version to $version"
+        
+        $path = "Cell2Fire\Cell2Fire.h"
+        (Get-Content $path) -replace 'C2FW_VERSION\s*=\s*".*?"', "C2FW_VERSION = `"$version`"" | Set-Content $path
+        
+        Select-String 'C2FW_VERSION' $path
+
     - name: Cache Boost
       id: cache-boost
       uses: actions/cache@v4
@@ -33,20 +54,10 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          Cell2Fire/include/dirent-1.24
-        key: dirent-${{ runner.os }}-1.24
+          Cell2Fire/include/dirent-1.25
+        key: dirent-${{ runner.os }}-1.25
         restore-keys: |
           dirent-${{ runner.os }}-
-
-    - name: Cache Eigen
-      id: cache-eigen
-      uses: actions/cache@v4
-      with:
-        path: |
-          Cell2Fire/include/eigen3
-        key: eigen-${{ runner.os }}-776d86d8df175b7036467a0ef131bd34755f847d
-        restore-keys: |
-          eigen-${{ runner.os }}-
 
     - name: Cache vcpkg
       id: cache-vcpkg
@@ -59,11 +70,10 @@ jobs:
           vcpkg-${{ runner.os }}-
 
     - name: Download dependencies
-      if: steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-eigen.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true'
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true'
       env:
         CACHE_BOOST: ${{ steps.cache-boost.outputs.cache-hit }}
         CACHE_DIRENT: ${{ steps.cache-dirent.outputs.cache-hit }}
-        CACHE_EIGEN: ${{ steps.cache-eigen.outputs.cache-hit }}
         CACHE_VCPKG: ${{ steps.cache-vcpkg.outputs.cache-hit }}
       run: |
         cd Cell2Fire
@@ -75,7 +85,7 @@ jobs:
         # boost
         if ($CACHE_BOOST -ne 'true') {
           $fname = "boost_1_84_0.tar.gz"
-          Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/$fname -OutFile $fname
+          Invoke-WebRequest -Uri https://archives.boost.io/release/1.84.0/source/$fname -OutFile $fname
           tar -xzf $fname -C include
         } else {
           echo "Boost already cached"
@@ -83,23 +93,10 @@ jobs:
 
         # dirent
         if ($CACHE_DIRENT -ne 'true') {
-          Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.24.zip -OutFile dirent-1.24.zip
-          Expand-Archive -Path .\dirent-1.24.zip -DestinationPath include
+          Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.25.zip -OutFile dirent-1.25.zip
+          Expand-Archive -Path .\dirent-1.25.zip -DestinationPath include
         } else {
           echo "Dirent already cached"
-        }
-
-        # eigen
-        if ($CACHE_EIGEN -ne 'true') {
-          $project_id = 15462818
-          $commit_sha = "776d86d8df175b7036467a0ef131bd34755f847d"
-          $path = "Eigen"
-          $url = "https://gitlab.com/api/v4/projects/$project_id/repository/archive?sha=$commit_sha&path=$path"
-          Invoke-WebRequest -Uri $url -OutFile eigen.tar.gz
-          tar -xzf eigen.tar.gz
-          mv eigen-$commit_sha-$commit_sha-Eigen include\eigen3
-        } else {
-          echo "Eigen already cached"
         }
 
         # tiffio
@@ -118,6 +115,20 @@ jobs:
         # Write-Host "Listing all files in installed\x64-windows:"
         # Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
 
+    - name: Cache Catch2 header
+      uses: actions/cache@v4
+      with:
+        path: Cell2Fire\include\catch2\catch.hpp
+        key: windows-catch2
+
+    - name: Download Catch2 header
+      run: |
+        cd Cell2Fire
+        if (!(Test-Path "include\catch2\catch.hpp")) {
+          New-Item -ItemType Directory -Path "include\catch2" -Force
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp" -OutFile "include\catch2\catch.hpp"
+        }
+
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
@@ -125,7 +136,20 @@ jobs:
       run: |
         cd Cell2Fire
         msbuild Cell2Fire.sln /p:Configuration=Release
-      
+
+    - name: Run Unit Tests
+      run: |
+        & "Cell2Fire\x64\Release\WindowsTests.exe"
+        $exitCode = $LASTEXITCODE
+        exit $exitCode
+      shell: pwsh
+
+    - name: Run Regression Test
+      run: |
+        cd test
+        ./test.ps1
+      shell: pwsh
+
     - name: Gather output
       run: |
         mkdir binaries

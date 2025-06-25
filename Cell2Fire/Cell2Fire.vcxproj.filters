@@ -18,9 +18,6 @@
     <ClCompile Include="Cell2Fire.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ellipse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Forest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -57,12 +54,12 @@
     <ClCompile Include="DataGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\test\unit_tests\test_kitral.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cell2Fire.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ellipse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Forest.h">

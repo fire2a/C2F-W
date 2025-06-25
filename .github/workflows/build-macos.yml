@@ -14,58 +14,130 @@ jobs:
   build:
     strategy:
       matrix:
-        runner: ["macOS-12", "macOS-13", "macOS-14"]
+        runner: [ "macOS-13", "macOS-14" ]
     runs-on: ${{ matrix.runner }}
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Check Runner
-      run: |
-        # arch
-        # echo "runner: ${{ matrix.runner }}.$(arch).$(uname -m)"
-        # mayor version: sw_vers -productVersion | cut -d '.' -f 1
-        # Darwin : uname -s
-        echo "suffix="$(uname -s).${{ matrix.runner }}.$(arch)"" >> $GITHUB_ENV
-        brew config
+      - name: Bump version in code
+        run: |
+          brew install gsed
+          run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            version=${{ github.sha }}
+          fi
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version=${{ github.sha }}
+          fi  
+          if [[ "${{github.event_name}}" == "push" && "${{github.ref_type}}" == "tag" ]]; then
+            version=${{ github.ref_name }}
+          fi
+          gsed -i "s/C2FW_VERSION.*/C2FW_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
+          grep C2FW_VERSION Cell2Fire/Cell2Fire.h
 
-    - name: Install Dependencies
-      run: |
-        brew install gcc@12 libomp eigen boost libtiff # llvm ?
+      - name: Check Runner
+        run: |
+          # arch
+          # echo "runner: ${{ matrix.runner }}.$(arch).$(uname -m)"
+          # mayor version: sw_vers -productVersion | cut -d '.' -f 1
+          # Darwin : uname -s
+          echo "suffix="$(uname -s).${{ matrix.runner }}.$(arch)"" >> $GITHUB_ENV
+          brew config
 
-    - name: Build
-      run: |
-        cd Cell2Fire
-        make clean
-        make -f makefile.macos
-        otool -L Cell2Fire > otool_${{ env.suffix }}.txt
-        mv Cell2Fire Cell2Fire_${{ env.suffix }}
+      - name: Install Dependencies
+        run: |
+          brew install gcc@12 libomp boost libtiff # llvm ?
 
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: binaries_${{ env.suffix }}
-        path: |
-          Cell2Fire/otool_${{ env.suffix }}.txt
-          Cell2Fire/Cell2Fire_${{ env.suffix }}
+      - name: Build
+        run: |
+          cd Cell2Fire
+          make clean
+          make -f makefile.macos
+          otool -L Cell2Fire > otool_${{ env.suffix }}.txt
+          mv Cell2Fire Cell2Fire_${{ env.suffix }}
 
-    - name: Install Static Dependencies
-      run: |
-        brew install gcc@12 libomp eigen boost libtiff jpeg-turbo xz zstd zlib 
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries_${{ env.suffix }}
+          path: |
+            Cell2Fire/otool_${{ env.suffix }}.txt
+            Cell2Fire/Cell2Fire_${{ env.suffix }}
 
-    - name: Build Static
-      run: |
-        cd Cell2Fire
-        make clean
-        make -f makefile.macos-static
-        otool -L Cell2Fire > otool_${{ env.suffix }}-static.txt
-        mv Cell2Fire Cell2Fire_${{ env.suffix }}-static
+      - name: Install Static Dependencies
+        run: |
+          brew install gcc@12 libomp boost libtiff jpeg-turbo xz zstd zlib
 
-    - name: Upload Static
-      uses: actions/upload-artifact@v4
-      with:
-        name: binaries_${{ env.suffix }}-static
-        path: |
-          Cell2Fire/otool_${{ env.suffix }}-static.txt
-          Cell2Fire/Cell2Fire_${{ env.suffix }}-static
+      - name: Build Static
+        run: |
+          cd Cell2Fire
+          make clean
+          make -f makefile.macos-static
+          otool -L Cell2Fire > otool_${{ env.suffix }}-static.txt
+          mv Cell2Fire Cell2Fire_${{ env.suffix }}-static
+
+      - name: Upload Static
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries_${{ env.suffix }}-static
+          path: |
+            Cell2Fire/otool_${{ env.suffix }}-static.txt
+            Cell2Fire/Cell2Fire_${{ env.suffix }}-static
+  test:
+    needs: build
+    strategy:
+      matrix:
+        runner: [ "macOS-13", "macOS-14" ]
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          brew install gcc@12 libomp boost libtiff
+
+      - name: Get Environment
+        run: |
+          echo "suffix="$(uname -s).${{ matrix.runner }}.$(arch)"" >> $GITHUB_ENV
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: binaries_${{ env.suffix }}
+          path: Cell2Fire
+          merge-multiple: true
+
+      - name: Cache Catch2 header
+        uses: actions/cache@v4
+        with:
+          path: catch.hpp
+          key: ${{ runner.os }}-catch2
+
+      - name: Download Catch2 header
+        run: |
+          BREW_PREFIX=$(brew --prefix)
+          INCLUDE_DIR="$BREW_PREFIX/include/catch2"
+          
+          if [ ! -f "$INCLUDE_DIR/catch.hpp" ]; then
+          mkdir -p "$INCLUDE_DIR"
+          curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o "$INCLUDE_DIR/catch.hpp"
+          fi
+
+      - name: chmod
+        run: |
+          ls Cell2Fire
+          chmod +x Cell2Fire/Cell2Fire*
+
+      - name: Unit Test
+        run: |
+          cd Cell2Fire
+          make -f makefile.macos tests
+
+#      - name: Bash Test
+#        run: |
+#          cd test
+#          bash test.sh _${{ env.suffix }}
