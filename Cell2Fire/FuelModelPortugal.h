@@ -1,5 +1,5 @@
 #ifndef FUELMODELPORTUGAL
-#define FUELMODELPOTUGAL
+#define FUELMODELPORTUGAL
 #include "Cells.h"
 #include "ReadArgs.h"
 #include <iostream>
