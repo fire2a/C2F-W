@@ -34,16 +34,16 @@ float l_to_b(float ws);
 float backfire_ros_p(main_outs* at, snd_outs* sec);
 
 // Flame length [m])
-float flame_length(inputs* data, fuel_coefs* ptr);
+float flame_length_p(inputs* data, fuel_coefs* ptr);
 
 // Angle of the flame w.r.t. horizontal surface (Putnam's)
 float angleFL_p(inputs* data, fuel_coefs* ptr);
 
 // Transformation from FL to FH using angle
-float flame_height(inputs* data, fuel_coefs* ptr);
+float flame_height_p(inputs* data, fuel_coefs* ptr);
 
 // byram intensity
-float byram_intensity(inputs* data, fuel_coefs* ptr);
+float byram_intensity_p(inputs* data, fuel_coefs* ptr);
 
 // Type of fire (Crown = 1, SROS = 0)
 bool fire_type(inputs* data, fuel_coefs* ptr);
