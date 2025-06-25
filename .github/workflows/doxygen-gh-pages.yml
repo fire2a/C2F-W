@@ -1,0 +1,34 @@
+---
+name: Doxygen GitHub Pages Deploy Action
+
+on:
+  push:
+    branches:
+      - docs
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Doxygen
+        run: sudo apt install -y doxygen graphviz texlive
+
+      - name: Generate Doxygen documentation
+        run: cd docs && doxygen Doxyfile
+
+      - name: Deploy to GitHub Pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd docs/html
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git init -b gh-pages
+          git add -A
+          git commit -m "Deploy to GitHub Pages"
+          git push -f https://x-access-token:${GITHUB_TOKEN}@github.com/fire2a/C2F-W.git gh-pages
