@@ -387,7 +387,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
             pattern = 1;  // std::stoi (DF[i][18], &sz);
 
         if (DF[i][24].compare("") == 0)
-            tree_height = -9999;
+            tree_height = 0;
         else
             tree_height = std::stof(DF[i][24], &sz);
 

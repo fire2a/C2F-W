@@ -20,7 +20,6 @@ std::unordered_map<int, std::vector<float>> p_coeff_p;
 std::unordered_map<int, std::vector<float>> q_coeff_p;
 std::unordered_map<int, std::vector<float>> fm_parameters_p;
 
-int16_t HEAT_YIELD_P = 18000;  // unidad kJ/kg
 /*
     Functions
 */
@@ -1026,27 +1025,6 @@ flame_length_p(inputs* data, fuel_coefs* ptr)
     return fl;
 }
 
-/**
- * @brief Calculates the flame length of a cell when there is crown fire.
- * @param intensity Byram intensity for crown fires
- * @return the flame length
- */
-
-// TODO: citation needed
-float
-crown_flame_length_p(float intensity)
-{
-    float fl = 0.1 * pow(intensity, 0.5);
-    if (fl < 0.01)
-    {
-        return 0;
-    }
-    else
-    {
-        return std::ceil(fl * 100.0) / 100.0;
-    }
-}
-
 float
 angleFL_p(inputs* data, fuel_coefs* ptr)
 {
@@ -1076,36 +1054,6 @@ byram_intensity_p(main_outs* at, fuel_coefs* ptr)
     ib = 259.833 * pow(fl, 2.174);
     ib = std::ceil(ib * 100.0) / 100.0;
     return ib;
-}
-
-/**
- * Calculates byram fire intensity when there is active crown fire.
- * In order for this to be calculated, the input folder must contain
- * files with CBD, CBH and tree height data for each cell.
- * @param at Structure containing the cell's output data.
- * @param data Structure containing the cell's input data.
- * @return Fire intensity.
- */
-float
-crown_byram_intensity_p(main_outs* at, inputs* data)
-{
-    float canopy_height;
-    if (data->tree_height == -9999)
-    {
-        canopy_height = data->cbh * 2;
-    }
-    else
-    {
-        canopy_height = data->tree_height - data->cbh;
-    }
-    if (canopy_height < 0)
-    {
-        std::cerr << "Tree height is lower than canopy base height, please provide valid files.\n"
-                     "Could not calculate crown Byram intensity due to invalid input data"
-                  << std::endl;
-        throw std::runtime_error("Could not calculate crown Byram intensity due to invalid input data");
-    }
-    return std::ceil((HEAT_YIELD_P / 60) * data->cbd * canopy_height * at->ros_active * 100.0) / 100.0;
 }
 
 int
@@ -1331,8 +1279,6 @@ calculate_p(inputs* data,
             cout << "bptr->ros = " << bptr->ros << "\n";
             cout << "fptr->ros = " << fptr->ros << "\n";
         }
-        at->crown_intensity = crown_byram_intensity_p(at, data);
-        at->crown_flame_length = crown_flame_length_p(at->crown_intensity);
 
         at->a = (hptr->ros + bptr->ros) / 2.;
         at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
@@ -1347,8 +1293,6 @@ calculate_p(inputs* data,
         at->rss = hptr->ros;
         bptr->ros = backfire_ros10_p(hptr, sec);
         fptr->ros = flankfire_ros_p(hptr->ros, bptr->ros, sec->lb);
-        at->crown_intensity = crown_byram_intensity_p(at, data);
-        at->crown_flame_length = crown_flame_length_p(at->crown_intensity);
 
         if (args->verbose)
         {
@@ -1439,8 +1383,6 @@ determine_destiny_metrics_p(inputs* data, fuel_coefs* ptr, arguments* args, main
         if (crownFire)
         {
             metrics->cfb = crownfractionburn_p(data, metrics);
-            metrics->crown_intensity = crown_byram_intensity_p(metrics, data);
-            metrics->crown_flame_length = crown_flame_length_p(metrics->crown_intensity);
         }
         if (args->verbose)
         {
