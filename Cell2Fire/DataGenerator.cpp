@@ -950,6 +950,10 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     {
         lookupTable = InFolder + separator() + "fbp_lookup_table.csv";
     }
+    else if (Simulator == "P")
+    {
+        lookupTable = InFolder + separator() + "portugal_lookup_table.csv";
+    }
     else
     {
         std::cerr << "Error: Simulator not recognized:" << Simulator << std::endl;

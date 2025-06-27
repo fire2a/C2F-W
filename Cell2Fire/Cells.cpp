@@ -2,6 +2,7 @@
 #include "Cells.h"
 #include "FuelModelFBP.h"
 #include "FuelModelKitral.h"
+#include "FuelModelPortugal.h"
 #include "FuelModelSpain.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
@@ -495,6 +496,19 @@ Cells::manageFire(int period,
         calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
     }
 
+    else if (args->Simulator == "P")
+    {
+        calculate_p(&df_ptr[this->realId - 1],
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown);
+    }
+
     /*  ROSs DEBUG!   */
     if (args->verbose)
     {
@@ -623,7 +637,7 @@ Cells::manageFire(int period,
             {
                 std::cout << "     (angle, realized ros in m/min): (" << angle << ", " << ros << ")" << std::endl;
             }
-            if (args->Simulator == "S")
+            if (args->Simulator == "S" || args->Simulator == "P")
             {
                 // Slope effect
                 float se = slope_effect(df_ptr[this->realId - 1].elev, df_ptr[nb - 1].elev, this->perimeter / 4.);
@@ -665,6 +679,10 @@ Cells::manageFire(int period,
                 {
                     determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2);
                 }
+                else if (args->Simulator == "P")
+                {
+                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics);
+                }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
                 RateOfSpreads[this->realId - 1] = roundedRos;  // max(roundedRos, RateOfSpreads[this->realId - 1]);
@@ -677,7 +695,7 @@ Cells::manageFire(int period,
                 surfFraction[nb] = metrics.sfc;
                 SurfaceFlameLengths[this->realId - 1] = mainstruct.fl;
                 SurfaceFlameLengths[nb - 1] = metrics.fl;
-                if ((args->AllowCROS) && (args->Simulator == "S"))
+                if ((args->AllowCROS) && (args->Simulator == "S" || args->Simulator == "P"))
                 {
                     float comp_zero = 0;
                     MaxFlameLengths[this->realId - 1]
@@ -839,6 +857,18 @@ Cells::manageFireBBO(int period,
     {
         calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
     }
+    else if (args->Simulator == "P")
+    {
+        calculate_p(&df_ptr[this->realId - 1],
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown);
+    }
 
     /*  ROSs DEBUG!   */
     if (args->verbose)
@@ -988,6 +1018,10 @@ Cells::manageFireBBO(int period,
                 else if (args->Simulator == "C")
                 {
                     determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2);
+                }
+                else if (args->Simulator == "P")
+                {
+                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics);
                 }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
@@ -1139,6 +1173,11 @@ Cells::get_burned(int period,
     else if (args->Simulator == "C")
     {
         calculate_fbp(&df[this->id], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+    }
+    else if (args->Simulator == "P")
+    {
+        calculate_p(
+            &(df[this->id]), coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
     }
 
     if (args->verbose)
@@ -1299,7 +1338,18 @@ Cells::ignition(int period,
             calculate_fbp(
                 &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
         }
-
+        else if (args->Simulator == "P")
+        {
+            calculate_p(&df_ptr[this->realId - 1],
+                        coef,
+                        args,
+                        &mainstruct,
+                        &sndstruct,
+                        &headstruct,
+                        &flankstruct,
+                        &backstruct,
+                        activeCrown);
+        }
         if (args->verbose)
         {
             std::cout << "\nIn ignition function" << std::endl;

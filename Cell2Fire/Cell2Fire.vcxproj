@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -129,6 +129,7 @@
     <ClCompile Include="FuelModelFBP.cpp" />
     <ClCompile Include="FuelModelKitral.cpp" />
     <ClCompile Include="FuelModelSpain.cpp" />
+    <ClCompile Include="FuelModelPortugal.cpp" />
     <ClCompile Include="Lightning.cpp" />
     <ClCompile Include="ReadArgs.cpp" />
     <ClCompile Include="ReadCSV.cpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="FuelModelFBP.h" />
     <ClInclude Include="FuelModelKitral.h" />
     <ClInclude Include="FuelModelSpain.h" />
+    <ClInclude Include="FuelModelPortugal.cpp" />
     <ClInclude Include="Lightning.h" />
     <ClInclude Include="ReadArgs.h" />
     <ClInclude Include="ReadCSV.h" />

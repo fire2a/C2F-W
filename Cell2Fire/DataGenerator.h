@@ -47,4 +47,4 @@ void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>
 
 void GenDataFile(const std::string& InFolder, const std::string& Simulator);
 
-#endif  // DataGenerator.h
+#endif

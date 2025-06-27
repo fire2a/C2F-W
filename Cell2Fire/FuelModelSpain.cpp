@@ -2325,7 +2325,15 @@ byram_intensity(main_outs* at, fuel_coefs* ptr)
 float
 crown_byram_intensity(main_outs* at, inputs* data)
 {
-    float canopy_height = data->tree_height - data->cbh;
+    float canopy_height;
+    if (data->tree_height == -9999)
+    {
+        canopy_height = data->cbh * 2;
+    }
+    else
+    {
+        canopy_height = data->tree_height - data->cbh;
+    }
     if (canopy_height < 0)
     {
         std::cerr << "Tree height is lower than canopy base height, please provide valid files.\n"
