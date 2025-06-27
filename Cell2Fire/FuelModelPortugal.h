@@ -19,7 +19,7 @@
        Functions
 */
 // Initialize coefficients
-void initialize_coeff(int scenario);
+void initialize_coeff_p(int scenario);
 
 // Calculate flank fire
 float flankfire_ros_p(float ros, float bros, float lb);
@@ -28,7 +28,7 @@ float flankfire_ros_p(float ros, float bros, float lb);
 float rate_of_spread_p(inputs* data, fuel_coefs* ptr, main_outs* at);
 
 // Length-to-Breadth ratio
-float l_to_b(float ws);
+float l_to_b_p(float ws);
 
 // BROS
 float backfire_ros_p(main_outs* at, snd_outs* sec);
@@ -46,19 +46,19 @@ float flame_height_p(inputs* data, fuel_coefs* ptr);
 float byram_intensity_p(inputs* data, fuel_coefs* ptr);
 
 // Type of fire (Crown = 1, SROS = 0)
-bool fire_type(inputs* data, fuel_coefs* ptr);
+bool fire_type_p(inputs* data, fuel_coefs* ptr);
 
 // CROS adjustements
-float rate_of_spread10(inputs* data, arguments* args);
+float rate_of_spread10_p(inputs* data, arguments* args);
 
-bool checkActive(inputs* data, main_outs* at);
-float crownfractionburn(inputs* data, main_outs* at);
-float final_rate_of_spread10(inputs* data);
+bool checkActive_p(inputs* data, main_outs* at);
+float crownfractionburn_p(inputs* data, main_outs* at);
+float final_rate_of_spread10_p(inputs* data);
 // Back fire with CROS
 float backfire_ros10_p(fire_struc* hptr, snd_outs* sec);
 
 // Slope effect
-float slope_effect(inputs* data);
+float slope_effect_p(inputs* data);
 
 // Main function to populate spread outputs based on inputs provided from main class
 void calculate_p(inputs* data,

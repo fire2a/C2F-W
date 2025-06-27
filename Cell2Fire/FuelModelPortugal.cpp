@@ -1295,7 +1295,7 @@ calculate_p(inputs* data,
         if (activeCrown)
         {
             at->ros_active = rate_of_spread10_p(data, args);
-            if (!checkActive(data, at))
+            if (!checkActive_p(data, at))
             {
                 activeCrown = false;
             }
