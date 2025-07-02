@@ -20,7 +20,7 @@ PATH=../Cell2Fire:$PATH
 # run
 set -x # enable debug tracing
 for format in asc tif; do
-    for model in fbp kitral sb; do
+    for model in fbp kitral sb portugal; do
         echo running $model-$format
         output_folder=test_results/$model-$format
         mkdir -p $output_folder
@@ -31,6 +31,9 @@ for format in asc tif; do
         elif [ "$model" == "sb" ]; then
             additional_args="--scenario 1"
             sim_code="S"
+        elif [ "$model" == "portugal" ]; then
+                    additional_args="--scenario 1"
+                    sim_code="P"
         elif [ "$model" == "kitral" ]; then
             additional_args=""
             sim_code="K"
