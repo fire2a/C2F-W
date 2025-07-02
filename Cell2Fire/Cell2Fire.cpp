@@ -692,6 +692,10 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     {
         this->maxFlameLengthFolder = Cell2Fire::createOutputFolder("MaxFlameLength");
     }
+    if (this->args.Stats)
+    {
+        this->statsFolder = Cell2Fire::createOutputFolder("Statistics");
+    }
     // Crown Folder
     if (this->args.OutCrown && this->args.AllowCROS)
     {
@@ -1766,8 +1770,7 @@ Cell2Fire::Results()
             this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownIntensities);
     }
 
-    // Flame Length Statistics
-    // This will be used to store accumulated flame lengths across simulations
+    // Surface Flame Length
     if (this->args.OutFl)
     {
         this->surfaceFlameLengthFolder = this->args.OutFolder + "SurfaceFlameLength" + separator();
@@ -1784,6 +1787,47 @@ Cell2Fire::Results()
         CSVPloter.printASCII(
             this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfaceFlameLengths);
     }
+
+    // Crown Flame length
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator != "C"))
+    {
+        this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
+        std::string fileName;
+        std::ostringstream oss;
+        oss.str("");
+        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
+        fileName = this->crownFlameLengthFolder + "CrownFlameLength" + oss.str() + ".asc";
+        if (this->args.verbose)
+        {
+            std::cout << "We are generating the Crown Flame Length to a asc file " << fileName << std::endl;
+        }
+        CSVWriter CSVPloter(fileName, " ");
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFlameLengths);
+    }
+
+    // Max Flame length
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator != "C"))
+    {
+        this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength" + separator();
+        std::string fileName;
+        std::ostringstream oss;
+        oss.str("");
+        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
+        fileName = this->maxFlameLengthFolder + "MaxFlameLength" + oss.str() + ".asc";
+        if (this->args.verbose)
+        {
+            std::cout << "We are generating the Max Flame Length to a asc file " << fileName << std::endl;
+        }
+        CSVWriter CSVPloter(fileName, " ");
+        CSVPloter.printASCII(
+            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->maxFlameLengths);
+    }
+
+    // Flame Length Statistics
+    // This will be used to store accumulated flame lengths across simulations
+    if (this->args.Stats)
+    {
 
         for (int cell : this->burntCells)
         {
@@ -1807,11 +1851,9 @@ Cell2Fire::Results()
         }
         if (currentSim == args.TotalSims)
         {
-            std::string filename = "statistics.csv";
-            CSVWriter statisticsFolder("", "");
-            this->statsFolder = this->args.OutFolder + "Statistics" + separator();
-            statisticsFolder.MakeDir(this->statsFolder);
-            CSVWriter statsFile(this->statsFolder + filename);
+            std::ostringstream oss;
+            std::string Statsname = this->statsFolder + "statistics" + oss.str() + ".csv";
+            CSVWriter statsFile(Statsname);
             statsFile.printStats(Statistics);
         }
     }

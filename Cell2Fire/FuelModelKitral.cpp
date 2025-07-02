@@ -559,6 +559,23 @@ setup_const()
     cbds.insert(std::make_pair(DX02, cbd_dx02));
 }
 
+/**
+ * @brief Sets default value for crown constants when no raster files are provided for them.
+ * @param data Cell data
+ */
+void
+setup_crown_const(inputs* data)
+{
+    if (data->cbd == -9999)
+    {
+        data->cbd = cbds[data->nftype][0];
+    }
+    if (data->cbh == -9999)
+    {
+        data->cbh = cbhs[data->nftype][0];
+    }
+}
+
 float
 rate_of_spread_k(inputs* data,
                  fuel_coefs* ptr,
@@ -595,6 +612,7 @@ rate_of_spread_k(inputs* data,
     return at->rss * (at->rss >= 0);
 }
 
+// TODO: citation needed
 float
 flankfire_ros_k(float ros, float bros, float lb)
 {
@@ -602,6 +620,7 @@ flankfire_ros_k(float ros, float bros, float lb)
 }
 
 /* ----------------- Length-to-Breadth --------------------------*/
+// TODO: citation needed
 float
 l_to_b(float ws, fuel_coefs* ptr)
 {
@@ -613,6 +632,7 @@ l_to_b(float ws, fuel_coefs* ptr)
 }
 
 /* ----------------- Back Rate of Spread --------------------------*/
+// TODO: citation needed
 float
 backfire_ros_k(main_outs* at, snd_outs* sec)
 {
@@ -626,6 +646,7 @@ backfire_ros_k(main_outs* at, snd_outs* sec)
     return bros * (bros >= 0);
 }
 
+// TODO: citation needed
 float
 slope_effect(float elev_i, float elev_j, int cellsize)
 {
@@ -636,6 +657,7 @@ slope_effect(float elev_i, float elev_j, int cellsize)
     return se;
 }
 
+// TODO: citation needed
 float
 flame_length(inputs* data, main_outs* at)  // REVISAR ESTA ECUACI�N
 {
@@ -647,6 +669,7 @@ flame_length(inputs* data, main_outs* at)  // REVISAR ESTA ECUACI�N
     return fl;
 }
 
+// TODO: citation needed
 float
 angleFL(inputs* data, main_outs* at)
 {
@@ -659,6 +682,7 @@ angleFL(inputs* data, main_outs* at)
     return angle;
 }
 
+// TODO: citation needed
 float
 flame_height(inputs* data, main_outs* at)
 {
@@ -668,6 +692,7 @@ flame_height(inputs* data, main_outs* at)
     return fh;
 }
 
+// TODO: citation needed
 float
 byram_intensity(inputs* data, main_outs* at)
 {
@@ -693,28 +718,14 @@ float
 crown_byram_intensity_k(main_outs* at, inputs* data)
 {
     float cbd, cbh;
-    if (std::isnan(data->cbh))
-    {
-        cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        cbh = data->cbh;
-    }
+    cbd = data->cbd;
+    cbh = data->cbh;
     // CBH is 0,1012 * Height^(1,4822)
     float canopy_height = std::pow(cbh / 0.1012, 1 / 1.4822) - cbh;
     if (canopy_height < 0)
     {
         throw std::runtime_error("Tree height is lower than canopy base height, "
                                  "please provide valid files.");
-    }
-    if (std::isnan(data->cbd))
-    {
-        cbd = cbds[data->nftype][0];
-    }
-    else
-    {
-        cbd = data->cbd;
     }
     return std::ceil((hs[data->nftype][0] / 60) * cbd * canopy_height * at->ros_active * 100.0) / 100.0;
 }
@@ -745,48 +756,28 @@ fire_type(inputs* data, main_outs* at, int FMC)
     float intensity, critical_intensity, cbh;
     bool crownFire = false;
     intensity = at->sfi;
-    if (std::isnan(data->cbh))
-    {
-        cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        cbh = data->cbh;
-    }
-    // cbh = data->cbh;
+    cbh = data->cbh;
     critical_intensity = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
-    if ((intensity > critical_intensity) && cbh != 0)
+    if ((intensity > critical_intensity) && cbh > 0)
         crownFire = true;
     return crownFire;
 }
 
+// TODO: citation needed
 float
 crownfractionburn(inputs* data, main_outs* at, int FMC)
-{  // generar output de cfb
+{
+    // generar output de cfb
     float a, cbd, ros, ros0, H, wa, i0, cbh, cfb;
-    if (std::isnan(data->cbh))
-    {
-        cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        cbh = data->cbh;
-    }
+    cbh = data->cbh;
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
     wa = fls_david[data->nftype][0];
-    if (std::isnan(data->cbd))
-    {
-        cbd = cbds[data->nftype][0];
-    }
-    else
-    {
-        cbd = data->cbd;
-    }
+    cbd = data->cbd;
 
     ros0 = 60 * i0 / (H * wa);
     ros = at->rss;
-    if (cbd != 0)
+    if (cbd > 0)
     {
         a = -log(0.1) / (0.9 * (3.0 / cbd - ros0));
     }
@@ -799,6 +790,7 @@ crownfractionburn(inputs* data, main_outs* at, int FMC)
     return cfb;
 }
 
+// TODO: citation needed
 float
 active_rate_of_spreadPL04(inputs* data,
                           main_outs* at)  // En KITRAL SE USA PL04
@@ -829,10 +821,11 @@ active_rate_of_spreadPL04(inputs* data,
         rospl04 = fmc * fch * (fv + ps);
     }
     ros_active = 3.34 * rospl04;  // if rac*cbd>3.0, aplicar
-                                  // ros_final=3.34*rospl04
+    // ros_final=3.34*rospl04
     return ros_active;
 }
 
+// TODO: citation needed
 float
 final_rate_of_spreadPL04(main_outs* at)  // En KITRAL SE USA PL04
 {
@@ -848,30 +841,19 @@ checkActive(inputs* data, main_outs* at, int FMC)  // En KITRAL SE USA PL04
 {
     float ros_critical, cbd, H, wa, i0, cbh;
     bool active;
-    if (std::isnan(data->cbh))
-    {
-        cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        cbh = data->cbh;
-    }
+    cbh = data->cbh;
+
     i0 = pow((0.01 * cbh * (460 + 25.9 * FMC)), 1.5);
     H = hs[data->nftype][0];
     wa = fls_david[data->nftype][0];
     ros_critical = 60 * i0 / (H * wa);
-    if (std::isnan(data->cbd))
-    {
-        cbd = cbds[data->nftype][0];
-    }
-    else
-    {
-        cbd = data->cbd;
-    }
+    cbd = data->cbd;
+
     active = cbd * ros_critical >= 3;
     return active;
 }
 
+// TODO: citation needed
 float
 backfire_ros10_k(fire_struc* hptr, snd_outs* sec)
 {
@@ -904,7 +886,7 @@ calculate_k(inputs* data,
 {
     // Hack: Initialize coefficients
     setup_const();
-
+    setup_crown_const(data);
     // Aux
     float ros, bros, lb, fros;
     int FMC;
@@ -920,14 +902,8 @@ calculate_k(inputs* data,
     FMC = args->FMC;
     ptr->nftype = data->nftype;
     ptr->fmc = fmcs[data->nftype][0];
-    if (isnan(data->cbh))
-    {
-        ptr->cbh = cbhs[data->nftype][0];
-    }
-    else
-    {
-        ptr->cbh = data->cbh;
-    }
+    ptr->cbh = data->cbh;
+
     // cout << "   cbh " << ptr->cbh << "\n";
 
     ptr->fl = fls_david[data->nftype][0];
@@ -969,10 +945,11 @@ calculate_k(inputs* data,
 
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not
     // want to include it)
-    if (args->AllowCROS && (data->cbh > 0 || cbhs[data->nftype][0] != 0))
+    if (args->AllowCROS && (data->cbh > 0))
     {
         if (activeCrown)
-        {  // si el fuego esta activo en copas chequeamos condiciones
+        {
+            // si el fuego esta activo en copas chequeamos condiciones
             at->ros_active = active_rate_of_spreadPL04(data, at);
             if (!checkActive(data, at, FMC))
             {
@@ -1093,7 +1070,9 @@ determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main
 {
     // Hack: Initialize coefficients
     setup_const();
+    setup_crown_const(data);
 
+    ptr->cbh = data->cbh;
     // Aux
     float ros = 0, bros = 0, lb = 0, fros = 0;
     int FMC = args->FMC;
@@ -1109,7 +1088,7 @@ determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main
     metrics->fl = flame_length(data, metrics);
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not
     // want to include it)
-    if (args->AllowCROS)
+    if (args->AllowCROS && data->cbh > 0)
     {
         crownFire = fire_type(data, metrics, FMC);
         if (crownFire)
