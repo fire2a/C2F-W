@@ -1,7 +1,7 @@
 grid_value,export_value,descriptive_name,fuel_type, r, g, b, h, s, l
 214,214,Eucalypt shrubs 4 to 6 ton,GR1,209,255,115,57,255,185
 212,212,Hardwoods shrubs 2 to 5,GR2,209,255,115,57,255,185
-213,213,Pine trees w shrubs 4 to 7 ,GR3,34,102,51,95,128,68
+213,213,Pine trees w shrubs 4 to 7,GR3,34,102,51,95,128,68
 211,211,Conifers with short leave with 4 to 6 tonha of shrubs,GR4,131,199,149,96,96,165
 221,221,hardwoods with shrubs 8 to 17,GR5,112,168,0,57,255,84
 222,222,holm and cork oak shrubs 7 to 17,GR6,223,184,230,206,122,207
