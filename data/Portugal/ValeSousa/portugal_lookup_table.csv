@@ -10,8 +10,8 @@ grid_value,export_value,descriptive_name,fuel_type, r, g, b, h, s, l
 224,224,Other forest stands with shrubs 6 to 9 ton of shrubs,GS1,196,189,151,35,70,174
 226,226,Other forest stands with shrubs 2 to 5 ton of shrubs,GS2,137,112,68,27,86,103
 225,225,Pines with shrubs 8 to 18 ton of shrub load,GS3,196,189,151,35,70,174
-234,234,Tall grass (>0.5m) ,GS4,251,190,185,3,227,218
-233,233,Low grass (<0.5m) ,SH2,247,104,161,-272,229,176
+234,234,Tall grass (>0.5m),GS4,251,190,185,3,227,218
+233,233,Low grass (<0.5m),SH2,247,104,161,-272,229,176
 237,237,High shrubs (>1m) load 12 to 27 ton,SH3,174,1,126,-285,252,88
 236,236,Low shrubs (<1m) load 7 to 14 ton,SH4,255,255,190,42,255,223
 235,235,Young shrubs (max 3 years),SH5,230,230,0,42,255,115
