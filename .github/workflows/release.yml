@@ -69,7 +69,7 @@ jobs:
       run: |
         cd data
         for format in asc tif; do
-          for fuel_model in CanadianFBP Kitral ScottAndBurgan; do
+          for fuel_model in CanadianFBP Kitral ScottAndBurgan Portugal; do
             if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
                 echo "found $fuel_model $format"
                 zip -r ../$fuel_model-$format.zip $fuel_model/*-$format
@@ -101,6 +101,8 @@ jobs:
           CanadianFBP-asc.zip
           ScottAndBurgan-asc.zip
           ScottAndBurgan-tif.zip
+          Portugal-asc.zip
+          Portugal-tif.zip
         token: ${{ secrets.GITHUB_TOKEN }}
         draft: true
         tag: ${{ env.RELEASE_TAG }}
