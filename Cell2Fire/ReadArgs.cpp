@@ -209,7 +209,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     if (cmdOptionExists(argv, argv + argc, "--statistics"))
     {
         out_stats = true;
-        printf("Statistics: %d \n", out_stats);
+        printf("StatisticsPerCell: %d \n", out_stats);
     }
 
     //--bbo
@@ -629,7 +629,7 @@ printArgs(arguments args)
     std::cout << "FinalGrid: " << args.FinalGrid << std::endl;
     std::cout << "PromTuned: " << args.PromTuned << std::endl;
     std::cout << "BBOTuning: " << args.BBOTuning << std::endl;
-    std::cout << "Statistics: " << args.Stats << std::endl;
+    std::cout << "StatisticsPerCell: " << args.Stats << std::endl;
     std::cout << "noOutput: " << args.NoOutput << std::endl;
     std::cout << "verbose: " << args.verbose << std::endl;
     std::cout << "seed: " << args.seed << std::endl;
@@ -661,7 +661,7 @@ printArgs(arguments args)
     std::cout << "FinalGrid: " << args.FinalGrid << std::endl;
     std::cout << "PromTuned: " << args.PromTuned << std::endl;
     std::cout << "BBOTuning: " << args.BBOTuning << std::endl;
-    std::cout << "Statistics: " << args.Stats << std::endl;
+    std::cout << "StatisticsPerCell: " << args.Stats << std::endl;
     std::cout << "noOutput: " << args.NoOutput << std::endl;
     std::cout << "verbose: " << args.verbose << std::endl;
     std::cout << "Ignition Points Log: " << args.IgnitionsLog << std::endl;

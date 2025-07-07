@@ -49,10 +49,11 @@ std::unordered_map<int, std::vector<int>> HarvestedCells;
 std::vector<int> NFTypesCells;
 std::unordered_map<int, int> IgnitionHistory;
 std::unordered_map<int, std::string> WeatherHistory;
-std::unordered_map<int, std::vector<float>> Statistics;
+std::unordered_map<int, std::vector<float>> StatisticsPerCell;
 std::unordered_map<int, float> meanSurfaceFlameLength;
 std::unordered_map<int, float> meanCrownFlameLength;
 std::unordered_map<int, float> meanMaxFlameLength;
+std::unordered_map<int, std::vector<float>> StatisticsPerSim;
 
 /******************************************************************************
                                                                                                                                 Utils
@@ -1824,18 +1825,23 @@ Cell2Fire::Results()
             this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->maxFlameLengths);
     }
 
-    // Flame Length Statistics
+    // Flame Length StatisticsPerCell
     // This will be used to store accumulated flame lengths across simulations
     if (this->args.Stats)
     {
-
+        float totalCrown = 0;
+        float totalSurface = 0;
+        float maxPerSim = 0;
+        std::vector<float> simStats;
         for (int cell : this->burntCells)
         {
-            std::vector<float> flameLengthMeans;
+            std::vector<float> cellFlameLengthMeans;
 
             float surfaceFlameLength = this->surfaceFlameLengths[cell] / args.TotalSims;
             meanSurfaceFlameLength[cell] += surfaceFlameLength;
-            flameLengthMeans.push_back(meanSurfaceFlameLength[cell]);
+            cellFlameLengthMeans.push_back(meanSurfaceFlameLength[cell]);
+            totalSurface += this->surfaceFlameLengths[cell];
+            maxPerSim = max(maxPerSim, this->surfaceFlameLengths[cell]);
 
             if ((this->args.AllowCROS) && (this->args.Simulator != "C"))
             {
@@ -1843,18 +1849,31 @@ Cell2Fire::Results()
                 float maxFlameLength = this->maxFlameLengths[cell] / args.TotalSims;
                 meanCrownFlameLength[cell] += crownFlameLength;
                 meanMaxFlameLength[cell] += maxFlameLength;
-                flameLengthMeans.push_back(meanCrownFlameLength[cell]);
-                flameLengthMeans.push_back(meanMaxFlameLength[cell]);
+                cellFlameLengthMeans.push_back(meanCrownFlameLength[cell]);
+                cellFlameLengthMeans.push_back(meanMaxFlameLength[cell]);
+                totalCrown += this->maxFlameLengths[cell];
+                maxPerSim = max(maxPerSim, this->crownFlameLengths[cell]);
             }
-
-            Statistics[cell] = { flameLengthMeans };
+            StatisticsPerCell[cell] = { cellFlameLengthMeans };
         }
+        simStats.push_back(totalSurface / BCells);
+        if ((this->args.AllowCROS) && (this->args.Simulator != "C"))
+        {
+            simStats.push_back(totalCrown / BCells);
+        }
+        simStats.push_back(maxPerSim);
+
+        StatisticsPerSim[this->sim] = { simStats };
+        std::ostringstream oss;
+        std::string Stats = this->statsFolder + "statisticsPerSim" + oss.str() + ".csv";
+        CSVWriter simStatsFile(Stats);
+        simStatsFile.printStats(StatisticsPerSim, "sim", (this->args.AllowCROS) && (this->args.Simulator != "C"));
         if (currentSim == args.TotalSims)
         {
             std::ostringstream oss;
-            std::string Statsname = this->statsFolder + "statistics" + oss.str() + ".csv";
+            std::string Statsname = this->statsFolder + "statisticsPerCell" + oss.str() + ".csv";
             CSVWriter statsFile(Statsname);
-            statsFile.printStats(Statistics);
+            statsFile.printStats(StatisticsPerCell, "cell", (this->args.AllowCROS) && (this->args.Simulator != "C"));
         }
     }
 

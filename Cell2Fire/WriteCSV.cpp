@@ -288,12 +288,21 @@ CSVWriter::printIgnitions(std::unordered_map<int, int> ignitionsHistory,
 }
 
 void
-CSVWriter::printStats(std::unordered_map<int, std::vector<float>> statistics)
+CSVWriter::printStats(std::unordered_map<int, std::vector<float>> statistics, std::string type, bool hasCrown)
 {
     std::ofstream ofs(fileName, std::ofstream::out);
 
     // Print column titles
-    ofs << "cell,surfaceFlameLength,crownFlameLength,maxFlameLength\n";
+    ofs << type << ",surfaceFlameLengthMean";
+    if (hasCrown)
+    {
+        ofs << type << ",crownFlameLengthMean,maxFlameLength";
+    }
+    else if (type == "sim")
+    {
+        ofs << ",maxFlameLength";
+    }
+    ofs << std::endl;
 
     // Iterate through the unordered_map using iterator
     for (auto it = statistics.begin(); it != statistics.end(); ++it)
