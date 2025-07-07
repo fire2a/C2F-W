@@ -20,14 +20,14 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt update
-          sudo apt install -y g++-12 libboost-all-dev libtiff-dev catch2
+          sudo apt-get update
+          sudo apt-get install -y g++-12 libboost-all-dev libtiff-dev catch2
 
       - name: Check Packages Versions
         run: |
           dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libtiff-dev catch2 > new_pkgs_ubuntu.txt
           if [ -n "$(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)" ]; then
-            echo "::warning:: apt packages versions diff! $(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)"
+            echo "::warning:: apt-get packages versions diff! $(diff new_pkgs_ubuntu.txt pkgs_ubuntu.txt)"
             diff_output=$(diff --side-by-side --suppress-common-lines new_pkgs_ubuntu.txt pkgs_ubuntu.txt || true)
             echo "$diff_output" | while IFS= read -r line; do
               echo "$line"

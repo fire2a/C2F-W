@@ -38,8 +38,8 @@ jobs:
 
       - name: Install Build Dependencies
         run: |
-          sudo apt update
-          sudo apt install -y g++-12 libboost-all-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
+          sudo apt-get update
+          sudo apt-get install -y g++-12 libboost-all-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
 
       - name: Check Packages Versions
         run: |
@@ -101,8 +101,8 @@ jobs:
 
       - name: Install Base Dependencies
         run: |
-          apt update
-          apt install -y unzip g++-12 make lsb-release curl
+          apt-get update
+          apt-get install -y unzip g++-12 make lsb-release curl
 
       - name: Cache Catch2 header
         uses: actions/cache@v4
@@ -150,8 +150,8 @@ jobs:
       - name: Install Runtime Dependencies
         if: ${{ env.do_dynamic == 'true' }}
         run: |
-          apt update
-          apt install -y libtiff6 libstdc++6 libgomp1 libgcc1
+          apt-get update
+          apt-get install -y libtiff6 libstdc++6 libgomp1 libgcc1
 
       - name: Test Suffix
         if: ${{ env.do_dynamic == 'true' }}
