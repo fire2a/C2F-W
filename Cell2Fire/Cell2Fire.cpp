@@ -861,10 +861,26 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
     // No Ignitions provided
     if (this->args.Ignitions == 0)
     {
+        std::srand(args.seed);
         while (true)
         {
             microloops = 0;
-            aux = distribution(generator2);
+            while (true)
+            {
+                aux = distribution(generator2);
+                float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
+                if (this->ignProb[aux - 1] > rd_number)
+                {
+                    break;
+                }
+                microloops++;
+                if (microloops > this->nCells * 100)
+                {
+
+                    this->noIgnition = true;
+                    break;
+                }
+            }
             // Check information (Debugging)
             if (this->args.verbose)
             {

@@ -36,7 +36,7 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
                                                                    const std::vector<float>& CBD,
                                                                    const std::vector<float>& CBH,
                                                                    const std::vector<float>& CCF,
-                                                                   const std::vector<float>& PY,
+                                                                   const std::vector<float>& ProbMap,
                                                                    const std::vector<float>& FMC,
                                                                    const std::vector<float>& TreeHeight,
 
