@@ -122,6 +122,16 @@ class Cells
     double rhoTheta(double theta, double a, double b);
     void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
 
+    int breaching(int currentCell,
+                  int neighbor,
+                  int perimeterCells,
+                  double angle,
+                  float heat,
+                  float wa,
+                  double ros,
+                  inputs df_ptr[],
+                  std::vector<std::unordered_map<std::string, int>> AdjCells);
+
     std::vector<int> manageFire(int period,
                                 std::unordered_set<int>& AvailSet,
                                 inputs df[],

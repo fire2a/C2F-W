@@ -363,6 +363,103 @@ Cells::slope_effect(float elev_i, float elev_j, int cellsize)
     return se;
 }
 
+int
+Cells::breaching(int currentCell,
+                 int neighbor,
+                 int perimeterCells,
+                 double angle,
+                 float heat,
+                 float wa,
+                 double ros,
+                 inputs df_ptr[],
+                 std::vector<std::unordered_map<std::string, int>> AdjCells)
+{
+    float intensity_direction = heat * wa * ros / 60;
+    float flame_l = 0.0755 * pow(intensity_direction, 0.46);
+    // DEBUGstd::cout<< "flame length: " <<flame_l << "m" <<std::endl;
+    int count_jump = 1;
+    float distance_to_check;
+    if (int(angle) % 10 == 5)
+    {  // if angle ends in 5, calculate hypotenuse
+        distance_to_check = pow((pow(perimeterCells / 4., 2) + pow(perimeterCells / 4., 2)), 0.5);
+    }
+    else
+    {
+        distance_to_check = (perimeterCells / 4.);
+    }
+    int new_neighbor;
+    while (true)
+    {
+        if (flame_l * 1.6 >= distance_to_check * count_jump)
+        {  // check if flame length is long enough to jump: flame_length*1.6>barrier
+            std::string direction;
+            switch (int(angle))
+            {  // check to which direction the angle corresponds
+            case 0:
+                direction = "E";
+                break;
+            case 45:
+                direction = "NE";
+                break;
+            case 90:
+                direction = "N";
+                break;
+            case 135:
+                direction = "NW";
+                break;
+            case 180:
+                direction = "W";
+                break;
+            case 225:
+                direction = "SW";
+                break;
+            case 270:
+                direction = "S";
+                break;
+            case 315:
+                direction = "SE";
+                break;
+            }
+
+            int pointing_cell;
+            for (auto& cell_value : AdjCells[neighbor - 1])
+            {
+                if (cell_value.first == direction)
+                {
+                    pointing_cell = cell_value.second;  // see neighbor in the given direction
+                }
+            }
+            if (df_ptr[pointing_cell - 1].nftype
+                == 0)  // if neighbor is not available, jump to next neighbor in given direction
+            {
+                if (pointing_cell == -1)
+                {  // if the cell is outside the margin of the forest no breaching effect is produced
+                    new_neighbor = -1;
+                    break;
+                }
+                else
+                {
+                    neighbor = pointing_cell;
+                    count_jump++;
+                }
+            }
+            else  // if the flame length is enough to reach the next cell and that cell is available, the new objective
+                  // cell is that cell
+            {
+                new_neighbor = pointing_cell;
+                break;
+            }
+        }
+        else
+        {  // if flame length does not reach the next cell, no breaching effect is produced
+            new_neighbor = -1;
+            break;
+        }
+    }
+
+    return new_neighbor;
+}
+
 /**
  * @brief Manage's the cell's response to being reached by fire.
  *
@@ -631,6 +728,23 @@ Cells::manageFire(int period,
             if (std::isnan(ros))
             {
                 ros = 1e-4;
+            }
+            if (df_ptr[nb - 1].nftype == 0)
+            {
+                if (args->verbose)
+                {
+                    std::cout << "  Checking breaching conditions for cell: " << nb << std::endl;
+                }
+                int jump_nb
+                    = breaching(this->realId, nb, perimeterCells, angle, coef->h, coef->wa, ros, df_ptr, AdjCells);
+                if (jump_nb != -1)
+                {
+                    nb = jump_nb;
+                    if !(args->verbose)
+                    {
+                        std::cout << "  Fire breach from cell: " << this->realId << "to cell: " << jump_nb << std::endl;
+                    }
+                }
             }
 
             if (args->verbose)
@@ -1201,18 +1315,6 @@ Cells::get_burned(int period,
     return false;
 }
 
-/* Old functions
-        Returns            void
-
-        Inputs:
-        AdjacentCells      dictionary{string:[array integers]}
-*/
-// void Cells::set_Adj(std::unordered_map<std::string, int> & adjacentCells) {
-// // WORKING CHECK OK
-//     // TODO: in python, these are pointers, maybe make these pointers too :P
-//     this->adjacents = adjacentCells;
-// }
-
 /**
  * @brief Sets a cell's fire status (0: Available, 1: Burning, 2: Burnt, 3:
  * Harvested, 4: Non Fuel).
@@ -1405,13 +1507,8 @@ Cells::print_info()
     std::cout << "Status = " << this->StatusD[this->status] << std::endl;
     std::cout << "Coordinates: ";
     std::cout << this->coord[0] << " " << this->coord[1] << std::endl;
-
     std::cout << "Area = " << this->area << std::endl;
     std::cout << "FTypes = " << this->FTypeD[this->fType] << std::endl;
-    std::cout << "AdjacentCells:";
-    // for (auto & nb : this->adjacents){
-    //	std::cout << " " << nb.first << ":" << nb.second;
-    // }
     std::cout << std::endl;
 
     printf("Angle Dict: ");
