@@ -313,10 +313,10 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         int HCellsP = HarvestedDF.size() - 1;
         CSVHPlan.parseHarvestedDF(HarvestedCells, HarvestedDF, HCellsP);
 
-        // Print-out
-        std::cout << "Number of Firebreak Cells :" << HarvestedCells.size() << std::endl;
         for (auto it = HarvestedCells.begin(); it != HarvestedCells.end(); it++)
         {
+            // Print-out
+            std::cout << "Number of Firebreak Cells :" << it->second.size() << std::endl;
             for (auto& it2 : it->second)
             {
                 this->fTypeCells[it2 - 1] = 0;
@@ -1208,7 +1208,10 @@ Cell2Fire::SendMessages()
                                                  this->surfaceFlameLengths,
                                                  this->crownFlameLengths,
                                                  this->crownIntensities,
-                                                 this->maxFlameLengths);
+                                                 this->maxFlameLengths,
+                                                 this->rows,
+                                                 this->cols,
+                                                 this->fTypeCells);
             }
 
             else

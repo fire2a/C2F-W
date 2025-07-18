@@ -126,11 +126,10 @@ class Cells
                   int neighbor,
                   int perimeterCells,
                   double angle,
-                  float heat,
-                  float wa,
-                  double ros,
                   inputs df_ptr[],
-                  std::vector<std::unordered_map<std::string, int>> AdjCells);
+                  float flameLength,
+                  int nrows,
+                  int ncols);
 
     std::vector<int> manageFire(int period,
                                 std::unordered_set<int>& AvailSet,
@@ -153,7 +152,10 @@ class Cells
                                 std::vector<float>& SurfaceFlameLengths,
                                 std::vector<float>& CrownFlameLengths,
                                 std::vector<float>& CrownIntensities,
-                                std::vector<float>& MaxFlameLengths);
+                                std::vector<float>& MaxFlameLengths,
+                                int nrows,
+                                int ncols,
+                                vector<int>& fTypeCells);
 
     std::vector<int> manageFireBBO(int period,
                                    std::unordered_set<int>& AvailSet,

@@ -23,6 +23,20 @@
 
 using namespace std;
 
+float comp_zero = 0;
+
+// Necessary to use adjacentCells
+std::unordered_map<int, int> angle_to_index = {
+    { 180, 0 },  // west
+    { 0, 1 },    // east
+    { 225, 2 },  // southwest
+    { 315, 3 },  // southeast
+    { 270, 4 },  // south
+    { 135, 5 },  // northwest
+    { 45, 6 },   // northeast
+    { 90, 7 }    // north
+};
+
 /**
  * @brief Constructs a Cell object for the wildfire simulation.
  *
@@ -368,15 +382,11 @@ Cells::breaching(int currentCell,
                  int neighbor,
                  int perimeterCells,
                  double angle,
-                 float heat,
-                 float wa,
-                 double ros,
                  inputs df_ptr[],
-                 std::vector<std::unordered_map<std::string, int>> AdjCells)
+                 float flameLength,
+                 int nrows,
+                 int ncols)
 {
-    float intensity_direction = heat * wa * ros / 60;
-    float flame_l = 0.0755 * pow(intensity_direction, 0.46);
-    // DEBUGstd::cout<< "flame length: " <<flame_l << "m" <<std::endl;
     int count_jump = 1;
     float distance_to_check;
     if (int(angle) % 10 == 5)
@@ -390,45 +400,15 @@ Cells::breaching(int currentCell,
     int new_neighbor;
     while (true)
     {
-        if (flame_l * 1.6 >= distance_to_check * count_jump)
+        if (flameLength * 1.6 >= distance_to_check * count_jump)
         {  // check if flame length is long enough to jump: flame_length*1.6>barrier
-            std::string direction;
-            switch (int(angle))
-            {  // check to which direction the angle corresponds
-            case 0:
-                direction = "E";
-                break;
-            case 45:
-                direction = "NE";
-                break;
-            case 90:
-                direction = "N";
-                break;
-            case 135:
-                direction = "NW";
-                break;
-            case 180:
-                direction = "W";
-                break;
-            case 225:
-                direction = "SW";
-                break;
-            case 270:
-                direction = "S";
-                break;
-            case 315:
-                direction = "SE";
-                break;
-            }
+            // { west 180, east 0, southwest 225, southeast 315, south 270, northwest 135, northeast 45, north 90}
+            auto adjacents = adjacentCells(neighbor - 1, nrows, ncols);
+            int pointing_cell = -1;
+            auto it = angle_to_index.find(static_cast<int>(angle));
+            int index = it->second;
+            pointing_cell = adjacents[index];
 
-            int pointing_cell;
-            for (auto& cell_value : AdjCells[neighbor - 1])
-            {
-                if (cell_value.first == direction)
-                {
-                    pointing_cell = cell_value.second;  // see neighbor in the given direction
-                }
-            }
             if (df_ptr[pointing_cell - 1].nftype
                 == 0)  // if neighbor is not available, jump to next neighbor in given direction
             {
@@ -529,7 +509,10 @@ Cells::manageFire(int period,
                   std::vector<float>& SurfaceFlameLengths,
                   std::vector<float>& CrownFlameLengths,
                   std::vector<float>& CrownIntensities,
-                  std::vector<float>& MaxFlameLengths)
+                  std::vector<float>& MaxFlameLengths,
+                  int nrows,
+                  int ncols,
+                  vector<int>& fTypeCells)
 {
     // Special flag for repetition (False = -99 for the record)
     int repeat = -99;
@@ -729,21 +712,22 @@ Cells::manageFire(int period,
             {
                 ros = 1e-4;
             }
-            if (df_ptr[nb - 1].nftype == 0)
+            if (fTypeCells[nb - 1] == 0)
             {
-                if (args->verbose)
-                {
-                    std::cout << "  Checking breaching conditions for cell: " << nb << std::endl;
-                }
-                int jump_nb
-                    = breaching(this->realId, nb, perimeterCells, angle, coef->h, coef->wa, ros, df_ptr, AdjCells);
+                std::cout << "  Checking breaching conditions for cell: " << nb << std::endl;
+
+                int jump_nb = breaching(this->realId,
+                                        nb,
+                                        perimeterCells,
+                                        angle,
+                                        df_ptr,
+                                        std::max({ mainstruct.crown_flame_length, mainstruct.fl, comp_zero }),
+                                        nrows,
+                                        ncols);
                 if (jump_nb != -1)
                 {
                     nb = jump_nb;
-                    if !(args->verbose)
-                    {
-                        std::cout << "  Fire breach from cell: " << this->realId << "to cell: " << jump_nb << std::endl;
-                    }
+                    std::cout << "  Fire breach from cell: " << this->realId << "to cell: " << jump_nb << std::endl;
                 }
             }
 
@@ -811,7 +795,6 @@ Cells::manageFire(int period,
                 SurfaceFlameLengths[nb - 1] = metrics.fl;
                 if ((args->AllowCROS) && (args->Simulator == "S" || args->Simulator == "P"))
                 {
-                    float comp_zero = 0;
                     MaxFlameLengths[this->realId - 1]
                         = std::max({ mainstruct.crown_flame_length, mainstruct.fl, comp_zero });
                     MaxFlameLengths[nb - 1] = std::max({ metrics.crown_flame_length, metrics.fl, comp_zero });
