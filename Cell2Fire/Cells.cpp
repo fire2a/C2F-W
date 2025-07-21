@@ -136,10 +136,11 @@ Cells::Cells(int _id,
  */
 void
 Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,
-                            // TODO: should probably make a coordinate type
                             std::unordered_set<int>& availSet,
+                            std::unordered_set<int>& harvestSet,
                             int cols,
-                            int rows)  // WORKING CHECK OK
+                            int rows,
+                            bool breaching)  // WORKING CHECK OK
 {
     std::vector<int> adj = adjacentCells(this->realId, rows, cols);
 
@@ -185,6 +186,10 @@ Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,
                 // TODO: cannot be None, replaced None = -1   and ROSAngleDir has
                 // a double inside
                 this->ROSAngleDir[angle] = -1;
+            }
+            else if (breaching && (harvestSet.find(nb) != harvestSet.end()))
+                this->ROSAngleDir[angle] = -1;
+            {
             }
             this->angleToNb[angle] = nb;
             this->fireProgress[nb] = 0.0;
@@ -385,7 +390,8 @@ Cells::breaching(int currentCell,
                  inputs df_ptr[],
                  float flameLength,
                  int nrows,
-                 int ncols)
+                 int ncols,
+                 vector<int>& fTypeCells)
 {
     int count_jump = 1;
     float distance_to_check;
@@ -397,19 +403,21 @@ Cells::breaching(int currentCell,
     {
         distance_to_check = (perimeterCells / 4.);
     }
-    int new_neighbor;
+    int new_neighbor = -1;
+    cout << "\tdistance to check " << distance_to_check * count_jump << endl;
+    cout << angle << endl;
+    cout << "\tflame length " << 1.6 * flameLength << " " << flameLength << endl;
     while (true)
     {
         if (flameLength * 1.6 >= distance_to_check * count_jump)
         {  // check if flame length is long enough to jump: flame_length*1.6>barrier
             // { west 180, east 0, southwest 225, southeast 315, south 270, northwest 135, northeast 45, north 90}
-            auto adjacents = adjacentCells(neighbor - 1, nrows, ncols);
-            int pointing_cell = -1;
+            auto adjacents = adjacentCells(neighbor, nrows, ncols);
+            int pointing_cell;
             auto it = angle_to_index.find(static_cast<int>(angle));
             int index = it->second;
             pointing_cell = adjacents[index];
-
-            if (df_ptr[pointing_cell - 1].nftype
+            if (fTypeCells[pointing_cell - 1]
                 == 0)  // if neighbor is not available, jump to next neighbor in given direction
             {
                 if (pointing_cell == -1)
@@ -705,6 +713,7 @@ Cells::manageFire(int period,
         {
             double angle = _angle.first;
             int nb = angleToNb[angle];
+            // cout << period << " " << this->realId << " " << angle << " " << nb << endl;
             float ros = (1 + args->ROSCV * ROSRV) * _angle.second;
             float roundedRos = static_cast<float>(std::ceil(ros * 100.0) / 100.0);
 
@@ -723,7 +732,8 @@ Cells::manageFire(int period,
                                         df_ptr,
                                         std::max({ mainstruct.crown_flame_length, mainstruct.fl, comp_zero }),
                                         nrows,
-                                        ncols);
+                                        ncols,
+                                        fTypeCells);
                 if (jump_nb != -1)
                 {
                     nb = jump_nb;

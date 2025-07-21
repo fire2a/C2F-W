@@ -334,7 +334,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->harvestCells.clear();
     for (i = 0; i < this->statusCells.size(); i++)
     {
-        if (this->statusCells[i] < 3)
+        if ((this->statusCells[i] < 3))
             this->availCells.insert(i + 1);
         else if (this->statusCells[i] == 4)
             this->nonBurnableCells.insert(i + 1);
@@ -585,7 +585,8 @@ Cell2Fire::InitCell(int id)
     it2 = this->Cells_Obj.find(id);
 
     // Initialize the fire fields for the selected cel
-    it2->second.initializeFireFields(this->coordCells, this->availCells, this->cols, this->rows);
+    it2->second.initializeFireFields(
+        this->coordCells, this->availCells, this->harvestCells, this->cols, this->rows, this->args_ptr->Breaching);
 
     // Print info for debugging
     if (this->args.verbose)

@@ -106,6 +106,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     bool out_stats = false;
     bool bbo_tuning = false;
     bool allow_cros = false;
+    bool breaching = false;
 
     //--out-messages
     if (cmdOptionExists(argv, argv + argc, "--output-messages"))
@@ -150,6 +151,13 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     {
         out_surf_consumption = true;
         printf("OutSurfaceConsumption: %s \n", btoa(out_surf_consumption));
+    }
+
+    //--breaching
+    if (cmdOptionExists(argv, argv + argc, "--breaching"))
+    {
+        breaching = true;
+        printf("Breaching: %s \n", btoa(breaching));
     }
 
     //--trajectories
@@ -597,6 +605,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->Stats = out_stats;
     args_ptr->BBOTuning = bbo_tuning;
     args_ptr->AllowCROS = allow_cros;
+    args_ptr->Breaching = breaching;
 }
 
 void

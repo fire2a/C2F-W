@@ -116,8 +116,10 @@ class Cells
 
     void initializeFireFields(std::vector<std::vector<int>>& coordCells,
                               std::unordered_set<int>& availSet,
+                              std::unordered_set<int>& harvestSet,
                               int cols,
-                              int rows);  // TODO: need TYPE
+                              int rows,
+                              bool breaching);  // TODO: need TYPE
     void ros_distr_old(double thetafire, double forward, double flank, double back);
     double rhoTheta(double theta, double a, double b);
     void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
@@ -129,7 +131,8 @@ class Cells
                   inputs df_ptr[],
                   float flameLength,
                   int nrows,
-                  int ncols);
+                  int ncols,
+                  vector<int>& fTypeCells);
 
     std::vector<int> manageFire(int period,
                                 std::unordered_set<int>& AvailSet,
