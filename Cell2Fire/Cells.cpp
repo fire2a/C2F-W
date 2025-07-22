@@ -382,9 +382,21 @@ Cells::slope_effect(float elev_i, float elev_j, int cellsize)
     return se;
 }
 
+/**
+ * Checks if firebreaks have been breached and returns the id of the burnt cell if so.
+ *
+ * @param neighbor ID of original neighboring cell
+ * @param perimeterCells size of the cell
+ * @param angle angle of neighbor
+ * @param df_ptr list of inputted command line arguments
+ * @param flameLength flame length
+ * @param nrows number of rows in grid
+ * @param ncols number of columns in grid
+ * @param fTypeCells list of fuel type of each cell
+ * @return id of cell reached by fire, -1 if breaching doesn't occur.
+ */
 int
-Cells::breaching(int currentCell,
-                 int neighbor,
+Cells::breaching(int neighbor,
                  int perimeterCells,
                  double angle,
                  inputs df_ptr[],
@@ -407,9 +419,10 @@ Cells::breaching(int currentCell,
     cout << "\tdistance to check " << distance_to_check * count_jump << endl;
     cout << angle << endl;
     cout << "\tflame length " << 1.6 * flameLength << " " << flameLength << endl;
+    float modifiedFlameLength = flameLength * 1.6;
     while (true)
     {
-        if (flameLength * 1.6 >= distance_to_check * count_jump)
+        if (modifiedFlameLength >= distance_to_check * count_jump)
         {  // check if flame length is long enough to jump: flame_length*1.6>barrier
             // { west 180, east 0, southwest 225, southeast 315, south 270, northwest 135, northeast 45, north 90}
             auto adjacents = adjacentCells(neighbor, nrows, ncols);
@@ -725,8 +738,7 @@ Cells::manageFire(int period,
             {
                 std::cout << "  Checking breaching conditions for cell: " << nb << std::endl;
 
-                int jump_nb = breaching(this->realId,
-                                        nb,
+                int jump_nb = breaching(nb,
                                         perimeterCells,
                                         angle,
                                         df_ptr,

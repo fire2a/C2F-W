@@ -124,8 +124,7 @@ class Cells
     double rhoTheta(double theta, double a, double b);
     void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
 
-    int breaching(int currentCell,
-                  int neighbor,
+    int breaching(int neighbor,
                   int perimeterCells,
                   double angle,
                   inputs df_ptr[],
