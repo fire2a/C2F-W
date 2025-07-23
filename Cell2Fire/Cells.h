@@ -30,7 +30,7 @@ typedef struct
     float ws, saz, cur, ps, cbh, ccf, cbd, elev, tmp, rh, lat, lon, ffmc, bui, gfl,
         tree_height;  // David: some variables only used on C2FK and not on C2FSB and
                       // viceversa
-    int waz, nftype, FMC, time, pattern, mon, jd, jd_min, pc, pdf;
+    int waz, nftype, FMC, time, pattern, mon, jd, jd_min, pc, pdf, is_combat_point;
 } inputs;  // David: Moved here to simplify inclusion
 
 typedef struct

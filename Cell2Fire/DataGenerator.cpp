@@ -578,6 +578,7 @@ DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells)
  * @param ProbMap Array of ignition probabilities
  * @param FMC Array of foliage moisture content
  * @param TreeHeight Array of tree heights
+ * @param CombatPoints Array of points where firefighting is likely
  * @param InFolder Input data directory
  * @return An array of arrays representing a cell.
  */
@@ -594,6 +595,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             const std::vector<float>& ProbMap,
             const std::vector<float>& FMC,
             const std::vector<float>& TreeHeight,
+            const std::vector<float>& CombatPoints,
             const std::string& InFolder)
 {
     // DF columns
@@ -854,6 +856,14 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         {
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(TreeHeight[i])));
         }
+        if (std::isnan(CombatPoints[i]))
+        {
+            rowData.emplace_back(std::make_unique<std::string>(""));
+        }
+        else
+        {
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(CombatPoints[i])));
+        }
 
         // Add the rowData to dataGrids
         dataGrids.push_back(std::move(rowData));
@@ -922,6 +932,7 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
  *  - probabilityMap: ignition probability map [%]
  *  - fmc: foliage moisture content
  *  - hm: tree height [m]
+ *  - combatPoints
  *
  * The generated file contains the following columns: fuel type, latitude, longitude, elevation, wind speed (always
  * blank), wind direction (always blank), slope, slope azimuth, curing level, canopy bulk density, canopy base height,
@@ -997,44 +1008,6 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
         std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGrid(FGrid, FBPDict);
     }
 
-    // FOR DEBUGING ----------------------------------------------------------
-    /*
-
-    // Print FBPDict
-    std::cout << "FBPDict:\n";
-    for (const auto& entry : FBPDict) {
-        std::cout << "  " << entry.first << ": " << entry.second << std::endl;
-    }
-
-    // Print ColorsDict
-    std::cout << "ColorsDict:\n";
-    for (const auto& entry : ColorsDict) {
-        std::cout << "  " << entry.first << ": " << std::get<0>(entry.second) <<
-    ", "
-                  << std::get<1>(entry.second) << ", " <<
-    std::get<2>(entry.second) << ", "
-                  << std::get<3>(entry.second) << std::endl;
-    }
-
-    // Print ForestGrid outputs
-    std::cout << "\nForestGrid Outputs:\n";
-    std::cout << "GFuelTypeN: ";
-    for (const auto& value : GFuelTypeN) {
-        std::cout << value << " ";
-    }
-    std::cout << "\nGFuelType: ";
-    for (const auto& value : GFuelType) {
-        std::cout << value << " ";
-    }
-
-    std::cout << "\n" << "FBPDicts:" << FBPDicts << "\n";
-    std::cout << "\n" << "Cols:" << Cols << "\n";
-    std::cout << "\n" << "CellSide:" << CellSide << "\n";
-
-    */
-    // FOR DEBUGING ENDS
-    // HERE-----------------------------------------------------
-
     int NCells = GFuelType.size();
 
     // Call DataGrids function (formerly DataGrids)
@@ -1048,11 +1021,12 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     std::vector<float> ProbMap(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> FMC(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> TreeHeight(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> CombatPoints(NCells, static_cast<float>(std::nanf("")));
 
     std::vector<std::string> filenames
-        = { "elevation" + extension, "saz" + extension, "slope" + extension, "cur" + extension,
-            "cbd" + extension,       "cbh" + extension, "ccf" + extension,   "probabilityMap" + extension,
-            "fmc" + extension,       "hm" + extension };
+        = { "elevation" + extension, "saz" + extension, "slope" + extension,       "cur" + extension,
+            "cbd" + extension,       "cbh" + extension, "ccf" + extension,         "probabilityMap" + extension,
+            "fmc" + extension,       "hm" + extension,  "combatPoints" + extension };
 
     for (const auto& name : filenames)
     {
@@ -1100,6 +1074,10 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
             {
                 DataGrids(filePath, TreeHeight, NCells);
             }
+            else if (name == "combatPoints.asc")
+            {
+                DataGrids(filePath, CombatPoints, NCells);
+            }
             else
             {
                 // Handle the case where the file name doesn't match any
@@ -1114,8 +1092,20 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     }
 
     // Call GenerateDat function
-    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(
-        GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, ProbMap, FMC, TreeHeight, InFolder);
+    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(GFuelType,
+                                                                                GFuelTypeN,
+                                                                                Elevation,
+                                                                                PS,
+                                                                                SAZ,
+                                                                                Curing,
+                                                                                CBD,
+                                                                                CBH,
+                                                                                CCF,
+                                                                                ProbMap,
+                                                                                FMC,
+                                                                                TreeHeight,
+                                                                                CombatPoints,
+                                                                                InFolder);
 
     writeDataToFile(result, InFolder);
     std::cout << "Generated data file" << std::endl;

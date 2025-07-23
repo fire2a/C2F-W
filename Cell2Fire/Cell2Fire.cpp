@@ -1020,6 +1020,17 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
     if (!this->noIgnition)
     {
         int newId = it->second.realId;
+        if (df[newId - 1].is_combat_point)
+        {
+            std::srand(args.seed);
+            float random_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
+            if (0.8 > random_number)
+            {
+                this->totalFirePeriods = 2;
+                cout << "changed fire period" << endl;
+            }
+        }
+
         if (this->args.verbose)
         std:
             cout << "New ID for burning cell: " << newId << std::endl;

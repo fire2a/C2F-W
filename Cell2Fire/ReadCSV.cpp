@@ -259,7 +259,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
     float cur, elev, ws, waz, saz, cbd, cbh, ccf, ps, lat, lon, ffmc, bui, gfl, tree_height;
 
     // Integers
-    int nftype, FMC, jd, jd_min, pc, pdf, time, pattern;
+    int nftype, FMC, jd, jd_min, pc, pdf, time, pattern, is_combat_point;
 
     // CChar
     const char* faux;
@@ -391,6 +391,16 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
         else
             tree_height = std::stof(DF[i][24], &sz);
 
+        if (DF[i][25].compare("") == 0)
+        {
+            is_combat_point = 0;
+            cout << "no hay comb" << endl;
+        }
+        else
+        {
+            is_combat_point = std::stoi(DF[i][25], &sz);
+        }
+
         // Set values
         strncpy(df_ptr->fueltype, faux, 4);
         df_ptr->elev = elev;
@@ -416,6 +426,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
         df_ptr->gfl = gfl;
         df_ptr->pattern = pattern;
         df_ptr->tree_height = tree_height;
+        df_ptr->is_combat_point = is_combat_point;
 
         // Next pointer
         df_ptr++;
