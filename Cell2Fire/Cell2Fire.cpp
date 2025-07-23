@@ -50,6 +50,11 @@ std::unordered_map<int, std::vector<int>> HarvestedCells;
 std::vector<int> NFTypesCells;
 std::unordered_map<int, int> IgnitionHistory;
 std::unordered_map<int, std::string> WeatherHistory;
+std::unordered_map<int, std::vector<float>> StatisticsPerCell;
+std::unordered_map<int, float> meanSurfaceFlameLength;
+std::unordered_map<int, float> meanCrownFlameLength;
+std::unordered_map<int, float> meanMaxFlameLength;
+std::unordered_map<int, std::vector<float>> StatisticsPerSim;
 
 /******************************************************************************
                                                                                                                                 Utils
@@ -176,9 +181,6 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     // Populate arguments from command line into the Cell2Fire object
     this->args = _args;
     this->args_ptr = &this->args;
-
-    // this->wdf_ptr = new weatherDF;
-    // this->wdf[100000];
 
     /********************************************************************
      *
@@ -342,7 +344,6 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
             this->harvestCells.insert(i + 1);
     }
 
-    // POTENCIALMENTE AQUI ESTA MALO
     /* Weather DataFrame */
     // this->WeatherData = this->CSVWeather.getData();
     // std::cout << "\nWeather DataFrame from instance " << this->CSVWeather.fileName << std::endl;
@@ -674,8 +675,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->surfaceIntensityFolder = Cell2Fire::createOutputFolder("SurfaceIntensity");
     }
     // Crown Byram Intensity Folder
-    if ((this->args.OutIntensity) && (this->args.AllowCROS)
-        && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutIntensity) && (this->args.AllowCROS) && (this->args.Simulator != "C"))
     {
         this->crownIntensityFolder = Cell2Fire::createOutputFolder("CrownIntensity");
     }
@@ -685,14 +685,18 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->surfaceFlameLengthFolder = Cell2Fire::createOutputFolder("SurfaceFlameLength");
     }
     // Crown Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator != "C"))
     {
         this->crownFlameLengthFolder = Cell2Fire::createOutputFolder("CrownFlameLength");
     }
     // max Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator != "C"))
     {
         this->maxFlameLengthFolder = Cell2Fire::createOutputFolder("MaxFlameLength");
+    }
+    if (this->args.Stats)
+    {
+        this->statsFolder = Cell2Fire::createOutputFolder("Statistics");
     }
     // Crown Folder
     if (this->args.OutCrown && this->args.AllowCROS)
@@ -1767,8 +1771,7 @@ Cell2Fire::Results()
     }
 
     // Crown Intensity
-    if ((this->args.OutIntensity) && (this->args.AllowCROS)
-        && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutIntensity) && (this->args.AllowCROS) && (this->args.Simulator != "C"))
     {
         this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
         std::string intensityName;
@@ -1804,7 +1807,7 @@ Cell2Fire::Results()
     }
 
     // Crown Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator != "C"))
     {
         this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
         std::string fileName;
@@ -1822,7 +1825,7 @@ Cell2Fire::Results()
     }
 
     // Max Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator != "C"))
     {
         this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength" + separator();
         std::string fileName;
@@ -1837,6 +1840,58 @@ Cell2Fire::Results()
         CSVWriter CSVPloter(fileName, " ");
         CSVPloter.printASCII(
             this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->maxFlameLengths);
+    }
+
+    // Flame Length StatisticsPerCell
+    // This will be used to store accumulated flame lengths across simulations
+    if (this->args.Stats)
+    {
+        float totalCrown = 0;
+        float totalSurface = 0;
+        float maxPerSim = 0;
+        std::vector<float> simStats;
+        for (int cell : this->burntCells)
+        {
+            std::vector<float> cellFlameLengthMeans;
+
+            float surfaceFlameLength = this->surfaceFlameLengths[cell] / args.TotalSims;
+            meanSurfaceFlameLength[cell] += surfaceFlameLength;
+            cellFlameLengthMeans.push_back(meanSurfaceFlameLength[cell]);
+            totalSurface += this->surfaceFlameLengths[cell];
+            maxPerSim = max(maxPerSim, this->surfaceFlameLengths[cell]);
+
+            if ((this->args.AllowCROS) && (this->args.Simulator != "C"))
+            {
+                float crownFlameLength = this->crownFlameLengths[cell] / args.TotalSims;
+                float maxFlameLength = this->maxFlameLengths[cell] / args.TotalSims;
+                meanCrownFlameLength[cell] += crownFlameLength;
+                meanMaxFlameLength[cell] += maxFlameLength;
+                cellFlameLengthMeans.push_back(meanCrownFlameLength[cell]);
+                cellFlameLengthMeans.push_back(meanMaxFlameLength[cell]);
+                totalCrown += this->maxFlameLengths[cell];
+                maxPerSim = max(maxPerSim, this->crownFlameLengths[cell]);
+            }
+            StatisticsPerCell[cell] = { cellFlameLengthMeans };
+        }
+        simStats.push_back(totalSurface / BCells);
+        if ((this->args.AllowCROS) && (this->args.Simulator != "C"))
+        {
+            simStats.push_back(totalCrown / BCells);
+        }
+        simStats.push_back(maxPerSim);
+
+        StatisticsPerSim[this->sim] = { simStats };
+        std::ostringstream oss;
+        std::string Stats = this->statsFolder + "statisticsPerSim" + oss.str() + ".csv";
+        CSVWriter simStatsFile(Stats);
+        simStatsFile.printStats(StatisticsPerSim, "sim", (this->args.AllowCROS) && (this->args.Simulator != "C"));
+        if (currentSim == args.TotalSims)
+        {
+            std::ostringstream oss;
+            std::string Statsname = this->statsFolder + "statisticsPerCell" + oss.str() + ".csv";
+            CSVWriter statsFile(Statsname);
+            statsFile.printStats(StatisticsPerCell, "cell", (this->args.AllowCROS) && (this->args.Simulator != "C"));
+        }
     }
 
     // Intensity

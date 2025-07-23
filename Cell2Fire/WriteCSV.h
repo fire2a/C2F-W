@@ -45,6 +45,7 @@ class CSVWriter
     void printWeather(std::vector<std::string> weatherHistory);
     void printIgnitions(std::unordered_map<int, int> ignitionsHistory,
                         std::unordered_map<int, std::string> weatherHistory);
+    void printStats(std::unordered_map<int, std::vector<float>> statistics, std::string type, bool hasCrown);
     void printCSV_V2(int rows, int cols, std::vector<int> statusCells);
     // Function to create a directory
     void MakeDir(std::string pathPlot);
