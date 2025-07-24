@@ -941,7 +941,7 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
  * @param Simulator Simulation model code
  */
 void
-GenDataFile(const std::string& InFolder, const std::string& Simulator)
+GenDataFile(const std::string& InFolder, const std::string& Simulator, std::string fuelsFile)
 {
     std::cout << "\n------ Reading input data ------\n\n";
     std::unordered_map<std::string, std::string> FBPDict;
@@ -984,17 +984,30 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     // Call ForestGrid function
     // If fuels.tif exists, then .tif's are used, otherwise .asc
     std::string extension;
-    if (fileExists(InFolder + separator() + "fuels.tif"))
+    std::string FGrid;
+    if (!fuelsFile.empty())
+    {
+        std::string::size_type idx;
+        idx = fuelsFile.rfind('.');
+
+        if (idx != std::string::npos)
+        {
+            extension = fuelsFile.substr(idx);
+            FGrid = InFolder + fuelsFile;
+        }
+    }
+    else if (fileExists(InFolder + separator() + "fuels.tif"))
     {
         extension = ".tif";
+        FGrid = InFolder + "fuels" + extension;
     }
     else
     {
         extension = ".asc";
+        FGrid = InFolder + "fuels" + extension;
     }
     std::cout << "Using " << extension << '\n';
     // Call ForestGrid function
-    std::string FGrid = InFolder + "fuels" + extension;
     std::vector<int> GFuelTypeN;
     std::vector<std::string> GFuelType;
     int FBPDicts, Cols;

@@ -2411,7 +2411,7 @@ main(int argc, char* argv[])
     arguments args;
     arguments* args_ptr = &args;
     parseArgs(argc, argv, args_ptr);
-    GenDataFile(args.InFolder, args.Simulator);
+    GenDataFile(args.InFolder, args.Simulator, args_ptr->FuelsFilename);
     int ep = 0;
     // Episodes loop (episode = replication)
     // CP: Modified to account the case when no ignition occurs and no grids are

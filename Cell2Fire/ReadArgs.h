@@ -14,7 +14,7 @@
  */
 typedef struct
 {
-    std::string InFolder, OutFolder, WeatherOpt, HarvestPlan, Simulator;
+    std::string InFolder, OutFolder, WeatherOpt, HarvestPlan, Simulator, FuelsFilename;
     bool OutMessages, OutFl, OutIntensity, OutRos, OutCrown, OutCrownConsumption, OutSurfConsumption, Trajectories,
         NoOutput, verbose, IgnitionsLog, Ignitions, OutputGrids, FinalGrid, PromTuned, Stats, BBOTuning, AllowCROS;
     float ROSCV, ROSThreshold, CROSThreshold, HFIThreshold, HFactor, FFactor, BFactor, EFactor, FirePeriodLen;

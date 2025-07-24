@@ -87,6 +87,15 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     else
         input_hplan = &empty;
 
+    //--fuels
+    char* input_fuels = getCmdOption(argv, argv + argc, "--fuels");
+    if (input_fuels)
+    {
+        printf("Fuels file: %s \n", input_fuels);
+    }
+    else
+        input_fuels = &empty;
+
     // Booleans
     bool out_messages = false;
     bool out_trajectories = false;
@@ -578,6 +587,13 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     }
     else
         args_ptr->HarvestPlan = input_hplan;
+
+    if (input_fuels == &empty)
+    {
+        args_ptr->FuelsFilename = "";
+    }
+    else
+        args_ptr->FuelsFilename = input_fuels;
 
     // booleans
     args_ptr->OutMessages = out_messages;

@@ -45,6 +45,6 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
 void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids,
                      const std::string& InFolder);
 
-void GenDataFile(const std::string& InFolder, const std::string& Simulator);
+void GenDataFile(const std::string& InFolder, const std::string& Simulator, std::string string);
 
 #endif
