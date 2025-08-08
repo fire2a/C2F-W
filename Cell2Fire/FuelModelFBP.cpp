@@ -105,6 +105,7 @@ calculate_fbp(
     hptr->rss = at->rss;
     at->sfc = surf_fuel_consump(data);
     at->sfi = fire_intensity(at->sfc, at->rss);
+    at->fl = flame_length_fbp(at->sfi);
 
     if (at->covertype == 'c')
     {
@@ -115,6 +116,7 @@ calculate_fbp(
         at->crown = firetype;
         if (firetype == 1)
         {
+            // TODO: poner crown flame length
             hptr->cfb = crown_frac_burn(at->rss, at->rso);
             hptr->fd = fire_description(hptr->cfb);
             hptr->ros = final_ros(data, at->fmc, at->isi, hptr->cfb, at->rss);
@@ -187,6 +189,7 @@ determine_destiny_metrics_fbp(inputs* data, fuel_coefs* pt, main_outs* metrics, 
         metrics->rss = rate_of_spread(data, (*ptr), metrics);
         metrics->sfc = surf_fuel_consump(data);
         metrics->sfi = fire_intensity(metrics->sfc, metrics->rss);
+        metrics->fl = flame_length_fbp(metrics->sfi);
 
         if (metrics->covertype == 'c')
         {
@@ -711,6 +714,12 @@ float
 fire_intensity(float fc, float ros)
 {
     return (300.0 * fc * ros);
+}
+
+float
+flame_length_fbp(float ib)
+{
+    return 0.0775 * pow(ib, 0.46);
 }
 
 // TODO: citation needed

@@ -40,6 +40,8 @@ float surf_fuel_consump(inputs* inp);
 
 float fire_intensity(float fc, float ros);
 
+float flame_length_fbp(float ib);
+
 void setup_const(fuel_coefs* ptr);
 
 char get_fueltype_number(fuel_coefs** ptr, char ft[4]);
