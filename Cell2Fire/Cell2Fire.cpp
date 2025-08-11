@@ -2440,8 +2440,6 @@ main(int argc, char* argv[])
         }
 
         Cell2Fire Forest = Forests[TID];
-        // Random seed
-
         // Random numbers (weather file and ROS-CV)
         int rnumber;
         double rnumber2;
