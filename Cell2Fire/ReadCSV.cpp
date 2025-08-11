@@ -394,7 +394,6 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
         if (DF[i][25].compare("") == 0)
         {
             is_combat_point = 0;
-            cout << "no hay comb" << endl;
         }
         else
         {

@@ -2422,30 +2422,12 @@ main(int argc, char* argv[])
     std::vector<Cell2Fire> Forests(num_threads, Forest2);
 
     cout << "\n-------Running simulations-------" << endl;
-    // Parallel zone
-#pragma omp parallel num_threads(num_threads)
+    if (num_threads == 1)
     {
-        // Number of threads
-        int TID = omp_get_thread_num();
-        if (TID == 0)
-        {
-            if (omp_get_num_threads() >= 2)
-            {
-                cout << "There are " << omp_get_num_threads() << " threads" << endl;
-            }
-            else
-            {
-                cout << "Serial version execution" << endl;
-            }
-        }
-
-        Cell2Fire Forest = Forests[TID];
-        // Random seed
-
-        // Random numbers (weather file and ROS-CV)
+        cout << "Serial version execution" << endl;
+        Cell2Fire Forest = Forests[0];
         int rnumber;
-        double rnumber2;
-#pragma omp for
+        float rnumber2;
         for (int ep = 1; ep <= args.TotalSims; ep++)
         {
 
@@ -2455,7 +2437,6 @@ main(int argc, char* argv[])
             boost::random::normal_distribution<> ndistribution(0.0, 1.0);
             boost::random::uniform_int_distribution<int> udistributionIgnition(1, Forest.nCells);
 
-            TID = omp_get_thread_num();
             rnumber = udistribution(generator);
             rnumber2 = ndistribution(generator);
             // Reset
@@ -2468,6 +2449,52 @@ main(int argc, char* argv[])
                 if (Forest.done)
                 {
                     break;
+                }
+            }
+        }
+    }
+    else
+    {
+        // Parallel zone
+#pragma omp parallel num_threads(num_threads)
+        {
+            // Number of threads
+            int TID = omp_get_thread_num();
+            if (TID == 0)
+            {
+                cout << "There are " << omp_get_num_threads() << " threads" << endl;
+            }
+
+            Cell2Fire Forest = Forests[TID];
+            // Random seed
+
+            // Random numbers (weather file and ROS-CV)
+            int rnumber;
+            double rnumber2;
+#pragma omp for
+            for (int ep = 1; ep <= args.TotalSims; ep++)
+            {
+
+                boost::random::mt19937 generator = boost::random::mt19937(args.seed * ep);
+                // Random generator and distributions
+                boost::random::uniform_int_distribution<int> udistribution(1, args.NWeatherFiles);
+                boost::random::normal_distribution<> ndistribution(0.0, 1.0);
+                boost::random::uniform_int_distribution<int> udistributionIgnition(1, Forest.nCells);
+
+                TID = omp_get_thread_num();
+                rnumber = udistribution(generator);
+                rnumber2 = ndistribution(generator);
+                // Reset
+                Forest.reset(rnumber, rnumber2, ep);
+                // Time steps during horizon (or until we break it)
+                for (int tstep = 0; tstep <= Forest.totalFirePeriods * Forest.args.TotalYears; tstep++)
+                {
+                    Forest.Step(generator, ep);
+
+                    if (Forest.done)
+                    {
+                        break;
+                    }
                 }
             }
         }
