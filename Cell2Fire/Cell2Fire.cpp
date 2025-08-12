@@ -2354,7 +2354,18 @@ main(int argc, char* argv[])
     int num_threads = args.nthreads;
     Cell2Fire Forest2(args);  // generate Forest object
     std::vector<Cell2Fire> Forests(num_threads, Forest2);
-
+    if (args.Simulator == "K")
+    {
+        setup_const();
+    }
+    else if (args.Simulator == "S")
+    {
+        initialize_coeff(args.scenario);
+    }
+    else if (args.Simulator == "P")
+    {
+        initialize_coeff_p(args.scenario);
+    }
     cout << "\n-------Running simulations-------" << endl;
     // Parallel zone
 #pragma omp parallel num_threads(num_threads)

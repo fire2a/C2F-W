@@ -2475,8 +2475,6 @@ calculate_s(inputs* data,
             fire_struc* bptr,
             bool& activeCrown)
 {
-    // Hack: Initialize coefficients
-    initialize_coeff(args->scenario);
 
     // Aux
     float ros, bros, lb, fros;

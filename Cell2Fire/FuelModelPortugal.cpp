@@ -1235,9 +1235,6 @@ calculate_p(inputs* data,
             bool& activeCrown)
 {
 
-    // Hack: Initialize coefficients
-    initialize_coeff_p(args->scenario);
-
     // Aux
     float ros, bros, lb, fros;
     bool crownFire = false;

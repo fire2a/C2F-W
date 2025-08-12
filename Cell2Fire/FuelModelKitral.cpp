@@ -839,9 +839,6 @@ calculate_k(inputs* data,
             fire_struc* bptr,
             bool& activeCrown)
 {
-    // Hack: Initialize coefficients
-    setup_const();
-    setup_crown_const(data);
     // Aux
     float ros, bros, lb, fros;
     int FMC;
