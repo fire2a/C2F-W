@@ -883,7 +883,6 @@ calculate_k(inputs* data,
             weatherDF* wdf_ptr)
 {
     // Hack: Initialize coefficients
-    setup_const();
     setup_crown_const(data);
     // Aux
     float ros, bros, lb, fros;
