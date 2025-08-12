@@ -626,7 +626,7 @@ l_to_b(float ws, fuel_coefs* ptr)
     float l1, l2, lb;
     l1 = 2.233;     // 1.411; // ptr->l1 ;
     l2 = -0.01031;  // 0.01745; // ptr->l2 ;
-    lb = 1.0 + pow(l1 * exp(-l2 * ws) - l1, 2.0);
+    lb = 1 + pow(l1 * exp(-l2 * ws) - l1, 2.0);
     return lb;
 }
 
@@ -647,7 +647,7 @@ backfire_ros_k(main_outs* at, snd_outs* sec)
 
 // TODO: citation needed
 float
-slope_effect(float elev_i, float elev_j, int cellsize)
+slope_effect(const float elev_i, const float elev_j, const int cellsize)
 {
     float ps_ij = (elev_j - elev_i) / (cellsize / 4.);  // cellsize corresponds to the perimeter of the cell
     float se;
@@ -658,7 +658,7 @@ slope_effect(float elev_i, float elev_j, int cellsize)
 
 // TODO: citation needed
 float
-flame_length(inputs* data, main_outs* at)  // REVISAR ESTA ECUACI�N
+flame_length(main_outs* at)  // REVISAR ESTA ECUACI�N
 {
     float ib, fl;
 
@@ -926,7 +926,7 @@ calculate_k(inputs* data,
     at->sfi = byram_intensity(data, at);
 
     // Step 7: Flame Length
-    at->fl = flame_length(data, at);
+    at->fl = flame_length(at);
 
     // Step 8: Flame angle
     at->angle = angleFL(wdf_ptr->ws, at);
@@ -1076,7 +1076,7 @@ determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main
     // Step 6: Byram Intensity
     metrics->sfi = byram_intensity(data, metrics);
     // Step 7: Flame Length
-    metrics->fl = flame_length(data, metrics);
+    metrics->fl = flame_length(metrics);
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not
     // want to include it)
     if (args->AllowCROS && data->cbh > 0)

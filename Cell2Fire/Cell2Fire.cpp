@@ -2310,7 +2310,7 @@ Cell2Fire::getROSMatrix()
  * cell.
  */
 std::vector<float>
-Cell2Fire::getFireProgressMatrix()
+Cell2Fire::getFireProgressMatrix() const
 {
     std::vector<float> ProgressMatrix(this->nCells, 0);
     return ProgressMatrix;

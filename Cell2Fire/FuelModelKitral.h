@@ -27,10 +27,10 @@ float rate_of_spread_k(inputs* data, fuel_coefs* ptr, main_outs* at, weatherDF* 
 float l_to_b(float ws, fuel_coefs*);
 
 // BROS
-float backfire_ros_k(main_outs* at, snd_outs* sec);
+float backfire_ros_k(const main_outs* at, const snd_outs* sec);
 
 // Flame length [m])
-float flame_length(inputs* data, main_outs* at);
+float flame_length(const main_outs* at);
 
 // Crown Flame length [m])
 float crown_flame_length_k(float intensity);
