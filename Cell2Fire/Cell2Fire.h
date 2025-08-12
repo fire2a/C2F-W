@@ -137,7 +137,7 @@ class Cell2Fire
     void reset(int rnumber, double rnumber2, int simExt);
     bool RunIgnition(boost::random::mt19937 generator, int ep);
     std::unordered_map<int, std::vector<int>> SendMessages();
-    void GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList);
+    void GetMessages(const std::unordered_map<int, std::vector<int>>& sendMessageList);
     void Results();
     void outputGrid();
     void updateWeather();
