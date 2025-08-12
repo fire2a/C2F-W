@@ -587,8 +587,6 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             const std::vector<int>& GFuelTypeN,
             const std::vector<float>& Elevation,
             const std::vector<float>& PS,
-            const std::vector<float>& SAZ,
-            const std::vector<float>& Curing,
             const std::vector<float>& CBD,
             const std::vector<float>& CBH,
             const std::vector<float>& CCF,
@@ -600,79 +598,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
 {
     // DF columns
     std::vector<std::string> Columns
-        = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",     "ps",         "saz",    "cur",
-            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "probMap", "jd",         "jd_min", "pc",
-            "pdf",      "time", "ffmc", "bui",    "gfl", "pattern", "tree_height" };
-
-    // GFL dictionary (FBP)
-    std::unordered_map<std::string, float> GFLD = { { "C1", 0.75f },
-                                                    { "C2", 0.8f },
-                                                    { "C3", 1.15f },
-                                                    { "C4", 1.2f },
-                                                    { "C5", 1.2f },
-                                                    { "C6", 1.2f },
-                                                    { "C7", 1.2f },
-                                                    { "D1", static_cast<float>(std::nanf("")) },
-                                                    { "D2", static_cast<float>(std::nanf("")) },
-                                                    { "S1", static_cast<float>(std::nanf("")) },
-                                                    { "S2", static_cast<float>(std::nanf("")) },
-                                                    { "S3", static_cast<float>(std::nanf("")) },
-                                                    { "O1a", 0.35f },
-                                                    { "O1b", 0.35f },
-                                                    { "M1", static_cast<float>(std::nanf("")) },
-                                                    { "M2", static_cast<float>(std::nanf("")) },
-                                                    { "M3", static_cast<float>(std::nanf("")) },
-                                                    { "M4", static_cast<float>(std::nanf("")) },
-                                                    { "NF", static_cast<float>(std::nanf("")) },
-                                                    { "M1_5", 0.1f },
-                                                    { "M1_10", 0.2f },
-                                                    { "M1_15", 0.3f },
-                                                    { "M1_20", 0.4f },
-                                                    { "M1_25", 0.5f },
-                                                    { "M1_30", 0.6f },
-                                                    { "M1_35", 0.7f },
-                                                    { "M1_40", 0.8f },
-                                                    { "M1_45", 0.8f },
-                                                    { "M1_50", 0.8f },
-                                                    { "M1_55", 0.8f },
-                                                    { "M1_60", 0.8f },
-                                                    { "M1_65", 1.0f },
-                                                    { "M1_70", 1.0f },
-                                                    { "M1_75", 1.0f },
-                                                    { "M1_80", 1.0f },
-                                                    { "M1_85", 1.0f },
-                                                    { "M1_90", 1.0f },
-                                                    { "M1_95", 1.0f } };
-
-    // PDF dictionary (CANADA)
-    std::unordered_map<std::string, int> PDFD
-        = { { "M3_5", 5 },     { "M3_10", 10 },   { "M3_15", 15 },   { "M3_20", 20 },   { "M3_25", 25 },
-            { "M3_30", 30 },   { "M3_35", 35 },   { "M3_40", 40 },   { "M3_45", 45 },   { "M3_50", 50 },
-            { "M3_55", 55 },   { "M3_60", 60 },   { "M3_65", 65 },   { "M3_70", 70 },   { "M3_75", 75 },
-            { "M3_80", 80 },   { "M3_85", 85 },   { "M3_90", 90 },   { "M3_95", 95 },   { "M4_5", 5 },
-            { "M4_10", 10 },   { "M4_15", 15 },   { "M4_20", 20 },   { "M4_25", 25 },   { "M4_30", 30 },
-            { "M4_35", 35 },   { "M4_40", 40 },   { "M4_45", 45 },   { "M4_50", 50 },   { "M4_55", 55 },
-            { "M4_60", 60 },   { "M4_65", 65 },   { "M4_70", 70 },   { "M4_75", 75 },   { "M4_80", 80 },
-            { "M4_85", 85 },   { "M4_90", 90 },   { "M4_95", 95 },   { "M3M4_5", 5 },   { "M3M4_10", 10 },
-            { "M3M4_15", 15 }, { "M3M4_20", 20 }, { "M3M4_25", 25 }, { "M3M4_30", 30 }, { "M3M4_35", 35 },
-            { "M3M4_40", 40 }, { "M3M4_45", 45 }, { "M3M4_50", 50 }, { "M3M4_55", 55 }, { "M3M4_60", 60 },
-            { "M3M4_65", 65 }, { "M3M4_70", 70 }, { "M3M4_75", 75 }, { "M3M4_80", 80 }, { "M3M4_85", 85 },
-            { "M3M4_90", 90 }, { "M3M4_95", 95 } };
-
-    // PCD dictionary (CANADA)
-    std::unordered_map<std::string, int> PCD
-        = { { "M3_5", 5 },     { "M3_10", 10 },   { "M3_15", 15 },   { "M3_20", 20 },   { "M3_25", 25 },
-            { "M3_30", 30 },   { "M3_35", 35 },   { "M3_40", 40 },   { "M3_45", 45 },   { "M3_50", 50 },
-            { "M3_55", 55 },   { "M3_60", 60 },   { "M3_65", 65 },   { "M3_70", 70 },   { "M3_75", 75 },
-            { "M3_80", 80 },   { "M3_85", 85 },   { "M3_90", 90 },   { "M3_95", 95 },   { "M4_5", 5 },
-            { "M4_10", 10 },   { "M4_15", 15 },   { "M4_20", 20 },   { "M4_25", 25 },   { "M4_30", 30 },
-            { "M4_35", 35 },   { "M4_40", 40 },   { "M4_45", 45 },   { "M4_50", 50 },   { "M4_55", 55 },
-            { "M4_60", 60 },   { "M4_65", 65 },   { "M4_70", 70 },   { "M4_75", 75 },   { "M4_80", 80 },
-            { "M4_85", 85 },   { "M4_90", 90 },   { "M4_95", 95 },   { "M3M4_5", 5 },   { "M3M4_10", 10 },
-            { "M3M4_15", 15 }, { "M3M4_20", 20 }, { "M3M4_25", 25 }, { "M3M4_30", 30 }, { "M3M4_35", 35 },
-            { "M3M4_40", 40 }, { "M3M4_45", 45 }, { "M3M4_50", 50 }, { "M3M4_55", 55 }, { "M3M4_60", 60 },
-            { "M3M4_65", 65 }, { "M3M4_70", 70 }, { "M3M4_75", 75 }, { "M3M4_80", 80 }, { "M3M4_85", 85 },
-            { "M3M4_90", 90 }, { "M3M4_95", 95 } };
+        = { "fueltype", "elev", "ps", "cbd", "cbh", "ccf", "ftypeN", "fmc", "probMap", "tree_height", "combat_point" };
 
     // Create a vector to store unique_ptr of ~BaseData
     std::vector<std::vector<std::unique_ptr<std::string>>> dataGrids;
@@ -685,18 +611,10 @@ GenerateDat(const std::vector<std::string>& GFuelType,
     {
 
         std::vector<std::unique_ptr<std::string>> rowData;
-
         // Fuel Type 0
         rowData.emplace_back(std::make_unique<std::string>(GFuelType[i]));
 
-        // lat 1
-        rowData.emplace_back(std::make_unique<std::string>("51.621244"));
-
-        // lon 2
-        rowData.emplace_back(std::make_unique<std::string>("-115.608378"));
-
-        // Elevation 3
-
+        // Elevation 1
         if (std::isnan(Elevation[i]))
 
         {
@@ -706,12 +624,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         {
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(Elevation[i])));
         }
-
-        // Blank space (task: check why) 4,5
-        rowData.emplace_back(std::make_unique<std::string>(""));
-        rowData.emplace_back(std::make_unique<std::string>(""));
-
-        // PS 6
+        // PS 2
         if (std::isnan(PS[i]))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
@@ -720,28 +633,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         {
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(PS[i])));
         }
-
-        // SAZ 7
-        if (std::isnan(SAZ[i]))
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(SAZ[i])));
-        }
-
-        // Handle special cases 8
-        if (std::isnan(Curing[i]) && (GFuelType[i] == "O1a" || GFuelType[i] == "O1b"))
-        {
-            rowData.emplace_back(std::make_unique<std::string>("60"));  // "cur"
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-
-        // CBD 9
+        // CBD 3
         if (std::isnan(CBD[i]))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
@@ -750,8 +642,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         {
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(CBD[i])));
         }
-
-        // CBH 10
+        // CBH 4
         if (std::isnan(CBH[i]))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
@@ -760,8 +651,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         {
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(CBH[i])));
         }
-
-        // CCF 11
+        // CCF 5
         if (std::isnan(CCF[i]))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
@@ -770,9 +660,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         {
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(CCF[i])));
         }
-
-        // Fuel Type N 12
-        // if (std::isnan(GFuelTypeN[i]))
+        // Fuel Type N 6
         if (std::isnan(static_cast<double>(GFuelTypeN[i])))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
@@ -782,7 +670,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(GFuelTypeN[i])));
         }
 
-        // FMC 13
+        // FMC 7
         if (std::isnan(FMC[i]))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
@@ -792,7 +680,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(FMC[i])));
         }
 
-        // ProbMap 14
+        // ProbMap 8
         if (std::isnan(ProbMap[i]))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
@@ -802,51 +690,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(ProbMap[i])));
         }
 
-        // Blank space (jd,jd_min) 15,16
-        rowData.emplace_back(std::make_unique<std::string>(""));
-        rowData.emplace_back(std::make_unique<std::string>(""));
-
-        // Populate PC 17
-        if (PCD.find(GFuelType[i]) != PCD.end())
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PCD[GFuelType[i]])));  // "pc"
-        }
-        else
-        {
-
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-
-        // Populate PDF 18
-        if (PDFD.find(GFuelType[i]) != PDFD.end())
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PDFD[GFuelType[i]])));  // "pdf"
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-
-        // time 19
-        rowData.emplace_back(std::make_unique<std::string>("20"));
-
-        // Blank space (ffmc,bui) 20,21
-        rowData.emplace_back(std::make_unique<std::string>(""));
-        rowData.emplace_back(std::make_unique<std::string>(""));
-
-        // GFL 22
-        if (GFLD.find(GFuelType[i]) != GFLD.end())
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(GFLD[GFuelType[i]])));  // "gfl"
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-
-        rowData.emplace_back(std::make_unique<std::string>(""));
-
-        // TreeHeight 24
+        // TreeHeight 9
 
         if (std::isnan(TreeHeight[i]))
         {
@@ -856,6 +700,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
         {
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(TreeHeight[i])));
         }
+        // Combat 10
         if (std::isnan(CombatPoints[i]))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
@@ -884,10 +729,8 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
 {
 
     std::ofstream dataFile(InFolder + separator() + "Data.csv");
-    std::vector<std::string> Columns
-        = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",         "ps",         "saz",    "cur",
-            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "probability", "jd",         "jd_min", "pc",
-            "pdf",      "time", "ffmc", "bui",    "gfl", "pattern",     "tree_height" };
+    std::vector<std::string> Columns = { "fueltype", "elev", "ps",          "cbd",         "cbh",         "ccf",
+                                         "ftypeN",   "fmc",  "probability", "tree_height", "combat_point" };
     if (dataFile.is_open())
     {
         // Write header
@@ -1025,9 +868,7 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator, std::stri
 
     // Call DataGrids function (formerly DataGrids)
     std::vector<float> Elevation(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> SAZ(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> PS(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> Curing(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> CBD(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> CBH(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> CCF(NCells, static_cast<float>(std::nanf("")));
@@ -1036,10 +877,9 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator, std::stri
     std::vector<float> TreeHeight(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> CombatPoints(NCells, static_cast<float>(std::nanf("")));
 
-    std::vector<std::string> filenames
-        = { "elevation" + extension, "saz" + extension, "slope" + extension,       "cur" + extension,
-            "cbd" + extension,       "cbh" + extension, "ccf" + extension,         "probabilityMap" + extension,
-            "fmc" + extension,       "hm" + extension,  "combatPoints" + extension };
+    std::vector<std::string> filenames = { "elevation" + extension, "slope" + extension, "cbd" + extension,
+                                           "cbh" + extension,       "ccf" + extension,   "probabilityMap" + extension,
+                                           "fmc" + extension,       "hm" + extension,    "combatPoints" + extension };
 
     for (const auto& name : filenames)
     {
@@ -1051,17 +891,9 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator, std::stri
             {
                 DataGrids(filePath, Elevation, NCells);
             }
-            else if (name == "saz.asc")
-            {
-                DataGrids(filePath, SAZ, NCells);
-            }
             else if (name == "slope.asc")
             {
                 DataGrids(filePath, PS, NCells);
-            }
-            else if (name == "cur.asc")
-            {
-                DataGrids(filePath, Curing, NCells);
             }
             else if (name == "cbd.asc")
             {
@@ -1105,20 +937,8 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator, std::stri
     }
 
     // Call GenerateDat function
-    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(GFuelType,
-                                                                                GFuelTypeN,
-                                                                                Elevation,
-                                                                                PS,
-                                                                                SAZ,
-                                                                                Curing,
-                                                                                CBD,
-                                                                                CBH,
-                                                                                CCF,
-                                                                                ProbMap,
-                                                                                FMC,
-                                                                                TreeHeight,
-                                                                                CombatPoints,
-                                                                                InFolder);
+    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(
+        GFuelType, GFuelTypeN, Elevation, PS, CBD, CBH, CCF, ProbMap, FMC, TreeHeight, CombatPoints, InFolder);
 
     writeDataToFile(result, InFolder);
     std::cout << "Generated data file" << std::endl;

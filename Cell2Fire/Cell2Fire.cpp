@@ -1151,7 +1151,6 @@ Cell2Fire::SendMessages()
 
     // Clean list
     this->burnedOutList.clear();
-
     // Check ending
     if (fire_period[year - 1] == this->totalFirePeriods - 1 && this->args.verbose)
     {

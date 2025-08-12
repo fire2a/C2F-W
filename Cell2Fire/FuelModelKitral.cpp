@@ -579,14 +579,14 @@ setup_crown_const(inputs* data)
 float
 rate_of_spread_k(inputs* data,
                  fuel_coefs* ptr,
-                 main_outs* at)  // incluir efecto pendiente aqui y no afuera
+                 main_outs* at,
+                 weatherDF* wdf_ptr)  // incluir efecto pendiente aqui y no afuera
 {
     float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps, fp;
-
     // se = slope_effect(inp) ;
-    ws = data->ws;
-    tmp = data->tmp;
-    rh = data->rh;
+    ws = wdf_ptr->ws;
+    tmp = wdf_ptr->tmp;
+    rh = wdf_ptr->rh;
     ps = at->se;  // hacerlo con elevaciones
     p1 = -12.86;
     p2 = 0.04316;
@@ -606,7 +606,6 @@ rate_of_spread_k(inputs* data,
     {
         at->rss = fmc * fch * (fv + ps);
     }
-
     // fp = 1.0 + 0.023322 * data->ps + 0.00013585 * pow(data->ps, 2.0);
     // at->rss = fmc*fch*(fv);
     return at->rss * (at->rss >= 0);
@@ -671,10 +670,9 @@ flame_length(inputs* data, main_outs* at)  // REVISAR ESTA ECUACI�N
 
 // TODO: citation needed
 float
-angleFL(inputs* data, main_outs* at)
+angleFL(const float ws, main_outs* at)
 {
-    float angle, fl, y, ws;
-    ws = data->ws;
+    float angle, fl, y;
     fl = at->fl;
     y = 10.0 / 36.0 * ws;
 
@@ -684,10 +682,10 @@ angleFL(inputs* data, main_outs* at)
 
 // TODO: citation needed
 float
-flame_height(inputs* data, main_outs* at)
+flame_height(const float ws, main_outs* at)
 {
     float fh, phi;
-    phi = angleFL(data, at);
+    phi = angleFL(ws, at);
     fh = at->fl * sin(phi);
     return fh;
 }
@@ -792,15 +790,14 @@ crownfractionburn(inputs* data, main_outs* at, int FMC)
 
 // TODO: citation needed
 float
-active_rate_of_spreadPL04(inputs* data,
-                          main_outs* at)  // En KITRAL SE USA PL04
+active_rate_of_spreadPL04(inputs* data, main_outs* at, weatherDF* wdf_ptr)  // En KITRAL SE USA PL04
 {
     float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps, ros_active, rospl04, fp, ros_final, ros;
 
     // se = slope_effect(inp) ;
-    ws = data->ws;
-    tmp = data->tmp;
-    rh = data->rh;
+    ws = wdf_ptr->ws;
+    tmp = wdf_ptr->tmp;
+    rh = wdf_ptr->rh;
     ps = at->se;
     p1 = -12.86;
     p2 = 0.04316;
@@ -882,7 +879,8 @@ calculate_k(inputs* data,
             fire_struc* hptr,
             fire_struc* fptr,
             fire_struc* bptr,
-            bool& activeCrown)
+            bool& activeCrown,
+            weatherDF* wdf_ptr)
 {
     // Hack: Initialize coefficients
     setup_const();
@@ -893,21 +891,14 @@ calculate_k(inputs* data,
     bool crownFire = false;
     at->cfb = 0;
     // Populate fuel coefs struct
-    if (args->verbose)
-    {
-        std::cout << "Populate fuel types " << std::endl;
-        std::cout << "NfTypes:" << data->nftype << std::endl;
-    }
+
     // FMC = Fuel Moisture Content
     FMC = args->FMC;
     ptr->nftype = data->nftype;
     ptr->fmc = fmcs[data->nftype][0];
     ptr->cbh = data->cbh;
 
-    // cout << "   cbh " << ptr->cbh << "\n";
-
     ptr->fl = fls_david[data->nftype][0];
-    // cout << "   fl " << ptr->fl << "\n";
 
     ptr->h = hs[data->nftype][0];
     // cout << "   h " << ptr->h << "\n";
@@ -915,10 +906,11 @@ calculate_k(inputs* data,
     float elevation_destiny = head->elev;
     at->se = slope_effect(elevation_origin, elevation_destiny, cellsize);
     // Step 1: Calculate HROS (surface)
-    at->rss = rate_of_spread_k(data, ptr, at);
+    at->rss = rate_of_spread_k(data, ptr, at, wdf_ptr);
+
     hptr->rss = at->rss;
     // Step 2: Calculate Length-to-breadth
-    sec->lb = l_to_b(data->ws, ptr);
+    sec->lb = l_to_b(wdf_ptr->ws, ptr);
 
     // Step 3: Calculate BROS (surface)
     bptr->rss = backfire_ros_k(at, sec);
@@ -938,10 +930,10 @@ calculate_k(inputs* data,
     at->fl = flame_length(data, at);
 
     // Step 8: Flame angle
-    at->angle = angleFL(data, at);
+    at->angle = angleFL(wdf_ptr->ws, at);
 
     // Step 9: Flame Height
-    at->fh = flame_height(data, at);
+    at->fh = flame_height(wdf_ptr->ws, at);
 
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not
     // want to include it)
@@ -950,7 +942,7 @@ calculate_k(inputs* data,
         if (activeCrown)
         {
             // si el fuego esta activo en copas chequeamos condiciones
-            at->ros_active = active_rate_of_spreadPL04(data, at);
+            at->ros_active = active_rate_of_spreadPL04(data, at, wdf_ptr);
             if (!checkActive(data, at, FMC))
             {
                 activeCrown = false;
@@ -973,7 +965,7 @@ calculate_k(inputs* data,
     // If we have Crown fire, update the ROSs
     if (crownFire)
     {
-        at->ros_active = active_rate_of_spreadPL04(data, at);
+        at->ros_active = active_rate_of_spreadPL04(data, at, wdf_ptr);
         at->cfb = crownfractionburn(data, at, FMC);
 
         hptr->ros = final_rate_of_spreadPL04(at);
@@ -1039,7 +1031,7 @@ calculate_k(inputs* data,
     if (args->verbose)
     {
         cout << "--------------- Inputs --------------- \n";
-        cout << "ws = " << data->ws << "\n";
+
         cout << "coef data->cbh = " << data->cbh << "\n";
         cout << "coef ptr->fmc = " << ptr->fmc << "\n";
         cout << "coef ptr->cbh = " << ptr->cbh << "\n";
