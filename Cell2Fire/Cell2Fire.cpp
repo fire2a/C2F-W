@@ -50,7 +50,7 @@ std::unordered_map<int, std::vector<int>> HarvestedCells;
 std::vector<int> NFTypesCells;
 std::unordered_map<int, int> IgnitionHistory;
 std::unordered_map<int, std::string> WeatherHistory;
-// std::unordered_map<int, std::vector<float>> StatisticsPerCell;
+std::unordered_map<int, std::vector<float>> StatisticsPerCell;
 std::unordered_map<int, float> meanSurfaceFlameLength;
 std::unordered_map<int, float> meanCrownFlameLength;
 std::unordered_map<int, float> meanMaxFlameLength;
@@ -1867,22 +1867,22 @@ Cell2Fire::Results()
 
             float surfaceFlameLength = this->surfaceFlameLengths[cell] / args.TotalSims;
             meanSurfaceFlameLength[cell] += surfaceFlameLength;
-            // cellFlameLengthMeans.push_back(meanSurfaceFlameLength[cell]);
+            cellFlameLengthMeans.push_back(meanSurfaceFlameLength[cell]);
             totalSurface += this->surfaceFlameLengths[cell];
             maxPerSim = max(maxPerSim, this->surfaceFlameLengths[cell]);
 
             if ((this->args.AllowCROS) && (this->args.Simulator != "C"))
             {
-                // float crownFlameLength = this->crownFlameLengths[cell] / args.TotalSims;
-                // float maxFlameLength = this->maxFlameLengths[cell] / args.TotalSims;
-                // meanCrownFlameLength[cell] += crownFlameLength;
-                // meanMaxFlameLength[cell] += maxFlameLength;
-                // cellFlameLengthMeans.push_back(meanCrownFlameLength[cell]);
-                // cellFlameLengthMeans.push_back(meanMaxFlameLength[cell]);
-                // totalCrown += this->maxFlameLengths[cell];
+                float crownFlameLength = this->crownFlameLengths[cell] / args.TotalSims;
+                float maxFlameLength = this->maxFlameLengths[cell] / args.TotalSims;
+                meanCrownFlameLength[cell] += crownFlameLength;
+                meanMaxFlameLength[cell] += maxFlameLength;
+                cellFlameLengthMeans.push_back(meanCrownFlameLength[cell]);
+                cellFlameLengthMeans.push_back(meanMaxFlameLength[cell]);
+                totalCrown += this->maxFlameLengths[cell];
                 maxPerSim = max(maxPerSim, this->crownFlameLengths[cell]);
             }
-            // StatisticsPerCell[cell] = { cellFlameLengthMeans };
+            StatisticsPerCell[cell] = { cellFlameLengthMeans };
         }
 
         simStats.push_back(totalSurface / BCells);
@@ -1904,8 +1904,7 @@ Cell2Fire::Results()
             std::string Statsname = this->statsFolder + "statisticsPerCell" + oss.str() + ".csv";
             CSVWriter statsFile(Statsname);
             statsFile.printStats(StatisticsPerCell, "cell", (this->args.AllowCROS) && (this->args.Simulator != "C"));
-        }
-         */
+        }*/
     }
 
     // Intensity
