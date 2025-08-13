@@ -747,7 +747,7 @@ Cells::manageFire(int period,
 
     // If original is empty (no messages but fire is alive if aux_list is not
     // empty)
-    if (msg_list.size() == 0)
+    if (msg_list.empty())
     {
         if (msg_list_aux[0] == -100)
         {
@@ -1070,7 +1070,7 @@ Cells::manageFireBBO(int period,
 
     // If original is empty (no messages but fire is alive if aux_list is not
     // empty)
-    if (msg_list.size() == 0)
+    if (msg_list.empty())
     {
         if (msg_list_aux[0] == -100)
         {
@@ -1273,7 +1273,7 @@ Cells::ignition(int period,
 {
 
     // If we have ignition points, update
-    if (ignitionPoints.size() > 0)
+    if (!ignitionPoints.empty())
     {
         this->status = 1;
         this->fireStarts = period;
