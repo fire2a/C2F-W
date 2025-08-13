@@ -483,11 +483,12 @@ Cells::manageFire(int period,
                     &flankstruct,
                     &backstruct,
                     activeCrown,
-                    nullptr);
+                    wdf_ptr);
     }
     else if (args->Simulator == "C")
     {
-        calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+        calculate_fbp(
+            &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, wdf_ptr);
     }
 
     else if (args->Simulator == "P")
@@ -500,7 +501,8 @@ Cells::manageFire(int period,
                     &headstruct,
                     &flankstruct,
                     &backstruct,
-                    activeCrown);
+                    activeCrown,
+                    wdf_ptr);
     }
 
     /*  ROSs DEBUG!   */
@@ -658,15 +660,15 @@ Cells::manageFire(int period,
                 }
                 else if (args->Simulator == "S")
                 {
-                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, nullptr);
+                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 else if (args->Simulator == "C")
                 {
-                    determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2);
+                    determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2, wdf_ptr);
                 }
                 else if (args->Simulator == "P")
                 {
-                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics);
+                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
@@ -831,12 +833,13 @@ Cells::manageFireBBO(int period,
                     &flankstruct,
                     &backstruct,
                     activeCrown,
-                    nullptr);
+                    wdf_ptr);
     }
 
     else if (args->Simulator == "C")
     {
-        calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+        calculate_fbp(
+            &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, wdf_ptr);
     }
     else if (args->Simulator == "P")
     {
@@ -848,7 +851,8 @@ Cells::manageFireBBO(int period,
                     &headstruct,
                     &flankstruct,
                     &backstruct,
-                    activeCrown);
+                    activeCrown,
+                    wdf_ptr);
     }
 
     /*  ROSs DEBUG!   */
@@ -992,15 +996,15 @@ Cells::manageFireBBO(int period,
                 }
                 else if (args->Simulator == "S")
                 {
-                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, nullptr);
+                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 else if (args->Simulator == "C")
                 {
-                    determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2);
+                    determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2, wdf_ptr);
                 }
                 else if (args->Simulator == "P")
                 {
-                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics);
+                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
@@ -1151,17 +1155,25 @@ Cells::get_burned(int period,
                     &flankstruct,
                     &backstruct,
                     activeCrown,
-                    nullptr);
+                    wdf_ptr);
     }
 
     else if (args->Simulator == "C")
     {
-        calculate_fbp(&df[this->id], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+        calculate_fbp(&df[this->id], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, wdf_ptr);
     }
     else if (args->Simulator == "P")
     {
-        calculate_p(
-            &(df[this->id]), coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
+        calculate_p(&(df[this->id]),
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown,
+                    wdf_ptr);
     }
 
     if (args->verbose)
@@ -1313,12 +1325,18 @@ Cells::ignition(int period,
                         &flankstruct,
                         &backstruct,
                         activeCrown,
-                        nullptr);
+                        wdf_ptr);
         }
         else if (args->Simulator == "C")
         {
-            calculate_fbp(
-                &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+            calculate_fbp(&df_ptr[this->realId - 1],
+                          coef,
+                          &mainstruct,
+                          &sndstruct,
+                          &headstruct,
+                          &flankstruct,
+                          &backstruct,
+                          wdf_ptr);
         }
         else if (args->Simulator == "P")
         {
@@ -1330,7 +1348,8 @@ Cells::ignition(int period,
                         &headstruct,
                         &flankstruct,
                         &backstruct,
-                        activeCrown);
+                        activeCrown,
+                        wdf_ptr);
         }
         if (args->verbose)
         {

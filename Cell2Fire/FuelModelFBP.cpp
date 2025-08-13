@@ -87,8 +87,14 @@ float slopelimit_isi = 0.01;
 int numfuels = 18;
 
 void
-calculate_fbp(
-    inputs* data, fuel_coefs* pt, main_outs* at, snd_outs* sec, fire_struc* hptr, fire_struc* fptr, fire_struc* bptr)
+calculate_fbp(inputs* data,
+              fuel_coefs* pt,
+              main_outs* at,
+              snd_outs* sec,
+              fire_struc* hptr,
+              fire_struc* fptr,
+              fire_struc* bptr,
+              weatherDF* wdf_ptr)
 {
     int firetype = 0;
     float accn;
@@ -101,7 +107,7 @@ calculate_fbp(
     zero_fire(bptr);
     at->covertype = get_fueltype_number(ptr, data->fueltype);
     at->ff = ffmc_effect(data->ffmc);
-    at->rss = rate_of_spread(data, (*ptr), at);
+    at->rss = rate_of_spread(data, (*ptr), at, wdf_ptr);
     hptr->rss = at->rss;
     at->sfc = surf_fuel_consump(data);
     at->sfi = fire_intensity(at->sfc, at->rss);
@@ -168,7 +174,8 @@ calculate_fbp(
 }
 
 void
-determine_destiny_metrics_fbp(inputs* data, fuel_coefs* pt, main_outs* metrics, fire_struc* metrics2)
+determine_destiny_metrics_fbp(
+    inputs* data, fuel_coefs* pt, main_outs* metrics, fire_struc* metrics2, weatherDF* wdf_ptr)
 {
     int firetype = 0;
     fuel_coefs** ptr = &pt;
@@ -184,7 +191,7 @@ determine_destiny_metrics_fbp(inputs* data, fuel_coefs* pt, main_outs* metrics, 
     else
     {
         metrics->ff = ffmc_effect(data->ffmc);
-        metrics->rss = rate_of_spread(data, (*ptr), metrics);
+        metrics->rss = rate_of_spread(data, (*ptr), metrics, wdf_ptr);
         metrics->sfc = surf_fuel_consump(data);
         metrics->sfi = fire_intensity(metrics->sfc, metrics->rss);
 
@@ -437,16 +444,17 @@ ffmc_effect(float ffmc)
  */
 
 float
-rate_of_spread(inputs* inp, fuel_coefs* ptr, main_outs* at)
+rate_of_spread(inputs* inp, fuel_coefs* ptr, main_outs* at, weatherDF* wdf_ptr)
 {
     float fw, isz, mult, *mu = &mult, rsi;
     at->ff = ffmc_effect(inp->ffmc);
-    at->raz = inp->waz;
+    at->raz = wdf_ptr->waz;
+    cout << "waz " << wdf_ptr->waz << endl;
     isz = 0.208 * at->ff;
     if (inp->ps > 0)
-        at->wsv = slope_effect(inp, ptr, at, isz);
+        at->wsv = slope_effect(inp, ptr, at, isz, wdf_ptr);
     else
-        at->wsv = inp->ws;
+        at->wsv = wdf_ptr->ws;
 
     if (at->wsv < 40.0)
         fw = exp(0.05039 * at->wsv);
@@ -576,7 +584,7 @@ bui_effect(fuel_coefs* ptr, main_outs* at, float bui)
 
 // TODO: citation needed
 float
-slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi)
+slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi, weatherDF* wdf_ptr)
 /* ISI is ISZ really */
 {
     double isf, rsf, wse, ps, rsz, wsx, wsy, wsex, wsey, wsvx, wsvy, wrad, srad, wsv, raz, check, wse2, wse1;
@@ -619,9 +627,9 @@ slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi)
         wse2 = 28.0 - log(1.0 - isf / (2.496 * at->ff)) / 0.0818;
         wse = wse2;
     }
-    wrad = inp->waz / 180.0 * 3.1415926;
-    wsx = inp->ws * sin(wrad);
-    wsy = inp->ws * cos(wrad);
+    wrad = wdf_ptr->waz / 180.0 * 3.1415926;
+    wsx = wdf_ptr->ws * sin(wrad);
+    wsy = wdf_ptr->ws * cos(wrad);
     srad = inp->saz / 180.0 * 3.1415926;
     wsex = wse * sin(srad);
     wsey = wse * cos(srad);
@@ -633,6 +641,7 @@ slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi)
     if (wsvx < 0)
         raz = 360 - raz;
     at->raz = raz;
+    cout << "calculated slope" << endl;
     return ((float)(wsv));
 }
 

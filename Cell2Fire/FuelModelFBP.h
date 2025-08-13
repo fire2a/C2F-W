@@ -32,9 +32,9 @@ float bui_effect(fuel_coefs* ptr, main_outs* at, float bui);
 
 float ros_calc(inputs* inp, fuel_coefs* ptr, float isi, float* mu);
 
-float rate_of_spread(inputs* inp, fuel_coefs* ptr, main_outs* at);
+float rate_of_spread(inputs* inp, fuel_coefs* ptr, main_outs* at, weatherDF* wdf_ptr);
 
-float slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi);
+float slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi, weatherDF* wdf_ptr);
 
 float surf_fuel_consump(inputs* inp);
 
@@ -90,9 +90,16 @@ float flank_fire_behaviour(inputs* inp, fuel_coefs* ptr, main_outs* at, fire_str
 
 void set_all(fire_struc* ptr, int time);
 
-void calculate_fbp(
-    inputs* data, fuel_coefs* ptr, main_outs* at, snd_outs* sec, fire_struc* hptr, fire_struc* fptr, fire_struc* bptr);
-void determine_destiny_metrics_fbp(inputs* data, fuel_coefs* pt, main_outs* metrics, fire_struc* metrics2);
+void calculate_fbp(inputs* data,
+                   fuel_coefs* ptr,
+                   main_outs* at,
+                   snd_outs* sec,
+                   fire_struc* hptr,
+                   fire_struc* fptr,
+                   fire_struc* bptr,
+                   weatherDF* wdf_ptr);
+void determine_destiny_metrics_fbp(
+    inputs* data, fuel_coefs* pt, main_outs* metrics, fire_struc* metrics2, weatherDF* wdf_ptr);
 void zero_main(main_outs* m);
 
 void zero_sec(snd_outs* s);

@@ -989,7 +989,7 @@ void
 determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* metrics)
 {
     // Hack: Initialize coefficients
-    setup_const();
+    // setup_const();
     setup_crown_const(data);
 
     ptr->cbh = data->cbh;
