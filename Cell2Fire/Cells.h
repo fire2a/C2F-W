@@ -3,7 +3,6 @@
 
 // include stuff
 #include "ReadArgs.h"
-
 #include <math.h>
 #include <stdio.h>
 #include <string>
