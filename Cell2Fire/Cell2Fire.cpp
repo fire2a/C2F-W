@@ -1347,7 +1347,7 @@ Cell2Fire::SendMessages()
  * fire model.
  */
 void
-Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList)
+Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMessageList)
 {
     // Iterator
     std::unordered_map<int, Cells>::iterator it;
