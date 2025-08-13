@@ -296,7 +296,7 @@ CSVWriter::printStats(std::unordered_map<int, std::vector<float>> statistics, st
     ofs << type << ",surfaceFlameLengthMean";
     if (hasCrown)
     {
-        ofs << type << ",crownFlameLengthMean,maxFlameLength";
+        ofs << ",crownFlameLengthMean,maxFlameLength";
     }
     else if (type == "sim")
     {
