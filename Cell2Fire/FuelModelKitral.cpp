@@ -631,7 +631,7 @@ l_to_b(float ws, fuel_coefs* ptr)
 /* ----------------- Back Rate of Spread --------------------------*/
 // TODO: citation needed
 float
-backfire_ros_k(main_outs* at, snd_outs* sec)
+backfire_ros_k(const main_outs* at, const snd_outs* sec)
 {
     float hb, bros, lb;
     // lb = l_to_b(data->fueltype,at->wsv) ;
@@ -656,7 +656,7 @@ slope_effect(const float elev_i, const float elev_j, const int cellsize)
 
 // TODO: citation needed
 float
-flame_length(main_outs* at)  // REVISAR ESTA ECUACI�N
+flame_length(const main_outs* at)  // REVISAR ESTA ECUACI�N
 {
     float ib, fl;
 

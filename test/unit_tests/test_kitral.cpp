@@ -3,6 +3,7 @@
 //
 #define CATCH_CONFIG_MAIN
 #include "../../Cell2Fire/FuelModelKitral.h"
+#include "../../Cell2Fire/FuelModelUtils.h"
 #include <catch2/catch.hpp>
 #include <string.h>
 
@@ -33,7 +34,10 @@ class NativeFuelFixture
         test_data = new inputs();
         test_coefs = new fuel_coefs();
         test_outs = new main_outs();
+        wdf = new weatherDF();
+
         set_fueltype(test_data, "BN03");
+
         test_data->nftype = 16;
         test_data->ws = 10;
         test_data->waz = 45;
@@ -195,21 +199,26 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test flame height", "[flame_height]")
 {
     float ws = 10;
     test_outs->fl = 6.82;
-    REQUIRE_THAT(flame_height(ws, test_outs), WithinAbs(6.160, 0.001));
+    test_outs->angle = 1.127;
+    REQUIRE_THAT(flame_height(test_outs), WithinAbs(6.160, 0.001));
     test_outs->fl = 4.334;
-    REQUIRE_THAT(flame_height(ws, test_outs), WithinAbs(3.723, 0.001));
+    test_outs->angle = 1.033;
+    REQUIRE_THAT(flame_height(test_outs), WithinAbs(3.723, 0.001));
     test_outs->fl = 10.193;
-    REQUIRE_THAT(flame_height(ws, test_outs), WithinAbs(9.501, 0.001));
+    test_outs->angle = 1.2;
+    REQUIRE_THAT(flame_height(test_outs), WithinAbs(9.501, 0.001));
 }
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test flame height changes with wind", "[flame_height]")
 {
     float ws = 100;
     test_outs->fl = 6.82;
-    float fl_100 = flame_height(ws, test_outs);
+    test_outs->angle = angleFL(ws, test_outs);
+    float fl_100 = flame_height(test_outs);
     REQUIRE_THAT(fl_100, WithinAbs(1.405, 0.001));
-    float ws = 50;
-    float fl_50 = flame_height(ws, test_outs);
+    ws = 50;
+    test_outs->angle = angleFL(ws, test_outs);
+    float fl_50 = flame_height(test_outs);
     REQUIRE_THAT(fl_50, WithinAbs(2.647, 0.001));
     REQUIRE(fl_50 > fl_100);
 }
@@ -219,12 +228,12 @@ TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with slope", 
     wdf->ws = 20;
     wdf->tmp = 27;
     wdf->rh = 40;
-    wdf->se = 1;
+    test_outs->se = 1;
     REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(9.977, 0.001));
     test_outs->se = 0.5;
     REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(9.101, 0.001));
     test_outs->se = 1.8;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs), wdf, WithinAbs(11.378, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(11.378, 0.001));
 }
 
 TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with wind", "[active_rate_of_spreadPL04]")
@@ -266,9 +275,9 @@ TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with humidity
     test_outs->se = 1.2;
     wdf->rh = 5;
     REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(115.518, 0.001));
-    test_data->rh = 25;
+    wdf->rh = 25;
     REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(36.817, 0.001));
-    test_data->rh = 45;
+    wdf->rh = 45;
     REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(7.823, 0.001));
 }
 
