@@ -106,10 +106,10 @@ calculate_fbp(inputs* data,
     zero_fire(fptr);
     zero_fire(bptr);
     at->covertype = get_fueltype_number(ptr, data->fueltype);
-    at->ff = ffmc_effect(data->ffmc);
+    at->ff = ffmc_effect(wdf_ptr->ffmc);
     at->rss = rate_of_spread(data, (*ptr), at, wdf_ptr);
     hptr->rss = at->rss;
-    at->sfc = surf_fuel_consump(data);
+    at->sfc = surf_fuel_consump(data, wdf_ptr);
     at->sfi = fire_intensity(at->sfc, at->rss);
 
     if (at->covertype == 'c')
@@ -139,7 +139,7 @@ calculate_fbp(inputs* data,
     }
     sec->lb = l_to_b(data->fueltype, at->wsv);
     bptr->isi = backfire_isi(at);
-    bptr->rss = backfire_ros(data, (*ptr), at, bptr->isi);
+    bptr->rss = backfire_ros(data, (*ptr), at, bptr->isi, wdf_ptr);
     fptr->rss = flankfire_ros(hptr->rss, bptr->rss, sec->lb);
     bptr->fi = fire_behaviour(data, (*ptr), at, bptr);
     fptr->ros = flankfire_ros(hptr->ros, bptr->ros, sec->lb);
@@ -190,9 +190,9 @@ determine_destiny_metrics_fbp(
     }
     else
     {
-        metrics->ff = ffmc_effect(data->ffmc);
+        metrics->ff = ffmc_effect(wdf_ptr->ffmc);
         metrics->rss = rate_of_spread(data, (*ptr), metrics, wdf_ptr);
-        metrics->sfc = surf_fuel_consump(data);
+        metrics->sfc = surf_fuel_consump(data, wdf_ptr);
         metrics->sfi = fire_intensity(metrics->sfc, metrics->rss);
 
         if (metrics->covertype == 'c')
@@ -447,9 +447,8 @@ float
 rate_of_spread(inputs* inp, fuel_coefs* ptr, main_outs* at, weatherDF* wdf_ptr)
 {
     float fw, isz, mult, *mu = &mult, rsi;
-    at->ff = ffmc_effect(inp->ffmc);
+    at->ff = ffmc_effect(wdf_ptr->ffmc);
     at->raz = wdf_ptr->waz;
-    cout << "waz " << wdf_ptr->waz << endl;
     isz = 0.208 * at->ff;
     if (inp->ps > 0)
         at->wsv = slope_effect(inp, ptr, at, isz, wdf_ptr);
@@ -461,13 +460,13 @@ rate_of_spread(inputs* inp, fuel_coefs* ptr, main_outs* at, weatherDF* wdf_ptr)
     else
         fw = 12.0 * (1.0 - exp(-0.0818 * (at->wsv - 28)));
     at->isi = isz * fw;
-    rsi = ros_calc(inp, ptr, at->isi, mu);
-    at->rss = rsi * bui_effect(ptr, at, inp->bui);
+    rsi = ros_calc(inp, ptr, at->isi, mu, wdf_ptr);
+    at->rss = rsi * bui_effect(ptr, at, wdf_ptr->bui);
     return (at->rss);
 }
 
 float
-ros_calc(inputs* inp, fuel_coefs* ptr, float isi, float* mult)
+ros_calc(inputs* inp, fuel_coefs* ptr, float isi, float* mult, weatherDF* wdf_ptr)
 {
     float ros;
     if (strncmp(inp->fueltype, "O1", 2) == 0)
@@ -477,7 +476,7 @@ ros_calc(inputs* inp, fuel_coefs* ptr, float isi, float* mult)
     if (strncmp(inp->fueltype, "M3", 2) == 0 || strncmp(inp->fueltype, "M4", 2) == 0)
         return (dead_fir(ptr, inp->pdf, isi, mult));
     if (strncmp(inp->fueltype, "D2", 2) == 0)
-        return (D2_ROS(ptr, isi, inp->bui, mult));
+        return (D2_ROS(ptr, isi, wdf_ptr->bui, mult));
     /* if all else has fail its a conifer   */
     return (conifer(ptr, isi, mult));
 }
@@ -603,7 +602,7 @@ slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi, weatherDF* 
         isf = ISF_deadfir(ptr, isi, inp->pdf, at->sf);
     else
     {
-        rsz = ros_calc(inp, ptr, isi, &mu);
+        rsz = ros_calc(inp, ptr, isi, &mu, wdf_ptr);
         rsf = rsz * at->sf;
 
         if (rsf > 0.0)
@@ -641,7 +640,6 @@ slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi, weatherDF* 
     if (wsvx < 0)
         raz = 360 - raz;
     at->raz = raz;
-    cout << "calculated slope" << endl;
     return ((float)(wsv));
 }
 
@@ -753,13 +751,13 @@ foliar_moisture(inputs* inp, main_outs* at)
 
 // TODO: citation needed
 float
-surf_fuel_consump(inputs* inp)
+surf_fuel_consump(inputs* inp, weatherDF* wdf_ptr)
 {
     float sfc, ffc, wfc, bui, ffmc, sfc_c2, sfc_d1;
     char ft[3];
     strncpy(ft, inp->fueltype, 2);
-    bui = inp->bui;
-    ffmc = inp->ffmc;
+    bui = wdf_ptr->bui;
+    ffmc = wdf_ptr->ffmc;
     if (strncmp(ft, "C1", 2) == 0)
     {
         /*       sfc=1.5*(1.0-exp(-0.23*(ffmc-81.0)));*/
@@ -938,11 +936,11 @@ backfire_isi(main_outs* at)
 
 // TODO: citation needed
 float
-backfire_ros(inputs* inp, fuel_coefs* ptr, main_outs* at, float bisi)
+backfire_ros(inputs* inp, fuel_coefs* ptr, main_outs* at, float bisi, weatherDF* wdf_ptr)
 {
     float mult = 0.0, bros;
-    bros = ros_calc(inp, ptr, bisi, &mult);
-    bros *= bui_effect(ptr, at, inp->bui);
+    bros = ros_calc(inp, ptr, bisi, &mult, wdf_ptr);
+    bros *= bui_effect(ptr, at, wdf_ptr->bui);
     return (bros);
 }
 

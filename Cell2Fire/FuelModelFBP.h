@@ -30,13 +30,13 @@ float conifer(fuel_coefs* ptr, float isi, float* mult);
 
 float bui_effect(fuel_coefs* ptr, main_outs* at, float bui);
 
-float ros_calc(inputs* inp, fuel_coefs* ptr, float isi, float* mu);
+float ros_calc(inputs* inp, fuel_coefs* ptr, float isi, float* mu, weatherDF* wdf_ptr);
 
 float rate_of_spread(inputs* inp, fuel_coefs* ptr, main_outs* at, weatherDF* wdf_ptr);
 
 float slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi, weatherDF* wdf_ptr);
 
-float surf_fuel_consump(inputs* inp);
+float surf_fuel_consump(inputs* inp, weatherDF* wdf_ptr);
 
 float fire_intensity(float fc, float ros);
 
@@ -66,7 +66,7 @@ float l_to_b(char ft[3], float ws);
 
 float ffmc_effect(float ffmc);
 
-float backfire_ros(inputs* inp, fuel_coefs* ptr, main_outs* at, float bisi);
+float backfire_ros(inputs* inp, fuel_coefs* ptr, main_outs* at, float bisi, weatherDF* wdf_ptr);
 
 float backfire_isi(main_outs* at);
 
