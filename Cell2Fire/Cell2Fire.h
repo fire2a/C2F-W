@@ -146,7 +146,7 @@ class Cell2Fire
 
     // Utils
     std::vector<float> getROSMatrix();
-    std::vector<float> getFireProgressMatrix() const;
+    std::vector<float> getFireProgressMatrix();
     void chooseWeather(const string& weatherOpt, int rnumber, int simExt);
     int totalFirePeriods;
 };
