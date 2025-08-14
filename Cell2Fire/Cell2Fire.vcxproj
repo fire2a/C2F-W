@@ -129,6 +129,7 @@
     <ClCompile Include="DataGenerator.cpp" />
     <ClCompile Include="Forest.cpp" />
     <ClCompile Include="FuelModelFBP.cpp" />
+    <ClCompile Include="FuelModelUtils.cpp" />
     <ClCompile Include="FuelModelKitral.cpp" />
     <ClCompile Include="FuelModelSpain.cpp" />
     <ClCompile Include="FuelModelPortugal.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="DataGenerator.h" />
     <ClInclude Include="Forest.h" />
     <ClInclude Include="FuelModelFBP.h" />
+    <ClCompile Include="FuelModelUtils.h" />
     <ClInclude Include="FuelModelKitral.h" />
     <ClInclude Include="FuelModelSpain.h" />
     <ClInclude Include="FuelModelPortugal.h" />

@@ -5,13 +5,13 @@ CFLAGS = -std=c++14 -O3 -fopenmp
 LIBS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ldl
 TARGETS = Cell2Fire
 all:	$(TARGETS)
-Cell2Fire: Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o FuelModelPortugal.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o DataGenerator.o
-	$(CC) -o $@ $(LIBS) Cell2Fire.o Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o FuelModelPortugal.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o DataGenerator.o
-Cell2Fire.o: Cell2Fire.cpp Cells.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o FuelModelPortugal.o Spotting.o ReadCSV.o ReadArgs.o WriteCSV.o DataGenerator.o
+Cell2Fire: Cell2Fire.o Cells.o FuelModelUtils.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o FuelModelPortugal.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o DataGenerator.o
+	$(CC) -o $@ $(LIBS) Cell2Fire.o Cells.o FuelModelUtils.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o FuelModelPortugal.o Spotting.o ReadCSV.o ReadArgs.o Lightning.o WriteCSV.o DataGenerator.o
+Cell2Fire.o: Cell2Fire.cpp Cells.o FuelModelUtils.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o FuelModelPortugal.o Spotting.o ReadCSV.o ReadArgs.o WriteCSV.o DataGenerator.o
 	$(CC) -c $(CFLAGS) Cell2Fire.cpp
 Spotting.o: Spotting.cpp Spotting.h Cells.h
 	$(CC) -c $(CFLAGS) Spotting.cpp
-Cells.o: Cells.cpp Cells.h FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o FuelModelPortugal.o
+Cells.o: Cells.cpp Cells.h FuelModelUtils.o FuelModelSpain.o FuelModelKitral.o FuelModelFBP.o FuelModelPortugal.o
 	$(CC) -c $(CFLAGS) Cells.cpp
 ReadCSV.o: ReadCSV.cpp ReadCSV.h 
 	$(CC) -c $(CFLAGS) ReadCSV.cpp
@@ -23,18 +23,20 @@ Forest.o: Forest.cpp Forest.h
 	$(CC) -c $(CFLAGS) Forest.cpp
 WriteCSV.o: WriteCSV.cpp WriteCSV.h
 	$(CC) -c $(CFLAGS) WriteCSV.cpp
-FuelModelSpain.o: FuelModelSpain.cpp FuelModelSpain.h Cells.h
+FuelModelUtils.o: FuelModelUtils.cpp FuelModelUtils.h Cells.h
+	$(CC) -c $(LIBS) $(CFLAGS) FuelModelUtils.cpp
+FuelModelSpain.o: FuelModelSpain.cpp FuelModelSpain.h FuelModelUtils.h Cells.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelSpain.cpp 
-FuelModelKitral.o: FuelModelKitral.cpp FuelModelKitral.h Cells.h
+FuelModelKitral.o: FuelModelKitral.cpp FuelModelUtils.h FuelModelKitral.h Cells.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelKitral.cpp 
 FuelModelFBP.o: FuelModelFBP.cpp FuelModelFBP.h Cells.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelFBP.cpp
-FuelModelPortugal.o: FuelModelPortugal.cpp FuelModelPortugal.h Cells.h
+FuelModelPortugal.o: FuelModelPortugal.cpp FuelModelUtils.h FuelModelPortugal.h Cells.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelPortugal.cpp
 DataGenerator.o: DataGenerator.cpp DataGenerator.h
 	$(CC) -c $(LIBS) $(CFLAGS) DataGenerator.cpp
 clean:
-	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o Cells.o Cell2Fire Spotting.o WriteCSV.o FuelModelFBP.o FuelModelKitral.o FuelModelSpain.o FuelModelPortugal.o DataGenerator.o *.gch
+	rm -f Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o Cells.o Cell2Fire Spotting.o WriteCSV.o FuelModelFBP.o FuelModelKitral.o FuelModelSpain.o FuelModelPortugal.o FuelModelUtils.o DataGenerator.o *.gch
 	
 DESTDIR = ~/bin
 install: all
