@@ -49,7 +49,7 @@ jobs:
         fi
 
     - name: Download All Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         pattern: binaries*
         path: Cell2Fire
@@ -61,7 +61,7 @@ jobs:
         ls
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip Cell2Fire ldd_manylinux.txt
-        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip Cell2Fire.Debian.bookworm.x86_64 ldd.Debian.bookworm.x86_64.txt
+        zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Debian.trixie.x86_64-binary.zip Cell2Fire.Debian.trixie.x86_64 ldd.Debian.trixie.x86_64.txt
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.noble.x86_64-binary.zip Cell2Fire.Ubuntu.noble.x86_64 ldd.Ubuntu.noble.x86_64.txt
         zip ../Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip Cell2Fire_Darwin* otool*.txt
 
@@ -93,7 +93,7 @@ jobs:
           Cell2FireW_${{ env.RELEASE_TAG }}.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip
+          Cell2FireW_${{ env.RELEASE_TAG }}-Debian.trixie.x86_64-binary.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.noble.x86_64-binary.zip
           Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip
           Kitral-asc.zip
