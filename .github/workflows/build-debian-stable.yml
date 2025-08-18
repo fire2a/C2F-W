@@ -127,7 +127,8 @@ jobs:
           cd Cell2Fire
           make tests
 
-      - name: Bash Test
+      - name: Bash Tests
         run: |
           cd test
           bash test.sh ${{ env.SUFFIX }}
+          bash kitral_regression.sh ${{ env.SUFFIX }}

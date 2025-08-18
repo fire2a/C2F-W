@@ -148,6 +148,7 @@ jobs:
       run: |
         cd test
         ./test.ps1
+        ./kitral_regression.ps1
       shell: pwsh
 
     - name: Gather output
