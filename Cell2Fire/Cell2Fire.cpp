@@ -2218,37 +2218,6 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
 }
 
 void
-Cell2Fire::InitHarvested()
-{
-    std::cout << "OK";
-}
-
-/**
- * @brief Retrieves the Rate of Spread (ROS) matrix for all cells.
- *
- * @return A vector of floats representing the ROS values for each cell.
- */
-std::vector<float>
-Cell2Fire::getROSMatrix()
-{
-    std::vector<float> ROSMatrix(this->nCells, 0);
-    return ROSMatrix;
-}
-
-/**
- * @brief Retrieves the Fire Progress matrix for all cells.
- *
- * @return A vector of floats representing the fire progress values for each
- * cell.
- */
-std::vector<float>
-Cell2Fire::getFireProgressMatrix()
-{
-    std::vector<float> ProgressMatrix(this->nCells, 0);
-    return ProgressMatrix;
-}
-
-void
 Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
 {
     string weatherFilename;
