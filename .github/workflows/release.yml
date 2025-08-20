@@ -15,7 +15,7 @@ permissions:
   contents: write
 
 env:
-  WINDOWS: false  # Set to 'false' to skip real Windows build & zip
+  WINDOWS: 'false'  # (string) Set to 'false' to skip real Windows build & zip
 
 jobs:
 
@@ -31,7 +31,7 @@ jobs:
   build_windows:
       uses: ./.github/workflows/build-windows.yml
       with:
-        enabled: ${{ env.WINDOWS == 'true' }}
+        enabled: ${{ fromJSON(env.WINDOWS) }}
 
   release:
     needs: [build_manylinux, build_windows, build_debian_stable, build_macos]
