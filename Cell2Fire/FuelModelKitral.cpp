@@ -624,7 +624,7 @@ l_to_b(float ws, fuel_coefs* ptr)
     float l1, l2, lb;
     l1 = 2.233;     // 1.411; // ptr->l1 ;
     l2 = -0.01031;  // 0.01745; // ptr->l2 ;
-    lb = 1 + pow(l1 * exp(-l2 * ws) - l1, 2.0);
+    lb = 1.0 + pow(l1 * exp(-l2 * ws) - l1, 2.0);
     return lb;
 }
 
