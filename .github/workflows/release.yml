@@ -28,7 +28,7 @@ jobs:
   build_windows:
       uses: ./.github/workflows/build-windows.yml
       with:
-        enabled: 'false'
+        enabled: false
 
   release:
     needs: [build_manylinux, build_windows, build_debian_stable, build_macos]
