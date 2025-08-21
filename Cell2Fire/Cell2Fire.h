@@ -142,11 +142,8 @@ class Cell2Fire
     void outputGrid();
     void updateWeather();
     void Step(boost::random::mt19937 generator, int ep);
-    void InitHarvested();
 
     // Utils
-    std::vector<float> getROSMatrix();
-    std::vector<float> getFireProgressMatrix();
     void chooseWeather(const string& weatherOpt, int rnumber, int simExt);
     int totalFirePeriods;
 };

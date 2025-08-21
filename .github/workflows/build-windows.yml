@@ -6,9 +6,19 @@ on:
   #     - main
   workflow_dispatch:
   workflow_call:
+    inputs:
+      enabled:
+        description: 'Enable the full Windows build (set false to upload placeholder)'
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: write
+
+env:
+  # True means perform actual Windows build; false means skip and upload placeholder
+  ENABLED: ${{ inputs.enabled }}
 
 jobs:
   windows_build:
@@ -18,7 +28,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Skip build (placeholder artifact)
+      if: env.ENABLED != 'true'
+      run: |
+        echo "Windows build disabled (ENABLED=${{ env.ENABLED }})"
+        mkdir binaries
+        echo "Windows build disabled" > binaries/WINDOWS_BUILD_WAS_DISABLED.txt
+      shell: bash
+
     - name: Bump version in header (Windows)
+      if: env.ENABLED == 'true'
       shell: pwsh
       run: |
         if ( "${{ github.event_name }}" -eq "pull_request" ){
@@ -40,6 +59,7 @@ jobs:
         Select-String 'C2FW_VERSION' $path
 
     - name: Cache Boost
+      if: env.ENABLED == 'true'
       id: cache-boost
       uses: actions/cache@v4
       with:
@@ -50,6 +70,7 @@ jobs:
           boost-${{ runner.os }}-
 
     - name: Cache Dirent
+      if: env.ENABLED == 'true'
       id: cache-dirent
       uses: actions/cache@v4
       with:
@@ -60,6 +81,7 @@ jobs:
           dirent-${{ runner.os }}-
 
     - name: Cache vcpkg
+      if: env.ENABLED == 'true'
       id: cache-vcpkg
       uses: actions/cache@v4
       with:
@@ -70,7 +92,7 @@ jobs:
           vcpkg-${{ runner.os }}-
 
     - name: Download dependencies
-      if: steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true'
+      if: env.ENABLED == 'true' && (steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true')
       env:
         CACHE_BOOST: ${{ steps.cache-boost.outputs.cache-hit }}
         CACHE_DIRENT: ${{ steps.cache-dirent.outputs.cache-hit }}
@@ -107,6 +129,7 @@ jobs:
         }
 
     - name: Setup vcpkg
+      if: env.ENABLED == 'true'
       run: |
         cd Cell2Fire\include\vcpkg
         .\bootstrap-vcpkg.bat
@@ -116,12 +139,14 @@ jobs:
         # Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
 
     - name: Cache Catch2 header
+      if: env.ENABLED == 'true'
       uses: actions/cache@v4
       with:
         path: Cell2Fire\include\catch2\catch.hpp
         key: windows-catch2
 
     - name: Download Catch2 header
+      if: env.ENABLED == 'true'
       run: |
         cd Cell2Fire
         if (!(Test-Path "include\catch2\catch.hpp")) {
@@ -130,14 +155,17 @@ jobs:
         }
 
     - name: Setup MSBuild
+      if: env.ENABLED == 'true'
       uses: microsoft/setup-msbuild@v2
 
     - name: Build Solution
+      if: env.ENABLED == 'true'
       run: |
         cd Cell2Fire
         msbuild Cell2Fire.sln /p:Configuration=Release
 
     - name: Run Unit Tests
+      if: env.ENABLED == 'true'
       run: |
         & "Cell2Fire\x64\Release\WindowsTests.exe"
         $exitCode = $LASTEXITCODE
@@ -145,18 +173,20 @@ jobs:
       shell: pwsh
 
     - name: Run Regression Test
+      if: env.ENABLED == 'true'
       run: |
         cd test
         ./test.ps1
       shell: pwsh
 
     - name: Gather output
+      if: env.ENABLED == 'true'
       run: |
         mkdir binaries
         copy Cell2Fire\x64\Release\*.dll binaries
         copy Cell2Fire\x64\Release\Cell2Fire.exe binaries
 
-    - name: Upload
+    - name: Upload artifact (real or placeholder)
       uses: actions/upload-artifact@v4
       with:
         name: binaries-Windows-x86_64
