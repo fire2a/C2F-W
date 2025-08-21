@@ -149,6 +149,8 @@
     <ClInclude Include="FuelModelPortugal.h" />
     <ClInclude Include="FuelModelSpain.h" />
     <ClCompile Include="FuelModelUtils.h" />
+    <ClInclude Include="FuelModelSpain.h" />
+    <ClInclude Include="FuelModelUtils.h" />
     <ClInclude Include="Lightning.h" />
     <ClInclude Include="ReadArgs.h" />
     <ClInclude Include="ReadCSV.h" />
