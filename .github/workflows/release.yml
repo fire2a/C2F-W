@@ -63,6 +63,8 @@ jobs:
         ls
         if [[ -f Cell2Fire.exe ]]; then
           zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
+        else
+          zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip WINDOWS_BUILD_WAS_DISABLED.txt
         zip ../Cell2FireW_${RELEASE_TAG}-manylinux-x86_64-binary.zip Cell2Fire ldd_manylinux.txt
         zip ../Cell2FireW_${RELEASE_TAG}-Debian.bookworm.x86_64-binary.zip Cell2Fire.Debian.bookworm.x86_64 ldd.Debian.bookworm.x86_64.txt
         zip ../Cell2FireW_${RELEASE_TAG}-Ubuntu.noble.x86_64-binary.zip Cell2Fire.Ubuntu.noble.x86_64 ldd.Ubuntu.noble.x86_64.txt
