@@ -6,6 +6,7 @@
 #include "DataGenerator.h"
 #include "FuelModelKitral.h"
 #include "FuelModelSpain.h"
+#include "FuelModelUtils.h"
 #include "Lightning.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
@@ -136,16 +137,13 @@ class Cell2Fire
     void reset(int rnumber, double rnumber2, int simExt);
     bool RunIgnition(boost::random::mt19937 generator, int ep);
     std::unordered_map<int, std::vector<int>> SendMessages();
-    void GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList);
+    void GetMessages(const std::unordered_map<int, std::vector<int>>& sendMessageList);
     void Results();
     void outputGrid();
     void updateWeather();
     void Step(boost::random::mt19937 generator, int ep);
-    void InitHarvested();
 
     // Utils
-    std::vector<float> getROSMatrix();
-    std::vector<float> getFireProgressMatrix();
     void chooseWeather(const string& weatherOpt, int rnumber, int simExt);
     int totalFirePeriods;
 };

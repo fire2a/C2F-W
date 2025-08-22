@@ -11,6 +11,7 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include "FuelModelKitral.h"
 #include "FuelModelPortugal.h"
 #include "FuelModelSpain.h"
+#include "FuelModelUtils.h"
 #include "Lightning.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
@@ -1347,7 +1348,7 @@ Cell2Fire::SendMessages()
  * fire model.
  */
 void
-Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList)
+Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMessageList)
 {
     // Iterator
     std::unordered_map<int, Cells>::iterator it;
@@ -2217,37 +2218,6 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
 }
 
 void
-Cell2Fire::InitHarvested()
-{
-    std::cout << "OK";
-}
-
-/**
- * @brief Retrieves the Rate of Spread (ROS) matrix for all cells.
- *
- * @return A vector of floats representing the ROS values for each cell.
- */
-std::vector<float>
-Cell2Fire::getROSMatrix()
-{
-    std::vector<float> ROSMatrix(this->nCells, 0);
-    return ROSMatrix;
-}
-
-/**
- * @brief Retrieves the Fire Progress matrix for all cells.
- *
- * @return A vector of floats representing the fire progress values for each
- * cell.
- */
-std::vector<float>
-Cell2Fire::getFireProgressMatrix()
-{
-    std::vector<float> ProgressMatrix(this->nCells, 0);
-    return ProgressMatrix;
-}
-
-void
 Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
 {
     string weatherFilename;
@@ -2354,7 +2324,18 @@ main(int argc, char* argv[])
     int num_threads = args.nthreads;
     Cell2Fire Forest2(args);  // generate Forest object
     std::vector<Cell2Fire> Forests(num_threads, Forest2);
-
+    if (args.Simulator == "K")
+    {
+        setup_const();
+    }
+    else if (args.Simulator == "S")
+    {
+        initialize_coeff(args.scenario);
+    }
+    else if (args.Simulator == "P")
+    {
+        initialize_coeff_p(args.scenario);
+    }
     cout << "\n-------Running simulations-------" << endl;
     // Parallel zone
 #pragma omp parallel num_threads(num_threads)

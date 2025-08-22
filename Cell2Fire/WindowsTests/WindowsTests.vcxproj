@@ -110,7 +110,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\Cell2Fire</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(SolutionDir)Cell2Fire\$(Platform)\$(Configuration)\FuelModelKitral</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(SolutionDir)Cell2Fire\$(Platform)\$(Configuration)\FuelModelKitral;$(SolutionDir)Cell2Fire\$(Platform)\$(Configuration)\FuelModelUtils</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,7 +129,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\Cell2Fire</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(SolutionDir)Cell2Fire\$(Platform)\$(Configuration)\FuelModelKitral</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(SolutionDir)Cell2Fire\$(Platform)\$(Configuration)\FuelModelKitral;$(SolutionDir)Cell2Fire\$(Platform)\$(Configuration)\FuelModelUtils</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

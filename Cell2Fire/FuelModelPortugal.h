@@ -25,7 +25,7 @@ void initialize_coeff_p(int scenario);
 float flankfire_ros_p(float ros, float bros, float lb);
 
 // Calculate rate of spread
-float rate_of_spread_p(inputs* data, fuel_coefs* ptr, main_outs* at);
+float rate_of_spread_p(inputs* data, fuel_coefs* ptr, main_outs* at, float ws);
 
 // Length-to-Breadth ratio
 float l_to_b_p(float ws);
@@ -34,13 +34,7 @@ float l_to_b_p(float ws);
 float backfire_ros_p(main_outs* at, snd_outs* sec);
 
 // Flame length [m])
-float flame_length_p(inputs* data, fuel_coefs* ptr);
-
-// Angle of the flame w.r.t. horizontal surface (Putnam's)
-float angleFL_p(inputs* data, fuel_coefs* ptr);
-
-// Transformation from FL to FH using angle
-float flame_height_p(inputs* data, fuel_coefs* ptr);
+float flame_length_p(inputs* data, fuel_coefs* ptr, float ws);
 
 // byram intensity
 float byram_intensity_p(inputs* data, fuel_coefs* ptr);
@@ -49,7 +43,7 @@ float byram_intensity_p(inputs* data, fuel_coefs* ptr);
 bool fire_type_p(inputs* data, fuel_coefs* ptr);
 
 // CROS adjustements
-float rate_of_spread10_p(inputs* data, arguments* args);
+float rate_of_spread10_p(inputs* data, arguments* args, float ws);
 
 bool checkActive_p(inputs* data, main_outs* at);
 float crownfractionburn_p(inputs* data, main_outs* at);
@@ -69,8 +63,9 @@ void calculate_p(inputs* data,
                  fire_struc* hptr,
                  fire_struc* fptr,
                  fire_struc* bptr,
-                 bool& activeCrown);
+                 bool& activeCrown,
+                 weatherDF* wdf_ptr);
 
-void determine_destiny_metrics_p(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* at);
+void determine_destiny_metrics_p(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* at, weatherDF* wdf_ptr);
 
 #endif

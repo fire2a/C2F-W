@@ -1,12 +1,9 @@
 #ifndef FUELMODELSPAIN
 #define FUELMODELSPAIN
 #include "Cells.h"
+#include "FuelModelUtils.h"
 #include "ReadArgs.h"
 #include <iostream>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -25,7 +22,7 @@ void initialize_coeff(int scenario);
 float flankfire_ros_s(float ros, float bros, float lb);
 
 // Calculate rate of spread
-float rate_of_spread_s(inputs* data, fuel_coefs* ptr, main_outs* at);
+float rate_of_spread_s(inputs* data, fuel_coefs* ptr, main_outs* at, float ws);
 
 // Length-to-Breadth ratio
 float l_to_b(float ws);
@@ -34,13 +31,7 @@ float l_to_b(float ws);
 float backfire_ros_s(main_outs* at, snd_outs* sec);
 
 // Flame length [m])
-float flame_length(inputs* data, fuel_coefs* ptr);
-
-// Angle of the flame w.r.t. horizontal surface (Putnam's)
-float angleFL(inputs* data, fuel_coefs* ptr);
-
-// Transformation from FL to FH using angle
-float flame_height(inputs* data, fuel_coefs* ptr);
+float flame_length(inputs* data, fuel_coefs* ptr, float ws);
 
 // byram intensity
 float byram_intensity(inputs* data, fuel_coefs* ptr);
@@ -49,7 +40,7 @@ float byram_intensity(inputs* data, fuel_coefs* ptr);
 bool fire_type(inputs* data, fuel_coefs* ptr);
 
 // CROS adjustements
-float rate_of_spread10(inputs* data, arguments* args);
+float rate_of_spread10(inputs* data, arguments* args, float ws);
 
 bool checkActive(inputs* data, main_outs* at);
 float crownfractionburn(inputs* data, main_outs* at);
@@ -70,8 +61,9 @@ void calculate_s(inputs* data,
                  fire_struc* hptr,
                  fire_struc* fptr,
                  fire_struc* bptr,
-                 bool& activeCrown);
+                 bool& activeCrown,
+                 weatherDF* wdf_ptr);
 
-void determine_destiny_metrics_s(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* at);
+void determine_destiny_metrics_s(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* at, weatherDF* wdf_ptr);
 
 #endif

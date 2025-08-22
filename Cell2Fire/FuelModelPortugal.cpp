@@ -1,5 +1,6 @@
 #include "FuelModelPortugal.h"
 #include "Cells.h"
+#include "FuelModelUtils.h"
 #include "ReadArgs.h"
 #include <cmath>
 #include <iostream>
@@ -964,15 +965,14 @@ initialize_coeff_p(int scenario)
 }
 
 float
-rate_of_spread_p(inputs* data, fuel_coefs* ptr, main_outs* at)
+rate_of_spread_p(inputs* data, fuel_coefs* ptr, main_outs* at, float ws)
 {
-    float p1, p2, p3, ws;
+    float p1, p2, p3;
 
     p1 = p_coeff_p[data->nftype][0];
     p2 = p_coeff_p[data->nftype][1];
     p3 = p_coeff_p[data->nftype][2];
     // se = slope_effect(inp) ;
-    ws = data->ws;
     at->rss = 1.0 / (p1 * exp(-p2 * ws) + p3);
 
     return at->rss * (at->rss >= 0);
@@ -1013,11 +1013,9 @@ backfire_ros_p(main_outs* at, snd_outs* sec)
 }
 
 float
-flame_length_p(inputs* data, fuel_coefs* ptr)
+flame_length_p(inputs* data, fuel_coefs* ptr, float ws)
 {
-    float q1, q2, q3, fl, ws;
-
-    ws = data->ws;
+    float q1, q2, q3, fl;
     q1 = q_coeff_p[data->nftype][0];
     q2 = q_coeff_p[data->nftype][1];
     q3 = q_coeff_p[data->nftype][2];
@@ -1045,27 +1043,6 @@ crown_flame_length_p(float intensity)
     {
         return std::ceil(fl * 100.0) / 100.0;
     }
-}
-
-float
-angleFL_p(inputs* data, fuel_coefs* ptr)
-{
-    float angle, fl, y, ws;
-    ws = data->ws;
-    fl = flame_length_p(data, ptr);
-    y = 10.0 / 36.0 * ws;
-
-    angle = atan(2.24 * sqrt(fl / pow(y, 2)));
-    return angle;
-}
-
-float
-flame_height_p(inputs* data, fuel_coefs* ptr)
-{
-    float fh, phi;
-    phi = angleFL_p(data, ptr);
-    fh = flame_length_p(data, ptr) * sin(phi);
-    return fh;
 }
 
 float
@@ -1135,17 +1112,16 @@ fire_type_p(inputs* data, main_outs* at)
 }
 
 float
-rate_of_spread10_p(inputs* data, arguments* args)
+rate_of_spread10_p(inputs* data, arguments* args, float ws)
 {
     // FM 10 coef
     float p1 = 0.2802, p2 = 0.07786, p3 = 0.01123;
-    float ros, ros10, ws, ffros, fcbd, fccf;
+    float ros, ros10, ffros, fcbd, fccf;
 
     ffros = args->ROS10Factor;
     fcbd = args->CBDFactor;
     fccf = args->CCFFactor;
 
-    ws = data->ws;
     ros10 = 1. / (p1 * exp(-p2 * ws) + p3);
     ros = ffros * ros10 + fccf * data->ccf + fcbd * args->CBDFactor;
 
@@ -1232,11 +1208,9 @@ calculate_p(inputs* data,
             fire_struc* hptr,
             fire_struc* fptr,
             fire_struc* bptr,
-            bool& activeCrown)
+            bool& activeCrown,
+            weatherDF* wdf_ptr)
 {
-
-    // Hack: Initialize coefficients
-    initialize_coeff_p(args->scenario);
 
     // Aux
     float ros, bros, lb, fros;
@@ -1258,11 +1232,11 @@ calculate_p(inputs* data,
     ptr->nftype = data->nftype;
 
     // Step 1: Calculate HROS (surface)
-    at->rss = rate_of_spread_p(data, ptr, at);
+    at->rss = rate_of_spread_p(data, ptr, at, wdf_ptr->ws);
     hptr->rss = at->rss;
 
     // Step 2: Calculate Length-to-breadth
-    sec->lb = l_to_b_p(data->ws);
+    sec->lb = l_to_b_p(wdf_ptr->ws);
 
     // Step 3: Calculate BROS (surface)
     bptr->rss = backfire_ros_p(at, sec);
@@ -1276,15 +1250,15 @@ calculate_p(inputs* data,
     at->c = (hptr->rss - bptr->rss) / 2.;
 
     // Step 6: Flame Length
-    at->fl = flame_length_p(data, ptr);
+    at->fl = flame_length_p(data, ptr, wdf_ptr->ws);
 
     // std::cout << "hasta aqui todo bien" << std::endl;
 
     // Step 7: Flame angle
-    at->angle = angleFL_p(data, ptr);
+    at->angle = angleFL(wdf_ptr->ws, at);
 
     // Step 8: Flame Height
-    at->fh = flame_height_p(data, ptr);
+    at->fh = flame_height(at);
 
     // Step 9: Byram Intensity
     at->sfi = byram_intensity_p(at, ptr);
@@ -1294,7 +1268,7 @@ calculate_p(inputs* data,
     {
         if (activeCrown)
         {
-            at->ros_active = rate_of_spread10_p(data, args);
+            at->ros_active = rate_of_spread10_p(data, args, wdf_ptr->ws);
             if (!checkActive_p(data, at))
             {
                 activeCrown = false;
@@ -1318,7 +1292,7 @@ calculate_p(inputs* data,
     // If we have Crown fire, update the ROSs
     if (crownFire)
     {
-        at->ros_active = rate_of_spread10_p(data, args);
+        at->ros_active = rate_of_spread10_p(data, args, wdf_ptr->ws);
         at->cfb = crownfractionburn_p(data, at);
 
         hptr->ros = final_rate_of_spread10_p(data, at);
@@ -1414,7 +1388,7 @@ calculate_p(inputs* data,
 }
 
 void
-determine_destiny_metrics_p(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* metrics)
+determine_destiny_metrics_p(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* metrics, weatherDF* wdf_ptr)
 {
     // Hack: Initialize coefficients
     initialize_coeff_p(args->scenario);
@@ -1427,7 +1401,7 @@ determine_destiny_metrics_p(inputs* data, fuel_coefs* ptr, arguments* args, main
     ptr->q3 = q_coeff_p[data->nftype][2];
     ptr->nftype = data->nftype;
     // Step 6: Flame Length
-    metrics->fl = flame_length_p(data, ptr);
+    metrics->fl = flame_length_p(data, ptr, wdf_ptr->ws);
     // Step 9: Byram Intensity
     metrics->sfi = byram_intensity_p(metrics, ptr);
     // Set cfb value for no crown fire scenario

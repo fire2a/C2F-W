@@ -1,4 +1,4 @@
-name: build debian stable
+name: build debian matrix
 
 on:
   pull_request:
@@ -13,7 +13,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: debian:stable-slim
+    strategy:
+      matrix:
+        debian_version: [bookworm, trixie]
+    name: build-${{ matrix.debian_version }}
+    container: debian:${{ matrix.debian_version }}-slim
 
     steps:
       - name: Checkout Code
@@ -57,7 +61,8 @@ jobs:
           DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
           CODENAME=$( lsb_release --short --codename 2>/dev/null )
           MACHINE=$( uname --machine 2>/dev/null )
-          echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+          echo "SUFFIX=.${DISTRIBUTION}.${CODENAME}.${MACHINE}" >> $GITHUB_ENV
+          echo "Using suffix: .${DISTRIBUTION}.${CODENAME}.${MACHINE}"
 
       - name: Build
         run: |
@@ -78,7 +83,11 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
-    container: debian:stable-slim
+    strategy:
+      matrix:
+        debian_version: [bookworm, trixie]
+    name: test-${{ matrix.debian_version }}
+    container: debian:${{ matrix.debian_version }}-slim
 
     steps:
       - name: Checkout Code
