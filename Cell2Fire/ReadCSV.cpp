@@ -432,6 +432,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
 void
 CSVReader::parseNDF(std::vector<int>& NFTypes, std::vector<std::vector<std::string>>& DF, int NCells)
 {
+    // TODO: change this to use dfptr, only used in bbo
     int i;
     // Ints
     int FType;
@@ -478,6 +479,7 @@ CSVReader::parsePROB(std::vector<float>& probabilities, std::vector<std::vector<
     {
         // printf("Populating DF for cell %d\n", i);
         if (DF[i][14].compare("") == 0)
+            // TODO: change to df_ptr? or directly read file
             Prob = 1;
         else
             Prob = std::stof(DF[i][14], &sz);
@@ -625,7 +627,8 @@ CSVReader::parseBBODF(std::unordered_map<int, std::vector<float>>& bbo,
                       std::vector<std::vector<std::string>>& DF,
                       int NFTypes)
 {
-    // Integers
+    // TODO: change this to use dfptr
+    //  Integers
     int i, j, ftype;
     int ffactors = 4;
     std::vector<float> bboFactors;

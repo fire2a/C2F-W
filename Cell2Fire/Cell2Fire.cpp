@@ -246,23 +246,20 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     std::string filename = this->args.InFolder + "Data.csv";
     std::string sep = ",";
     CSVReader CSVParser(filename, sep);
-
-    // Populate DF
+    // TODO: delete csvparser and use dfptr instead
+    //  Populate DF
     std::vector<std::vector<std::string>> DF = CSVParser.getData(filename);
     std::cout << "Forest DataFrame from instance " << filename << std::endl;
     // DEBUGCSVParser.printData(DF);
     std::cout << "Number of cells: " << this->nCells << std::endl;
-    df = new inputs[this->nCells];
-
-    // Create empty df with size of NCells
-    df_ptr = &df[0];  // access reference for the first element of df
 
     // Populate the df [nCells] objects
-    CSVParser.parseDF(df_ptr,
+    //
+    /* CSVParser.parseDF(df_ptr,
                       DF,
                       this->args_ptr,
                       this->nCells);  // iterates from the first element of df, using DF,
-                                      // args_ptr and the number of cells
+                                      // args_ptr and the number of cells*/
 
     // Initialize and populate relevant vectors
     this->fTypeCells = std::vector<int>(this->nCells, 1);
@@ -2315,7 +2312,8 @@ main(int argc, char* argv[])
     arguments args;
     arguments* args_ptr = &args;
     parseArgs(argc, argv, args_ptr);
-    GenDataFile(args.InFolder, args.Simulator);
+
+    // TODO: create shared data vectors
     int ep = 0;
     // Episodes loop (episode = replication)
     // CP: Modified to account the case when no ignition occurs and no grids are

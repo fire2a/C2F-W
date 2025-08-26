@@ -1,6 +1,7 @@
 #ifndef DATAGENERATOR_H
 #define DATAGENERATOR_H
 
+#include "Cells.h"
 #include "tiffio.h"
 #include <algorithm>
 #include <array>
@@ -12,6 +13,7 @@
 #include <limits>
 #include <memory>
 #include <sstream>
+#include <string.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -39,12 +41,12 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
                                                                    const std::vector<float>& ProbMap,
                                                                    const std::vector<float>& FMC,
                                                                    const std::vector<float>& TreeHeight,
-
-                                                                   const std::string& InFolder);
+                                                                   const std::string& InFolder,
+                                                                   inputs* df_ptr);
 
 void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids,
                      const std::string& InFolder);
 
-void GenDataFile(const std::string& InFolder, const std::string& Simulator);
+void GenDataFile(const std::string& InFolder, const std::string& Simulator, inputs* df_ptr, arguments* args_ptr);
 
 #endif

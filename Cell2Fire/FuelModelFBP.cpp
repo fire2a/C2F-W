@@ -85,6 +85,7 @@ char version[50] = "Last modified June 2015,  by BMW ", ver[17] = "Version 5.000
 
 float slopelimit_isi = 0.01;
 int numfuels = 18;
+int _time = 20;
 
 void
 calculate_fbp(inputs* data,
@@ -726,22 +727,20 @@ foliar_moisture(inputs* inp, main_outs* at)
 {
     float latn;
     int nd;
-    at->jd = inp->jd;
-    at->jd_min = inp->jd_min;
-    if (inp->jd_min <= 0)
+    at->jd = 0;
+    at->jd_min = 0;
+
+    if (inp->elev < 0)
     {
-        if (inp->elev < 0)
-        {
-            latn = 23.4 * exp(-0.0360 * (150 - inp->lon)) + 46.0;
-            at->jd_min = (int)(0.5 + 151.0 * inp->lat / latn);
-        }
-        else
-        {
-            latn = 33.7 * exp(-0.0351 * (150 - inp->lon)) + 43.0;
-            at->jd_min = (int)(0.5 + 142.1 * inp->lat / latn + (0.0172 * inp->elev));
-        }
+        latn = 23.4 * exp(-0.0360 * (150 - inp->lon)) + 46.0;
+        at->jd_min = (int)(0.5 + 151.0 * inp->lat / latn);
     }
-    nd = abs(inp->jd - at->jd_min);
+    else
+    {
+        latn = 33.7 * exp(-0.0351 * (150 - inp->lon)) + 43.0;
+        at->jd_min = (int)(0.5 + 142.1 * inp->lat / latn + (0.0172 * inp->elev));
+    }
+    nd = abs(at->jd_min);
     if (nd >= 50)
         return (120.0);
     if (nd >= 30 && nd < 50)
@@ -992,7 +991,7 @@ float
 flank_spread_distance(
     inputs* inp, fire_struc* ptr, snd_outs* sec, float hrost, float brost, float hd, float bd, float lb, float a)
 {
-    sec->lbt = (lb - 1.0) * (1.0 - exp(-a * inp->time)) + 1.0;
+    sec->lbt = (lb - 1.0) * (1.0 - exp(-a * _time)) + 1.0;
     ptr->rost = (hrost + brost) / (sec->lbt * 2.0);
     return ((hd + bd) / (2.0 * sec->lbt));
 }
@@ -1001,8 +1000,8 @@ flank_spread_distance(
 float
 spread_distance(inputs* inp, fire_struc* ptr, float a)
 {
-    ptr->rost = ptr->ros * (1.0 - exp(-a * inp->time));
-    return (ptr->ros * (inp->time + (exp(-a * inp->time) / a) - 1.0 / a));
+    ptr->rost = ptr->ros * (1.0 - exp(-a * _time));
+    return (ptr->ros * (_time + (exp(-a * _time) / a) - 1.0 / a));
 }
 
 int
