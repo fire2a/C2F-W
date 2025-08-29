@@ -596,8 +596,10 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             const std::vector<float>& FMC,
             const std::vector<float>& TreeHeight,
             const std::string& InFolder,
-            inputs* df_ptr)
+            inputs* df_ptr,
+            arguments* args_ptr)
 {
+    cout << "entr generate dat" << endl;
     // DF columns
     std::vector<std::string> Columns
         = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",     "ps",         "saz",    "cur",
@@ -847,7 +849,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
 
         df_ptr++;
     }
-
+    cout << "end" << endl;
     return dataGrids;
 }
 
@@ -1101,8 +1103,21 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator, inputs* d
     }
 
     // Call GenerateDat function
-    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(
-        GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, ProbMap, FMC, TreeHeight, InFolder, df_ptr);
+    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(GFuelType,
+                                                                                GFuelTypeN,
+                                                                                Elevation,
+                                                                                PS,
+                                                                                SAZ,
+                                                                                Curing,
+                                                                                CBD,
+                                                                                CBH,
+                                                                                CCF,
+                                                                                ProbMap,
+                                                                                FMC,
+                                                                                TreeHeight,
+                                                                                InFolder,
+                                                                                df_ptr,
+                                                                                args_ptr);
 
     // writeDataToFile(result, InFolder);
     std::cout << "Generated data" << std::endl;

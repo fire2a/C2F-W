@@ -42,7 +42,8 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
                                                                    const std::vector<float>& FMC,
                                                                    const std::vector<float>& TreeHeight,
                                                                    const std::string& InFolder,
-                                                                   inputs* df_ptr);
+                                                                   inputs* df_ptr,
+                                                                   arguments* args_ptr);
 
 void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids,
                      const std::string& InFolder);

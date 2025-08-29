@@ -215,6 +215,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     ********************************************************************/
     // Create forest structure
     forestDF frdf;
+
     // DEBUG
     std::cout << "\n------------------Forest Data ----------------------\n" << std::endl;
     std::vector<std::vector<std::string>> FDF = this->CSVForest.getData(_args.InFolder + "fuels");
@@ -242,14 +243,19 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     ********************************************************************/
     // DEBUGstd::cout << "\n------ Read DataFrames: Forest and Weather ------\n";
 
+    df = new inputs[this->nCells];
+
+    // Create empty df with size of NCells
+    df_ptr = &df[0];
+    GenDataFile(args.InFolder, args.Simulator, df_ptr, this->args_ptr);
     /* Forest DataFrame */
     std::string filename = this->args.InFolder + "Data.csv";
     std::string sep = ",";
     CSVReader CSVParser(filename, sep);
     // TODO: delete csvparser and use dfptr instead
     //  Populate DF
-    std::vector<std::vector<std::string>> DF = CSVParser.getData(filename);
-    std::cout << "Forest DataFrame from instance " << filename << std::endl;
+    // std::vector<std::vector<std::string>> DF = CSVParser.getData(filename);
+    // std::cout << "Forest DataFrame from instance " << filename << std::endl;
     // DEBUGCSVParser.printData(DF);
     std::cout << "Number of cells: " << this->nCells << std::endl;
 
@@ -276,8 +282,8 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->crownFlameLengths = std::vector<float>(this->nCells, 0);
     this->maxFlameLengths = std::vector<float>(this->nCells, 0);
 
-    this->ignProb = std::vector<float>(this->nCells, 1);
-    CSVParser.parsePROB(this->ignProb, DF, this->nCells);
+    // this->ignProb = std::vector<float>(this->nCells, 1);
+    // CSVParser.parsePROB(this->ignProb, DF, this->nCells);
 
     // Non burnable types: populate relevant fields such as status and ftype
     std::string NoFuel = "NF ";
@@ -867,10 +873,10 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
             {
                 aux = distribution(generator2);
                 float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
-                if (this->ignProb[aux - 1] > rd_number)
-                {
-                    break;
-                }
+                // if (this->ignProb[aux - 1] > rd_number)
+                //{
+                break;
+                //}
                 microloops++;
                 if (microloops > this->nCells * 100)
                 {
@@ -1246,7 +1252,6 @@ Cell2Fire::SendMessages()
                              "messages"
                           << std::endl;
         }
-
         // If message and not a true flag
         if (aux_list.size() > 0 && aux_list[0] != -100)
         {
@@ -1349,7 +1354,6 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
 {
     // Iterator
     std::unordered_map<int, Cells>::iterator it;
-
     // Information of the current step
     if (this->args.verbose)
     {
@@ -1642,7 +1646,7 @@ Cell2Fire::Results()
     // Declare an iterator to unordered_map
     std::unordered_map<int, Cells>::iterator it;
     int i;
-
+    cout << "results" << endl;
     for (auto& br : this->burntCells)
     {
         if (this->Cells_Obj.find(br) != this->Cells_Obj.end())
@@ -2188,8 +2192,7 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
     // If more than planning horizon, next sim
     if (this->year > this->args.TotalYears)
     {
-        // printf("\n\nEntra a year mayor al total...\n\n");
-        //  Print-out results to folder
+        // Print-out results to folder
         this->Results();
         // Next Sim if max year
         this->sim += 1;

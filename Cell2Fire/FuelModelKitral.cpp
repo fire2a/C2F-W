@@ -813,6 +813,7 @@ calculate_k(inputs* data,
             bool& activeCrown,
             weatherDF* wdf_ptr)
 {
+    setup_crown_const(data);
     // Aux
     float ros, bros, lb, fros;
     int FMC;
