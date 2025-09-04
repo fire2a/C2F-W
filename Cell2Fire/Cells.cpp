@@ -436,7 +436,6 @@ Cells::manageFire(int period,
 {
     // Special flag for repetition (False = -99 for the record)
     int repeat = -99;
-    cout << "entra a manage fire" << endl;
     // msg lists contains integers (True = -100)
     std::vector<int> msg_list_aux;
     msg_list_aux.push_back(0);
@@ -747,10 +746,12 @@ Cells::manageFire(int period,
         }
     }
 
-    std::cout << " ----------------- End of new manageFire function "
-                 "-----------------"
-              << std::endl;
-
+    if (args->verbose)
+    {
+        std::cout << " ----------------- End of new manageFire function "
+                     "-----------------"
+                  << std::endl;
+    }
     return msg_list;
 }
 

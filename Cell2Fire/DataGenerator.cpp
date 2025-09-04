@@ -599,7 +599,6 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             inputs* df_ptr,
             arguments* args_ptr)
 {
-    cout << "entr generate dat" << endl;
     // DF columns
     std::vector<std::string> Columns
         = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",     "ps",         "saz",    "cur",
@@ -794,16 +793,15 @@ GenerateDat(const std::vector<std::string>& GFuelType,
 
         // ProbMap 14
         // TODO:change probability parser
-        /*
+
         if (std::isnan(ProbMap[i]))
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->ign_probability = 1.0;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(ProbMap[i])));
+            df_ptr->ign_probability = ProbMap[i];
         }
-         */
 
         // Populate PC 17
         if (PCD.find(GFuelType[i]) != PCD.end())
@@ -849,7 +847,6 @@ GenerateDat(const std::vector<std::string>& GFuelType,
 
         df_ptr++;
     }
-    cout << "end" << endl;
     return dataGrids;
 }
 
@@ -1120,5 +1117,4 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator, inputs* d
                                                                                 args_ptr);
 
     // writeDataToFile(result, InFolder);
-    std::cout << "Generated data" << std::endl;
 }
