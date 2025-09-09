@@ -680,15 +680,13 @@ GenerateDat(const std::vector<std::string>& GFuelType,
     // Dataframe
     // std::vector<std::vector<boost::any>> DF(GFuelType.size(),
     // std::vector<boost::any>(Columns.size()));
-
+    const char* faux;
     // Populate DF
     for (size_t i = 0; i < GFuelType.size(); ++i)
     {
 
         // Fuel Type 0
-        // rowData.emplace_back(std::make_unique<std::string>(GFuelType[i]));
-        strncpy(df_ptr->fueltype, std::make_unique<std::string>(GFuelType[i])->c_str(), 4);
-
+        df_ptr->fueltype = GFuelType[i];
         // lat 1
         // rowData.emplace_back(std::make_unique<std::string>("51.621244"));
         df_ptr->lat = 51.621244;

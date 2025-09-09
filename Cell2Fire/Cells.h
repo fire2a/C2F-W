@@ -25,7 +25,7 @@ typedef struct
 
 typedef struct
 {
-    char fueltype[5];
+    std::string fueltype;
     float ws, saz, cur, ps, cbh, ccf, cbd, elev, tmp, rh, lat, lon, ffmc, bui, gfl, tree_height,
         ign_probability;  // David: some variables only used on C2FK and not on C2FSB and
                           // viceversa
@@ -34,7 +34,7 @@ typedef struct
 
 typedef struct
 {
-    char fueltype[4];
+    std::string fueltype;
     float p1, p2, p3;    // hros coef
     float q1, q2, q3;    // flame length coef
     float q, bui0, cfl;  // fbp params

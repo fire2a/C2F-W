@@ -216,7 +216,7 @@ setup_const(fuel_coefs* ptr)
 {
     // printf("dlw debug, enter fuel_coefs\n");
     /*   fuel type 0 */
-    strncpy(ptr->fueltype, "M1 ", 3);
+    ptr->fueltype = "M1";
     ptr->p1 = 110.0;
     ptr->p2 = 0.0282;
     ptr->p3 = 1.5;
@@ -226,7 +226,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.80;
     /*   fuel type 1 */
     ptr++;
-    strncpy(ptr->fueltype, "M2 ", 3);
+    ptr->fueltype = "M2";
     ptr->p1 = 110.0;
     ptr->p2 = 0.0282;
     ptr->p3 = 1.5;
@@ -236,7 +236,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.80;
     /*   fuel type 2 */
     ptr++;
-    strncpy(ptr->fueltype, "M3 ", 3);
+    ptr->fueltype = "M3";
     ptr->p1 = 120.0;
     ptr->p2 = 0.0572;
     ptr->p3 = 1.4;
@@ -246,7 +246,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.80;
     /*   fuel type 3 */
     ptr++;
-    strncpy(ptr->fueltype, "M4 ", 3);
+    ptr->fueltype = "M4";
     ptr->p1 = 100.0;
     ptr->p2 = 0.0404;
     ptr->p3 = 1.48;
@@ -256,7 +256,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.80;
     /*   fuel type 4 */
     ptr++;
-    strncpy(ptr->fueltype, "C1 ", 3);
+    ptr->fueltype = "C1";
     ptr->p1 = 90.0;
     ptr->p2 = 0.0649;
     ptr->p3 = 4.5;
@@ -266,7 +266,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.75;
     /*  fuel type 5 */
     ptr++;
-    strncpy(ptr->fueltype, "C2 ", 3);
+    ptr->fueltype = "C2";
     ptr->p1 = 110.0;
     ptr->p2 = 0.0282;
     ptr->p3 = 1.5;
@@ -276,7 +276,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.80;
     /*   fuel type 6 */
     ptr++;
-    strncpy(ptr->fueltype, "C3 ", 3);
+    ptr->fueltype = "C3";
     ptr->p1 = 110.0;
     ptr->p2 = 0.0444;
     ptr->p3 = 3.0;
@@ -286,7 +286,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 1.15;
     /*   fuel type 7 */
     ptr++;
-    strncpy(ptr->fueltype, "C4 ", 3);
+    ptr->fueltype = "C4";
     ptr->p1 = 110.0;
     ptr->p2 = 0.0293;
     ptr->p3 = 1.5;
@@ -296,7 +296,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 1.20;
     /*  fuel type 8 */
     ptr++;
-    strncpy(ptr->fueltype, "C5 ", 3);
+    ptr->fueltype = "C5";
     ptr->p1 = 30.0;
     ptr->p2 = 0.0697;
     ptr->p3 = 4.0;
@@ -306,7 +306,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 1.20;
     /*  fuel type 9 */
     ptr++;
-    strncpy(ptr->fueltype, "C6 ", 3);
+    ptr->fueltype = "C6";
     ptr->p1 = 30.0;
     ptr->p2 = 0.0800;
     ptr->p3 = 3.0;
@@ -316,7 +316,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 1.80;
     /*  fuel type 10 */
     ptr++;
-    strncpy(ptr->fueltype, "C7 ", 3);
+    ptr->fueltype = "C7";
     ptr->p1 = 45.0;
     ptr->p2 = 0.0305;
     ptr->p3 = 2.0;
@@ -326,7 +326,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.50;
     /*  fuel type 11 */
     ptr++;
-    strncpy(ptr->fueltype, "D1 ", 3);
+    ptr->fueltype = "D1";
     ptr->p1 = 30.0;
     ptr->p2 = 0.0232;
     ptr->p3 = 1.6;
@@ -336,7 +336,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.0;
     /*  fuel type 12 */
     ptr++;
-    strncpy(ptr->fueltype, "S1 ", 3);
+    ptr->fueltype = "S1";
     ptr->p1 = 75.0;
     ptr->p2 = 0.0297;
     ptr->p3 = 1.3;
@@ -346,7 +346,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.0;
     /*  fuel type 13 */
     ptr++;
-    strncpy(ptr->fueltype, "S2 ", 3);
+    ptr->fueltype = "S2";
     ptr->p1 = 40.0;
     ptr->p2 = 0.0438;
     ptr->p3 = 1.7;
@@ -356,7 +356,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.0;
     /*  fuel type 14 */
     ptr++;
-    strncpy(ptr->fueltype, "S3 ", 3);
+    ptr->fueltype = "S3";
     ptr->p1 = 55.0;
     ptr->p2 = 0.0829;
     ptr->p3 = 3.2;
@@ -366,7 +366,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.0;
     /*  fuel type 15 */
     ptr++;
-    strncpy(ptr->fueltype, "O1a", 3);
+    ptr->fueltype = "O1a";
     ptr->p1 = 190.0;
     ptr->p2 = 0.0310;
     ptr->p3 = 1.40;
@@ -376,7 +376,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.0;
     /*  fuel type 16 */
     ptr++;
-    strncpy(ptr->fueltype, "O1b", 3);
+    ptr->fueltype = "O1b";
     ptr->p1 = 250.0;
     ptr->p2 = 0.0350;
     ptr->p3 = 1.7;
@@ -386,7 +386,7 @@ setup_const(fuel_coefs* ptr)
     ptr->cfl = 0.0;
     /*  fuel type 17 */
     ptr++;
-    strncpy(ptr->fueltype, "D2 ", 3);
+    ptr->fueltype = "D2";
     ptr->p1 = 6.0;
     ptr->p2 = 0.0232;
     ptr->p3 = 1.6;
@@ -397,7 +397,7 @@ setup_const(fuel_coefs* ptr)
 }
 
 char
-get_fueltype_number(fuel_coefs** ptr, char fuel[4])
+get_fueltype_number(fuel_coefs** ptr, std::string fuel)
 {
     int i;
     char cover;
@@ -405,11 +405,13 @@ get_fueltype_number(fuel_coefs** ptr, char fuel[4])
         fuel[0] += 'A' - 'a';
     if (fuel[2] >= 'A' && fuel[2] <= 'Z')
         fuel[2] += 'a' - 'A';
-    for (i = 0; i < numfuels && (strncmp((*ptr)->fueltype, fuel, 3) != 0); i++)
+    for (i = 0; i < numfuels && ((*ptr)->fueltype == fuel); i++)
+    {
         (*ptr)++;
+    }
     if (i >= numfuels)
     {
-        printf(" %s not a recognizable fuel type\n ", fuel);
+        cout << fuel << " %s not a recognizable fuel type\n ";
         // exit(9);
         cover = 'f';
         return (cover);
@@ -470,13 +472,13 @@ float
 ros_calc(inputs* inp, fuel_coefs* ptr, float isi, float* mult, weatherDF* wdf_ptr)
 {
     float ros;
-    if (strncmp(inp->fueltype, "O1", 2) == 0)
+    if (inp->fueltype.substr(0, 2) == "O1")
         return (grass(ptr, inp->cur, isi, mult));
-    if (strncmp(inp->fueltype, "M1", 2) == 0 || strncmp(inp->fueltype, "M2", 2) == 0)
+    if (inp->fueltype == "M1" || inp->fueltype == "M2")
         return (mixed_wood(ptr, isi, mult, inp->pc));
-    if (strncmp(inp->fueltype, "M3", 2) == 0 || strncmp(inp->fueltype, "M4", 2) == 0)
+    if (inp->fueltype == "M3" || inp->fueltype == "M4")
         return (dead_fir(ptr, inp->pdf, isi, mult));
-    if (strncmp(inp->fueltype, "D2", 2) == 0)
+    if (inp->fueltype == "D2")
         return (D2_ROS(ptr, isi, wdf_ptr->bui, mult));
     /* if all else has fail its a conifer   */
     return (conifer(ptr, isi, mult));
@@ -506,11 +508,11 @@ mixed_wood(fuel_coefs* ptr, float isi, float* mu, int pc)
     int i;
     *mu = pc / 100.0;
     ros_c2 = ptr->p1 * pow((1.0 - exp(-1.0 * ptr->p2 * isi)), ptr->p3);
-    if (strncmp(ptr->fueltype, "M2", 2) == 0)
+    if (ptr->fueltype == "M2")
         mult = 0.2;
     else
         mult = 1.0;
-    for (i = 0; strncmp(ptr->fueltype, "D1", 2) != 0 && i < numfuels; ptr++, i++)
+    for (i = 0; ptr->fueltype == "D1" && i < numfuels; ptr++, i++)
         ;
     if (i >= numfuels)
     {
@@ -530,12 +532,12 @@ dead_fir(fuel_coefs* ptr, int pdf, float isi, float* mu)
     double a, b, c;
     int i;
     float ros, rosm3or4_max, ros_d1, greenness = 1.0;
-    if (strncmp(ptr->fueltype, "M4", 2) == 0)
+    if (ptr->fueltype == "M4")
         greenness = 0.2;
 
     rosm3or4_max = ptr->p1 * pow((1.0 - exp(-1.0 * ptr->p2 * isi)), ptr->p3);
 
-    for (i = 0; strncmp(ptr->fueltype, "D1", 2) != 0 && i < numfuels; ptr++, i++)
+    for (i = 0; ptr->fueltype == "D1" && i < numfuels; ptr++, i++)
         ;
     if (i >= numfuels)
     {
@@ -597,9 +599,9 @@ slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi, weatherDF* 
     if (at->sf > 10.0)
         at->sf = 10.00; /* added to ensure maximum is correct in version 4.6  */
 
-    if (strncmp(ptr->fueltype, "M1", 2) == 0 || strncmp(ptr->fueltype, "M2", 2) == 0)
+    if (ptr->fueltype == "M1" || ptr->fueltype == "M2")
         isf = ISF_mixedwood(ptr, isi, inp->pc, at->sf);
-    else if (strncmp(ptr->fueltype, "M3", 2) == 0 || strncmp(ptr->fueltype, "M4", 2) == 0)
+    else if (ptr->fueltype == "M3" || ptr->fueltype == "M4")
         isf = ISF_deadfir(ptr, isi, inp->pdf, at->sf);
     else
     {
@@ -660,11 +662,11 @@ ISF_mixedwood(fuel_coefs* ptr, float isz, int pc, float sf)
         check = slopelimit_isi;
     isf_c2 = (1.0 / (-1.0 * ptr->p2)) * log(check);
 
-    if (strncmp(ptr->fueltype, "M2", 2) == 0)
+    if (ptr->fueltype == "M2")
         mult = 0.2;
     else
         mult = 1.0;
-    for (i = 0; strncmp(ptr->fueltype, "D1", 2) != 0 && i < numfuels; ptr++, i++)
+    for (i = 0; ptr->fueltype == "D1" && i < numfuels; ptr++, i++)
         ;
     rsf_d1 = sf * (mult * ptr->p1) * pow((1.0 - exp(-1.0 * ptr->p2 * isz)), ptr->p3);
 
@@ -694,12 +696,12 @@ ISF_deadfir(fuel_coefs* ptr, float isz, int pdf, float sf)
         check = slopelimit_isi;
     isf_max = (1.0 / (-1.0 * ptr->p2)) * log(check);
 
-    if (strncmp(ptr->fueltype, "M4", 2) == 0)
+    if (ptr->fueltype == "M4")
         mult = 0.2;
     else
         mult = 1.0;
 
-    for (i = 0; strncmp(ptr->fueltype, "D1", 2) != 0 && i < numfuels; ptr++, i++)
+    for (i = 0; ptr->fueltype == "D1" && i < numfuels; ptr++, i++)
         ;
     rsf_d1 = sf * (mult * ptr->p1) * pow((1.0 - exp(-1.0 * ptr->p2 * isz)), ptr->p3);
 
@@ -753,11 +755,9 @@ float
 surf_fuel_consump(inputs* inp, weatherDF* wdf_ptr)
 {
     float sfc, ffc, wfc, bui, ffmc, sfc_c2, sfc_d1;
-    char ft[3];
-    strncpy(ft, inp->fueltype, 2);
     bui = wdf_ptr->bui;
     ffmc = wdf_ptr->ffmc;
-    if (strncmp(ft, "C1", 2) == 0)
+    if (inp->fueltype == "C1")
     {
         /*       sfc=1.5*(1.0-exp(-0.23*(ffmc-81.0)));*/
         if (ffmc > 84)
@@ -766,13 +766,13 @@ surf_fuel_consump(inputs* inp, weatherDF* wdf_ptr)
             sfc = 0.75 - 0.75 * sqrt(1 - exp(0.23 * (ffmc - 84)));
         return (sfc >= 0 ? sfc : 0.0);
     }
-    if (strncmp(ft, "C2", 2) == 0 || strncmp(ft, "M3", 2) == 0 || strncmp(ft, "M4", 2) == 0)
+    if (inp->fueltype == "C2" || inp->fueltype == "M3" || inp->fueltype == "M4")
         return (5.0 * (1.0 - exp(-0.0115 * bui)));
-    if (strncmp(ft, "C3", 2) == 0 || strncmp(ft, "C4", 2) == 0)
+    if (inp->fueltype == "C3" || inp->fueltype == "C4")
         return (5.0 * pow((1.0 - exp(-0.0164 * bui)), 2.24));
-    if (strncmp(ft, "C5", 2) == 0 || strncmp(ft, "C6", 2) == 0)
+    if (inp->fueltype == "C5" || inp->fueltype == "C6")
         return (5.0 * pow((1.0 - exp(-0.0149 * bui)), 2.48));
-    if (strncmp(ft, "C7", 2) == 0)
+    if (inp->fueltype == "C7")
     {
         ffc = 2.0 * (1.0 - exp(-0.104 * (ffmc - 70.0)));
         if (ffc < 0)
@@ -780,36 +780,36 @@ surf_fuel_consump(inputs* inp, weatherDF* wdf_ptr)
         wfc = 1.5 * (1.0 - exp(-0.0201 * bui));
         return (ffc + wfc);
     }
-    if (strncmp(ft, "O1", 2) == 0)
+    if (inp->fueltype.substr(0, 2) == "O1")
         return ((inp->gfl) /* change this*/);
-    if (strncmp(ft, "M1", 2) == 0 || strncmp(ft, "M2", 2) == 0)
+    if (inp->fueltype == "M1" || inp->fueltype == "M2")
     {
         sfc_c2 = 5.0 * (1.0 - exp(-0.0115 * bui));
         sfc_d1 = 1.5 * (1.0 - exp(-0.0183 * bui));
         sfc = inp->pc / 100.0 * sfc_c2 + (100.0 - inp->pc) / 100.0 * sfc_d1;
         return (sfc);
     }
-    if (strncmp(ft, "S1", 2) == 0)
+    if (inp->fueltype == "S1")
     {
         ffc = 4.0 * (1.0 - exp(-0.025 * bui));
         wfc = 4.0 * (1.0 - exp(-0.034 * bui));
         return (ffc + wfc);
     }
-    if (strncmp(ft, "S2", 2) == 0)
+    if (inp->fueltype == "S2")
     {
         ffc = 10.0 * (1.0 - exp(-0.013 * bui));
         wfc = 6.0 * (1.0 - exp(-0.060 * bui));
         return (ffc + wfc);
     }
-    if (strncmp(ft, "S3", 2) == 0)
+    if (inp->fueltype == "S3")
     {
         ffc = 12.0 * (1.0 - exp(-0.0166 * bui));
         wfc = 20.0 * (1.0 - exp(-0.0210 * bui));
         return (ffc + wfc);
     }
-    if (strncmp(ft, "D1", 2) == 0)
+    if (inp->fueltype == "D1")
         return (1.5 * (1.0 - exp(-0.0183 * bui)));
-    if (strncmp(ft, "D2", 2) == 0)
+    if (inp->fueltype == "D2")
         return (bui >= 80 ? 1.5 * (1.0 - exp(-0.0183 * bui)) : 0.0);
 
     printf("prob in sfc func \n");
@@ -873,7 +873,7 @@ float
 final_ros(inputs* inp, float fmc, float isi, float cfb, float rss)
 {
     float rsc, ros;
-    if (strncmp(inp->fueltype, "C6", 2) == 0)
+    if (inp->fueltype == "C6")
     {
         rsc = foliar_mois_effect(isi, fmc);
         ros = rss + cfb * (rsc - rss);
@@ -899,18 +899,18 @@ crown_consump(inputs* inp, fuel_coefs* ptr, float cfb)
 {
     float cfc;
     cfc = ptr->cfl * cfb;
-    if (strncmp(inp->fueltype, "M1", 2) == 0 || strncmp(inp->fueltype, "M2", 2) == 0)
+    if (inp->fueltype == "M1" || inp->fueltype == "M2")
         cfc = inp->pc / 100.0 * cfc;
-    if (strncmp(inp->fueltype, "M3", 2) == 0 || strncmp(inp->fueltype, "M4", 2) == 0)
+    if (inp->fueltype == "M3" || inp->fueltype == "M4")
         cfc = inp->pdf / 100.0 * cfc;
     return (cfc);
 }
 
 // TODO: citation needed
 float
-l_to_b(char ft[3], float ws)
+l_to_b(string ft, float ws)
 {
-    if (strncmp(ft, "O1", 2) == 0)
+    if (ft.substr(0, 2) == "O1")
         return (ws < 1.0 ? 1.0 : (1.1 * pow(ws, 0.464)));
     else
         return (1.0 + 8.729 * pow(1.0 - exp(-0.030 * ws), 2.155));

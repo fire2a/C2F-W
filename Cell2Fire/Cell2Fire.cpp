@@ -288,7 +288,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
 
     for (int l = 0; l < this->nCells; l++)
     {
-        if (strcmp(df[l].fueltype, "NF") == 0 || strcmp(df[l].fueltype, "ND") == 0)
+        if (strncmp(df[l].fueltype, "NF", 2) == 0 || strncmp(df[l].fueltype, "ND", 2) == 0)
         {
             this->fTypeCells[l] = 0;
             this->fTypeCells2[l] = "NonBurnable";
@@ -739,7 +739,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
 
     for (i = 0; i < this->nCells; i++)
     {
-        if (strcmp(df[i].fueltype, "NF") == 0 || strcmp(df[i].fueltype, "ND") == 0)
+        if (strncmp(df[i].fueltype, "NF", 2) == 0 || strncmp(df[i].fueltype, "ND", 2) == 0)
         {
             this->fTypeCells[i] = 0;
             this->fTypeCells2[i] = "NonBurnable";
