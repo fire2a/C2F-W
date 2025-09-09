@@ -117,7 +117,7 @@ calculate_fbp(inputs* data,
     {
         at->fmc = foliar_moisture(data, at);
         at->csi = crit_surf_intensity((*ptr), at->fmc);
-        at->rso = critical_ros(data->fueltype, at->sfc, at->csi);
+        at->rso = critical_ros(at->sfc, at->csi);
         firetype = fire_type(at->csi, at->sfi);
         at->crown = firetype;
         if (firetype == 1)
@@ -200,7 +200,7 @@ determine_destiny_metrics_fbp(
         {
             metrics->fmc = foliar_moisture(data, metrics);
             metrics->csi = crit_surf_intensity((*ptr), metrics->fmc);
-            metrics->rso = critical_ros(data->fueltype, metrics->sfc, metrics->csi);
+            metrics->rso = critical_ros(metrics->sfc, metrics->csi);
             firetype = fire_type(metrics->csi, metrics->sfi);
             metrics->crown = firetype;
             if (firetype == 1)
@@ -754,6 +754,7 @@ foliar_moisture(inputs* inp, main_outs* at)
 float
 surf_fuel_consump(inputs* inp, weatherDF* wdf_ptr)
 {
+    cout << inp->fueltype << "$" << endl;
     float sfc, ffc, wfc, bui, ffmc, sfc_c2, sfc_d1;
     bui = wdf_ptr->bui;
     ffmc = wdf_ptr->ffmc;
@@ -834,7 +835,7 @@ crit_surf_intensity(fuel_coefs* ptr, float fmc)
 
 // TODO: citation needed
 float
-critical_ros(char ft[3], float sfc, float csi)
+critical_ros(float sfc, float csi)
 {
     if (sfc > 0)
         return (csi / (300.0 * sfc));
@@ -968,14 +969,12 @@ perimeter(fire_struc* h, fire_struc* b, snd_outs* sec, float lb)
 float
 acceleration(inputs* inp, float cfb)
 {
-    int i;
-    char canopy = 'c', open_list[10][3] = { "O1", "C1", "S1", "S2", "S3", "o1", "c1", "s1", "s2", "s3" };
-    for (i = 0; strncmp(inp->fueltype, open_list[i], 2) != 0 && i < 10; i++)
-        ;
-    if (i < 10)
-        canopy = 'o';
-    if (canopy == 'o')
+    std::vector<std::string> open_list = { "O1a", "O1b", "C1", "S1", "S2", "S3", "o1", "c1", "s1", "s2", "s3" };
+
+    if (std::find(std::begin(open_list), std::end(open_list), inp->fueltype) != std::end(open_list))
+    {
         return (0.115);
+    }
     else
         return (0.115 - 18.8 * pow(cfb, 2.5) * exp(-8.0 * cfb));  // TODO: citation needed
 }

@@ -684,14 +684,12 @@ GenerateDat(const std::vector<std::string>& GFuelType,
     // Populate DF
     for (size_t i = 0; i < GFuelType.size(); ++i)
     {
-
         // Fuel Type 0
         df_ptr->fueltype = GFuelType[i];
+        cout << df_ptr->fueltype << endl;
         // lat 1
-        // rowData.emplace_back(std::make_unique<std::string>("51.621244"));
         df_ptr->lat = 51.621244;
         // lon 2
-        // rowData.emplace_back(std::make_unique<std::string>("-115.608378"));
         df_ptr->lon = -115.608378;
 
         // Elevation 3
@@ -700,12 +698,10 @@ GenerateDat(const std::vector<std::string>& GFuelType,
 
         {
             df_ptr->elev = 0;
-            // rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else
         {
             df_ptr->elev = Elevation[i];
-            // rowData.emplace_back(std::make_unique<std::string>(std::to_string(Elevation[i])));
         }
 
         // PS 6

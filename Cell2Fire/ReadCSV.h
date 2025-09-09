@@ -47,9 +47,6 @@ class CSVReader
     // Print data to console (Debug)
     void printData(std::vector<std::vector<std::string>>& DF);
 
-    // Populate DF (Spanish version)
-    void parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, arguments* args_ptr, int NCells);
-
     // Populate NFtypes (Spanish version)
     void parseNDF(std::vector<int>& NFTypes, std::vector<std::vector<std::string>>& DF, int NCells);
 

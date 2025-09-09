@@ -52,10 +52,10 @@ setup_const()
     std::vector<float> h_pch2;
     std::vector<float> cbd_pch2;
     fmc_pch2.push_back(0.016027);
-    cbh_pch2.push_back(0);
+    cbh_pch2.push_back(0.0);
     fl_pch2.push_back(0.617);
     h_pch2.push_back(16434);
-    cbd_pch2.push_back(0);
+    cbd_pch2.push_back(0.0);
     fmcs.insert(std::make_pair(PCH2, fmc_pch2));
     cbhs.insert(std::make_pair(PCH2, cbh_pch2));
     fls_david.insert(std::make_pair(PCH2, fl_pch2));
@@ -813,7 +813,6 @@ calculate_k(inputs* data,
             bool& activeCrown,
             weatherDF* wdf_ptr)
 {
-    setup_crown_const(data);
     // Aux
     float ros, bros, lb, fros;
     int FMC;
@@ -829,8 +828,8 @@ calculate_k(inputs* data,
     FMC = args->FMC;
     ptr->nftype = data->nftype;
     ptr->fmc = fmcs[data->nftype][0];
+    setup_crown_const(data);
     ptr->cbh = data->cbh;
-
     ptr->fl = fls_david[data->nftype][0];
 
     ptr->h = hs[data->nftype][0];

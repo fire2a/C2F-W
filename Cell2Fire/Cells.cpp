@@ -454,8 +454,8 @@ Cells::manageFire(int period,
     main_outs metrics = {};
     snd_outs sndstruct;
     fire_struc headstruct, backstruct, flankstruct, metrics2;
-    cout << "$" << df_ptr[this->realId - 1].fueltype << "$" << endl;
-    // Calculate parameters
+    // cout << "$" << df_ptr[this->realId - 1].fueltype << "$" << endl;
+    //  Calculate parameters
     if (args->Simulator == "K")
     {
         calculate_k(&df_ptr[this->realId - 1],
