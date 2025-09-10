@@ -1531,6 +1531,17 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
         {
             this->burningCells.insert(bc);
         }
+        if (this->args_ptr->AllMessages)
+        {
+            for (auto& bc : burningCells)
+            {
+                auto lt = this->availCells.find(bc);
+                if (lt != this->availCells.end())
+                {
+                    this->availCells.erase(bc);
+                }
+            }
+        }
 
         // Display info for debugging
         if (this->args.verbose)
