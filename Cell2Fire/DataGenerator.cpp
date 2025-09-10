@@ -31,6 +31,13 @@ separator()
 #endif
 }
 
+inline std::string&
+rtrim(std::string& s, const char* t = " \t\n\r\f\v")
+{
+    s.erase(s.find_last_not_of(t) + 1);
+    return s;
+}
+
 /**
  * @brief Reads the model lookup table and creates dictionaries for the fuel types and cell's ColorsDict.
  *
@@ -106,17 +113,13 @@ Dictionary(const std::string& filename)
                 tokens.push_back(token);
             }
 
-            if (tokens[3].substr(0, 3) == "FM1")
-            {
-                FBPDict[tokens[0]] = tokens[3].substr(0, 4);
-            }
-            else if (tokens[3].substr(0, 3) == "Non" || tokens[3].substr(0, 3) == "NFn")
+            if (tokens[3].substr(0, 3) == "Non" || tokens[3].substr(0, 3) == "NFn")
             {
                 FBPDict[tokens[0]] = "NF";
             }
             else
             {
-                FBPDict[tokens[0]] = tokens[3].substr(0, 3);
+                FBPDict[tokens[0]] = tokens[3];
             }
 
             ColorsDict[tokens[0]] = std::make_tuple(
@@ -686,7 +689,6 @@ GenerateDat(const std::vector<std::string>& GFuelType,
     {
         // Fuel Type 0
         df_ptr->fueltype = GFuelType[i];
-        cout << df_ptr->fueltype << endl;
         // lat 1
         df_ptr->lat = 51.621244;
         // lon 2

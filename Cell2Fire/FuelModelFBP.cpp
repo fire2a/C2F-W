@@ -754,7 +754,6 @@ foliar_moisture(inputs* inp, main_outs* at)
 float
 surf_fuel_consump(inputs* inp, weatherDF* wdf_ptr)
 {
-    cout << inp->fueltype << "$" << endl;
     float sfc, ffc, wfc, bui, ffmc, sfc_c2, sfc_d1;
     bui = wdf_ptr->bui;
     ffmc = wdf_ptr->ffmc;
@@ -813,7 +812,7 @@ surf_fuel_consump(inputs* inp, weatherDF* wdf_ptr)
     if (inp->fueltype == "D2")
         return (bui >= 80 ? 1.5 * (1.0 - exp(-0.0183 * bui)) : 0.0);
 
-    printf("prob in sfc func \n");
+    cout << inp->fueltype << " prob in sfc func" << endl;
     exit(9);
     return (-99);
 }
@@ -912,7 +911,9 @@ float
 l_to_b(string ft, float ws)
 {
     if (ft.substr(0, 2) == "O1")
+    {
         return (ws < 1.0 ? 1.0 : (1.1 * pow(ws, 0.464)));
+    }
     else
         return (1.0 + 8.729 * pow(1.0 - exp(-0.030 * ws), 2.155));
 }
