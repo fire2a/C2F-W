@@ -1,7 +1,6 @@
 #!/bin/bash
 # run simulations from model, put them in test_results, compare to target_results
 
-
 rm -rf target_results
 unzip -q target_results.zip
 
@@ -20,23 +19,26 @@ PATH=../Cell2Fire:$PATH
 # run
 set -x # enable debug tracing
 for format in asc tif; do
-    for model in fbp kitral sb; do
-        echo running $model-$format
-        output_folder=test_results/$model-$format
-        mkdir -p $output_folder
-        rm -rf $output_folder/*
-        if [ "$model" == "fbp" ]; then
-            additional_args="--cros"
-            sim_code="C"
-        elif [ "$model" == "sb" ]; then
-            additional_args="--scenario 1"
-            sim_code="S"
-        elif [ "$model" == "kitral" ]; then
-            additional_args=""
-            sim_code="K"
-        fi
-        Cell2Fire$1 --input-instance-folder model/$model-$format --output-folder $output_folder --nsims 113 --output-messages --grids --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args > test_results/$model-$format/log.txt
-    done
+	for model in fbp kitral sb portugal; do
+		echo running $model-$format
+		output_folder=test_results/$model-$format
+		mkdir -p $output_folder
+		rm -rf $output_folder/*
+		if [ "$model" == "fbp" ]; then
+			additional_args="--cros"
+			sim_code="C"
+		elif [ "$model" == "sb" ]; then
+			additional_args="--scenario 1"
+			sim_code="S"
+		elif [ "$model" == "portugal" ]; then
+			additional_args="--scenario 1"
+			sim_code="P"
+		elif [ "$model" == "kitral" ]; then
+			additional_args=""
+			sim_code="K"
+		fi
+		Cell2Fire$1 --input-instance-folder model/$model-$format --output-folder $output_folder --nsims 113 --output-messages --grids --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args >test_results/$model-$format/log.txt
+	done
 done
 set +x # disable debug tracing
 
@@ -56,10 +58,10 @@ dir2_num_files=$(ls -1 $dir2_files | wc -l)
 
 # check if the number of files in each directory is equal
 if [ $dir1_num_files -ne $dir2_num_files ]; then
-    echo "Directories are not equal due to number"
-    echo "Directory ${dir1} has ${dir1_num_files} files"
-    echo "Directory ${dir2} has ${dir2_num_files} files"
-    exit 1
+	echo "Directories are not equal due to number"
+	echo "Directory ${dir1} has ${dir1_num_files} files"
+	echo "Directory ${dir2} has ${dir2_num_files} files"
+	exit 1
 fi
 # delete version line
 find test_results/ -name log.txt -type f | xargs sed -i -e '/version:/d'
@@ -70,23 +72,23 @@ diff_output=$(diff -rq "$dir1" "$dir2")
 
 # check if there is any difference
 if [ -z "$diff_output" ]; then
-    echo "Directories are equal"
+	echo "Directories are equal"
 else
-    echo "Directories are not equal due to differences"
-    # compare file by file if fails show the file name
-    for file1 in $(find "$dir1" -type f); do
-        # find file1 in dir2
-        file2=$(echo $file1 | sed "s/${dir1}/${dir2}/")
-        # echo "Comparing $file1 and $file2"
-        diff_output=$(diff "$file1" "$file2")
-        if [ -n "$diff_output" ]; then
-            echo "Files are not equal, aborting... $file1"
-            echo $diff_output
-            exit 1
-        fi
-    done
-    #uncomment exit below to check all differences
-    #exit 1
+	echo "Directories are not equal due to differences"
+	# compare file by file if fails show the file name
+	for file1 in $(find "$dir1" -type f); do
+		# find file1 in dir2
+		file2=$(echo $file1 | sed "s/${dir1}/${dir2}/")
+		# echo "Comparing $file1 and $file2"
+		diff_output=$(diff "$file1" "$file2")
+		if [ -n "$diff_output" ]; then
+			echo "Files are not equal, aborting... $file1"
+			echo $diff_output
+			exit 1
+		fi
+	done
+	#uncomment exit below to check all differences
+	#exit 1
 fi
 
 rm -rf target_results

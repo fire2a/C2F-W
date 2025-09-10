@@ -6,7 +6,7 @@ CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_S
 LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff
 
 # Source files
-SRCS = Cell2Fire.cpp Cells.cpp FuelModelSpain.cpp FuelModelKitral.cpp FuelModelFBP.cpp Spotting.cpp ReadCSV.cpp ReadArgs.cpp Lightning.cpp WriteCSV.cpp DataGenerator.cpp
+SRCS = Cell2Fire.cpp Cells.cpp FuelModelUtils.cpp FuelModelSpain.cpp FuelModelPortugal.cpp FuelModelKitral.cpp FuelModelFBP.cpp Spotting.cpp ReadCSV.cpp ReadArgs.cpp Lightning.cpp WriteCSV.cpp DataGenerator.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
@@ -17,7 +17,7 @@ TEST_TARGET = test_cell2fire
 
 # Test source files
 TEST_DIR = ../test/unit_tests
-TEST_FILES = $(TEST_DIR)/*.cpp FuelModelKitral.cpp
+TEST_FILES = $(TEST_DIR)/*.cpp FuelModelKitral.cpp FuelModelUtils.cpp
 
 # Build rules
 all: $(TARGET)

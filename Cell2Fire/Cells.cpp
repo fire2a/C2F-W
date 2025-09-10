@@ -2,6 +2,7 @@
 #include "Cells.h"
 #include "FuelModelFBP.h"
 #include "FuelModelKitral.h"
+#include "FuelModelPortugal.h"
 #include "FuelModelSpain.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
@@ -441,14 +442,6 @@ Cells::manageFire(int period,
     msg_list_aux.push_back(0);
     std::vector<int> msg_list;
 
-    // Populate Inputs
-    df_ptr[this->realId - 1].waz = wdf_ptr->waz;
-    df_ptr[this->realId - 1].ws = wdf_ptr->ws;
-    df_ptr[this->realId - 1].tmp = wdf_ptr->tmp;
-    df_ptr[this->realId - 1].rh = wdf_ptr->rh;
-    df_ptr[this->realId - 1].bui = wdf_ptr->bui;
-    df_ptr[this->realId - 1].ffmc = wdf_ptr->ffmc;
-
     int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
@@ -476,7 +469,8 @@ Cells::manageFire(int period,
                     &headstruct,
                     &flankstruct,
                     &backstruct,
-                    activeCrown);
+                    activeCrown,
+                    wdf_ptr);
     }
     else if (args->Simulator == "S")
     {
@@ -488,11 +482,27 @@ Cells::manageFire(int period,
                     &headstruct,
                     &flankstruct,
                     &backstruct,
-                    activeCrown);
+                    activeCrown,
+                    wdf_ptr);
     }
     else if (args->Simulator == "C")
     {
-        calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+        calculate_fbp(
+            &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, wdf_ptr);
+    }
+
+    else if (args->Simulator == "P")
+    {
+        calculate_p(&df_ptr[this->realId - 1],
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown,
+                    wdf_ptr);
     }
 
     /*  ROSs DEBUG!   */
@@ -502,11 +512,8 @@ Cells::manageFire(int period,
         std::cout << "-------Input Structure--------" << std::endl;
         std::cout << "fueltype: " << df_ptr[this->realId - 1].fueltype << std::endl;
         std::cout << "nfueltype: " << df_ptr[this->realId - 1].nftype << std::endl;
-        std::cout << "ws: " << df_ptr[this->realId - 1].ws << std::endl;
-        std::cout << "waz: " << df_ptr[this->realId - 1].waz << std::endl;
+
         std::cout << "ps: " << df_ptr[this->realId - 1].ps << std::endl;
-        std::cout << "saz: " << df_ptr[this->realId - 1].saz << std::endl;
-        std::cout << "cur: " << df_ptr[this->realId - 1].cur << std::endl;
         std::cout << "elev: " << df_ptr[this->realId - 1].elev << std::endl;
         std::cout << "cbd: " << df_ptr[this->realId - 1].cbd << std::endl;
         std::cout << "cbh: " << df_ptr[this->realId - 1].cbh << std::endl;
@@ -623,7 +630,7 @@ Cells::manageFire(int period,
             {
                 std::cout << "     (angle, realized ros in m/min): (" << angle << ", " << ros << ")" << std::endl;
             }
-            if (args->Simulator == "S")
+            if (args->Simulator == "S" || args->Simulator == "P")
             {
                 // Slope effect
                 float se = slope_effect(df_ptr[this->realId - 1].elev, df_ptr[nb - 1].elev, this->perimeter / 4.);
@@ -647,23 +654,21 @@ Cells::manageFire(int period,
                 FSCell->push_back(double(nb));
                 FSCell->push_back(double(period));
                 FSCell->push_back(roundedRos);
-                df_ptr[nb - 1].waz = wdf_ptr->waz;
-                df_ptr[nb - 1].ws = wdf_ptr->ws;
-                df_ptr[nb - 1].tmp = wdf_ptr->tmp;
-                df_ptr[nb - 1].rh = wdf_ptr->rh;
-                df_ptr[nb - 1].bui = wdf_ptr->bui;
-                df_ptr[nb - 1].ffmc = wdf_ptr->ffmc;
                 if (args->Simulator == "K")
                 {
                     determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
                 }
                 else if (args->Simulator == "S")
                 {
-                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics);
+                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 else if (args->Simulator == "C")
                 {
-                    determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2);
+                    determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2, wdf_ptr);
+                }
+                else if (args->Simulator == "P")
+                {
+                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
@@ -677,7 +682,7 @@ Cells::manageFire(int period,
                 surfFraction[nb] = metrics.sfc;
                 SurfaceFlameLengths[this->realId - 1] = mainstruct.fl;
                 SurfaceFlameLengths[nb - 1] = metrics.fl;
-                if ((args->AllowCROS) && (args->Simulator == "S"))
+                if ((args->AllowCROS) && (args->Simulator == "S" || args->Simulator == "P"))
                 {
                     float comp_zero = 0;
                     MaxFlameLengths[this->realId - 1]
@@ -729,7 +734,7 @@ Cells::manageFire(int period,
 
     // If original is empty (no messages but fire is alive if aux_list is not
     // empty)
-    if (msg_list.size() == 0)
+    if (msg_list.empty())
     {
         if (msg_list_aux[0] == -100)
         {
@@ -793,12 +798,6 @@ Cells::manageFireBBO(int period,
     fire_struc headstruct, backstruct, flankstruct, metrics2;
 
     // Populate inputs
-    df_ptr->waz = wdf_ptr->waz;
-    df_ptr->ws = wdf_ptr->ws;
-    df_ptr->bui = wdf_ptr->bui;
-    df_ptr->ffmc = wdf_ptr->ffmc;
-    df_ptr->tmp = wdf_ptr->tmp;
-    df_ptr->rh = wdf_ptr->rh;
     int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
@@ -820,7 +819,8 @@ Cells::manageFireBBO(int period,
                     &headstruct,
                     &flankstruct,
                     &backstruct,
-                    activeCrown);
+                    activeCrown,
+                    wdf_ptr);
     }
     else if (args->Simulator == "S")
     {
@@ -832,12 +832,27 @@ Cells::manageFireBBO(int period,
                     &headstruct,
                     &flankstruct,
                     &backstruct,
-                    activeCrown);
+                    activeCrown,
+                    wdf_ptr);
     }
 
     else if (args->Simulator == "C")
     {
-        calculate_fbp(&df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+        calculate_fbp(
+            &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, wdf_ptr);
+    }
+    else if (args->Simulator == "P")
+    {
+        calculate_p(&df_ptr[this->realId - 1],
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown,
+                    wdf_ptr);
     }
 
     /*  ROSs DEBUG!   */
@@ -846,8 +861,6 @@ Cells::manageFireBBO(int period,
         std::cout << "*********** ROSs debug ************" << std::endl;
         std::cout << "-------Input Structure--------" << std::endl;
         std::cout << "fueltype: " << df_ptr->fueltype << std::endl;
-        std::cout << "ws: " << df_ptr->ws << std::endl;
-        std::cout << "waz: " << df_ptr->waz << std::endl;
         std::cout << "ps: " << df_ptr->ps << std::endl;
         std::cout << "saz: " << df_ptr->saz << std::endl;
         std::cout << "cur: " << df_ptr->cur << std::endl;
@@ -983,11 +996,15 @@ Cells::manageFireBBO(int period,
                 }
                 else if (args->Simulator == "S")
                 {
-                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics);
+                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 else if (args->Simulator == "C")
                 {
-                    determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2);
+                    determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2, wdf_ptr);
+                }
+                else if (args->Simulator == "P")
+                {
+                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
@@ -1036,7 +1053,7 @@ Cells::manageFireBBO(int period,
 
     // If original is empty (no messages but fire is alive if aux_list is not
     // empty)
-    if (msg_list.size() == 0)
+    if (msg_list.empty())
     {
         if (msg_list_aux[0] == -100)
         {
@@ -1104,10 +1121,6 @@ Cells::get_burned(int period,
     fire_struc headstruct, backstruct, flankstruct;
 
     // Compute main angle and ROSs: forward, flanks and back
-    df[this->id].waz = wdf_ptr->waz;
-    df[this->id].ws = wdf_ptr->ws;
-    df[this->id].tmp = wdf_ptr->tmp;
-    df[this->id].rh = wdf_ptr->rh;
     int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
@@ -1128,17 +1141,39 @@ Cells::get_burned(int period,
                     &headstruct,
                     &flankstruct,
                     &backstruct,
-                    activeCrown);
+                    activeCrown,
+                    wdf_ptr);
     }
     else if (args->Simulator == "S")
     {
-        calculate_s(
-            &(df[this->id]), coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
+        calculate_s(&(df[this->id]),
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown,
+                    wdf_ptr);
     }
 
     else if (args->Simulator == "C")
     {
-        calculate_fbp(&df[this->id], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+        calculate_fbp(&df[this->id], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, wdf_ptr);
+    }
+    else if (args->Simulator == "P")
+    {
+        calculate_p(&(df[this->id]),
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown,
+                    wdf_ptr);
     }
 
     if (args->verbose)
@@ -1222,7 +1257,7 @@ Cells::ignition(int period,
 {
 
     // If we have ignition points, update
-    if (ignitionPoints.size() > 0)
+    if (!ignitionPoints.empty())
     {
         this->status = 1;
         this->fireStarts = period;
@@ -1244,10 +1279,6 @@ Cells::ignition(int period,
         // << "  bui: " <<   wdf_ptr->bui << std::endl;
 
         // Populate inputs
-        df_ptr->waz = wdf_ptr->waz;
-        df_ptr->ws = wdf_ptr->ws;
-        df_ptr->bui = wdf_ptr->bui;
-        df_ptr->ffmc = wdf_ptr->ffmc;
         int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
         if (head_cell <= 0)                       // solve boundaries case
         {
@@ -1268,7 +1299,8 @@ Cells::ignition(int period,
                         &headstruct,
                         &flankstruct,
                         &backstruct,
-                        activeCrown);
+                        activeCrown,
+                        wdf_ptr);
         }
         else if (args->Simulator == "S")
         {
@@ -1280,14 +1312,33 @@ Cells::ignition(int period,
                         &headstruct,
                         &flankstruct,
                         &backstruct,
-                        activeCrown);
+                        activeCrown,
+                        wdf_ptr);
         }
         else if (args->Simulator == "C")
         {
-            calculate_fbp(
-                &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct);
+            calculate_fbp(&df_ptr[this->realId - 1],
+                          coef,
+                          &mainstruct,
+                          &sndstruct,
+                          &headstruct,
+                          &flankstruct,
+                          &backstruct,
+                          wdf_ptr);
         }
-
+        else if (args->Simulator == "P")
+        {
+            calculate_p(&df_ptr[this->realId - 1],
+                        coef,
+                        args,
+                        &mainstruct,
+                        &sndstruct,
+                        &headstruct,
+                        &flankstruct,
+                        &backstruct,
+                        activeCrown,
+                        wdf_ptr);
+        }
         if (args->verbose)
         {
             std::cout << "\nIn ignition function" << std::endl;

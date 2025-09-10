@@ -3,7 +3,6 @@
 
 // include stuff
 #include "ReadArgs.h"
-
 #include <math.h>
 #include <stdio.h>
 #include <string>
@@ -119,7 +118,7 @@ class Cells
                               int cols,
                               int rows);  // TODO: need TYPE
     void ros_distr_old(double thetafire, double forward, double flank, double back);
-    double rhoTheta(double theta, double a, double b);
+    static double rhoTheta(double theta, double a, double b);
     void ros_distr_V2(double thetafire, double a, double b, double c, double EFactor);
 
     std::vector<int> manageFire(int period,
@@ -197,8 +196,8 @@ class Cells
     void print_info();
 
   private:
-    double allocate(double offset, double base, double ros1, double ros2);
-    float slope_effect(float elev_i, float elev_j, int cellsize);
+    static double allocate(double offset, double base, double ros1, double ros2);
+    static float slope_effect(float elev_i, float elev_j, int cellsize);
 };
 
 #endif

@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <math.h>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -387,7 +388,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
             pattern = 1;  // std::stoi (DF[i][18], &sz);
 
         if (DF[i][24].compare("") == 0)
-            tree_height = 0;
+            tree_height = -9999;
         else
             tree_height = std::stof(DF[i][24], &sz);
 
@@ -498,7 +499,7 @@ CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
 {
     std::string::size_type sz;  // alias of size_t
 
-    float ws, waz, tmp = 27, rh = 40;
+    float ws = 0, waz = 0, tmp = 27, rh = 40;
     float apcp = 0, ffmc = 0, dmc = 0, dc = 0, isi = 0, bui = 0, fwi = 0;
 
     // One element per weather period
@@ -516,8 +517,7 @@ CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
         else
         {
             waz = std::stoi(DF[i][3], &sz);
-            if (waz >= 360)
-                waz -= 360;
+            waz = fmod((waz + 180.0), 360.0);
         }
 
         ws = DF[i][2].empty() ? 0 : std::stof(DF[i][2], &sz);

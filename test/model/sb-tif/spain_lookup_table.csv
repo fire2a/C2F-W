@@ -25,7 +25,7 @@ grid_value,export_value,descriptive_name,fuel_type, r, g, b, h, s, l
 164,164,The primary carrier of fire in TU4 is short conifer trees with grass or moss understory,TU4,99,0,0,0,255,50
 165,165,The primary carrier of fire in TU5 is heavy forest litter,TU5,99,0,0,0,255,50
 181,181,The primary carrier of fire in TL1 is compact forest litter,TL1,99,0,0,0,255,50
-182,182,The primary carrier of fire in TL2 is broadleaf (hardwood) litter ,TL2,99,0,0,0,255,50
+182,182,The primary carrier of fire in TL2 is broadleaf (hardwood) litter,TL2,99,0,0,0,255,50
 183,183,The primary carrier of fire in TL3 is moderate load conifer litter light load of coarse fuels,TL3,99,0,0,0,255,50
 185,185,The primary carrier of fire in TL5 is high load conifer litter light slash or mortality fuel,TL5,99,0,0,0,255,50
 186,186,The primary carrier of fire in TL6 is moderate load broadleaf litter,TL6,99,0,0,0,255,50

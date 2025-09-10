@@ -13,10 +13,10 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Doxygen
-        run: sudo apt install -y doxygen graphviz texlive
+        run: sudo apt-get install -y doxygen graphviz texlive
 
       - name: Generate Doxygen documentation
         run: cd docs && doxygen Doxyfile

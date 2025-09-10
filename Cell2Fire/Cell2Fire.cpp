@@ -9,7 +9,9 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 #include "Cells.h"
 #include "DataGenerator.h"
 #include "FuelModelKitral.h"
+#include "FuelModelPortugal.h"
 #include "FuelModelSpain.h"
+#include "FuelModelUtils.h"
 #include "Lightning.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
@@ -673,7 +675,8 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->surfaceIntensityFolder = Cell2Fire::createOutputFolder("SurfaceIntensity");
     }
     // Crown Byram Intensity Folder
-    if ((this->args.OutIntensity) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    if ((this->args.OutIntensity) && (this->args.AllowCROS)
+        && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
     {
         this->crownIntensityFolder = Cell2Fire::createOutputFolder("CrownIntensity");
     }
@@ -683,12 +686,12 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->surfaceFlameLengthFolder = Cell2Fire::createOutputFolder("SurfaceFlameLength");
     }
     // Crown Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
     {
         this->crownFlameLengthFolder = Cell2Fire::createOutputFolder("CrownFlameLength");
     }
     // max Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
     {
         this->maxFlameLengthFolder = Cell2Fire::createOutputFolder("MaxFlameLength");
     }
@@ -859,10 +862,26 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
     // No Ignitions provided
     if (this->args.Ignitions == 0)
     {
+        std::srand(args.seed);
         while (true)
         {
             microloops = 0;
-            aux = distribution(generator2);
+            while (true)
+            {
+                aux = distribution(generator2);
+                float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
+                if (this->ignProb[aux - 1] > rd_number)
+                {
+                    break;
+                }
+                microloops++;
+                if (microloops > this->nCells * 100)
+                {
+
+                    this->noIgnition = true;
+                    break;
+                }
+            }
             // Check information (Debugging)
             if (this->args.verbose)
             {
@@ -1329,7 +1348,7 @@ Cell2Fire::SendMessages()
  * fire model.
  */
 void
-Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessageList)
+Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMessageList)
 {
     // Iterator
     std::unordered_map<int, Cells>::iterator it;
@@ -1735,7 +1754,8 @@ Cell2Fire::Results()
     }
 
     // Crown Intensity
-    if ((this->args.OutIntensity) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    if ((this->args.OutIntensity) && (this->args.AllowCROS)
+        && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
     {
         this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
         std::string intensityName;
@@ -1771,7 +1791,7 @@ Cell2Fire::Results()
     }
 
     // Crown Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
     {
         this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
         std::string fileName;
@@ -1789,7 +1809,7 @@ Cell2Fire::Results()
     }
 
     // Max Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS) && (this->args.Simulator == "S"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
     {
         this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength" + separator();
         std::string fileName;
@@ -2184,37 +2204,6 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
 }
 
 void
-Cell2Fire::InitHarvested()
-{
-    std::cout << "OK";
-}
-
-/**
- * @brief Retrieves the Rate of Spread (ROS) matrix for all cells.
- *
- * @return A vector of floats representing the ROS values for each cell.
- */
-std::vector<float>
-Cell2Fire::getROSMatrix()
-{
-    std::vector<float> ROSMatrix(this->nCells, 0);
-    return ROSMatrix;
-}
-
-/**
- * @brief Retrieves the Fire Progress matrix for all cells.
- *
- * @return A vector of floats representing the fire progress values for each
- * cell.
- */
-std::vector<float>
-Cell2Fire::getFireProgressMatrix()
-{
-    std::vector<float> ProgressMatrix(this->nCells, 0);
-    return ProgressMatrix;
-}
-
-void
 Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
 {
     string weatherFilename;
@@ -2321,7 +2310,18 @@ main(int argc, char* argv[])
     int num_threads = args.nthreads;
     Cell2Fire Forest2(args);  // generate Forest object
     std::vector<Cell2Fire> Forests(num_threads, Forest2);
-
+    if (args.Simulator == "K")
+    {
+        setup_const();
+    }
+    else if (args.Simulator == "S")
+    {
+        initialize_coeff(args.scenario);
+    }
+    else if (args.Simulator == "P")
+    {
+        initialize_coeff_p(args.scenario);
+    }
     cout << "\n-------Running simulations-------" << endl;
     // Parallel zone
 #pragma omp parallel num_threads(num_threads)

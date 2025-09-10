@@ -575,7 +575,7 @@ DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells)
  * @param CBD Array of canopy bulk densities
  * @param CBH Array of canopy base heights
  * @param CCF Array of canopy cover fractions
- * @param PY Array of ignition probabilities
+ * @param ProbMap Array of ignition probabilities
  * @param FMC Array of foliage moisture content
  * @param TreeHeight Array of tree heights
  * @param InFolder Input data directory
@@ -591,7 +591,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             const std::vector<float>& CBD,
             const std::vector<float>& CBH,
             const std::vector<float>& CCF,
-            const std::vector<float>& PY,
+            const std::vector<float>& ProbMap,
             const std::vector<float>& FMC,
             const std::vector<float>& TreeHeight,
             const std::string& InFolder)
@@ -599,7 +599,7 @@ GenerateDat(const std::vector<std::string>& GFuelType,
     // DF columns
     std::vector<std::string> Columns
         = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",     "ps",         "saz",    "cur",
-            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "py",      "jd",         "jd_min", "pc",
+            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "probMap", "jd",         "jd_min", "pc",
             "pdf",      "time", "ffmc", "bui",    "gfl", "pattern", "tree_height" };
 
     // GFL dictionary (FBP)
@@ -790,14 +790,14 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             rowData.emplace_back(std::make_unique<std::string>(std::to_string(FMC[i])));
         }
 
-        // PY 14
-        if (std::isnan(PY[i]))
+        // ProbMap 14
+        if (std::isnan(ProbMap[i]))
         {
             rowData.emplace_back(std::make_unique<std::string>(""));
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PY[i])));
+            rowData.emplace_back(std::make_unique<std::string>(std::to_string(ProbMap[i])));
         }
 
         // Blank space (jd,jd_min) 15,16
@@ -875,9 +875,9 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
 
     std::ofstream dataFile(InFolder + separator() + "Data.csv");
     std::vector<std::string> Columns
-        = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",     "ps",         "saz",    "cur",
-            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "py",      "jd",         "jd_min", "pc",
-            "pdf",      "time", "ffmc", "bui",    "gfl", "pattern", "tree_height" };
+        = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",         "ps",         "saz",    "cur",
+            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "probability", "jd",         "jd_min", "pc",
+            "pdf",      "time", "ffmc", "bui",    "gfl", "pattern",     "tree_height" };
     if (dataFile.is_open())
     {
         // Write header
@@ -919,7 +919,7 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
  *  - cbd: canopy bulk density [km/m²]
  *  - cbh: canopy base height [m]
  *  - ccf: canopy cover fraction
- *  - py: ignition probability map [%]
+ *  - probabilityMap: ignition probability map [%]
  *  - fmc: foliage moisture content
  *  - hm: tree height [m]
  *
@@ -949,6 +949,10 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     else if (Simulator == "C")
     {
         lookupTable = InFolder + separator() + "fbp_lookup_table.csv";
+    }
+    else if (Simulator == "P")
+    {
+        lookupTable = InFolder + separator() + "portugal_lookup_table.csv";
     }
     else
     {
@@ -1041,13 +1045,14 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     std::vector<float> CBD(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> CBH(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> CCF(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> PY(NCells, static_cast<float>(std::nanf("")));
+    std::vector<float> ProbMap(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> FMC(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> TreeHeight(NCells, static_cast<float>(std::nanf("")));
 
     std::vector<std::string> filenames
-        = { "elevation" + extension, "saz" + extension, "slope" + extension, "cur" + extension, "cbd" + extension,
-            "cbh" + extension,       "ccf" + extension, "py" + extension,    "fmc" + extension, "hm" + extension };
+        = { "elevation" + extension, "saz" + extension, "slope" + extension, "cur" + extension,
+            "cbd" + extension,       "cbh" + extension, "ccf" + extension,   "probabilityMap" + extension,
+            "fmc" + extension,       "hm" + extension };
 
     for (const auto& name : filenames)
     {
@@ -1083,9 +1088,9 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
             {
                 DataGrids(filePath, CCF, NCells);
             }
-            else if (name == "py.asc")
+            else if (name == "probabilityMap.asc")
             {
-                DataGrids(filePath, PY, NCells);
+                DataGrids(filePath, ProbMap, NCells);
             }
             else if (name == "fmc.asc")
             {
@@ -1109,8 +1114,8 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     }
 
     // Call GenerateDat function
-    std::vector<std::vector<std::unique_ptr<std::string>>> result
-        = GenerateDat(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, PY, FMC, TreeHeight, InFolder);
+    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(
+        GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, ProbMap, FMC, TreeHeight, InFolder);
 
     writeDataToFile(result, InFolder);
     std::cout << "Generated data file" << std::endl;

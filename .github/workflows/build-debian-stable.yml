@@ -1,4 +1,4 @@
-name: build debian stable
+name: build debian matrix
 
 on:
   pull_request:
@@ -13,11 +13,15 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: debian:stable-slim
+    strategy:
+      matrix:
+        debian_version: [bookworm, trixie]
+    name: build-${{ matrix.debian_version }}
+    container: debian:${{ matrix.debian_version }}-slim
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Bump version in code
         shell: bash
@@ -36,15 +40,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          apt update
-          apt install -y g++-12 make lsb-release unzip libboost-all-dev libtiff-dev catch2
+          apt-get update
+          apt-get install -y g++-12 make lsb-release unzip libboost-all-dev libtiff-dev catch2
 
       - name: Check Packages Versions
         if: false
         run: |
           dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libtiff-dev catch2 > new_pkgs_debian.txt
           if [ -n "$(diff new_pkgs_debian.txt pkgs_debian.txt)" ]; then
-            echo "::warning:: apt packages versions diff! $(diff new_pkgs_debian.txt pkgs_debian.txt)"
+            echo "::warning:: apt-get packages versions diff! $(diff new_pkgs_debian.txt pkgs_debian.txt)"
             diff_output=$(diff --side-by-side --suppress-common-lines new_pkgs_debian.txt pkgs_debian.txt || true)
             echo "$diff_output" | while IFS= read -r line; do
               echo "$line"
@@ -57,7 +61,8 @@ jobs:
           DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
           CODENAME=$( lsb_release --short --codename 2>/dev/null )
           MACHINE=$( uname --machine 2>/dev/null )
-          echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
+          echo "SUFFIX=.${DISTRIBUTION}.${CODENAME}.${MACHINE}" >> $GITHUB_ENV
+          echo "Using suffix: .${DISTRIBUTION}.${CODENAME}.${MACHINE}"
 
       - name: Build
         run: |
@@ -78,16 +83,20 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
-    container: debian:stable-slim
+    strategy:
+      matrix:
+        debian_version: [bookworm, trixie]
+    name: test-${{ matrix.debian_version }}
+    container: debian:${{ matrix.debian_version }}-slim
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Dependencies
         run: |
-          apt update
-          apt install -y g++-12 make lsb-release unzip libtiff6 libgomp1 curl
+          apt-get update
+          apt-get install -y g++-12 make lsb-release unzip libtiff6 libgomp1 curl
 
       - name: Cache Catch2 header
         uses: actions/cache@v4
@@ -111,7 +120,7 @@ jobs:
           echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: binaries${{ env.SUFFIX }}
           path: Cell2Fire

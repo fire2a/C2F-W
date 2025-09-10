@@ -287,7 +287,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     if (simulator_option)
     {
         std::string s = simulator_option;
-        if (s != "S" && s != "K" && s != "C")
+        if (s != "S" && s != "K" && s != "C" && s != "P")
         {
             printf("%s Simulator Option not recognized or not developed, using "
                    "S&B as default!!! \n",

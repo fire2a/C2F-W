@@ -106,6 +106,7 @@
       <AdditionalIncludeDirectories>.\include\boost_1_84_0;.\include\dirent-1.25\include;.\include\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
       <LanguageStandard>stdcpp14</LanguageStandard>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,6 +117,7 @@
       <AdditionalIncludeDirectories>.\include\dirent-1.25\include;.\include\boost_1_84_0;.\include\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
       <LanguageStandard>stdcpp14</LanguageStandard>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,7 +130,9 @@
     <ClCompile Include="Forest.cpp" />
     <ClCompile Include="FuelModelFBP.cpp" />
     <ClCompile Include="FuelModelKitral.cpp" />
+    <ClCompile Include="FuelModelPortugal.cpp" />
     <ClCompile Include="FuelModelSpain.cpp" />
+    <ClCompile Include="FuelModelUtils.cpp" />
     <ClCompile Include="Lightning.cpp" />
     <ClCompile Include="ReadArgs.cpp" />
     <ClCompile Include="ReadCSV.cpp" />
@@ -142,7 +146,10 @@
     <ClInclude Include="Forest.h" />
     <ClInclude Include="FuelModelFBP.h" />
     <ClInclude Include="FuelModelKitral.h" />
+    <ClInclude Include="FuelModelPortugal.h" />
     <ClInclude Include="FuelModelSpain.h" />
+    <ClInclude Include="FuelModelSpain.h" />
+    <ClInclude Include="FuelModelUtils.h" />
     <ClInclude Include="Lightning.h" />
     <ClInclude Include="ReadArgs.h" />
     <ClInclude Include="ReadCSV.h" />
