@@ -405,7 +405,7 @@ get_fueltype_number(fuel_coefs** ptr, std::string fuel)
         fuel[0] += 'A' - 'a';
     if (fuel[2] >= 'A' && fuel[2] <= 'Z')
         fuel[2] += 'a' - 'A';
-    for (i = 0; i < numfuels && ((*ptr)->fueltype == fuel); i++)
+    for (i = 0; i < numfuels && ((*ptr)->fueltype != fuel); i++)
     {
         (*ptr)++;
     }
@@ -475,7 +475,9 @@ ros_calc(inputs* inp, fuel_coefs* ptr, float isi, float* mult, weatherDF* wdf_pt
     if (inp->fueltype.substr(0, 2) == "O1")
         return (grass(ptr, inp->cur, isi, mult));
     if (inp->fueltype == "M1" || inp->fueltype == "M2")
+    {
         return (mixed_wood(ptr, isi, mult, inp->pc));
+    }
     if (inp->fueltype == "M3" || inp->fueltype == "M4")
         return (dead_fir(ptr, inp->pdf, isi, mult));
     if (inp->fueltype == "D2")
@@ -512,7 +514,7 @@ mixed_wood(fuel_coefs* ptr, float isi, float* mu, int pc)
         mult = 0.2;
     else
         mult = 1.0;
-    for (i = 0; ptr->fueltype == "D1" && i < numfuels; ptr++, i++)
+    for (i = 0; ptr->fueltype != "D1" && i < numfuels; ptr++, i++)
         ;
     if (i >= numfuels)
     {
@@ -520,7 +522,6 @@ mixed_wood(fuel_coefs* ptr, float isi, float* mu, int pc)
         exit(9);
     }
     ros_d1 = ptr->p1 * pow((1.0 - exp(-1.0 * ptr->p2 * isi)), ptr->p3);
-
     ros = (pc / 100.0) * ros_c2 + mult * (100 - pc) / 100.0 * ros_d1;
     return (ros);
 }
@@ -537,7 +538,7 @@ dead_fir(fuel_coefs* ptr, int pdf, float isi, float* mu)
 
     rosm3or4_max = ptr->p1 * pow((1.0 - exp(-1.0 * ptr->p2 * isi)), ptr->p3);
 
-    for (i = 0; ptr->fueltype == "D1" && i < numfuels; ptr++, i++)
+    for (i = 0; ptr->fueltype != "D1" && i < numfuels; ptr++, i++)
         ;
     if (i >= numfuels)
     {
@@ -600,7 +601,9 @@ slope_effect(inputs* inp, fuel_coefs* ptr, main_outs* at, float isi, weatherDF* 
         at->sf = 10.00; /* added to ensure maximum is correct in version 4.6  */
 
     if (ptr->fueltype == "M1" || ptr->fueltype == "M2")
+    {
         isf = ISF_mixedwood(ptr, isi, inp->pc, at->sf);
+    }
     else if (ptr->fueltype == "M3" || ptr->fueltype == "M4")
         isf = ISF_deadfir(ptr, isi, inp->pdf, at->sf);
     else
@@ -666,7 +669,7 @@ ISF_mixedwood(fuel_coefs* ptr, float isz, int pc, float sf)
         mult = 0.2;
     else
         mult = 1.0;
-    for (i = 0; ptr->fueltype == "D1" && i < numfuels; ptr++, i++)
+    for (i = 0; ptr->fueltype != "D1" && i < numfuels; ptr++, i++)
         ;
     rsf_d1 = sf * (mult * ptr->p1) * pow((1.0 - exp(-1.0 * ptr->p2 * isz)), ptr->p3);
 
@@ -701,7 +704,7 @@ ISF_deadfir(fuel_coefs* ptr, float isz, int pdf, float sf)
     else
         mult = 1.0;
 
-    for (i = 0; ptr->fueltype == "D1" && i < numfuels; ptr++, i++)
+    for (i = 0; ptr->fueltype != "D1" && i < numfuels; ptr++, i++)
         ;
     rsf_d1 = sf * (mult * ptr->p1) * pow((1.0 - exp(-1.0 * ptr->p2 * isz)), ptr->p3);
 
