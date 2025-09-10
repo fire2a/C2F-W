@@ -1,0 +1,80 @@
+version: v0.0.0
+
+------ Command line values ------
+InFolder: . 
+OutFolder: results 
+WeatherOpt: rows 
+OutMessages: true 
+OutROS: true 
+FinalGrid: true 
+CrownROS: true 
+TotalSims: 3 
+Simulator: S 
+fmc: 66 
+scenario: 2 
+
+------ Reading input data ------
+
+Using .asc
+No elevation.asc file, filling with NaN
+No saz.asc file, filling with NaN
+No slope.asc file, filling with NaN
+No cur.asc file, filling with NaN
+No cbd.asc file, filling with NaN
+No cbh.asc file, filling with NaN
+No ccf.asc file, filling with NaN
+No py.asc file, filling with NaN
+No fmc.asc file, filling with NaN
+No hm.asc file, filling with NaN
+Generated data file
+
+------------------Forest Data ----------------------
+
+./fuels.asc
+Forest DataFrame from instance ./Data.csv
+Number of cells: 534640
+
+-------Running simulations-------
+Serial version execution
+
+Simulation 1 Start:
+	weather file: ./Weather.csv
+	ignition cell: 353747
+	max time periods: 360
+
+Simulation 1 Results:
+	Cell Status            Count     Percent
+	----------------------------------------
+	Available             237045      44.34%
+	Burnt                    474       0.09%
+	Non-Burnable          297121      55.57%
+	Firebreak                  0       0.00%
+	Total                 534640     100.00%
+
+Simulation 2 Start:
+	weather file: ./Weather.csv
+	ignition cell: 445718
+	max time periods: 360
+
+Simulation 2 Results:
+	Cell Status            Count     Percent
+	----------------------------------------
+	Available             236690      44.27%
+	Burnt                    829       0.16%
+	Non-Burnable          297121      55.57%
+	Firebreak                  0       0.00%
+	Total                 534640     100.00%
+
+Simulation 3 Start:
+	weather file: ./Weather.csv
+	ignition cell: 392684
+	max time periods: 360
+
+Simulation 3 Results:
+	Cell Status            Count     Percent
+	----------------------------------------
+	Available             237162      44.36%
+	Burnt                    357       0.07%
+	Non-Burnable          297121      55.57%
+	Firebreak                  0       0.00%
+	Total                 534640     100.00%
