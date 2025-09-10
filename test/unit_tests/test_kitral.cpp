@@ -15,7 +15,7 @@ set_fueltype(inputs* test_data, string ftype)
 #if defined _WIN32 || defined __CYGWIN__
     strcpy_s(test_data->fueltype, ftype.c_str());
 #else
-    strcpy(test_data->fueltype, ftype.c_str());
+    test_data->fueltype = ftype;
 #endif
 }
 
