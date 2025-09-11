@@ -20,24 +20,31 @@ PATH=../Cell2Fire:$PATH
 set -x # enable debug tracing
 for format in asc tif; do
 	for model in fbp kitral sb portugal; do
-		echo running $model-$format
-		output_folder=test_results/$model-$format
-		mkdir -p $output_folder
-		rm -rf $output_folder/*
-		if [ "$model" == "fbp" ]; then
-			additional_args="--cros"
-			sim_code="C"
-		elif [ "$model" == "sb" ]; then
-			additional_args="--scenario 1"
-			sim_code="S"
-		elif [ "$model" == "portugal" ]; then
-			additional_args="--scenario 1"
-			sim_code="P"
-		elif [ "$model" == "kitral" ]; then
-			additional_args=""
-			sim_code="K"
-		fi
-		Cell2Fire$1 --input-instance-folder model/$model-$format --output-folder $output_folder --nsims 113 --output-messages --grids --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog $additional_args >test_results/$model-$format/log.txt
+	  for msg in all normal; do
+      echo running $model-$format-$msg
+      output_folder=test_results/$model-$format-$msg
+      mkdir -p $output_folder
+      rm -rf $output_folder/*
+      if [ "$model" == "fbp" ]; then
+        additional_args="--cros"
+        sim_code="C"
+      elif [ "$model" == "sb" ]; then
+        additional_args="--scenario 1"
+        sim_code="S"
+      elif [ "$model" == "portugal" ]; then
+        additional_args="--scenario 1 "
+        sim_code="P"
+      elif [ "$model" == "kitral" ]; then
+        additional_args=""
+        sim_code="K"
+      fi
+      if [ "$msg" == "all" ]; then
+        msgs="--all-messages"
+      elif [ "$msg" == "normal" ]; then
+        msgs="--output-messages"
+      fi
+      Cell2Fire$1 --input-instance-folder model/$model-$format --output-folder $output_folder --nsims 113 --grids --out-intensity --sim ${sim_code} --seed 123 --ignitionsLog ${msgs} ${additional_args} >test_results/$model-$format-$msg/log.txt
+	  done
 	done
 done
 set +x # disable debug tracing

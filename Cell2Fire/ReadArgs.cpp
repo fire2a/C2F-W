@@ -205,6 +205,11 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     {
         all_messages = true;
         printf("Save all messages: %d \n", all_messages);
+        if (!out_messages)
+        {
+            printf("OutMessages: %s \n", btoa(true));
+            out_messages = true;
+        }
     }
 
     //--Prom_tuned
