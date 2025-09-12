@@ -12,11 +12,8 @@ using Catch::Matchers::WithinAbs;
 void
 set_fueltype(inputs* test_data, string ftype)
 {
-#if defined _WIN32 || defined __CYGWIN__
-    strcpy_s(test_data->fueltype, ftype.c_str());
-#else
+
     test_data->fueltype = ftype;
-#endif
 }
 
 class NativeFuelFixture
