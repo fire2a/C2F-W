@@ -16,7 +16,6 @@
 #include <iostream>
 #include <limits>
 #include <memory>
-#include <sstream>
 #include <string.h>
 #include <unordered_map>
 #include <vector>
@@ -852,9 +851,8 @@ GenerateDat(const std::vector<std::string>& GFuelType,
  * @param InFolder Directory where the CSV file will be created.
  */
 void
-writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids, const std::string& InFolder)
+writeDataToFile(inputs* df_ptr, int NCells, const std::string& InFolder)
 {
-
     std::ofstream dataFile(InFolder + separator() + "Data.csv");
     std::vector<std::string> Columns
         = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",         "ps",         "saz",    "cur",
@@ -864,21 +862,41 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
     {
         // Write header
         for (const auto& col : Columns)
-        {
             dataFile << col << ",";
-        }
         dataFile << "\n";
 
-        // Write data
-        for (const auto& rowData : dataGrids)
+        // Write data rows
+        for (int i = 0; i < NCells; ++i)
         {
-            for (const auto& item : rowData)
-            {
-                dataFile << *item << ",";  // Dereference the unique_ptr before writing
-            }
-            dataFile << "\n";
+            dataFile << df_ptr[i].fueltype << ",";
+            dataFile << df_ptr[i].lat << ",";
+            dataFile << df_ptr[i].lon << ",";
+            dataFile << df_ptr[i].elev << ",";
+            dataFile << ",";  // ws (blank)
+            dataFile << ",";  // waz (blank)
+            dataFile << df_ptr[i].ps << ",";
+            dataFile << df_ptr[i].saz << ",";
+            dataFile << df_ptr[i].cur << ",";
+            dataFile << df_ptr[i].cbd << ",";
+            dataFile << df_ptr[i].cbh << ",";
+            dataFile << df_ptr[i].ccf << ",";
+            dataFile << df_ptr[i].nftype << ",";
+            dataFile << df_ptr[i].FMC << ",";
+            dataFile << df_ptr[i].ign_probability << ",";
+            dataFile << ",";  // jd (blank)
+            dataFile << ",";  // jd_min (blank)
+            dataFile << df_ptr[i].pc << ",";
+            dataFile << df_ptr[i].pdf << ",";
+            dataFile << ",";  // time (blank)
+            dataFile << ",";  // ffmc (blank)
+            dataFile << ",";  // bui (blank)
+            dataFile << df_ptr[i].gfl << ",";
+            dataFile << ",";  // pattern (blank)
+            dataFile << df_ptr[i].tree_height << "\n";
         }
         dataFile.close();
+    std:
+        cout << "\nData file 'Data.csv' created successfully in " << InFolder << std::endl;
     }
     else
     {
@@ -1112,5 +1130,6 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator, inputs* d
                                                                                 df_ptr,
                                                                                 args_ptr);
 
-    // writeDataToFile(result, InFolder);
+    if (args_ptr->WriteData)
+        writeDataToFile(df_ptr, NCells, InFolder);
 }

@@ -106,6 +106,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     bool out_stats = false;
     bool bbo_tuning = false;
     bool allow_cros = false;
+    bool write_data = false;
 
     //--out-messages
     if (cmdOptionExists(argv, argv + argc, "--output-messages"))
@@ -223,6 +224,13 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     {
         allow_cros = true;
         printf("CrownROS: %s \n", btoa(allow_cros));
+    }
+
+    //--write-data
+    if (cmdOptionExists(argv, argv + argc, "--write-data"))
+    {
+        write_data = true;
+        printf("WriteData: %s \n", btoa(write_data));
     }
 
     // Floats and ints
@@ -597,6 +605,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->Stats = out_stats;
     args_ptr->BBOTuning = bbo_tuning;
     args_ptr->AllowCROS = allow_cros;
+    args_ptr->WriteData = write_data;
 }
 
 void

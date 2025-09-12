@@ -45,8 +45,7 @@ std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::ve
                                                                    inputs* df_ptr,
                                                                    arguments* args_ptr);
 
-void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids,
-                     const std::string& InFolder);
+void writeDataToFile(inputs* df_ptr, int NCells, const std::string& InFolder);
 
 void GenDataFile(const std::string& InFolder, const std::string& Simulator, inputs* df_ptr, arguments* args_ptr);
 
