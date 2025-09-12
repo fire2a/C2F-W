@@ -56,11 +56,11 @@ dir1="test_results"
 dir2="target_results"
 
 # get the list of files in each directory
-dir1_files=$(find "$dir1" -type f | sort)
-dir1_num_files=$(ls -1 $dir1_files | wc -l)
+# dir1_files=$(find "$dir1" -type f | sort)
+dir1_num_files=$(find "$dir1" -type f | wc -l)
 # echo $dir1_files $dir1_num_files
-dir2_files=$(find "$dir2" -type f | sort)
-dir2_num_files=$(ls -1 $dir2_files | wc -l)
+# dir2_files=$(find "$dir2" -type f | sort)
+dir2_num_files=$(find "$dir2" -type f | wc -l)
 # echo $dir2_files $dir2_num_files
 
 # check if the number of files in each directory is equal
@@ -71,7 +71,7 @@ if [ $dir1_num_files -ne $dir2_num_files ]; then
 	exit 1
 fi
 # delete version line
-find test_results/ -name log.txt -type f | xargs sed -i -e '/version:/d'
+find test_results/ -name log.txt -type f -exec sed -i -e '/^version:/d' {} \;
 
 # use diff to compare the files in each directory
 diff_output=$(diff -rq "$dir1" "$dir2")
