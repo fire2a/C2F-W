@@ -17,7 +17,7 @@ unzip -q target_results.zip
 PATH=../Cell2Fire:$PATH
 
 # run
-set -x # enable debug tracing
+# set -x # enable debug tracing
 for format in asc tif; do
 	for model in fbp kitral sb portugal; do
 		for msg in all normal; do
@@ -47,7 +47,7 @@ for format in asc tif; do
 		done
 	done
 done
-set +x # disable debug tracing
+# set +x # disable debug tracing
 
 # find difference between directories and files
 
