@@ -9,55 +9,75 @@ $WarningPreference = "SilentlyContinue"
 # Run simulations
 foreach ($format in "asc", "tif") {
     foreach ($model in "fbp", "kitral", "sb", "portugal") {
-        Write-Output "Running $model-$format"
-        $outputDir = "test_results/$model-$format"
+        foreach ($msg in "all", "normal")
+        {
+            Write-Output "Running $model-$format-$msg"
+            $outputDir = "test_results/$model-$format-$msg"
 
-        # Create (or clean) output folder
-        if (Test-Path $outputDir) {
-            Get-ChildItem -Path $outputDir -Recurse -Force | Remove-Item -Force
-        } else {
-            New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+            # Create (or clean) output folder
+            if (Test-Path $outputDir)
+            {
+                Get-ChildItem -Path $outputDir -Recurse -Force | Remove-Item -Force
+            }
+            else
+            {
+                New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+            }
+
+            # Determine arguments based on model
+            switch ($model)
+            {
+                "fbp" {
+                    $additionalArgs = "--cros"
+                    $simCode = "C"
+                }
+                "sb" {
+                    $additionalArgs = "--scenario 1"
+                    $simCode = "S"
+                }
+                "portugal" {
+                    $additionalArgs = "--scenario 1"
+                    $simCode = "P"
+                }
+                "kitral" {
+                    $additionalArgs = ""
+                    $simCode = "K"
+                }
+            }
+            switch ($msg)
+            {
+                "all" {
+                    $msgs = "--all-messages"
+                }
+                "normal" {
+                    $msgs = "--output-messages"
+                }
+            }
+
+            # Build argument list and run simulation
+            $cmdArgs = @(
+                "--input-instance-folder", "model/$model-$format",
+                "--output-folder", $outputDir,
+                "--nsims", "113",
+                "--output-messages", "--grids", "--out-intensity", "--ignitionsLog",
+                "--sim", $simCode,
+                "--seed", "123"
+            )
+            if ($additionalArgs)
+            {
+                $cmdArgs += $additionalArgs.Split(" ")
+            }if ($msgs)
+            {
+                $cmdArgs += $msgs.Split(" ")
+            }
+            $logFile = "$outputDir/log.txt"
+
+            # Run the simulation and tee the output to a log file
+            & .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> $logFile 2> $null
+            (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
+            (Get-Content $logFile | Select-String -pattern 'version:' -notmatch) | Set-Content $logFile
+            (Get-Content "$outputDir/ignition_and_weather_log.csv") -replace '\\', '/' | Set-Content "$outputDir/ignition_and_weather_log.csv"
         }
-
-        # Determine arguments based on model
-        switch ($model) {
-            "fbp" {
-                $additionalArgs = "--cros"
-                $simCode = "C"
-            }
-            "sb" {
-                $additionalArgs = "--scenario 1"
-                $simCode = "S"
-            }
-            "portugal" {
-                $additionalArgs = "--scenario 1"
-                $simCode = "P"
-            }
-            "kitral" {
-                $additionalArgs = ""
-                $simCode = "K"
-            }
-        }
-
-        # Build argument list and run simulation
-        $cmdArgs = @(
-            "--input-instance-folder", "model/$model-$format",
-            "--output-folder", $outputDir,
-            "--nsims", "113",
-            "--output-messages", "--grids", "--out-intensity", "--ignitionsLog",
-            "--sim", $simCode,
-            "--seed", "123"
-        )
-        if ($additionalArgs) {
-            $cmdArgs += $additionalArgs.Split(" ")
-        }
-        $logFile = "$outputDir/log.txt"
-
-        # Run the simulation and tee the output to a log file
-        & .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> $logFile 2>$null
-        (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
-        (Get-Content $logFile | Select-String -pattern 'version:' -notmatch) | Set-Content $logFile
-        (Get-Content "$outputDir/ignition_and_weather_log.csv") -replace '\\', '/' | Set-Content "$outputDir/ignition_and_weather_log.csv"
     }
 }
 

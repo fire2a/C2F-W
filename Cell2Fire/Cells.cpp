@@ -1197,18 +1197,6 @@ Cells::get_burned(int period,
     return false;
 }
 
-/* Old functions
-        Returns            void
-
-        Inputs:
-        AdjacentCells      dictionary{string:[array integers]}
-*/
-// void Cells::set_Adj(std::unordered_map<std::string, int> & adjacentCells) {
-// // WORKING CHECK OK
-//     // TODO: in python, these are pointers, maybe make these pointers too :P
-//     this->adjacents = adjacentCells;
-// }
-
 /**
  * @brief Sets a cell's fire status (0: Available, 1: Burning, 2: Burnt, 3:
  * Harvested, 4: Non Fuel).
