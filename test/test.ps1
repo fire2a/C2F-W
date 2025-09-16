@@ -9,7 +9,7 @@ $WarningPreference = "SilentlyContinue"
 # Run simulations
 foreach ($format in "asc", "tif") {
     foreach ($model in "fbp", "kitral", "sb", "portugal") {
-        foreach ($msg in "normal")
+        foreach ($msg in "all", "normal")
         {
             Write-Output "Running $model-$format-$msg"
             $outputDir = "test_results/$model-$format-$msg"
