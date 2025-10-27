@@ -51,7 +51,7 @@ jobs:
         fi
 
     - name: Download All Artifacts
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         pattern: binaries*
         path: Cell2Fire
