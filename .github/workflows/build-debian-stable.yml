@@ -73,7 +73,7 @@ jobs:
           mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: binaries${{ env.SUFFIX }}
           path: |
