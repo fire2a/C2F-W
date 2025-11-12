@@ -105,7 +105,7 @@ jobs:
           echo "suffix="$(uname -s).${{ matrix.runner }}.$(arch)"" >> $GITHUB_ENV
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           pattern: binaries_${{ env.suffix }}
           path: Cell2Fire
