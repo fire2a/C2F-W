@@ -59,7 +59,7 @@ jobs:
           mv Cell2Fire Cell2Fire_${{ env.suffix }}
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: binaries_${{ env.suffix }}
           path: |
@@ -79,7 +79,7 @@ jobs:
           mv Cell2Fire Cell2Fire_${{ env.suffix }}-static
 
       - name: Upload Static
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: binaries_${{ env.suffix }}-static
           path: |
