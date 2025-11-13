@@ -436,7 +436,6 @@ Cells::manageFire(int period,
 {
     // Special flag for repetition (False = -99 for the record)
     int repeat = -99;
-
     // msg lists contains integers (True = -100)
     std::vector<int> msg_list_aux;
     msg_list_aux.push_back(0);
@@ -455,8 +454,8 @@ Cells::manageFire(int period,
     main_outs metrics = {};
     snd_outs sndstruct;
     fire_struc headstruct, backstruct, flankstruct, metrics2;
-
-    // Calculate parameters
+    // cout << "$" << df_ptr[this->realId - 1].fueltype << "$" << endl;
+    //  Calculate parameters
     if (args->Simulator == "K")
     {
         calculate_k(&df_ptr[this->realId - 1],

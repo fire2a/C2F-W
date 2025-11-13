@@ -215,6 +215,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     ********************************************************************/
     // Create forest structure
     forestDF frdf;
+
     // DEBUG
     std::cout << "\n------------------Forest Data ----------------------\n" << std::endl;
     std::vector<std::vector<std::string>> FDF = this->CSVForest.getData(_args.InFolder + "fuels");
@@ -242,27 +243,29 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     ********************************************************************/
     // DEBUGstd::cout << "\n------ Read DataFrames: Forest and Weather ------\n";
 
+    df = new inputs[this->nCells];
+
+    // Create empty df with size of NCells
+    df_ptr = &df[0];
+    GenDataFile(args.InFolder, args.Simulator, df_ptr, this->args_ptr);
     /* Forest DataFrame */
     std::string filename = this->args.InFolder + "Data.csv";
     std::string sep = ",";
     CSVReader CSVParser(filename, sep);
-
-    // Populate DF
-    std::vector<std::vector<std::string>> DF = CSVParser.getData(filename);
-    std::cout << "Forest DataFrame from instance " << filename << std::endl;
+    // TODO: delete csvparser and use dfptr instead
+    //  Populate DF
+    // std::vector<std::vector<std::string>> DF = CSVParser.getData(filename);
+    // std::cout << "Forest DataFrame from instance " << filename << std::endl;
     // DEBUGCSVParser.printData(DF);
     std::cout << "Number of cells: " << this->nCells << std::endl;
-    df = new inputs[this->nCells];
-
-    // Create empty df with size of NCells
-    df_ptr = &df[0];  // access reference for the first element of df
 
     // Populate the df [nCells] objects
-    CSVParser.parseDF(df_ptr,
+    //
+    /* CSVParser.parseDF(df_ptr,
                       DF,
                       this->args_ptr,
                       this->nCells);  // iterates from the first element of df, using DF,
-                                      // args_ptr and the number of cells
+                                      // args_ptr and the number of cells*/
 
     // Initialize and populate relevant vectors
     this->fTypeCells = std::vector<int>(this->nCells, 1);
@@ -279,20 +282,13 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->crownFlameLengths = std::vector<float>(this->nCells, 0);
     this->maxFlameLengths = std::vector<float>(this->nCells, 0);
 
-    this->ignProb = std::vector<float>(this->nCells, 1);
-    CSVParser.parsePROB(this->ignProb, DF, this->nCells);
-
     // Non burnable types: populate relevant fields such as status and ftype
-    std::string NoFuel = "NF ";
-    std::string NoData = "ND ";
     std::string Empty = "";
-    const char* NF = NoFuel.c_str();
-    const char* ND = NoData.c_str();
     const char* EM = Empty.c_str();
 
     for (int l = 0; l < this->nCells; l++)
     {
-        if (strcmp(df[l].fueltype, NF) == 0 || strcmp(df[l].fueltype, ND) == 0)
+        if (df[l].fueltype == "NF" || df[l].fueltype == "ND")
         {
             this->fTypeCells[l] = 0;
             this->fTypeCells2[l] = "NonBurnable";
@@ -740,14 +736,10 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->crownMetrics.clear();  // intensity and crown
 
     // Non burnable types: populate relevant fields such as status and ftype
-    std::string NoFuel = "NF ";
-    std::string NoData = "ND ";
-    const char* NF = NoFuel.c_str();
-    const char* ND = NoData.c_str();
 
     for (i = 0; i < this->nCells; i++)
     {
-        if (strcmp(df[i].fueltype, NF) == 0 || strcmp(df[i].fueltype, ND) == 0)
+        if (df[i].fueltype == "NF" || df[i].fueltype == "ND")
         {
             this->fTypeCells[i] = 0;
             this->fTypeCells2[i] = "NonBurnable";
@@ -853,11 +845,9 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
     boost::random::mt19937 generator2 = boost::random::mt19937(args.seed * ep * this->nCells);
     boost::random::uniform_int_distribution<int> distribution(1, this->nCells);
 
-    // std::default_random_engine generator2(args.seed * ep * this->nCells);  // * time(NULL)); //creates a different
-    //  generator solving cases when parallel
-    //  running creates simulations at same time
+    // generator solving cases when parallel
+    // running creates simulations at same time
     std::unordered_map<int, Cells>::iterator it;
-    // std::uniform_int_distribution<int> distribution(1, this->nCells);
 
     // No Ignitions provided
     if (this->args.Ignitions == 0)
@@ -870,14 +860,13 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
             {
                 aux = distribution(generator2);
                 float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
-                if (this->ignProb[aux - 1] > rd_number)
+                if (df_ptr[aux - 1].ign_probability > rd_number)
                 {
                     break;
                 }
                 microloops++;
                 if (microloops > this->nCells * 100)
                 {
-
                     this->noIgnition = true;
                     break;
                 }
@@ -900,7 +889,6 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
                 if (it->second.getStatus() == "Available" && it->second.fType != 0)
                 {
                     IgnitionHistory[sim] = aux;
-                    // std::cout << "Selected (Random) ignition point: " << aux << std::endl;
                     std::vector<int> ignPts = { aux };
                     if (it->second.ignition(this->fire_period[year - 1],
                                             this->year,
@@ -1249,7 +1237,6 @@ Cell2Fire::SendMessages()
                              "messages"
                           << std::endl;
         }
-
         // If message and not a true flag
         if (aux_list.size() > 0 && aux_list[0] != -100)
         {
@@ -1352,7 +1339,6 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
 {
     // Iterator
     std::unordered_map<int, Cells>::iterator it;
-
     // Information of the current step
     if (this->args.verbose)
     {
@@ -1645,7 +1631,6 @@ Cell2Fire::Results()
     // Declare an iterator to unordered_map
     std::unordered_map<int, Cells>::iterator it;
     int i;
-
     for (auto& br : this->burntCells)
     {
         if (this->Cells_Obj.find(br) != this->Cells_Obj.end())
@@ -2191,8 +2176,7 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
     // If more than planning horizon, next sim
     if (this->year > this->args.TotalYears)
     {
-        // printf("\n\nEntra a year mayor al total...\n\n");
-        //  Print-out results to folder
+        // Print-out results to folder
         this->Results();
         // Next Sim if max year
         this->sim += 1;
@@ -2315,7 +2299,8 @@ main(int argc, char* argv[])
     arguments args;
     arguments* args_ptr = &args;
     parseArgs(argc, argv, args_ptr);
-    GenDataFile(args.InFolder, args.Simulator);
+
+    // TODO: create shared data vectors
     int ep = 0;
     // Episodes loop (episode = replication)
     // CP: Modified to account the case when no ignition occurs and no grids are

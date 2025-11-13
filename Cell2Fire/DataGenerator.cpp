@@ -5,6 +5,7 @@
 
 #include "DataGenerator.h"
 
+#include "Cells.h"
 #include "tiffio.h"
 #include <algorithm>
 #include <array>
@@ -15,8 +16,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
-#include <sstream>
-#include <string>
+#include <string.h>
 #include <unordered_map>
 #include <vector>
 
@@ -28,6 +28,13 @@ separator()
 #else
     return '/';
 #endif
+}
+
+inline std::string&
+rtrim(std::string& s, const char* t = " \t\n\r\f\v")
+{
+    s.erase(s.find_last_not_of(t) + 1);
+    return s;
 }
 
 /**
@@ -105,17 +112,13 @@ Dictionary(const std::string& filename)
                 tokens.push_back(token);
             }
 
-            if (tokens[3].substr(0, 3) == "FM1")
-            {
-                FBPDict[tokens[0]] = tokens[3].substr(0, 4);
-            }
-            else if (tokens[3].substr(0, 3) == "Non" || tokens[3].substr(0, 3) == "NFn")
+            if (tokens[3].substr(0, 3) == "Non" || tokens[3].substr(0, 3) == "NFn")
             {
                 FBPDict[tokens[0]] = "NF";
             }
             else
             {
-                FBPDict[tokens[0]] = tokens[3].substr(0, 3);
+                FBPDict[tokens[0]] = tokens[3];
             }
 
             ColorsDict[tokens[0]] = std::make_tuple(
@@ -594,7 +597,9 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             const std::vector<float>& ProbMap,
             const std::vector<float>& FMC,
             const std::vector<float>& TreeHeight,
-            const std::string& InFolder)
+            const std::string& InFolder,
+            inputs* df_ptr,
+            arguments* args_ptr)
 {
     // DF columns
     std::vector<std::string> Columns
@@ -677,190 +682,166 @@ GenerateDat(const std::vector<std::string>& GFuelType,
     // Dataframe
     // std::vector<std::vector<boost::any>> DF(GFuelType.size(),
     // std::vector<boost::any>(Columns.size()));
-
+    const char* faux;
     // Populate DF
     for (size_t i = 0; i < GFuelType.size(); ++i)
     {
-
-        std::vector<std::unique_ptr<std::string>> rowData;
-
         // Fuel Type 0
-        rowData.emplace_back(std::make_unique<std::string>(GFuelType[i]));
-
+        df_ptr->fueltype = GFuelType[i];
         // lat 1
-        rowData.emplace_back(std::make_unique<std::string>("51.621244"));
-
+        df_ptr->lat = 51.621244;
         // lon 2
-        rowData.emplace_back(std::make_unique<std::string>("-115.608378"));
+        df_ptr->lon = -115.608378;
 
         // Elevation 3
 
         if (std::isnan(Elevation[i]))
 
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->elev = 0;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(Elevation[i])));
+            df_ptr->elev = Elevation[i];
         }
-
-        // Blank space (task: check why) 4,5
-        rowData.emplace_back(std::make_unique<std::string>(""));
-        rowData.emplace_back(std::make_unique<std::string>(""));
 
         // PS 6
         if (std::isnan(PS[i]))
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->ps = 0;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PS[i])));
+            df_ptr->ps = PS[i];
         }
 
         // SAZ 7
         if (std::isnan(SAZ[i]))
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->saz = 0;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(SAZ[i])));
+            df_ptr->saz = SAZ[i];
         }
 
         // Handle special cases 8
         if (std::isnan(Curing[i]) && (GFuelType[i] == "O1a" || GFuelType[i] == "O1b"))
         {
-            rowData.emplace_back(std::make_unique<std::string>("60"));  // "cur"
+            df_ptr->cur = 60;  // "cur"
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->cur = 0;
         }
 
         // CBD 9
         if (std::isnan(CBD[i]))
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->cbd = -9999;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(CBD[i])));
+            df_ptr->cbd = CBD[i];
         }
 
         // CBH 10
         if (std::isnan(CBH[i]))
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->cbh = -9999;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(CBH[i])));
+            df_ptr->cbh = CBH[i];
         }
 
         // CCF 11
         if (std::isnan(CCF[i]))
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->ccf = 0;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(CCF[i])));
+            df_ptr->ccf = CCF[i];
         }
 
         // Fuel Type N 12
         // if (std::isnan(GFuelTypeN[i]))
         if (std::isnan(static_cast<double>(GFuelTypeN[i])))
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->nftype = 0;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(GFuelTypeN[i])));
+            df_ptr->nftype = GFuelTypeN[i];
         }
 
         // FMC 13
         if (std::isnan(FMC[i]))
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->FMC = args_ptr->FMC;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(FMC[i])));
+            df_ptr->FMC = FMC[i];
         }
 
         // ProbMap 14
+        // TODO:change probability parser
+
         if (std::isnan(ProbMap[i]))
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->ign_probability = 1.0;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(ProbMap[i])));
+            df_ptr->ign_probability = ProbMap[i];
         }
-
-        // Blank space (jd,jd_min) 15,16
-        rowData.emplace_back(std::make_unique<std::string>(""));
-        rowData.emplace_back(std::make_unique<std::string>(""));
 
         // Populate PC 17
         if (PCD.find(GFuelType[i]) != PCD.end())
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PCD[GFuelType[i]])));  // "pc"
+            df_ptr->pc = PCD[GFuelType[i]];  // "pc"
         }
         else
         {
 
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->pc = 0;
         }
 
         // Populate PDF 18
         if (PDFD.find(GFuelType[i]) != PDFD.end())
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PDFD[GFuelType[i]])));  // "pdf"
+            df_ptr->pdf = PDFD[GFuelType[i]];  // "pdf"
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->pdf = 0;
         }
-
-        // time 19
-        rowData.emplace_back(std::make_unique<std::string>("20"));
-
-        // Blank space (ffmc,bui) 20,21
-        rowData.emplace_back(std::make_unique<std::string>(""));
-        rowData.emplace_back(std::make_unique<std::string>(""));
 
         // GFL 22
         if (GFLD.find(GFuelType[i]) != GFLD.end())
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(GFLD[GFuelType[i]])));  // "gfl"
+            df_ptr->gfl = GFLD[GFuelType[i]];  // "gfl"
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->gfl = 0;
         }
-
-        rowData.emplace_back(std::make_unique<std::string>(""));
 
         // TreeHeight 24
 
         if (std::isnan(TreeHeight[i]))
         {
-            rowData.emplace_back(std::make_unique<std::string>(""));
+            df_ptr->tree_height = -9999;
         }
         else
         {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(TreeHeight[i])));
+            df_ptr->tree_height = TreeHeight[i];
         }
 
-        // Add the rowData to dataGrids
-        dataGrids.push_back(std::move(rowData));
-
-        rowData.clear();
+        df_ptr++;
     }
-
     return dataGrids;
 }
 
@@ -870,9 +851,8 @@ GenerateDat(const std::vector<std::string>& GFuelType,
  * @param InFolder Directory where the CSV file will be created.
  */
 void
-writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids, const std::string& InFolder)
+writeDataToFile(inputs* df_ptr, int NCells, const std::string& InFolder)
 {
-
     std::ofstream dataFile(InFolder + separator() + "Data.csv");
     std::vector<std::string> Columns
         = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",         "ps",         "saz",    "cur",
@@ -882,21 +862,41 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
     {
         // Write header
         for (const auto& col : Columns)
-        {
             dataFile << col << ",";
-        }
         dataFile << "\n";
 
-        // Write data
-        for (const auto& rowData : dataGrids)
+        // Write data rows
+        for (int i = 0; i < NCells; ++i)
         {
-            for (const auto& item : rowData)
-            {
-                dataFile << *item << ",";  // Dereference the unique_ptr before writing
-            }
-            dataFile << "\n";
+            dataFile << df_ptr[i].fueltype << ",";
+            dataFile << df_ptr[i].lat << ",";
+            dataFile << df_ptr[i].lon << ",";
+            dataFile << df_ptr[i].elev << ",";
+            dataFile << ",";  // ws (blank)
+            dataFile << ",";  // waz (blank)
+            dataFile << df_ptr[i].ps << ",";
+            dataFile << df_ptr[i].saz << ",";
+            dataFile << df_ptr[i].cur << ",";
+            dataFile << df_ptr[i].cbd << ",";
+            dataFile << df_ptr[i].cbh << ",";
+            dataFile << df_ptr[i].ccf << ",";
+            dataFile << df_ptr[i].nftype << ",";
+            dataFile << df_ptr[i].FMC << ",";
+            dataFile << df_ptr[i].ign_probability << ",";
+            dataFile << ",";  // jd (blank)
+            dataFile << ",";  // jd_min (blank)
+            dataFile << df_ptr[i].pc << ",";
+            dataFile << df_ptr[i].pdf << ",";
+            dataFile << ",";  // time (blank)
+            dataFile << ",";  // ffmc (blank)
+            dataFile << ",";  // bui (blank)
+            dataFile << df_ptr[i].gfl << ",";
+            dataFile << ",";  // pattern (blank)
+            dataFile << df_ptr[i].tree_height << "\n";
         }
         dataFile.close();
+    std:
+        cout << "\nData file 'Data.csv' created successfully in " << InFolder << std::endl;
     }
     else
     {
@@ -930,7 +930,7 @@ writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& da
  * @param Simulator Simulation model code
  */
 void
-GenDataFile(const std::string& InFolder, const std::string& Simulator)
+GenDataFile(const std::string& InFolder, const std::string& Simulator, inputs* df_ptr, arguments* args_ptr)
 {
     std::cout << "\n------ Reading input data ------\n\n";
     std::unordered_map<std::string, std::string> FBPDict;
@@ -1114,9 +1114,22 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     }
 
     // Call GenerateDat function
-    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(
-        GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, ProbMap, FMC, TreeHeight, InFolder);
+    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(GFuelType,
+                                                                                GFuelTypeN,
+                                                                                Elevation,
+                                                                                PS,
+                                                                                SAZ,
+                                                                                Curing,
+                                                                                CBD,
+                                                                                CBH,
+                                                                                CCF,
+                                                                                ProbMap,
+                                                                                FMC,
+                                                                                TreeHeight,
+                                                                                InFolder,
+                                                                                df_ptr,
+                                                                                args_ptr);
 
-    writeDataToFile(result, InFolder);
-    std::cout << "Generated data file" << std::endl;
+    if (args_ptr->WriteData)
+        writeDataToFile(df_ptr, NCells, InFolder);
 }
