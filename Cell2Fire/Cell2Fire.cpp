@@ -48,6 +48,7 @@ inputs* df;
 int currentSim = 0;
 std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;
+std::unordered_map<int, float> WeatherWeights;
 std::vector<int> NFTypesCells;
 std::unordered_map<int, int> IgnitionHistory;
 std::unordered_map<int, std::string> WeatherHistory;
@@ -218,6 +219,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     // DEBUG
     std::cout << "\n------------------Forest Data ----------------------\n" << std::endl;
     std::vector<std::vector<std::string>> FDF = this->CSVForest.getData(_args.InFolder + "fuels");
+
     // DEBUGthis->CSVForest.printData(FDF);
     this->CSVForest.parseForestDF(&frdf, FDF);
 
@@ -325,6 +327,17 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
                 this->statusCells[it2 - 1] = 3;
             }
         }
+    }
+
+    if (this->args.UseWeatherWeights)
+    {
+        std::string sep = ",";
+        CSVReader CSVWeatherWeigths(this->args.WeatherWeightsFile, sep);
+
+        std::vector<std::vector<std::string>> WeatherWeightsDF = CSVWeatherWeigths.getData(this->args.WeatherWeightsFile);
+
+        CSVWeatherWeights.parseWeatherWeights(WeatherWeights, WeatherWeightDF, this->args.NWeatherFiles);
+
     }
 
     // Relevant sets: Initialization

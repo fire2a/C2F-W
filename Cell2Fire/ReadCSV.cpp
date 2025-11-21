@@ -585,6 +585,14 @@ CSVReader::parseIgnitionDF(std::vector<int>& ig, std::vector<std::vector<std::st
 }
 
 /*
+ * Read weather weights
+ */
+void
+CSVReader::parseWeatherWeights(std::unordered_map<int, float>& wf, std::vector<std::vector<std::string>>& DF, int NumberOfWeatherFiles){
+
+}
+
+/*
  * Populate HarvestedDF
  */
 void
