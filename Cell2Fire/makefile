@@ -1,9 +1,9 @@
 # Compiler
-CXX = g++-12
+CXX = g++-14
 
 # Compiler and linker flags
-CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I /usr/include -I /usr/include/catch2
-LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff
+CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3
+LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff -lCatch2Main -lCatch2
 
 # Source files
 SRCS = Cell2Fire.cpp Cells.cpp FuelModelUtils.cpp FuelModelSpain.cpp FuelModelPortugal.cpp FuelModelKitral.cpp FuelModelFBP.cpp Spotting.cpp ReadCSV.cpp ReadArgs.cpp Lightning.cpp WriteCSV.cpp DataGenerator.cpp
@@ -29,7 +29,7 @@ tests: $(TEST_TARGET)
 	./$(TEST_TARGET)
 
 $(TEST_TARGET): $(TEST_FILES) $(SRCS)
-	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_FILES)
+	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_FILES) $(LDFLAGS)
 
 
 %.o: %.cpp
@@ -42,4 +42,4 @@ DESTDIR = /usr/local/bin
 install: all
 	cp $(TARGETS) $(DESTDIR)
 uninstall: all
-	rm $(DESTDIR)/$(TARGETS) 
+	rm $(DESTDIR)/$(TARGETS)

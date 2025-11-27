@@ -1,10 +1,10 @@
 //
 // Created by mati on 20-02-25.
 //
-#define CATCH_CONFIG_MAIN
 #include "../../Cell2Fire/FuelModelKitral.h"
 #include "../../Cell2Fire/FuelModelUtils.h"
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <string.h>
 
 using Catch::Matchers::WithinAbs;
