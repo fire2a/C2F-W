@@ -595,7 +595,6 @@ rate_of_spread_k(inputs* data,
     fmc = fmcs[data->nftype][0] * 60;  // factor de propagacion en m/min
     fch = min(51.43, 52.3342 * pow(ch, -1.3035));
     fv = p1 * exp(-p2 * ws) + p3;
-    std::cout << "ps: " << ps << "\n";
     if (ps == 0)
     {
         at->rss = fmc * fch * (fv);
