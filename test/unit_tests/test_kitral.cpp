@@ -3,9 +3,15 @@
 //
 #include "../../Cell2Fire/FuelModelKitral.h"
 #include "../../Cell2Fire/FuelModelUtils.h"
+#include <string.h>
+// catch v3 or v2 compatibility
+#if __has_include(<catch2/catch_test_macros.hpp>)
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <string.h>
+#else
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
+#endif
 
 using Catch::Matchers::WithinAbs;
 
