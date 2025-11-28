@@ -94,6 +94,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         printf("WeatherWeightsFile: %s \n", weather_weights_file);
         args_ptr->WeatherWeightsFile = weather_weights_file;
         args_ptr->UseWeatherWeights = true;
+        input_weather = "random"
     }
     else {
         args_ptr->WeatherWeightsFile = &empty;
