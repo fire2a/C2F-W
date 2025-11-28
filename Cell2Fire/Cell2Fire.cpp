@@ -48,7 +48,8 @@ inputs* df;
 int currentSim = 0;
 std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;
-std::unordered_map<int, float> WeatherWeights;
+std::vector<float> WeatherWeights;
+std::vector<int> WeatherWeightIDs;
 std::vector<int> NFTypesCells;
 std::unordered_map<int, int> IgnitionHistory;
 std::unordered_map<int, std::string> WeatherHistory;
@@ -329,16 +330,19 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         }
     }
 
+    /*
     if (this->args.UseWeatherWeights)
     {
+        cout << "use weather weights" << endl;
         std::string sep = ",";
-        CSVReader CSVWeatherWeigths(this->args.WeatherWeightsFile, sep);
+        CSVReader CSVWeatherWeights(this->args.WeatherWeightsFile, sep);
 
-        std::vector<std::vector<std::string>> WeatherWeightsDF = CSVWeatherWeigths.getData(this->args.WeatherWeightsFile);
+        std::vector<std::vector<std::string>> WeatherWeightsDF = CSVWeatherWeights.getData(this->args.WeatherWeightsFile);
+        cout << "ww df "<< WeatherWeightsDF[0][0] << endl;
 
-        CSVWeatherWeights.parseWeatherWeights(WeatherWeights, WeatherWeightDF, this->args.NWeatherFiles);
+        CSVWeatherWeights.parseWeatherWeights(WeatherWeights, WeatherWeightIDs, WeatherWeightsDF, this->args.NWeatherFiles);
 
-    }
+    }*/
 
     // Relevant sets: Initialization
     this->availCells.clear();
@@ -2259,6 +2263,7 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
     {
         // Random Weather
         weatherFilename = this->args.InFolder + "Weathers" + separator() + "Weather" + std::to_string(rnumber) + ".csv";
+        
         // this->CSVWeather.setFilename(weatherFilename);
 
         /* Weather DataFrame */
@@ -2349,6 +2354,16 @@ main(int argc, char* argv[])
     {
         initialize_coeff_p(args.scenario);
     }
+    if (args.UseWeatherWeights)
+    {
+        std::string sep = ",";
+        CSVReader CSVWeatherWeights(args.WeatherWeightsFile, sep);
+
+        std::vector<std::vector<std::string>> WeatherWeightsDF = CSVWeatherWeights.getData(args.WeatherWeightsFile);
+
+        CSVWeatherWeights.parseWeatherWeights(WeatherWeights, WeatherWeightIDs, WeatherWeightsDF, args.NWeatherFiles);
+
+    }
     cout << "\n-------Running simulations-------" << endl;
     // Parallel zone
 #pragma omp parallel num_threads(num_threads)
@@ -2384,7 +2399,12 @@ main(int argc, char* argv[])
             boost::random::uniform_int_distribution<int> udistributionIgnition(1, Forest.nCells);
 
             TID = omp_get_thread_num();
-            rnumber = udistribution(generator);
+            if (args.UseWeatherWeights) {
+                std::discrete_distribution<int> dist(std::begin(WeatherWeights), std::end(WeatherWeights));
+                int weatherWeightIndex = dist(generator);
+                rnumber = WeatherWeightIDs[weatherWeightIndex];
+            } else {
+                rnumber = udistribution(generator);}
             rnumber2 = ndistribution(generator);
             // Reset
             Forest.reset(rnumber, rnumber2, ep);

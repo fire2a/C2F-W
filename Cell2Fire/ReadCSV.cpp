@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
+#include <numeric>
 /**
  * Creates an instance of CSVReader.
  * @param filename name of file to read
@@ -588,8 +588,25 @@ CSVReader::parseIgnitionDF(std::vector<int>& ig, std::vector<std::vector<std::st
  * Read weather weights
  */
 void
-CSVReader::parseWeatherWeights(std::unordered_map<int, float>& wf, std::vector<std::vector<std::string>>& DF, int NumberOfWeatherFiles){
-
+CSVReader::parseWeatherWeights(std::vector<float>& WeatherWeights, std::vector<int>& WeatherWeightIDs, std::vector<std::vector<std::string>>& DF, int NumberOfWeatherFiles){
+    int i;
+    std::string::size_type sz;  // alias of size_t
+    if (DF[0].size() > NumberOfWeatherFiles) {
+        throw std::runtime_error("Error: number of rows in weather weights file longer than number of weather files");
+    }
+    for (i = 0; i < DF.size(); i++)
+    {
+        int index = std::stoi(DF[i][0]);
+        WeatherWeights.push_back(std::stof(DF[i][1]));
+        WeatherWeightIDs.push_back(index);
+        if (index > NumberOfWeatherFiles) {
+            throw std::runtime_error("Error while parsing weather weights: ID not in Weathers folder");
+        }
+    }
+    double sum = std::accumulate(WeatherWeights.begin(), WeatherWeights.end(), 0.0);
+    if (sum > 1.000001 || sum < 0.9999999) {
+        throw std::runtime_error("Error: weather weights must add up to 1.0");
+    }
 }
 
 /*
@@ -752,25 +769,3 @@ CSVReader::printWeatherDF(weatherDF wdf)
     std::cout << " " << wdf.waz;
 }
 
-/*
-int main()
-{
-        // Creating an object of CSVWriter
-        CSVReader reader("example.csv");
-
-        // Get the data from CSV File
-        std::vector<std::vector<std::string> > dataList = reader.getData();
-
-        // Print the content of row by row on screen
-        for(std::vector<std::string> vec : dataList)
-        {
-                for(std::string data : vec)
-                {
-                        std::cout<<data<< " ";
-                }
-                std::cout<<std::endl;
-        }
-        return 0;
-
-}
-*/

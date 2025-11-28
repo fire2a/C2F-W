@@ -78,6 +78,8 @@ class CSVReader
                     std::vector<std::vector<std::string>>& DF,
                     int NFTypes);
 
+    void parseWeatherWeights(std::vector<float>& WeatherWeights, std::vector<int>& WeatherWeightIDs, std::vector<std::vector<std::string>>& DF, int NumberOfWeatherFiles);
+
     // Prints individual cell info
     void printDF(inputs df);
 
