@@ -1,121 +1,172 @@
-name: release
+name: Release
 
 on:
-  # pull_request:
-  #   branches:
-  #   - main
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+' # Matches semantic version tags like v1.0.0
-      - 'v[0-9]+.[0-9]+.[0-9]+-\w+' # Matches pre-release tags like v1.0.0-beta
-      - 'v[0-9]+.[0-9]+.[0-9]+\w+' # Matches pre-release tags like v1.0.0beta
+      - 'v[0-9]+.[0-9]+.[0-9]+'        # v1.0.0
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'      # v1.0.0-beta
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  # Call all build workflows
+  build_debian:
+    uses: ./.github/workflows/build-debian.yml
 
   build_manylinux:
-      uses: ./.github/workflows/build-manylinux.yml
-
-  build_debian_stable:
-      uses: ./.github/workflows/build-debian-stable.yml
+    uses: ./.github/workflows/build-manylinux.yml
 
   build_macos:
-       uses: ./.github/workflows/build-macos.yml
+    uses: ./.github/workflows/build-macos.yml
 
   build_windows:
-      uses: ./.github/workflows/build-windows.yml
-      with:
-        enabled: true
+    uses: ./.github/workflows/build-windows.yml
+    with:
+      enabled: true  # Set to false to skip Windows builds
 
-  release:
-    needs: [build_manylinux, build_windows, build_debian_stable, build_macos]
+  # Create release with all artifacts
+  create_release:
+    needs: [build_debian, build_manylinux, build_macos, build_windows]
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v5
+      - name: Checkout Code
+        uses: actions/checkout@v5
 
-    - name: Set Release Tag
-      id: set_tag
-      run: |
-        if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          echo "RELEASE_TAG=${{ github.sha }}" >> $GITHUB_ENV
-          echo "TAG_DESCRIPTION=${{ github.sha }}" >> $GITHUB_ENV
-        else
-          echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
-          TAG_NAME=$(git describe --tags)
-          echo "TAG_DESCRIPTION=$(git tag -n99 $TAG_NAME | sed -n '2p')" >> $GITHUB_ENV
-        fi
-
-    - name: Download All Artifacts
-      uses: actions/download-artifact@v6
-      with:
-        pattern: binaries*
-        path: Cell2Fire
-        merge-multiple: true
-
-    - name: Zip Binaries
-      run: |
-        cd Cell2Fire
-        ls
-
-        if [[ -f Cell2Fire.exe ]]; then
-          zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
-        else
-          zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip WINDOWS_BUILD_WAS_DISABLED.txt
-        fi
-        zip ../Cell2FireW_${RELEASE_TAG}-manylinux-x86_64-binary.zip Cell2Fire ldd_manylinux.txt
-        zip ../Cell2FireW_${RELEASE_TAG}-Debian.bookworm.x86_64-binary.zip Cell2Fire.Debian.bookworm.x86_64 ldd.Debian.bookworm.x86_64.txt
-        zip ../Cell2FireW_${RELEASE_TAG}-Debian.trixie.x86_64-binary.zip Cell2Fire.Debian.trixie.x86_64 ldd.Debian.trixie.x86_64.txt
-        zip ../Cell2FireW_${RELEASE_TAG}-Ubuntu.noble.x86_64-binary.zip Cell2Fire.Ubuntu.noble.x86_64 ldd.Ubuntu.noble.x86_64.txt
-        zip ../Cell2FireW_${RELEASE_TAG}-macOS-binaries.zip Cell2Fire_Darwin* otool*.txt
-
-    - name: Zip Data Instances
-      run: |
-        cd data
-        for format in asc tif; do
-          for fuel_model in CanadianFBP Kitral ScottAndBurgan Portugal; do
-            if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
-                echo "found $fuel_model $format"
-                zip -r ../$fuel_model-$format.zip $fuel_model/*-$format
+      - name: Set Release Tag
+        id: set_tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "RELEASE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+            echo "TAG_DESCRIPTION=Manual release from commit ${{ github.sha }}" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+            TAG_NAME=$(git describe --tags)
+            TAG_DESC=$(git tag -l -n99 "$TAG_NAME" | tail -n +2 | sed 's/^[ \t]*//')
+            if [[ -z "$TAG_DESC" ]]; then
+              TAG_DESC="Release $TAG_NAME"
             fi
+            echo "TAG_DESCRIPTION<<EOF" >> $GITHUB_ENV
+            echo "$TAG_DESC" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          pattern: binaries*
+          path: artifacts
+
+      - name: List Downloaded Artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find artifacts -type f -ls
+
+      - name: Organize Binaries
+        run: |
+          mkdir -p Cell2Fire
+          find artifacts -name 'Cell2Fire*' -type f -exec cp {} Cell2Fire/ \;
+          find artifacts -name 'ldd*.txt' -type f -exec cp {} Cell2Fire/ \;
+          find artifacts -name 'otool*.txt' -type f -exec cp {} Cell2Fire/ \;
+          find artifacts -name '*.dll' -type f -exec cp {} Cell2Fire/ \; 2>/dev/null || true
+          find artifacts -name '*.exe' -type f -exec cp {} Cell2Fire/ \; 2>/dev/null || true
+          find artifacts -name 'WINDOWS_BUILD_WAS_DISABLED.txt' -type f -exec cp {} Cell2Fire/ \; 2>/dev/null || true
+          ls -lh Cell2Fire/
+
+      - name: Create Binary Zips - Debian
+        run: |
+          cd Cell2Fire
+          
+          # Debian bookworm
+          if [[ -f Cell2Fire.Debian.bookworm.x86_64 ]]; then
+            zip ../Cell2FireW_${RELEASE_TAG}-Debian.bookworm.x86_64-binary.zip \
+              Cell2Fire.Debian.bookworm.x86_64 \
+              ldd.Debian.bookworm.x86_64.txt
+          fi
+          
+          # Debian trixie
+          if [[ -f Cell2Fire.Debian.trixie.x86_64 ]]; then
+            zip ../Cell2FireW_${RELEASE_TAG}-Debian.trixie.x86_64-binary.zip \
+              Cell2Fire.Debian.trixie.x86_64 \
+              ldd.Debian.trixie.x86_64.txt
+          fi
+          
+          # Ubuntu noble
+          if [[ -f Cell2Fire.Ubuntu.noble.x86_64 ]]; then
+            zip ../Cell2FireW_${RELEASE_TAG}-Ubuntu.noble.x86_64-binary.zip \
+              Cell2Fire.Ubuntu.noble.x86_64 \
+              ldd.Ubuntu.noble.x86_64.txt
+          fi
+
+      - name: Create Binary Zips - ManyLinux
+        run: |
+          cd Cell2Fire
+          if [[ -f Cell2Fire ]] && [[ ! -f Cell2Fire.exe ]]; then
+            zip ../Cell2FireW_${RELEASE_TAG}-manylinux-x86_64-binary.zip \
+              Cell2Fire \
+              ldd_manylinux.txt
+          fi
+
+      - name: Create Binary Zips - macOS
+        run: |
+          cd Cell2Fire
+          zip ../Cell2FireW_${RELEASE_TAG}-macOS-binaries.zip \
+            Cell2Fire_Darwin* \
+            otool*.txt 2>/dev/null || echo "No macOS binaries found"
+
+      - name: Create Binary Zips - Windows
+        run: |
+          cd Cell2Fire
+          if [[ -f Cell2Fire.exe ]]; then
+            zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip \
+              Cell2Fire.exe *.dll
+          else
+            zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip \
+              WINDOWS_BUILD_WAS_DISABLED.txt
+          fi
+
+      - name: Create Data Instance Zips
+        run: |
+          cd data
+          for format in asc tif; do
+            for fuel_model in CanadianFBP Kitral ScottAndBurgan Portugal; do
+              if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
+                echo "Zipping $fuel_model $format"
+                zip -r ../$fuel_model-$format.zip $fuel_model/*-$format
+              fi
+            done
           done
-        done
 
-    - name: Git Archive
-      run: |
-        git rm -r data output test
-        git rm -f *.pdf
-        git add -f Cell2Fire/*
-        astash=`git stash create`
-        git archive --prefix=C2F/ --output="Cell2FireW_${{ env.RELEASE_TAG }}.zip" $astash
+      - name: Create Source Archive
+        run: |
+          git rm -r data output test 2>/dev/null || true
+          git rm -f *.pdf 2>/dev/null || true
+          git add -f Cell2Fire/* || true
+          astash=$(git stash create || echo "HEAD")
+          git archive --prefix=C2F/ --output="Cell2FireW_${RELEASE_TAG}.zip" $astash
 
-
-    - name: Create Draft Release
-      uses: ncipollo/release-action@v1.20.0
-      with:
-        artifacts: |
-          Cell2FireW_${{ env.RELEASE_TAG }}.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip
-
-          Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip
-
-          Cell2FireW_${{ env.RELEASE_TAG }}-Debian.trixie.x86_64-binary.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.noble.x86_64-binary.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip
-          Kitral-asc.zip
-          Kitral-tif.zip
-          CanadianFBP-asc.zip
-          ScottAndBurgan-asc.zip
-          ScottAndBurgan-tif.zip
-          Portugal-asc.zip
-          Portugal-tif.zip
-        token: ${{ secrets.GITHUB_TOKEN }}
-        draft: true
-        tag: ${{ env.RELEASE_TAG }}
-        name: "C2F-W: ${{ env.RELEASE_TAG }}"
-        body: ${{ env.TAG_DESCRIPTION}}
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            Cell2FireW_${{ env.RELEASE_TAG }}.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-Debian.trixie.x86_64-binary.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.noble.x86_64-binary.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
+            Kitral-asc.zip
+            Kitral-tif.zip
+            CanadianFBP-asc.zip
+            ScottAndBurgan-asc.zip
+            ScottAndBurgan-tif.zip
+            Portugal-asc.zip
+            Portugal-tif.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          tag: ${{ env.RELEASE_TAG }}
+          name: "C2F-W: ${{ env.RELEASE_TAG }}"
+          body: ${{ env.TAG_DESCRIPTION }}
