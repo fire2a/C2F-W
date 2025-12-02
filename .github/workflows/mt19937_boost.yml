@@ -1,0 +1,101 @@
+name: mt19937 boost cross-os congruence
+on:
+  workflow_dispatch:
+jobs:
+  build-and-run:
+    name: Build and run Boost emitter (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    # no job-level env needed
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libboost-random-dev #clang
+        shell: bash
+
+      - name: Install dependencies (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew update
+          brew install llvm
+          # Homebrew provides Boost as a single formula; we'll use headers/libs from it
+          brew install boost
+          echo "Using clang++ from Homebrew"
+          echo "CXX=$(brew --prefix)/opt/llvm/bin/clang++" >> $GITHUB_ENV
+
+      - name: Set up Visual Studio shell
+        if: startsWith(matrix.os, 'windows')
+        uses: egor-tensin/vs-shell@v2
+        with:
+            arch: x64
+
+      - name: Set up Vcpkg (Windows)
+        if: startsWith(matrix.os, 'windows')
+        shell: powershell
+        run: |
+          # Use preinstalled vcpkg from runner images
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install boost-random:x64-windows
+          Write-Host "VCPKG include: $env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\include"
+          "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\include" | Out-File -FilePath include_path.txt -Encoding ascii
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          c++ -std=c++17 test/tech/mt19937_boost.cpp -o mt19937_boost
+
+      - name: Build (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          "$CXX" -std=c++17 -I"$(brew --prefix)/include" -L"$(brew --prefix)/lib" test/tech/mt19937_boost.cpp -o mt19937_boost
+
+      - name: Build (Windows)
+        if: startsWith(matrix.os, 'windows')
+        shell: powershell
+        run: |
+            # Add include path and compile
+            $include = Join-Path $env:VCPKG_INSTALLATION_ROOT 'installed\x64-windows\include'
+            $env:INCLUDE = "$include;$env:INCLUDE"
+            cmd /c "cl /std:c++17 /EHsc /I `"$include`" test\tech\mt19937_boost.cpp /Fe:mt19937_boost.exe"
+
+      - name: Run emitter
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            ./mt19937_boost.exe > mt19937_${{ runner.os }}.txt
+          else
+            ./mt19937_boost > mt19937_${{ runner.os }}.txt
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mt19937_${{ runner.os }}
+          path: mt19937_${{ runner.os }}.txt
+
+  compare:
+    name: Compare outputs (${{ runner.os }})
+    runs-on: ubuntu-latest
+    needs: build-and-run
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Diff Ubuntu vs macOS
+        run: |
+          diff -u artifacts/mt19937_Linux/mt19937_Linux.txt artifacts/mt19937_macOS/mt19937_macOS.txt
+
+      - name: Diff Ubuntu vs Windows (normalize CRLF)
+        run: |
+          sudo apt-get install -y dos2unix
+          dos2unix artifacts/mt19937_Windows/mt19937_Windows.txt
+          diff -u  artifacts/mt19937_Windows/mt19937_Windows.txt artifacts/mt19937_Linux/mt19937_Linux.txt 
