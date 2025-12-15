@@ -105,7 +105,7 @@ jobs:
           apt-get install -y unzip g++-12 make lsb-release curl
 
       - name: Cache Catch2 header
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: catch.hpp
           key: ${{ runner.os }}-catch2
