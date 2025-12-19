@@ -1,31 +1,72 @@
-This folder contains a containerized version of Cell2Fire. The container runs the latest version of Cell2Fire without having to manually build and configure the application on your system. The container is compatible with both Podman and Docker. We recommend using Podman, but the instructions found here are easily translated into Docker.
+# Cell2Fire Containers
 
-## TL;DR
+This folder contains a containerized versions of Cell2Fire. The containers runs the latest version of Cell2Fire without having to manually build and configure the application on your system. 
+
+
+### Requirement
+You only need Podman installed on your system to build and run the container. Replace `podman` with `docker` if needed.
+```bash
+sudo apt install podman
 ```
-sudo apt install podman git
-git clone git@github.com:Cell2Fire/C2F-W.git
-cd C2F-W/container
-podman build -t c2f .
-cd ../test
+
+## Usage
+After building the container image (named `cell2fire` in the next example), you can run Cell2Fire simulations using the container. The container accepts the same parameters as if you were running the compiled binary directly.
+
+The simplest use is by mounting the instance and results directories into the container using volumes (`-v $(pwd):/mnt`) and deleting the container after the run (`--rm`).
+```bash
 mkdir results
-~/C2F-W/test$ podman run -v $(pwd):/mnt c2f --input-instance-folder /mnt/model/fbp-asc --output-folder /mnt/results --nsims 3 --sim C --grids
+podman run --rm -v $(pwd):/mnt cell2fire \
+    --input-instance-folder /mnt/data/Kitral/Portezuelo-tif \
+    --output-folder /mnt/results \
+    --output-messages \
+    --ignitionsLog \
+    --nsims 3 --sim K --grids | tee results/log.txt
 ls results
-
-# unnecesary if correctly addressing the output folder:
-# enter the container interactively, overriding the entrypoint:
-podman run -it --entrypoint /bin/bash c2f
+rm -r results/*
 ```
 
-## Folder Structure
+## Select your preferred build
+
+### 1. Lightweight
+```
+git clone git@github.com:Cell2Fire/C2F-W.git
+cd C2F-W
+podman build -t cell2fire -f container/Containerfile .
+```
+
+### 2. Run tests too
+```
+git clone git@github.com:Cell2Fire/C2F-W.git
+cd C2F-W
+podman build -t cell2firetests -f container/Containerfile+tests .
+```
+
+### 3. Minimal dependencies but heavier
+Also wget and unzip is needed to get the Dockerfile and a test instance.
+```bash
+# get the Dockerfile
+wget https://github.com/fire2a/C2F-W/raw/main/container/Dockerfile
+
+# build
+podman build -t cell2fire -f Dockerfile .
+
+# get an instance
+wget https://github.com/fire2a/C2F-W/releases/download/v1.0.1/Kitral-tif.zip
+unzip Kitral-tif.zip -d data
+```
+
+## Learn More
+
+### Folder Structure
 
 - `container/`: Contains the files used to build and run the container.
   - `Dockerfile`: Defines the build instructions for the container image.
 
-## Prerequisites
+### Prerequisites
 
 Ensure you have Podman installed on your system. You can find installation instructions in the [official Podman documentation](https://podman.io/docs/installation).
 
-## Building the Image
+### Building the Image
 
 To build the container image using Podman, navigate to the `container/` directory and run the following command:
 
@@ -35,7 +76,7 @@ podman build -t <image_name> -f Dockerfile .
 ```
 This command builds the container image and tags it as <image_name>.
 
-## Running Cell2Fire
+### Running Cell2Fire
 
 Once the image is built, you can run the simulation using Podman. It accepts the same parameters as if you were running the compiled binary directly.
 In order for the container to have access to the input data files, we must use volumes. Simply put the `-v` or `--volume` tag followed by the path to your input files

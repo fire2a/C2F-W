@@ -1,0 +1,8 @@
+*
+!Cell2Fire/*.cpp
+!Cell2Fire/*.h
+!Cell2Fire/makefile
+!test/unit_tests/*.cpp
+!test/model
+!test/target_results.zip
+!test/test.sh
