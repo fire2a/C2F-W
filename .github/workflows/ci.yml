@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'  # All branches
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  quick-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ make libboost-dev libtiff-dev catch2
+
+      - name: Build
+        run: |
+          cd Cell2Fire
+          make clean
+          make
+
+      - name: Build Tests
+        run: |
+          cd Cell2Fire
+          make tests
+
+      - name: Run Unit Tests
+        run: |
+          cd Cell2Fire
+          ./test_cell2fire
+
+      - name: Show Binary Info
+        run: |
+          cd Cell2Fire
+          ls -lh Cell2Fire test_cell2fire
+          ldd Cell2Fire
