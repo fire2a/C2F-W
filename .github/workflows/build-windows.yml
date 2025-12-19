@@ -61,7 +61,7 @@ jobs:
     - name: Cache Boost
       if: env.ENABLED == 'true'
       id: cache-boost
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           Cell2Fire/include/boost_1_84_0
@@ -72,7 +72,7 @@ jobs:
     - name: Cache Dirent
       if: env.ENABLED == 'true'
       id: cache-dirent
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           Cell2Fire/include/dirent-1.25
@@ -83,7 +83,7 @@ jobs:
     - name: Cache vcpkg
       if: env.ENABLED == 'true'
       id: cache-vcpkg
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           Cell2Fire/include/vcpkg
@@ -140,7 +140,7 @@ jobs:
 
     - name: Cache Catch2 header
       if: env.ENABLED == 'true'
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: Cell2Fire\include\catch2\catch.hpp
         key: windows-catch2
