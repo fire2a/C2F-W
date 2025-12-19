@@ -25,7 +25,7 @@ TEST_TARGET = test_cell2fire
 
 # Test source files
 TEST_DIR = ../test/unit_tests
-TEST_FILES = $(TEST_DIR)/*.cpp FuelModelKitral.cpp FuelModelUtils.cpp
+TEST_FILES = $(TEST_DIR)/*.cpp FuelModel*.cpp Cells.cpp
 
 # Build rules
 all: $(TARGET)

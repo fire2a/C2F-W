@@ -137,34 +137,7 @@ Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,
         {
             int a = -1 * coordCells[nb - 1][0] + coordCells[this->id][0];
             int b = -1 * coordCells[nb - 1][1] + coordCells[this->id][1];
-
-            int angle = -1;
-            if (a == 0)
-            {
-                if (b >= 0)
-                    angle = 270;
-                else
-                    angle = 90;
-            }
-            else if (b == 0)
-            {
-                if (a >= 0)
-                    angle = 180;
-                else
-                    angle = 0;
-            }
-            else
-            {
-                // TODO: check this logi
-                double radToDeg = 180 / M_PI;
-                // TODO: i think all the negatives and abs cancel out
-                double temp = std::atan(b * 1.0 / a) * radToDeg;
-                if (a > 0)
-                    temp += 180;
-                if (a < 0 && b > 0)
-                    temp += 360;
-                angle = temp;
-            }
+            double angle = std::fmod(std::atan2(-b, -a) * 180.0 / M_PI + 360.0, 360.0);
             this->angleDict[nb] = angle;
             if (availSet.find(nb) != availSet.end())
             {
@@ -442,14 +415,24 @@ Cells::manageFire(int period,
     msg_list_aux.push_back(0);
     std::vector<int> msg_list;
 
+    /* Matias V. proposed change:
     int head_angle = wdf_ptr->waz - 90;
     if (head_angle < 0)
         head_angle += 360;
+    New logic: Convert meteorological azimuth to grid angle
+        angleToNb uses: 0°=South, 90°=East, 180°=North, 270°=West
+        Meteorological: 0°=North, 90°=East, 180°=South, 270°=West
+        Conversion: grid = (180 - met + 360) mod 360
+     */
+    int head_angle = (static_cast<int>(180.0 - wdf_ptr->waz) + 360) % 360;
 
-    head_angle = std::round(head_angle / 45.0) * 45.0;
+    // Snap to nearest 45° increment for 8-direction lookup
+    head_angle = static_cast<int>(std::round(head_angle / 45.0) * 45.0);
+    if (head_angle >= 360)
+        head_angle = 0;
 
     int head_cell = angleToNb[head_angle];  // head cell for slope calculation
-    if (head_cell <= 0)                       // solve boundaries case
+    if (head_cell <= 0)                     // solve boundaries case
     {
         head_cell = this->realId;  // as it is used only for slope calculation, if
                                    // it is a boundary cell, it uses the
