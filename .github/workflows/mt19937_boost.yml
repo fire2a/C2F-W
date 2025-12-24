@@ -1,9 +1,9 @@
-name: mt19937 boost cross-os congruence
+name: rng mt19937 boost cross-os congruence
 on:
   workflow_dispatch:
 jobs:
   build-and-run:
-    name: Build and run Boost emitter (${{ matrix.os }})
+    name: Build and run Boost (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          sudo apt-get update
+          sudo apt-get update -q
           sudo apt-get install -y build-essential libboost-random-dev #clang
         shell: bash
 
@@ -81,7 +81,7 @@ jobs:
           path: mt19937_${{ runner.os }}.txt
 
   compare:
-    name: Compare outputs (${{ runner.os }})
+    name: Compare outputs
     runs-on: ubuntu-latest
     needs: build-and-run
     steps:
