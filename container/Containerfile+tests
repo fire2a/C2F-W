@@ -1,0 +1,28 @@
+FROM debian:stable-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        catch2 \
+        g++ \
+        libboost-random-dev \
+        libtiff-dev \
+        make \
+        unzip && \ 
+    rm -rf /var/lib/apt/lists/*
+
+COPY Cell2Fire Cell2Fire
+
+COPY test /test
+
+WORKDIR /Cell2Fire
+
+RUN make clean && \
+    make tests && \
+    make
+
+RUN cd /test && ./test.sh
+
+ENTRYPOINT ["/Cell2Fire/Cell2Fire"]
+

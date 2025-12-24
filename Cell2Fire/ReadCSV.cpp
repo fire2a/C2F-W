@@ -5,15 +5,40 @@
 
 #include "tiffio.h"
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
 #include <iterator>
 #include <math.h>
+#include <cstring>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+// Local minimal replacement for boost::algorithm::split with is_any_of semantics.
+// C++14-friendly (uses std::string, not std::string_view).
+// When compress == false, preserves empty tokens (equivalent to token_compress_off).
+// When compress == true, collapses consecutive delimiters.
+static std::vector<std::string>
+split_any_of(const std::string& s, const std::string& delims, bool compress)
+{
+    std::vector<std::string> out;
+    const size_t n = s.size();
+    size_t i = 0;
+    while (i <= n) {
+        size_t j = s.find_first_of(delims, i);
+        if (j == std::string::npos) j = n;
+        out.emplace_back(s.substr(i, j - i));
+        if (j == n) break;
+        if (compress) {
+            i = j + 1;
+            while (i < n && delims.find(s[i]) != std::string::npos) ++i;
+        } else {
+            i = j + 1;
+        }
+    }
+    return out;
+}
 
 /**
  * Creates an instance of CSVReader.
@@ -104,8 +129,7 @@ CSVReader::getData(string filename)
             }
             else
             {
-                std::vector<std::string> vec;
-                boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
+                std::vector<std::string> vec = split_any_of(line, this->delimeter, false);
                 dataList.push_back(vec);
             }
         }
@@ -206,8 +230,7 @@ CSVReader::getData(string filename)
     {
         while (getline(file, line))
         {
-            std::vector<std::string> vec;
-            boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
+            std::vector<std::string> vec = split_any_of(line, this->delimeter, false);
             dataList.push_back(vec);
         }
     }
