@@ -1,72 +1,65 @@
-name: rng mt19937 std cross-os congruence
+---
+name: rng std::mt19937 cross-os congruence
 on:
   workflow_dispatch:
 jobs:
   build-and-run:
-    name: Build and run Boost emitter (${{ matrix.os }})
+    name: Build and run (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    # no job-level env needed
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup MSBuild (Windows)
         if: startsWith(matrix.os, 'windows')
         uses: microsoft/setup-msbuild@v2
-
       - name: Ensure compiler (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update -q
           sudo apt-get install -y build-essential
         shell: bash
-
       - name: Ensure compiler (macOS)
         if: startsWith(matrix.os, 'macos')
         run: |
           xcode-select --install || true
         shell: bash
-
       - name: Build (Linux/macOS)
         if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')
         run: |
           c++ -std=c++17 test/tech/mt19937_std.cpp -o mt19937_std
         shell: bash
-
       - name: Set up Visual Studio shell
         if: startsWith(matrix.os, 'windows')
         uses: egor-tensin/vs-shell@v2
         with:
-            arch: x64
-
+          arch: x64
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           cl /std:c++17 test\tech\mt19937_std.cpp /Fe:mt19937_std.exe
         shell: pwsh
-
       - name: Run and capture (Linux/macOS)
         if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')
         run: |
           ./mt19937_std > mt19937_${{ runner.os }}.txt
         shell: bash
-
       - name: Run and capture (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           .\mt19937_std.exe | Out-File -FilePath mt19937_${{ runner.os }}.txt -Encoding ascii
         shell: pwsh
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: mt19937_${{ runner.os }}
           path: mt19937_${{ runner.os }}.txt
-
   compare:
     name: Compare outputs
     runs-on: ubuntu-latest
@@ -76,13 +69,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-
       - name: Diff Ubuntu vs macOS
         run: |
           diff -u artifacts/mt19937_Linux/mt19937_Linux.txt artifacts/mt19937_macOS/mt19937_macOS.txt
-
       - name: Diff Ubuntu vs Windows (normalize CRLF)
-        run: |
+        run: |-
           sudo apt-get install -y dos2unix
           dos2unix artifacts/mt19937_Windows/mt19937_Windows.txt
-          diff -u  artifacts/mt19937_Windows/mt19937_Windows.txt artifacts/mt19937_Linux/mt19937_Linux.txt 
+          diff -u  artifacts/mt19937_Windows/mt19937_Windows.txt artifacts/mt19937_Linux/mt19937_Linux.txt
