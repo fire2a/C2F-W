@@ -35,8 +35,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+<<<<<<< HEAD
     - name: Checkout
       uses: actions/checkout@v6
+||||||| parent of 4d668e09 (macOS build fixes)
+      - name: Checkout Code
+        uses: actions/checkout@v5
+=======
+      - name: Checkout Code
+        uses: actions/checkout@v6
+>>>>>>> 4d668e09 (macOS build fixes)
 
     - name: Set Release Tag
       id: set_tag

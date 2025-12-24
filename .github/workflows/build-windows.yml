@@ -25,8 +25,16 @@ jobs:
     runs-on: windows-latest
 
     steps:
+<<<<<<< HEAD
     - name: Checkout
       uses: actions/checkout@v6
+||||||| parent of 4d668e09 (macOS build fixes)
+      - name: Checkout Code
+        uses: actions/checkout@v5
+=======
+      - name: Checkout Code
+        uses: actions/checkout@v6
+>>>>>>> 4d668e09 (macOS build fixes)
 
     - name: Skip build (placeholder artifact)
       if: env.ENABLED != 'true'

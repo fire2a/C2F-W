@@ -1,30 +1,33 @@
-# Development dependencies
-CXX = g++
+# Makefile for building Cell2Fire on macOS using Homebrew-installed GCC
+CXX := g++
 
-# NOT WORKING
-# Capture the value of the environment variable HOMEBREW_PREFIX
-# HOMEBREW_PREFIX := $(shell echo $$HOMEBREW_PREFIX)
-# HOMEBREW_PREFIX := $(shell echo $(brew --prefix))
+# get include and library paths
+BOOST_PREFIX := $(shell brew --prefix boost)
+OMP_PREFIX := $(shell brew --prefix libomp)
+TIFF_PREFIX := $(shell brew --prefix libtiff)
+CATCH2_PREFIX := $(shell brew --prefix catch2)
 
-# Capture the output of the `arch` command
-ARCH := $(shell arch)
+# Compiler flags
+CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -std=c++14 -O3 \
+	   -I$(BOOST_PREFIX)/include \
+	   -Xclang -fopenmp -I$(OMP_PREFIX)/include \
+	   -I$(TIFF_PREFIX)/include \
+	   -I$(CATCH2_PREFIX)/include
+# Linker flags
+LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -lm -lpthread \
+	  -L$(BOOST_PREFIX)/lib \
+	  -lomp -L$(OMP_PREFIX)/lib \
+	  -ltiff -L$(TIFF_PREFIX)/lib
 
-# Set HOMEBREW_PREFIX based on the architecture
-ifeq ($(ARCH), arm64)
-	HOMEBREW_PREFIX := /opt/homebrew
-else
-	HOMEBREW_PREFIX := /usr/local
-endif
-
-INCLUDE := $(HOMEBREW_PREFIX)/include
-OPT := $(HOMEBREW_PREFIX)/opt
-
-# Compiler and linker flags
-CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I $(INCLUDE) -I $(INCLUDE)/boost -I $(INCLUDE)/catch2
-LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff -L$(OPT)/libtiff/lib
+# Catch2 configuration v2 or v3?
+# Try to detect if Catch2 v3 libraries are available (Homebrew installs them in lib)
+CATCH2_VERSION := $(shell brew list --versions catch2 | cut -d' ' -f2 | sort -V | tail -n1 | cut -d. -f1)
+CATCH2_V3_LIBS := $(shell [ $(CATCH2_VERSION) -gt 2 ] && echo "-L$(CATCH2_PREFIX)/lib -lCatch2Main -lCatch2" || echo "")
+# Test-specific linker flags
+TEST_LDFLAGS = $(LDFLAGS) $(CATCH2_V3_LIBS)
 
 # Source files
-SRCS = Cell2Fire.cpp Cells.cpp FuelModelUtils.cpp FuelModelSpain.cpp FuelModelKitral.cpp FuelModelFBP.cpp FuelModelPortugal.cpp Spotting.cpp ReadCSV.cpp ReadArgs.cpp Lightning.cpp WriteCSV.cpp DataGenerator.cpp
+SRCS = Cell2Fire.cpp Cells.cpp FuelModelUtils.cpp FuelModelSpain.cpp FuelModelPortugal.cpp FuelModelKitral.cpp FuelModelFBP.cpp Spotting.cpp ReadCSV.cpp ReadArgs.cpp Lightning.cpp WriteCSV.cpp DataGenerator.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
@@ -47,7 +50,7 @@ tests: $(TEST_TARGET)
 	./$(TEST_TARGET)
 
 $(TEST_TARGET): $(TEST_FILES) $(SRCS)
-	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_FILES)
+	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_FILES) $(TEST_LDFLAGS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -55,8 +58,18 @@ $(TEST_TARGET): $(TEST_FILES) $(SRCS)
 clean:
 	rm -f $(OBJS) $(TARGET) $(TEST_TARGET)
 
+# Show build configuration and environment
+info:
+	@echo "Compiler: $($(CXX) --version)"
+	@echo "Homebrew Prefix: $(shell brew --prefix)"
+	@echo "CXXFLAGS: $(CXXFLAGS)"
+	@echo "LDFLAGS: $(LDFLAGS)"
+	@echo "Catch2 v3 Libraries: $(if $(CATCH2_V3_LIBS),YES ($(CATCH2_V3_LIBS)),NO (header-only v2))"
+
 DESTDIR = /usr/local/bin
 install: all
 	cp $(TARGETS) $(DESTDIR)
 uninstall: all
 	rm $(DESTDIR)/$(TARGETS)
+
+# https://mac.r-project.org/openmp/

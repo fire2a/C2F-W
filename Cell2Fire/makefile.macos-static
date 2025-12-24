@@ -1,21 +1,11 @@
-# Development dependencies
-CXX = g++
+# Makefile for building Cell2Fire on macOS using Homebrew-installed GCC
+HOMEBREW_PREFIX := $(shell brew --prefix)
 
-# NOT WORKING
-# Capture the value of the environment variable HOMEBREW_PREFIX
-# HOMEBREW_PREFIX := $(shell echo $$HOMEBREW_PREFIX) 
-# HOMEBREW_PREFIX := $(shell echo $(brew --prefix))
+# get GCC version installed via Homebrew
+GCC_VERSION := $(shell brew list --versions gcc | cut -d' ' -f2 | sort -V | tail -n1 | cut -d. -f1)
+CXX := $(HOMEBREW_PREFIX)/bin/g++-$(GCC_VERSION)
 
-# Capture the output of the `arch` command
-ARCH := $(shell arch)
-
-# Set HOMEBREW_PREFIX based on the architecture
-ifeq ($(ARCH), arm64)
-	HOMEBREW_PREFIX := /opt/homebrew
-else
-	HOMEBREW_PREFIX := /usr/local
-endif
-
+# get include and library paths
 INCLUDE := $(HOMEBREW_PREFIX)/include
 OPT := $(HOMEBREW_PREFIX)/opt
 
@@ -48,6 +38,16 @@ $(TARGET): $(OBJS)
 
 clean:
 	rm -f $(OBJS) $(TARGET)
+
+# Show build configuration and environment
+info:
+	@echo "Compiler: $(CXX)"
+	@echo "GCC Version: $(GCC_VERSION)"
+	@echo "Homebrew Prefix: $(HOMEBREW_PREFIX)"
+	@echo "INCLUDE: $(INCLUDE)"
+	@echo "OPT: $(OPT)"
+	@echo "CXXFLAGS: $(CXXFLAGS)"
+	@echo "LDFLAGS: $(LDFLAGS)"
 
 DESTDIR = /usr/local/bin
 install: all

@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 name: build manylinux
+||||||| parent of 4d668e09 (macOS build fixes)
+name: Build ManyLinux (Static)
+=======
+name: Build ManyLinux (static lib.linking)
+>>>>>>> 4d668e09 (macOS build fixes)
 
 on:
   # pull_request:
@@ -137,6 +143,7 @@ jobs:
     steps:
 
       - name: Checkout Code
+<<<<<<< HEAD
         uses: actions/checkout@v6
 
       - name: Install Base Dependencies
@@ -156,6 +163,11 @@ jobs:
             mkdir  /usr/include/catch2
             curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /usr/include/catch2/catch.hpp
           fi
+||||||| parent of 4d668e09 (macOS build fixes)
+        uses: actions/checkout@v5
+=======
+        uses: actions/checkout@v6
+>>>>>>> 4d668e09 (macOS build fixes)
 
       - name: Download Artifacts
         uses: actions/download-artifact@v6
