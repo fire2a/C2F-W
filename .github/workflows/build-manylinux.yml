@@ -8,7 +8,13 @@ on:
   workflow_call:
 
 env:
+<<<<<<< HEAD
   do_dynamic: true
+||||||| parent of 0b3b5b35 (workflow linux build tidy)
+  STATIC_BUILD_DEPS: "g++ make libboost-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev"
+=======
+  STATIC_BUILD_DEPS: "g++ make libboost-random-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev"
+>>>>>>> 0b3b5b35 (workflow linux build tidy)
 
 permissions:
   contents: write
@@ -38,8 +44,16 @@ jobs:
 
       - name: Install Build Dependencies
         run: |
+<<<<<<< HEAD
           sudo apt-get update
           sudo apt-get install -y g++-12 libboost-all-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
+||||||| parent of 0b3b5b35 (workflow linux build tidy)
+          sudo apt-get update
+          sudo apt-get install -y ${{ env.STATIC_BUILD_DEPS }}
+=======
+          sudo apt-get update -qq
+          sudo apt-get install -y ${{ env.STATIC_BUILD_DEPS }}
+>>>>>>> 0b3b5b35 (workflow linux build tidy)
 
       - name: Check Packages Versions
         run: |
@@ -58,10 +72,18 @@ jobs:
         if: ${{ env.do_dynamic == 'true' }}
         run: |
           cd Cell2Fire
+<<<<<<< HEAD
           make clean
           make
           ldd Cell2Fire > ldd${{ env.SUFFIX }}.txt
           mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
+||||||| parent of 0b3b5b35 (workflow linux build tidy)
+          make clean
+          make -f makefile.static
+=======
+          make -f makefile.static clean
+          make -f makefile.static
+>>>>>>> 0b3b5b35 (workflow linux build tidy)
 
       - name: Upload Suffix
         if: ${{ env.do_dynamic == 'true' }}
@@ -80,7 +102,25 @@ jobs:
           make -f makefile.static > ldd_manylinux.txt 2>&1 || true
           ldd Cell2Fire > ldd_manylinux.txt 2>&1 || true
 
+<<<<<<< HEAD
       - name: Upload Static
+||||||| parent of 0b3b5b35 (workflow linux build tidy)
+      - name: Verify Static Linking
+        run: |
+          cd Cell2Fire
+          echo "Checking dynamic dependencies (should be minimal):"
+          ldd Cell2Fire 2>&1 | tee ldd_manylinux.txt
+
+      - name: Upload Static Binary
+=======
+      - name: Verify Static Linking
+        run: |
+          cd Cell2Fire
+          echo "Checking dynamic dependencies, should output: not a dynamic executable"
+          ldd Cell2Fire 2>&1 | tee ldd_manylinux.txt
+
+      - name: Upload Static Binary
+>>>>>>> 0b3b5b35 (workflow linux build tidy)
         uses: actions/upload-artifact@v5
         with:
           name: binaries-manylinux-x86_64
@@ -89,7 +129,7 @@ jobs:
             Cell2Fire/Cell2Fire
           if-no-files-found: error
 
-  test:
+  integration_test:
     needs: build
     runs-on: ubuntu-latest
     container: ubuntu:noble
@@ -137,6 +177,7 @@ jobs:
         run: |
           cd test
           bash test.sh
+<<<<<<< HEAD
 
       - name: Get Environment
         if: ${{ env.do_dynamic == 'true' }}
@@ -158,3 +199,19 @@ jobs:
         run: |
           cd test
           bash test.sh ${{ env.SUFFIX }}
+||||||| parent of 0b3b5b35 (workflow linux build tidy)
+
+      - name: Install Test Dependencies
+        run: |
+          apt-get update
+          apt-get install -y unzip g++ make catch2 libboost-dev libtiff-dev
+
+      - name: Build and Run Unit Tests (Dynamic Build for Testing)
+        run: |
+          cd Cell2Fire
+          make clean
+          make tests
+          ./test_cell2fire
+
+=======
+>>>>>>> 0b3b5b35 (workflow linux build tidy)
