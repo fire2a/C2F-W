@@ -1,5 +1,5 @@
 # Development dependencies
-CXX = g++-12
+CXX = g++
 
 # NOT WORKING
 # Capture the value of the environment variable HOMEBREW_PREFIX
