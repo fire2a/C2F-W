@@ -1,4 +1,4 @@
-name: mt19937 std cross-os congruence
+name: rng mt19937 std cross-os congruence
 on:
   workflow_dispatch:
 jobs:
@@ -21,7 +21,7 @@ jobs:
       - name: Ensure compiler (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          sudo apt-get update
+          sudo apt-get update -q
           sudo apt-get install -y build-essential
         shell: bash
 
@@ -68,7 +68,7 @@ jobs:
           path: mt19937_${{ runner.os }}.txt
 
   compare:
-    name: Compare outputs (${{ runner.os }})
+    name: Compare outputs
     runs-on: ubuntu-latest
     needs: build-and-run
     steps:
