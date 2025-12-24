@@ -1,27 +1,95 @@
+<<<<<<< HEAD
 name: build macos all
 
+||||||| parent of dad7e72a (tidy macOS workflow)
+name: Build macOS
+
+=======
+---
+name: Build macOS
+>>>>>>> dad7e72a (tidy macOS workflow)
 on:
   # pull_request:
   #   branches:
   #     - main
   workflow_dispatch:
   workflow_call:
-
 permissions:
   contents: write
-
 jobs:
   build:
     strategy:
       matrix:
+<<<<<<< HEAD
         runner: [ "macOS-13", "macOS-14" ]
+||||||| parent of dad7e72a (tidy macOS workflow)
+        include:
+          # ARM64 builds on macOS 14 Sonoma
+          - runner: macos-14
+            arch: arm64
+            type: dynamic
+          - runner: macos-14
+            arch: arm64
+            type: static
+          # ARM64 builds on macOS 15 Sequoia
+          - runner: macos-15
+            arch: arm64
+            type: dynamic
+          - runner: macos-15
+            arch: arm64
+            type: static
+          # Intel x86_64 builds on macOS 15
+          - runner: macos-15-intel
+            arch: x86_64
+            type: dynamic
+          - runner: macos-15-intel
+            arch: x86_64
+            type: static
+    
+=======
+        include:
+          # ARM64 builds on macOS 14 Sonoma
+          - runner: macos-14
+            arch: arm64
+            type: dynamic
+          - runner: macos-14
+            arch: arm64
+            type: static
+          # ARM64 builds on macOS 15 Sequoia
+          - runner: macos-15
+            arch: arm64
+            type: dynamic
+          - runner: macos-15
+            arch: arm64
+            type: static
+          # Intel x86_64 builds on macOS 15
+          - runner: macos-15-intel
+            arch: x86_64
+            type: dynamic
+          - runner: macos-15-intel
+            arch: x86_64
+            type: static
+>>>>>>> dad7e72a (tidy macOS workflow)
     runs-on: ${{ matrix.runner }}
-
     steps:
       - name: Checkout Code
+<<<<<<< HEAD
         uses: actions/checkout@v6
 
       - name: Bump version in code
+||||||| parent of dad7e72a (tidy macOS workflow)
+        uses: actions/checkout@v5
+
+      - name: Install gsed for version bumping
+        run: brew install gsed
+
+      - name: Bump Version in Code
+=======
+        uses: actions/checkout@v5
+      - name: Install gsed for version bumping
+        run: brew install gsed
+      - name: Bump Version in Code
+>>>>>>> dad7e72a (tidy macOS workflow)
         run: |
           brew install gsed
           run: |
@@ -36,9 +104,17 @@ jobs:
           fi
           gsed -i "s/C2FW_VERSION.*/C2FW_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
           grep C2FW_VERSION Cell2Fire/Cell2Fire.h
+<<<<<<< HEAD
 
       - name: Check Runner
+||||||| parent of dad7e72a (tidy macOS workflow)
+
+      - name: Set Environment
+=======
+      - name: Set Environment
+>>>>>>> dad7e72a (tidy macOS workflow)
         run: |
+<<<<<<< HEAD
           # arch
           # echo "runner: ${{ matrix.runner }}.$(arch).$(uname -m)"
           # mayor version: sw_vers -productVersion | cut -d '.' -f 1
@@ -46,23 +122,106 @@ jobs:
           echo "suffix="$(uname -s).${{ matrix.runner }}.$(arch)"" >> $GITHUB_ENV
           brew config
 
+||||||| parent of dad7e72a (tidy macOS workflow)
+          KERNEL=$(uname -s)
+          MACHINE=$(uname -m)
+          SUFFIX="_${KERNEL}.${{ matrix.runner }}.${MACHINE}"
+          echo "SUFFIX=${SUFFIX}" >> $GITHUB_ENV
+          echo "Building for: ${KERNEL} on ${{ matrix.runner }} (${MACHINE})"
+
+=======
+          KERNEL=$(uname -s)
+          MACHINE=$(uname -m)
+          SUFFIX="_${KERNEL}.${{ matrix.runner }}.${MACHINE}"
+          echo "SUFFIX=${SUFFIX}" >> $GITHUB_ENV
+          echo "Building for: ${KERNEL} on ${{ matrix.runner }} (${MACHINE})"
+          echo "matrix:: type:${{ matrix.type }}, arch:${{ matrix.arch }}, runner:${{ matrix.runner }}"
+>>>>>>> dad7e72a (tidy macOS workflow)
       - name: Install Dependencies
         run: |
+<<<<<<< HEAD
           brew install gcc@12 libomp boost libtiff # llvm ?
 
+||||||| parent of dad7e72a (tidy macOS workflow)
+          brew install gcc libomp boost libtiff
+          if [[ "${{ matrix.type }}" == "static" ]]; then
+            brew install jpeg-turbo xz zstd zlib
+          fi
+
+      - name: Check Brew Package Versions
+        run: |
+          brew list --versions gcc libomp boost libtiff > "pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+          if [[ "${{ matrix.type }}" == "static" ]]; then
+            brew list --versions jpeg-turbo xz zstd zlib >> "pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+          fi
+          cat "pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+
+=======
+          brew install gcc libomp boost libtiff
+          if [[ "${{ matrix.type }}" == "static" ]]; then
+            brew install jpeg-turbo xz zstd zlib
+          fi
+      - name: Check Brew Package Versions
+        run: |
+          brew list --versions gcc libomp boost libtiff > "pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+          if [[ "${{ matrix.type }}" == "static" ]]; then
+            brew list --versions jpeg-turbo xz zstd zlib >> "pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+          fi
+          cat "pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+>>>>>>> dad7e72a (tidy macOS workflow)
       - name: Build
         run: |
           cd Cell2Fire
           make clean
+<<<<<<< HEAD
           make -f makefile.macos
           otool -L Cell2Fire > otool_${{ env.suffix }}.txt
           mv Cell2Fire Cell2Fire_${{ env.suffix }}
 
       - name: Upload
+||||||| parent of dad7e72a (tidy macOS workflow)
+          if [[ "${{ matrix.type }}" == "static" ]]; then
+            make -f makefile.macos-static
+          else
+            make -f makefile.macos
+          fi
+
+      - name: Get Binary Info
+        run: |
+          cd Cell2Fire
+          otool -L Cell2Fire > "otool${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+          cat "otool${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+
+      - name: Prepare Artifacts
+        run: |
+          cd Cell2Fire
+          mv Cell2Fire "Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}"
+          ls -lh "Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}"
+
+      - name: Upload Artifacts
+=======
+          if [[ "${{ matrix.type }}" == "static" ]]; then
+            make -f makefile.macos-static
+          else
+            make -f makefile.macos
+          fi
+      - name: Get Binary Info
+        run: |
+          cd Cell2Fire
+          otool -L Cell2Fire > "otool${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+          cat "otool${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+      - name: Prepare Artifacts
+        run: |
+          cd Cell2Fire
+          mv Cell2Fire "Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}"
+          ls -lh "Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}"
+      - name: Upload Artifacts
+>>>>>>> dad7e72a (tidy macOS workflow)
         uses: actions/upload-artifact@v5
         with:
           name: binaries_${{ env.suffix }}
           path: |
+<<<<<<< HEAD
             Cell2Fire/otool_${{ env.suffix }}.txt
             Cell2Fire/Cell2Fire_${{ env.suffix }}
 
@@ -85,31 +244,69 @@ jobs:
           path: |
             Cell2Fire/otool_${{ env.suffix }}-static.txt
             Cell2Fire/Cell2Fire_${{ env.suffix }}-static
+||||||| parent of dad7e72a (tidy macOS workflow)
+            Cell2Fire/Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}
+            Cell2Fire/otool${{ env.SUFFIX }}-${{ matrix.type }}.txt
+            pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt
+          if-no-files-found: error
+
+=======
+            Cell2Fire/Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}
+            Cell2Fire/otool${{ env.SUFFIX }}-${{ matrix.type }}.txt
+            pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt
+          if-no-files-found: error
+>>>>>>> dad7e72a (tidy macOS workflow)
   test:
     needs: build
     strategy:
       matrix:
+<<<<<<< HEAD
         runner: [ "macOS-13", "macOS-14" ]
+||||||| parent of dad7e72a (tidy macOS workflow)
+        runner: [ macos-14, macos-15, macos-15-intel ]
+    
+=======
+        runner:
+          - macos-14
+          - macos-15
+          - macos-15-intel
+>>>>>>> dad7e72a (tidy macOS workflow)
     runs-on: ${{ matrix.runner }}
-
     steps:
       - name: Checkout Code
+<<<<<<< HEAD
         uses: actions/checkout@v6
 
       - name: Install Dependencies
+||||||| parent of dad7e72a (tidy macOS workflow)
+        uses: actions/checkout@v5
+
+      - name: Install Test Dependencies
+=======
+        uses: actions/checkout@v5
+      - name: Install Test Dependencies
+>>>>>>> dad7e72a (tidy macOS workflow)
         run: |
+<<<<<<< HEAD
           brew install gcc@12 libomp boost libtiff
 
       - name: Get Environment
         run: |
           echo "suffix="$(uname -s).${{ matrix.runner }}.$(arch)"" >> $GITHUB_ENV
 
+||||||| parent of dad7e72a (tidy macOS workflow)
+          brew install gcc libomp boost
+
+=======
+          brew install gcc libomp boost
+>>>>>>> dad7e72a (tidy macOS workflow)
       - name: Download Artifacts
         uses: actions/download-artifact@v6
         with:
           pattern: binaries_${{ env.suffix }}
           path: Cell2Fire
           merge-multiple: true
+<<<<<<< HEAD
 
       - name: Cache Catch2 header
         uses: actions/cache@v4
@@ -118,6 +315,12 @@ jobs:
           key: ${{ runner.os }}-catch2
 
       - name: Download Catch2 header
+||||||| parent of dad7e72a (tidy macOS workflow)
+
+      - name: Make Binaries Executable
+=======
+      - name: Make Binaries Executable
+>>>>>>> dad7e72a (tidy macOS workflow)
         run: |
           BREW_PREFIX=$(brew --prefix)
           INCLUDE_DIR="$BREW_PREFIX/include/catch2"
@@ -131,13 +334,66 @@ jobs:
         run: |
           ls Cell2Fire
           chmod +x Cell2Fire/Cell2Fire*
+<<<<<<< HEAD
 
       - name: Unit Test
+||||||| parent of dad7e72a (tidy macOS workflow)
+
+      - name: Build and Run Unit Tests
+=======
+      - name: Build and Run Unit Tests
+>>>>>>> dad7e72a (tidy macOS workflow)
         run: |
           cd Cell2Fire
+<<<<<<< HEAD
           make -f makefile.macos tests
 
 #      - name: Bash Test
 #        run: |
 #          cd test
 #          bash test.sh _${{ env.suffix }}
+||||||| parent of dad7e72a (tidy macOS workflow)
+          make tests
+          ./test_cell2fire
+
+      - name: Test Dynamic Binary
+        run: |
+          cd test
+          KERNEL=$(uname -s)
+          MACHINE=$(uname -m)
+          SUFFIX="_${KERNEL}.${{ matrix.runner }}.${MACHINE}"
+          if [[ -f "../Cell2Fire/Cell2Fire${SUFFIX}-dynamic" ]]; then
+            bash test.sh "${SUFFIX}-dynamic"
+          fi
+
+      - name: Test Static Binary
+        run: |
+          cd test
+          KERNEL=$(uname -s)
+          MACHINE=$(uname -m)
+          SUFFIX="_${KERNEL}.${{ matrix.runner }}.${MACHINE}"
+          if [[ -f "../Cell2Fire/Cell2Fire${SUFFIX}-static" ]]; then
+            bash test.sh "${SUFFIX}-static"
+          fi
+=======
+          make tests
+          ./test_cell2fire
+      - name: Test Dynamic Binary
+        run: |
+          cd test
+          KERNEL=$(uname -s)
+          MACHINE=$(uname -m)
+          SUFFIX="_${KERNEL}.${{ matrix.runner }}.${MACHINE}"
+          if [[ -f "../Cell2Fire/Cell2Fire${SUFFIX}-dynamic" ]]; then
+            bash test.sh "${SUFFIX}-dynamic"
+          fi
+      - name: Test Static Binary
+        run: |-
+          cd test
+          KERNEL=$(uname -s)
+          MACHINE=$(uname -m)
+          SUFFIX="_${KERNEL}.${{ matrix.runner }}.${MACHINE}"
+          if [[ -f "../Cell2Fire/Cell2Fire${SUFFIX}-static" ]]; then
+            bash test.sh "${SUFFIX}-static"
+          fi
+>>>>>>> dad7e72a (tidy macOS workflow)
