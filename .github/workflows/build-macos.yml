@@ -279,19 +279,20 @@ jobs:
       - name: Get Binary Info
         run: |
           cd Cell2Fire
-          otool -L Cell2Fire > "otool${{ env.SUFFIX }}-${{ matrix.type }}.txt"
-          cat "otool${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+          otool -L Cell2Fire > "otool${{ env.SUFFIX }}.${{ matrix.type }}.txt"
+          cat "otool${{ env.SUFFIX }}.${{ matrix.type }}.txt"
       - name: Prepare Artifacts
         run: |
           cd Cell2Fire
-          mv Cell2Fire "Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}"
-          ls -lh "Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}"
+          mv Cell2Fire "Cell2Fire${{ env.SUFFIX }}.${{ matrix.type }}"
+          ls -lh "Cell2Fire${{ env.SUFFIX }}.${{ matrix.type }}"
       - name: Upload Artifacts
 >>>>>>> dad7e72a (tidy macOS workflow)
         uses: actions/upload-artifact@v5
         with:
           name: binaries_${{ env.suffix }}
           path: |
+<<<<<<< HEAD
 <<<<<<< HEAD
             Cell2Fire/otool_${{ env.suffix }}.txt
             Cell2Fire/Cell2Fire_${{ env.suffix }}
@@ -319,6 +320,15 @@ jobs:
             Cell2Fire/Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}
             Cell2Fire/otool${{ env.SUFFIX }}-${{ matrix.type }}.txt
             Cell2Fire/pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt
+||||||| parent of 8089279f (build fixes)
+            Cell2Fire/Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}
+            Cell2Fire/otool${{ env.SUFFIX }}-${{ matrix.type }}.txt
+            Cell2Fire/pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt
+=======
+            Cell2Fire/Cell2Fire${{ env.SUFFIX }}.${{ matrix.type }}
+            Cell2Fire/otool${{ env.SUFFIX }}.${{ matrix.type }}.txt
+            Cell2Fire/pkgs${{ env.SUFFIX }}.${{ matrix.type }}.txt
+>>>>>>> 8089279f (build fixes)
           if-no-files-found: error
 
 =======

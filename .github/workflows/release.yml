@@ -58,18 +58,45 @@ jobs:
           echo "TAG_DESCRIPTION=$(git tag -n99 $TAG_NAME | sed -n '2p')" >> $GITHUB_ENV
         fi
 
+<<<<<<< HEAD
     - name: Download All Artifacts
       uses: actions/download-artifact@v6
       with:
         pattern: binaries*
         path: Cell2Fire
         merge-multiple: true
+||||||| parent of 8089279f (build fixes)
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          pattern: binaries*
+          path: artifacts
+=======
+      - name: Get Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          pattern: binaries*
+          path: artifacts
+>>>>>>> 8089279f (build fixes)
 
+<<<<<<< HEAD
     - name: Zip Binaries
       run: |
         cd Cell2Fire
         ls
+||||||| parent of 8089279f (build fixes)
+      - name: List Downloaded Artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find artifacts -type f -ls
+=======
+      - name: List Artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find artifacts -type f -ls
+>>>>>>> 8089279f (build fixes)
 
+<<<<<<< HEAD
         if [[ -f Cell2Fire.exe ]]; then
           zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
         else
@@ -80,7 +107,47 @@ jobs:
         zip ../Cell2FireW_${RELEASE_TAG}-Debian.trixie.x86_64-binary.zip Cell2Fire.Debian.trixie.x86_64 ldd.Debian.trixie.x86_64.txt
         zip ../Cell2FireW_${RELEASE_TAG}-Ubuntu.noble.x86_64-binary.zip Cell2Fire.Ubuntu.noble.x86_64 ldd.Ubuntu.noble.x86_64.txt
         zip ../Cell2FireW_${RELEASE_TAG}-macOS-binaries.zip Cell2Fire_Darwin* otool*.txt
+||||||| parent of 8089279f (build fixes)
+      - name: Organize Binaries
+        run: |
+          mkdir -p Cell2Fire
+          find artifacts -name 'Cell2Fire*' -type f -exec cp {} Cell2Fire/ \;
+          find artifacts -name 'ldd*.txt' -type f -exec cp {} Cell2Fire/ \;
+          find artifacts -name 'otool*.txt' -type f -exec cp {} Cell2Fire/ \;
+          find artifacts -name '*.dll' -type f -exec cp {} Cell2Fire/ \; 2>/dev/null || true
+          find artifacts -name '*.exe' -type f -exec cp {} Cell2Fire/ \; 2>/dev/null || true
+          find artifacts -name 'WINDOWS_BUILD_WAS_DISABLED.txt' -type f -exec cp {} Cell2Fire/ \; 2>/dev/null || true
+          ls -lh Cell2Fire/
+=======
+      - name: Organize Binaries
+        run: |
+          set +e
+          mkdir -p Cell2Fire
+          # linux builds 
+          #   Cell2fire.dist.codename.arch
+          #   pkgs.dist.codename.arch.txt
+          #   ldd.dist.codename.arch.txt
+          # manylinux build
+          #   Cell2Fire
+          #   pkgs_manylinux.txt
+          #   ldd_manylinux.txt
+          # macOS build
+          #  Cell2Fire_Darwin.runner.arch.dynamic/static
+          #  pkgs_Darwin.runner.arch.dynamic/static.txt
+          #  otool.runner.arch.dynamic/static.txt
+          find artifacts -name 'Cell2Fire*' -type f -exec cp {} Cell2Fire/ \;
+          find artifacts -name 'pkgs*' -type f -exec cp {} Cell2Fire/ \;
+          find artifacts -name 'ldd*.txt' -type f -exec cp {} Cell2Fire/ \;
+          find artifacts -name 'otool*.txt' -type f -exec cp {} Cell2Fire/ \;
+          # windows build
+          #  Cell2Fire.exe
+          #  "tiff_dependencies".dll
+          find artifacts -name '*.dll' -type f -exec cp {} Cell2Fire/ \;
+          find artifacts -name '*.exe' -type f -exec cp {} Cell2Fire/ \;
+          set -e
+>>>>>>> 8089279f (build fixes)
 
+<<<<<<< HEAD
     - name: Zip Data Instances
       run: |
         cd data
@@ -88,11 +155,159 @@ jobs:
           for fuel_model in CanadianFBP Kitral ScottAndBurgan Portugal; do
             if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
                 echo "found $fuel_model $format"
-                zip -r ../$fuel_model-$format.zip $fuel_model/*-$format
+||||||| parent of 8089279f (build fixes)
+      - name: Create Binary Zips - Debian distros
+        run: |
+          cd Cell2Fire
+
+          for distro in "Debian.bookworm.x86_64" "Debian.trixie.x86_64" "Ubuntu.noble.x86_64" "Ubuntu.jammy.x86_64"; do
+            if [[ -f "Cell2Fire.${distro}" ]]; then
+              zip ../Cell2FireW_${RELEASE_TAG}-${distro}-binary.zip \
+                "Cell2Fire.${distro}" \
+                "ldd.${distro}.txt" \
+                "pkgs.${distro}.txt" 
+            else
+              echo "No build found for ${distro}, skipping zip creation."
             fi
+          done
+          
+      - name: Create Binary Zips - ManyLinux
+        run: |
+          cd Cell2Fire
+          if [[ -f Cell2Fire ]]; then
+            zip ../Cell2FireW_${RELEASE_TAG}-manylinux-x86_64-binary.zip \
+              Cell2Fire \
+              ldd_manylinux.txt
+              pkgs_manylinux.txt
+          else
+            echo "No manylinux build found, skipping zip creation."
+          fi
+
+      - name: Create Binary Zips - macOS
+        run: |
+          cd Cell2Fire
+          if [[ -f Cell2Fire_Darwin ]]; then
+            zip ../Cell2FireW_${RELEASE_TAG}-macOS-binaries.zip \
+              Cell2Fire_Darwin* \
+              otool*.txt
+          else
+            echo "No macOS binaries found, skipping zip creation."
+          fi
+
+      - name: Create Binary Zips - Windows
+        run: |
+          cd Cell2Fire
+          if [[ -f Cell2Fire.exe ]]; then
+            zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip \
+              Cell2Fire.exe *.dll
+          else
+            echo "No Windows build found, creating placeholder zip."
+            zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip \
+              WINDOWS_BUILD_WAS_DISABLED.txt
+          fi
+
+      - name: Create Data Instance Zips
+        run: |
+          cd data
+          for format in asc tif; do
+            for fuel_model in CanadianFBP Kitral ScottAndBurgan Portugal; do
+              if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
+                echo "Zipping $fuel_model $format"
+=======
+      - name: Create Binary Zips - Debian distros
+        if: ${{ needs.build_debian.result == 'success' }}
+        run: |
+          cd Cell2Fire
+          # get the names from build-debian.yml
+          for distro in "Debian.bookworm.x86_64" "Debian.trixie.x86_64" "Ubuntu.noble.x86_64" "Ubuntu.jammy.x86_64"; do
+            if [[ -f "Cell2Fire.${distro}" ]]; then
+              zip ../Cell2FireW_${RELEASE_TAG}-${distro}-binary.zip \
+                "Cell2Fire.${distro}" \
+                "ldd.${distro}.txt" \
+                "pkgs.${distro}.txt" 
+            else
+              echo "No build found for ${distro}, skipping."
+            fi
+          done
+          
+      - name: Create Binary Zips - ManyLinux
+        if: ${{ needs.build_manylinux.result == 'success' }}
+        run: |
+          cd Cell2Fire
+          if [[ -f Cell2Fire ]]; then
+            zip ../Cell2FireW_${RELEASE_TAG}-manylinux-x86_64-binary.zip \
+              Cell2Fire \
+              ldd_manylinux.txt \
+              pkgs_manylinux.txt
+          else
+            echo "No manylinux build found, skipping."
+          fi
+
+      - name: Create Binary Zips - macOS
+        if: ${{ needs.build_macos.result == 'success' }}
+        run: |
+          cd Cell2Fire
+          # get from build-macos.yml
+          for combo in \
+            "macos-14 arm64 dynamic" \
+            "macos-14 arm64 static" \
+            "macos-15 arm64 dynamic" \
+            "macos-15 arm64 static" \
+            "macos-15-intel x86_64 dynamic" \
+            "macos-15-intel x86_64 static"
+          do
+            set -- $combo
+            runner=$1
+            arch=$2
+            type=$3
+            file="Cell2Fire_Darwin.${runner}.${arch}.${type}"
+            if [[ -f "$file" ]]; then
+              echo "Found $file"
+              zip ../Cell2FireW_${RELEASE_TAG}-macOS-${runner}-${arch}-${type}-binary.zip \
+                Cell2Fire_Darwin.${runner}.${arch}.${type} \
+                pkgs_Darwin.${runner}.${arch}.${type}.txt \
+                otool_Darwin.${runner}.${arch}.${type}.txt
+            else
+              echo "No macOS binaries found, skipping."
+            fi
+          done
+
+      - name: Create Binary Zips - Windows
+        if: ${{ needs.build_windows.result == 'success' }}
+        run: |
+          cd Cell2Fire
+          if [[ -f Cell2Fire.exe ]]; then
+            zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip \
+              Cell2Fire.exe \
+              *.dll
+          else
+            echo "No Windows build found, skipping."
+          fi
+
+      - name: Create Data Instance Zips
+        run: |
+          cd data
+          for format in asc tif; do
+            for fuel_model in CanadianFBP Kitral ScottAndBurgan Portugal; do
+              if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
+                echo "Zipping $fuel_model $format"
+>>>>>>> 8089279f (build fixes)
+                zip -r ../$fuel_model-$format.zip $fuel_model/*-$format
+<<<<<<< HEAD
+            fi
+||||||| parent of 8089279f (build fixes)
+              fi
+            done
+=======
+              else
+                echo "No files found for $fuel_model $format, skipping."
+              fi
+            done
+>>>>>>> 8089279f (build fixes)
           done
         done
 
+<<<<<<< HEAD
     - name: Git Archive
       run: |
         git rm -r data output test
@@ -100,7 +315,25 @@ jobs:
         git add -f Cell2Fire/*
         astash=`git stash create`
         git archive --prefix=C2F/ --output="Cell2FireW_${{ env.RELEASE_TAG }}.zip" $astash
+||||||| parent of 8089279f (build fixes)
+      - name: Create Source Archive
+        run: |
+          git rm -r data output test 2>/dev/null || true
+          git rm -f *.pdf 2>/dev/null || true
+          git add -f Cell2Fire/* || true
+          astash=$(git stash create || echo "HEAD")
+          git archive --prefix=C2F/ --output="Cell2FireW_${RELEASE_TAG}.zip" $astash
+=======
+      - name: Create Source Archive, excluding instances and heavy documents or images
+        run: |
+          git rm -rf data output 2>/dev/null || true
+          git rm -f *.pdf 2>/dev/null || true
+          git add -f Cell2Fire/* || true
+          astash=$(git stash create || echo "HEAD")
+          git archive --prefix=C2F/ --output="Cell2FireW_${RELEASE_TAG}.zip" $astash
+>>>>>>> 8089279f (build fixes)
 
+<<<<<<< HEAD
 
     - name: Create Draft Release
       uses: ncipollo/release-action@v1.20.0
@@ -127,3 +360,67 @@ jobs:
         tag: ${{ env.RELEASE_TAG }}
         name: "C2F-W: ${{ env.RELEASE_TAG }}"
         body: ${{ env.TAG_DESCRIPTION}}
+||||||| parent of 8089279f (build fixes)
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            Cell2FireW_${{ env.RELEASE_TAG }}.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-Debian.trixie.x86_64-binary.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.noble.x86_64-binary.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip
+            Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
+            Kitral-asc.zip
+            Kitral-tif.zip
+            CanadianFBP-asc.zip
+            ScottAndBurgan-asc.zip
+            ScottAndBurgan-tif.zip
+            Portugal-asc.zip
+            Portugal-tif.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          tag: ${{ env.RELEASE_TAG }}
+          name: "C2F-W: ${{ env.RELEASE_TAG }}"
+          body: ${{ env.TAG_DESCRIPTION }}
+=======
+      - name: Build artifact list for release
+        run: |
+          ARTIFACTS="Cell2FireW_${RELEASE_TAG}.zip"
+          for f in \
+            Cell2FireW_${RELEASE_TAG}-Debian.bookworm.x86_64-binary.zip \
+            Cell2FireW_${RELEASE_TAG}-Debian.trixie.x86_64-binary.zip \
+            Cell2FireW_${RELEASE_TAG}-Ubuntu.noble.x86_64-binary.zip \
+            Cell2FireW_${RELEASE_TAG}-manylinux-x86_64-binary.zip \
+            Cell2FireW_${RELEASE_TAG}-macOS-macos-14-arm64-dynamic-binary.zip \
+            Cell2FireW_${RELEASE_TAG}-macOS-macos-14-arm64-static-binary.zip \
+            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-arm64-dynamic-binary.zip \
+            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-arm64-static-binary.zip \
+            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-intel-x86_64-dynamic-binary.zip \
+            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-intel-x86_64-static-binary.zip \
+            Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip \
+            Kitral-asc.zip \
+            Kitral-tif.zip \
+            CanadianFBP-asc.zip \
+            ScottAndBurgan-asc.zip \
+            ScottAndBurgan-tif.zip \
+            Portugal-asc.zip \
+            Portugal-tif.zip
+          do
+            if [[ -f "$f" ]]; then
+              ARTIFACTS="$ARTIFACTS $f"
+            fi
+          done
+          echo "$ARTIFACTS" > artifact-list.txt
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: $(cat artifact-list.txt)
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          tag: ${{ env.RELEASE_TAG }}
+          name: "C2F-W: ${{ env.RELEASE_TAG }}"
+          body: ${{ env.TAG_DESCRIPTION }}
+>>>>>>> 8089279f (build fixes)
