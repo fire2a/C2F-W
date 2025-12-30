@@ -13,15 +13,22 @@ name: Build macOS
 name: Build macOS
 =======
 name: Build macOS (dynamic & static lib.linking)
+<<<<<<< HEAD
 >>>>>>> 4d668e09 (macOS build fixes)
+||||||| parent of 71d82e6a (final refactor)
+=======
+
+>>>>>>> 71d82e6a (final refactor)
 on:
   # pull_request:
   #   branches:
   #     - main
   workflow_dispatch:
   workflow_call:
+
 permissions:
   contents: write
+
 jobs:
   build:
     strategy:
@@ -80,10 +87,18 @@ jobs:
     runs-on: ${{ matrix.runner }}
     continue-on-error: true
     steps:
+<<<<<<< HEAD
       - name: Checkout Code
 <<<<<<< HEAD
 <<<<<<< HEAD
+||||||| parent of 71d82e6a (final refactor)
+      - name: Checkout Code
+=======
+
+      - name: Checkout code
+>>>>>>> 71d82e6a (final refactor)
         uses: actions/checkout@v6
+<<<<<<< HEAD
 
       - name: Bump version in code
 ||||||| parent of dad7e72a (tidy macOS workflow)
@@ -100,10 +115,21 @@ jobs:
 =======
         uses: actions/checkout@v6
 >>>>>>> 4d668e09 (macOS build fixes)
+||||||| parent of 71d82e6a (final refactor)
+=======
+
+>>>>>>> 71d82e6a (final refactor)
       - name: Install gsed for version bumping
         run: brew install gsed
+<<<<<<< HEAD
       - name: Bump Version in Code
 >>>>>>> dad7e72a (tidy macOS workflow)
+||||||| parent of 71d82e6a (final refactor)
+      - name: Bump Version in Code
+=======
+
+      - name: Bump version in code
+>>>>>>> 71d82e6a (final refactor)
         run: |
           brew install gsed
           run: |
@@ -119,6 +145,7 @@ jobs:
           gsed -i "s/C2FW_VERSION.*/C2FW_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
           grep C2FW_VERSION Cell2Fire/Cell2Fire.h
 <<<<<<< HEAD
+<<<<<<< HEAD
 
       - name: Check Runner
 ||||||| parent of dad7e72a (tidy macOS workflow)
@@ -127,7 +154,14 @@ jobs:
 =======
       - name: Set Environment
 >>>>>>> dad7e72a (tidy macOS workflow)
+||||||| parent of 71d82e6a (final refactor)
+      - name: Set Environment
+=======
+
+      - name: Set suffix
+>>>>>>> 71d82e6a (final refactor)
         run: |
+<<<<<<< HEAD
 <<<<<<< HEAD
           # arch
           # echo "runner: ${{ matrix.runner }}.$(arch).$(uname -m)"
@@ -138,9 +172,14 @@ jobs:
 
 ||||||| parent of dad7e72a (tidy macOS workflow)
           KERNEL=$(uname -s)
+||||||| parent of 71d82e6a (final refactor)
+          KERNEL=$(uname -s)
+=======
+>>>>>>> 71d82e6a (final refactor)
           MACHINE=$(uname -m)
-          SUFFIX="_${KERNEL}.${{ matrix.runner }}.${MACHINE}"
+          SUFFIX="_${{ matrix.runner }}.${MACHINE}.${{ matrix.type }}"
           echo "SUFFIX=${SUFFIX}" >> $GITHUB_ENV
+<<<<<<< HEAD
           echo "Building for: ${KERNEL} on ${{ matrix.runner }} (${MACHINE})"
 
 =======
@@ -158,6 +197,15 @@ jobs:
           echo "matrix attributes:: type:${{ matrix.type }}, arch:${{ matrix.arch }}, runner:${{ matrix.runner }}"
 >>>>>>> 4d668e09 (macOS build fixes)
       - name: Install Dependencies
+||||||| parent of 71d82e6a (final refactor)
+          echo "Building for: ${KERNEL} on ${{ matrix.runner }} (${MACHINE})"
+          echo "matrix attributes:: type:${{ matrix.type }}, arch:${{ matrix.arch }}, runner:${{ matrix.runner }}"
+      - name: Install Dependencies
+=======
+          echo "Building for: ${SUFFIX}"
+
+      - name: Install dependencies
+>>>>>>> 71d82e6a (final refactor)
         run: |
 <<<<<<< HEAD
           brew install gcc@12 libomp boost libtiff # llvm ?
@@ -183,12 +231,16 @@ jobs:
           else
             brew install catch2
           fi
-      - name: Check Brew Package Versions
+
+      - name: Check brew package versions
         run: |
-          brew list --versions gcc libomp boost libtiff > "Cell2Fire/pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+          brew list --versions gcc libomp boost libtiff > "Cell2Fire/pkgs${{ env.SUFFIX }}.txt"
           if [[ "${{ matrix.type }}" == "static" ]]; then
-            brew list --versions jpeg-turbo xz zstd zlib >> "Cell2Fire/pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+            brew list --versions jpeg-turbo xz zstd zlib >> "Cell2Fire/pkgs${{ env.SUFFIX }}.txt"
+          else
+            brew list --versions catch2 >> "Cell2Fire/pkgs${{ env.SUFFIX }}.txt"
           fi
+<<<<<<< HEAD
 <<<<<<< HEAD
           cat "pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
 >>>>>>> dad7e72a (tidy macOS workflow)
@@ -198,10 +250,14 @@ jobs:
       - name: Build
 =======
           cat "Cell2Fire/pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+||||||| parent of 71d82e6a (final refactor)
+          cat "Cell2Fire/pkgs${{ env.SUFFIX }}-${{ matrix.type }}.txt"
+=======
+          cat "Cell2Fire/pkgs${{ env.SUFFIX }}.txt"
+
+>>>>>>> 71d82e6a (final refactor)
       - name: Debug show stuff
         if: true
-        env:
-          MATRIX_TYPE: ${{ matrix.type }}
         run: |
           set -x
           g++ --version
@@ -223,14 +279,22 @@ jobs:
           # ls_brew_pkg boost
           ls_brew_pkg libomp
           ls_brew_pkg libtiff
-          if [[ "$MATRIX_TYPE" == *dynamic* ]]; then 
+          if [[ "${{ matrix.type }}" == "dynamic" ]]; then
             ls $(brew --prefix catch2)
             ls_brew_pkg catch2
             echo "catch2 v: $(brew list --versions catch2 | cut -d' ' -f2 | sort -V | tail -n1 | cut -d. -f1)"
           fi
+<<<<<<< HEAD
           
       - name: Build (& Test if dynamic)
 >>>>>>> 4d668e09 (macOS build fixes)
+||||||| parent of 71d82e6a (final refactor)
+          
+      - name: Build (& Test if dynamic)
+=======
+
+      - name: Build (& test if dynamic)
+>>>>>>> 71d82e6a (final refactor)
         run: |
           cd Cell2Fire
 <<<<<<< HEAD
@@ -273,25 +337,47 @@ jobs:
           else
             make -f makefile.macos info
             make -f makefile.macos clean
-            make -f makefile.macos tests
+            if [[ ${{ vars.RUN_UNIT_TESTS }} == 'true' ]]; then
+              make -f makefile.macos tests
+            fi
             make -f makefile.macos
           fi
-      - name: Get Binary Info
+
+      - name: Get binary info
         run: |
           cd Cell2Fire
-          otool -L Cell2Fire > "otool${{ env.SUFFIX }}.${{ matrix.type }}.txt"
-          cat "otool${{ env.SUFFIX }}.${{ matrix.type }}.txt"
-      - name: Prepare Artifacts
+          otool -L Cell2Fire > "otool${{ env.SUFFIX }}.txt"
+          cat "otool${{ env.SUFFIX }}.txt"
+
+      - name: Prepare artifacts
         run: |
           cd Cell2Fire
+<<<<<<< HEAD
           mv Cell2Fire "Cell2Fire${{ env.SUFFIX }}.${{ matrix.type }}"
           ls -lh "Cell2Fire${{ env.SUFFIX }}.${{ matrix.type }}"
       - name: Upload Artifacts
 >>>>>>> dad7e72a (tidy macOS workflow)
+||||||| parent of 71d82e6a (final refactor)
+          mv Cell2Fire "Cell2Fire${{ env.SUFFIX }}.${{ matrix.type }}"
+          ls -lh "Cell2Fire${{ env.SUFFIX }}.${{ matrix.type }}"
+      - name: Upload Artifacts
+=======
+          mv Cell2Fire "Cell2Fire${{ env.SUFFIX }}"
+          ls -lh "Cell2Fire${{ env.SUFFIX }}"
+
+      - name: Upload artifacts
+>>>>>>> 71d82e6a (final refactor)
         uses: actions/upload-artifact@v5
         with:
+<<<<<<< HEAD
           name: binaries_${{ env.suffix }}
+||||||| parent of 71d82e6a (final refactor)
+          name: binaries${{ env.SUFFIX }}-${{ matrix.type }}
+=======
+          name: binaries${{ env.SUFFIX }}
+>>>>>>> 71d82e6a (final refactor)
           path: |
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
             Cell2Fire/otool_${{ env.suffix }}.txt
@@ -329,7 +415,17 @@ jobs:
             Cell2Fire/otool${{ env.SUFFIX }}.${{ matrix.type }}.txt
             Cell2Fire/pkgs${{ env.SUFFIX }}.${{ matrix.type }}.txt
 >>>>>>> 8089279f (build fixes)
+||||||| parent of 71d82e6a (final refactor)
+            Cell2Fire/Cell2Fire${{ env.SUFFIX }}.${{ matrix.type }}
+            Cell2Fire/otool${{ env.SUFFIX }}.${{ matrix.type }}.txt
+            Cell2Fire/pkgs${{ env.SUFFIX }}.${{ matrix.type }}.txt
+=======
+            Cell2Fire/Cell2Fire${{ env.SUFFIX }}
+            Cell2Fire/otool${{ env.SUFFIX }}.txt
+            Cell2Fire/pkgs${{ env.SUFFIX }}.txt
+>>>>>>> 71d82e6a (final refactor)
           if-no-files-found: error
+<<<<<<< HEAD
 
 =======
             Cell2Fire/Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}
@@ -338,7 +434,14 @@ jobs:
           if-no-files-found: error
 >>>>>>> dad7e72a (tidy macOS workflow)
   test:
+||||||| parent of 71d82e6a (final refactor)
+  test:
+=======
+
+  regression_test:
+>>>>>>> 71d82e6a (final refactor)
     needs: build
+    if: ${{ vars.RUN_REGRESSION_TESTS == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -386,6 +489,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     continue-on-error: true
     steps:
+<<<<<<< HEAD
       - name: Checkout Code
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -404,11 +508,28 @@ jobs:
         uses: actions/checkout@v5
       - name: Install Test Dependencies
 =======
-        uses: actions/checkout@v6
+||||||| parent of 71d82e6a (final refactor)
+      - name: Checkout Code
+=======
 
+      - name: Checkout only tests
+>>>>>>> 71d82e6a (final refactor)
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            test/
+          sparse-checkout-cone-mode: false
+
+<<<<<<< HEAD
       - name: Set Environment
 >>>>>>> 4d668e09 (macOS build fixes)
+||||||| parent of 71d82e6a (final refactor)
+      - name: Set Environment
+=======
+      - name: Set suffix
+>>>>>>> 71d82e6a (final refactor)
         run: |
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
           brew install gcc@12 libomp boost libtiff
@@ -427,14 +548,26 @@ jobs:
           brew install gcc libomp boost
 =======
           KERNEL=$(uname -s)
+||||||| parent of 71d82e6a (final refactor)
+          KERNEL=$(uname -s)
+=======
+>>>>>>> 71d82e6a (final refactor)
           MACHINE=$(uname -m)
-          SUFFIX="_${KERNEL}.${{ matrix.runner }}.${MACHINE}"
+          SUFFIX="_${{ matrix.runner }}.${MACHINE}.${{ matrix.type }}"
           echo "SUFFIX=${SUFFIX}" >> $GITHUB_ENV
+          echo "Building for: ${SUFFIX}"
 
+<<<<<<< HEAD
 >>>>>>> 4d668e09 (macOS build fixes)
       - name: Download Artifacts
+||||||| parent of 71d82e6a (final refactor)
+      - name: Download Artifacts
+=======
+      - name: Download artifacts
+>>>>>>> 71d82e6a (final refactor)
         uses: actions/download-artifact@v6
         with:
+<<<<<<< HEAD
 <<<<<<< HEAD
           pattern: binaries_${{ env.suffix }}
 ||||||| parent of 4d668e09 (macOS build fixes)
@@ -442,6 +575,11 @@ jobs:
 =======
           name: binaries${{ env.SUFFIX }}-${{ matrix.type }}
 >>>>>>> 4d668e09 (macOS build fixes)
+||||||| parent of 71d82e6a (final refactor)
+          name: binaries${{ env.SUFFIX }}-${{ matrix.type }}
+=======
+          name: binaries${{ env.SUFFIX }}
+>>>>>>> 71d82e6a (final refactor)
           path: Cell2Fire
 <<<<<<< HEAD
           merge-multiple: true
@@ -465,7 +603,7 @@ jobs:
       - name: Make Binaries Executable
 =======
 
-      - name: Install Dependencies
+      - name: Install dependencies
         if: contains(matrix.type, 'dynamic')
 >>>>>>> 4d668e09 (macOS build fixes)
         run: |
@@ -536,11 +674,22 @@ jobs:
 =======
           brew install libomp boost libtiff
 
+<<<<<<< HEAD
 >>>>>>> 4d668e09 (macOS build fixes)
       - name: Test Dynamic Binary
         run: |
           chmod +x Cell2Fire/Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}
+||||||| parent of 71d82e6a (final refactor)
+      - name: Test Dynamic Binary
+        run: |
+          chmod +x Cell2Fire/Cell2Fire${{ env.SUFFIX }}-${{ matrix.type }}
+=======
+      - name: Run tests
+        run: |-
+          chmod +x Cell2Fire/Cell2Fire${{ env.SUFFIX }}
+>>>>>>> 71d82e6a (final refactor)
           cd test
+<<<<<<< HEAD
 <<<<<<< HEAD
           KERNEL=$(uname -s)
           MACHINE=$(uname -m)
@@ -577,3 +726,8 @@ jobs:
 =======
           bash test.sh "${{ env.SUFFIX }}-${{ matrix.type }}"
 >>>>>>> 4d668e09 (macOS build fixes)
+||||||| parent of 71d82e6a (final refactor)
+          bash test.sh "${{ env.SUFFIX }}-${{ matrix.type }}"
+=======
+          ./test.sh "${{ env.SUFFIX }}"
+>>>>>>> 71d82e6a (final refactor)

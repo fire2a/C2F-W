@@ -1,10 +1,15 @@
+# Accept an optional first (positional) parameter for the executable to run.
+# If none is supplied, use the repository default used by CI:
+param(
+    [string]$Exe = ".\..\Cell2Fire\x64\Release\Cell2Fire.exe"
+)
+Write-Output "Using executable: $Exe"
+
 # Unzip target results
 Expand-Archive -Path "target_results.zip" -DestinationPath "."
 
-
 $DebugPreference = "SilentlyContinue"
 $WarningPreference = "SilentlyContinue"
-
 
 # Run simulations
 foreach ($format in "asc", "tif") {
@@ -54,11 +59,11 @@ foreach ($format in "asc", "tif") {
         $logFile = "$outputDir/log.txt"
 
         # Run the simulation and tee the output to a log file
-        & .\..\Cell2Fire\x64\Release\Cell2Fire.exe @cmdArgs *> $logFile 2>$null
-        (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
-        (Get-Content $logFile | Select-String -pattern 'version:' -notmatch) | Set-Content $logFile
-        (Get-Content "$outputDir/ignition_and_weather_log.csv") -replace '\\', '/' | Set-Content "$outputDir/ignition_and_weather_log.csv"
-    }
+        & $Exe @cmdArgs *> $logFile 2>$null
+            (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
+            (Get-Content $logFile | Select-String -pattern 'version:' -notmatch) | Set-Content $logFile
+            (Get-Content "$outputDir/ignition_and_weather_log.csv") -replace '\\', '/' | Set-Content "$outputDir/ignition_and_weather_log.csv"
+        }
 }
 
 # Define directories to compare

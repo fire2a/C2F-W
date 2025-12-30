@@ -1,11 +1,20 @@
+<<<<<<< HEAD
 name: build and test windows
 
+||||||| parent of 71d82e6a (final refactor)
+name: Build Windows
+=======
+---
+name: Build Windows
+
+>>>>>>> 71d82e6a (final refactor)
 on:
   # pull_request:
   #   branches:
   #     - main
   workflow_dispatch:
   workflow_call:
+<<<<<<< HEAD
     inputs:
       enabled:
         description: 'Enable the full Windows build (set false to upload placeholder)'
@@ -13,6 +22,10 @@ on:
         type: boolean
         default: true
 
+||||||| parent of 71d82e6a (final refactor)
+=======
+
+>>>>>>> 71d82e6a (final refactor)
 permissions:
   contents: write
 
@@ -21,10 +34,32 @@ env:
   ENABLED: ${{ inputs.enabled }}
 
 jobs:
-  windows_build:
+  build:
     runs-on: windows-latest
+<<<<<<< HEAD
 
+||||||| parent of 71d82e6a (final refactor)
+    defaults:
+      run:
+        shell: powershell
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\.github\.environment\vcpkg\archives
+      VCPKG_DOWNLOADS: ${{ github.workspace }}\.github\.environment\vcpkg\downloads
+      VCPKG_FEATURE_FLAGS: manifests,binarycaching
+      VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\.github\\.environment\\vcpkg\\archives,readwrite"
+
+=======
+    defaults:
+      run:
+        shell: powershell
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\.github\.environment\vcpkg\archives
+      VCPKG_DOWNLOADS: ${{ github.workspace }}\.github\.environment\vcpkg\downloads
+      VCPKG_FEATURE_FLAGS: manifests,binarycaching
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}\.github\.environment\vcpkg\archives,readwrite
+>>>>>>> 71d82e6a (final refactor)
     steps:
+<<<<<<< HEAD
 <<<<<<< HEAD
     - name: Checkout
       uses: actions/checkout@v6
@@ -32,10 +67,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v5
 =======
+||||||| parent of 71d82e6a (final refactor)
+=======
+
+>>>>>>> 71d82e6a (final refactor)
       - name: Checkout Code
         uses: actions/checkout@v6
 >>>>>>> 4d668e09 (macOS build fixes)
 
+<<<<<<< HEAD
     - name: Skip build (placeholder artifact)
       if: env.ENABLED != 'true'
       run: |
@@ -43,6 +83,46 @@ jobs:
         mkdir binaries
         echo "Windows build disabled" > binaries/WINDOWS_BUILD_WAS_DISABLED.txt
       shell: bash
+||||||| parent of 71d82e6a (final refactor)
+      - name: Bump version in header
+        run: |
+          $version = "dev"
+          if ( "${{ github.event_name }}" -eq "pull_request" ){
+            $version="${{ github.sha }}"
+          }
+          if ("${{ github.event_name }}" -eq "workflow_dispatch" ){
+            $version="${{ github.sha }}"
+          } 
+          if ( ("${{github.event_name}}" -eq "push") -and ("${{github.ref_type}}" -eq "tag" )){
+            $ref="${{ github.ref }}"
+            $version=$ref.Split("/")[-1]
+          }
+          
+          Write-Host "Setting version to $version"
+          
+          $path = "Cell2Fire\Cell2Fire.h"
+          (Get-Content $path) -replace 'C2FW_VERSION\s*=\s*".*?"', "C2FW_VERSION = `"$version`"" | Set-Content $path
+          
+          Select-String 'C2FW_VERSION' $path
+=======
+      - name: Bump version in header
+        run: |
+          $version = "dev"
+          if ( "${{ github.event_name }}" -eq "pull_request" ){
+            $version="${{ github.sha }}"
+          }
+          if ("${{ github.event_name }}" -eq "workflow_dispatch" ){
+            $version="${{ github.sha }}"
+          } 
+          if ( ("${{github.event_name}}" -eq "push") -and ("${{github.ref_type}}" -eq "tag" )){
+            $ref="${{ github.ref }}"
+            $version=$ref.Split("/")[-1]
+          }
+          Write-Host "Setting version to $version"
+          $path = "Cell2Fire\Cell2Fire.h"
+          (Get-Content $path) -replace 'C2FW_VERSION\s*=\s*".*?"', "C2FW_VERSION = `"$version`"" | Set-Content $path
+          Select-String 'C2FW_VERSION' $path
+>>>>>>> 71d82e6a (final refactor)
 
     - name: Bump version in header (Windows)
       if: env.ENABLED == 'true'
@@ -88,6 +168,7 @@ jobs:
         restore-keys: |
           dirent-${{ runner.os }}-
 
+<<<<<<< HEAD
     - name: Cache vcpkg
       if: env.ENABLED == 'true'
       id: cache-vcpkg
@@ -128,6 +209,55 @@ jobs:
         } else {
           echo "Dirent already cached"
         }
+||||||| parent of 71d82e6a (final refactor)
+
+      - name: Show vcpkg paths (pre-build)
+        if: ${{ false }}
+        run: |
+          cd Cell2Fire
+          $archives = $env:VCPKG_DEFAULT_BINARY_CACHE
+          $downloads = $env:VCPKG_DOWNLOADS
+          $installed = Join-Path $PWD "vcpkg_installed"
+
+          Write-Host "Archives path=$archives"
+          Write-Host "Downloads path=$downloads"
+          Write-Host "Install root (project)=$installed"
+
+          function Show-DirSummary($label, $path) {
+            if (Test-Path $path) {
+              $count = (Get-ChildItem $path -Recurse -File -ErrorAction SilentlyContinue | Measure-Object).Count
+              Write-Host "$label exists, files=$count"
+            } else {
+              Write-Host "$label does not exist"
+            }
+          }
+
+          Show-DirSummary "Archives" $archives
+          Show-DirSummary "Downloads" $downloads
+          Show-DirSummary "Installed" $installed
+=======
+      - name: Show vcpkg paths (pre-build)
+        if: ${{ false }}
+        run: |
+          cd Cell2Fire
+          $archives = $env:VCPKG_DEFAULT_BINARY_CACHE
+          $downloads = $env:VCPKG_DOWNLOADS
+          $installed = Join-Path $PWD "vcpkg_installed"
+          Write-Host "Archives path=$archives"
+          Write-Host "Downloads path=$downloads"
+          Write-Host "Install root (project)=$installed"
+          function Show-DirSummary($label, $path) {
+            if (Test-Path $path) {
+              $count = (Get-ChildItem $path -Recurse -File -ErrorAction SilentlyContinue | Measure-Object).Count
+              Write-Host "$label exists, files=$count"
+            } else {
+              Write-Host "$label does not exist"
+            }
+          }
+          Show-DirSummary "Archives" $archives
+          Show-DirSummary "Downloads" $downloads
+          Show-DirSummary "Installed" $installed
+>>>>>>> 71d82e6a (final refactor)
 
         # tiffio
         if ($CACHE_VCPKG -ne 'true') {
@@ -146,6 +276,7 @@ jobs:
         # Write-Host "Listing all files in installed\x64-windows:"
         # Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
 
+<<<<<<< HEAD
     - name: Cache Catch2 header
       if: env.ENABLED == 'true'
       uses: actions/cache@v4
@@ -171,7 +302,56 @@ jobs:
       run: |
         cd Cell2Fire
         msbuild Cell2Fire.sln /p:Configuration=Release
+||||||| parent of 71d82e6a (final refactor)
+      - name: Show vcpkg paths (post-build)
+        if: ${{ false }}
+        run: |
+          cd Cell2Fire
+          $archives = $env:VCPKG_DEFAULT_BINARY_CACHE
+          $downloads = $env:VCPKG_DOWNLOADS
+          $installed = Join-Path $PWD "vcpkg_installed"
 
+          Write-Host "Archives path=$archives"
+          Write-Host "Downloads path=$downloads"
+          Write-Host "Install root (project)=$installed"
+
+          function Show-DirSummary($label, $path) {
+            if (Test-Path $path) {
+              $count = (Get-ChildItem $path -Recurse -File -ErrorAction SilentlyContinue | Measure-Object).Count
+              Write-Host "$label exists, files=$count"
+            } else {
+              Write-Host "$label does not exist"
+            }
+          }
+
+          Show-DirSummary "Archives" $archives
+          Show-DirSummary "Downloads" $downloads
+          Show-DirSummary "Installed" $installed
+=======
+      - name: Show vcpkg paths (post-build)
+        if: ${{ false }}
+        run: |
+          cd Cell2Fire
+          $archives = $env:VCPKG_DEFAULT_BINARY_CACHE
+          $downloads = $env:VCPKG_DOWNLOADS
+          $installed = Join-Path $PWD "vcpkg_installed"
+          Write-Host "Archives path=$archives"
+          Write-Host "Downloads path=$downloads"
+          Write-Host "Install root (project)=$installed"
+          function Show-DirSummary($label, $path) {
+            if (Test-Path $path) {
+              $count = (Get-ChildItem $path -Recurse -File -ErrorAction SilentlyContinue | Measure-Object).Count
+              Write-Host "$label exists, files=$count"
+            } else {
+              Write-Host "$label does not exist"
+            }
+          }
+          Show-DirSummary "Archives" $archives
+          Show-DirSummary "Downloads" $downloads
+          Show-DirSummary "Installed" $installed
+>>>>>>> 71d82e6a (final refactor)
+
+<<<<<<< HEAD
     - name: Run Unit Tests
       if: env.ENABLED == 'true'
       run: |
@@ -186,7 +366,24 @@ jobs:
         cd test
         ./test.ps1
       shell: pwsh
+||||||| parent of 71d82e6a (final refactor)
 
+      - name: Run Unit Tests
+        if: ${{ true }}
+        run: |
+          & "Cell2Fire\x64\Release\WindowsTests.exe"
+          $exitCode = $LASTEXITCODE
+          exit $exitCode
+=======
+      - name: Run Unit Tests
+        if: ${{ vars.RUN_UNIT_TESTS == 'true' }}
+        run: |
+          & "Cell2Fire\x64\Release\WindowsTests.exe"
+          $exitCode = $LASTEXITCODE
+          exit $exitCode
+>>>>>>> 71d82e6a (final refactor)
+
+<<<<<<< HEAD
     - name: Gather output
       if: env.ENABLED == 'true'
       run: |
@@ -199,3 +396,58 @@ jobs:
       with:
         name: binaries-Windows-x86_64
         path: binaries
+||||||| parent of 71d82e6a (final refactor)
+      - name: Run Regression Test
+        if: ${{ true }}
+        run: |
+          cd test
+          ./test.ps1
+
+      - name: Gather output
+        run: |
+          mkdir binaries
+          copy Cell2Fire\x64\Release\*.dll binaries
+          copy Cell2Fire\x64\Release\Cell2Fire.exe binaries
+
+      - name: Upload artifact (real or placeholder)
+        uses: actions/upload-artifact@v5
+        with:
+          name: binaries-Windows-x86_64
+          path: binaries
+=======
+      - name: Gather output
+        run: |
+          mkdir binaries
+          copy Cell2Fire\x64\Release\*.dll binaries
+          copy Cell2Fire\x64\Release\Cell2Fire.exe binaries
+
+      - name: Upload artifact (real or placeholder)
+        uses: actions/upload-artifact@v5
+        with:
+          name: binaries-Windows-x86_64
+          path: binaries
+
+  regression_tests:
+    needs: build
+    if: ${{ vars.RUN_REGRESSION_TESTS == 'true' }}
+    runs-on: windows-latest
+    steps:
+
+      - name: Checkout tests only
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            test/
+          sparse-checkout-cone-mode: false
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          name: binaries-Windows-x86_64
+          path: Cell2Fire
+
+      - name: Run Regression Test
+        run: |-
+          cd test
+          ./test.ps1 ../Cell2Fire/Cell2Fire.exe
+>>>>>>> 71d82e6a (final refactor)

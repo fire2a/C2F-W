@@ -1,3 +1,4 @@
+---
 name: Build Debian/Ubuntu
 
 on:
@@ -5,7 +6,8 @@ on:
   workflow_call:
 
 env:
-  BUILD_DEPS: "g++ make lsb-release libboost-dev libtiff-dev catch2"
+  BUILD_DEPS: g++ make lsb-release libboost-random-dev libtiff-dev catch2
+  RUN_DEPS: libtiff-tools libgomp1
 
 permissions:
   contents: write
@@ -13,49 +15,46 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     strategy:
       matrix:
         container:
-          - image: "debian:bookworm-slim"
-            name: "Debian.bookworm"
-          - image: "debian:trixie-slim"
-            name: "Debian.trixie"
-          - image: "ubuntu:24.04"
-            name: "Ubuntu.noble"
-          - image: "ubuntu:22.04"
-            name: "Ubuntu.jammy"
-    
+          - image: debian:bookworm-slim
+            name: Debian.bookworm
+          - image: debian:trixie-slim
+            name: Debian.trixie
+          - image: ubuntu:24.04
+            name: Ubuntu.noble
+          - image: ubuntu:22.04
+            name: Ubuntu.jammy
     container:
       image: ${{ matrix.container.image }}
-    
     steps:
-      - name: Checkout Code
+
+      - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           export DEBIAN_FRONTEND=noninteractive
           apt-get update -qq
           apt-get install -y --no-install-recommends ${{ env.BUILD_DEPS }}
 
-      - name: Get Environment Info
-        id: env_info
+      - name: Set suffix
         run: |
           DISTRIBUTION=$(lsb_release --short --id 2>/dev/null)
           CODENAME=$(lsb_release --short --codename 2>/dev/null)
           MACHINE=$(uname --machine 2>/dev/null)
           SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"
-          echo "suffix=${SUFFIX}" >> $GITHUB_OUTPUT
-          echo "Building for: ${DISTRIBUTION} ${CODENAME} (${MACHINE})"
+          echo "SUFFIX=${SUFFIX}" >> $GITHUB_ENV
+          echo "Building for: ${SUFFIX}"
 
-      - name: Check Package Versions
+      - name: Check package versions
         run: |
-          SUFFIX="${{ steps.env_info.outputs.suffix }}"
-          dpkg-query -W -f='${binary:Package} ${Version}\n' ${{ env.BUILD_DEPS }} > "pkgs${SUFFIX}.txt"
-          cat "pkgs${SUFFIX}.txt"
+          cd Cell2Fire
+          dpkg-query -W -f='${binary:Package} ${Version}\n' ${{ env.BUILD_DEPS }} > "pkgs${{ env.SUFFIX }}.txt"
+          cat "pkgs${{ env.SUFFIX }}.txt"
 
-      - name: Bump Version in Code
+      - name: Bump version in code
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
@@ -76,31 +75,84 @@ jobs:
           make clean
           make
 
-      - name: Build & Run Unit Tests
+      - name: Run unit tests
+        if: ${{ vars.RUN_UNIT_TESTS == 'true' }}
         run: |
           cd Cell2Fire
           make tests
 
-      - name: Get Binary Info
+      - name: Get binary info
         run: |
-          SUFFIX="${{ steps.env_info.outputs.suffix }}"
           cd Cell2Fire
-          ldd Cell2Fire > "ldd${SUFFIX}.txt"
-          cat "ldd${SUFFIX}.txt"
+          ldd Cell2Fire > "ldd${{ env.SUFFIX }}.txt"
+          cat "ldd${{ env.SUFFIX }}.txt"
 
-      - name: Prepare Artifacts
+      - name: Prepare artifacts
         run: |
-          SUFFIX="${{ steps.env_info.outputs.suffix }}"
           cd Cell2Fire
-          mv Cell2Fire "Cell2Fire${SUFFIX}"
-          ls -lh "Cell2Fire${SUFFIX}"
+          mv Cell2Fire "Cell2Fire${{ env.SUFFIX }}"
+          ls -lh "Cell2Fire${{ env.SUFFIX }}"
 
-      - name: Upload Artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v5
         with:
-          name: binaries${{ steps.env_info.outputs.suffix }}
+          name: binaries${{ env.SUFFIX }}
           path: |
-            Cell2Fire/Cell2Fire${{ steps.env_info.outputs.suffix }}
-            Cell2Fire/ldd${{ steps.env_info.outputs.suffix }}.txt
-            pkgs${{ steps.env_info.outputs.suffix }}.txt
+            Cell2Fire/Cell2Fire${{ env.SUFFIX }}
+            Cell2Fire/ldd${{ env.SUFFIX }}.txt
+            Cell2Fire/pkgs${{ env.SUFFIX }}.txt
           if-no-files-found: error
+
+  regression_tests:
+    needs: build
+    if: ${{ vars.RUN_REGRESSION_TESTS == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        container:
+          - image: debian:bookworm-slim
+            name: Debian.bookworm
+          - image: debian:trixie-slim
+            name: Debian.trixie
+          - image: ubuntu:24.04
+            name: Ubuntu.noble
+          - image: ubuntu:22.04
+            name: Ubuntu.jammy
+    container:
+      image: ${{ matrix.container.image }}
+    steps:
+
+      - name: Install run dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          apt-get install -y --no-install-recommends lsb-release unzip ${{ env.RUN_DEPS }}
+
+      - name: Checkout only tests
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            test/
+          sparse-checkout-cone-mode: false
+
+      - name: Set suffix
+        run: |
+          DISTRIBUTION=$(lsb_release --short --id 2>/dev/null)
+          CODENAME=$(lsb_release --short --codename 2>/dev/null)
+          MACHINE=$(uname --machine 2>/dev/null)
+          SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"
+          echo "SUFFIX=${SUFFIX}" >> $GITHUB_ENV
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v6
+        with:
+          name: binaries${{ env.SUFFIX }}
+          path: Cell2Fire
+
+      - name: Run tests
+        run: |-
+          chmod +x "Cell2Fire/Cell2Fire${{ env.SUFFIX }}"
+          chmod +x "test/test.sh"
+          cd test
+          ./test.sh "${{ env.SUFFIX }}"
