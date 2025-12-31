@@ -1,37 +1,12 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-name: build manylinux
-||||||| parent of 4d668e09 (macOS build fixes)
-name: Build ManyLinux (Static)
-=======
-||||||| parent of 71d82e6a (final refactor)
-=======
 ---
->>>>>>> 71d82e6a (final refactor)
 name: Build ManyLinux (static lib.linking)
->>>>>>> 4d668e09 (macOS build fixes)
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
   workflow_dispatch:
   workflow_call:
 
 env:
-<<<<<<< HEAD
-<<<<<<< HEAD
-  do_dynamic: true
-||||||| parent of 0b3b5b35 (workflow linux build tidy)
-  STATIC_BUILD_DEPS: "g++ make libboost-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev"
-=======
-  STATIC_BUILD_DEPS: "g++ make libboost-random-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev"
->>>>>>> 0b3b5b35 (workflow linux build tidy)
-||||||| parent of 71d82e6a (final refactor)
-  STATIC_BUILD_DEPS: "g++ make libboost-random-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev"
-=======
   STATIC_BUILD_DEPS: g++ make libboost-random-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
->>>>>>> 71d82e6a (final refactor)
 
 permissions:
   contents: write
@@ -48,199 +23,56 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            version=${{ github.sha }}
-          fi
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            version=${{ github.sha }}
-          fi  
-          if [[ "${{github.event_name}}" == "push" && "${{github.ref_type}}" == "tag" ]]; then
-            version=${{ github.ref_name }}
+            version="${{ github.sha }}"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version="${{ github.sha }}"
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref_type }}" == "tag" ]]; then
+            version="${{ github.ref_name }}"
+          else
+            version="${{ github.sha }}"
           fi
           echo "Setting version to ${version}"
           sed -i "s/C2FW_VERSION.*/C2FW_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
 
       - name: Install build dependencies
         run: |
-<<<<<<< HEAD
-          sudo apt-get update
-          sudo apt-get install -y g++-12 libboost-all-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
-||||||| parent of 0b3b5b35 (workflow linux build tidy)
-          sudo apt-get update
-          sudo apt-get install -y ${{ env.STATIC_BUILD_DEPS }}
-=======
           sudo apt-get update -qq
           sudo apt-get install -y ${{ env.STATIC_BUILD_DEPS }}
->>>>>>> 0b3b5b35 (workflow linux build tidy)
 
-<<<<<<< HEAD
-      - name: Check Packages Versions
-        run: |
-          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev > new_pkgs_ubuntu.txt
-          cat new_pkgs_ubuntu.txt
-
-      - name: Get Environment
-        if: ${{ env.do_dynamic == 'true' }}
-        run: |
-          DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
-          CODENAME=$( lsb_release --short --codename 2>/dev/null )
-          MACHINE=$( uname --machine 2>/dev/null )
-          echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
-
-      - name: Build Suffix
-        if: ${{ env.do_dynamic == 'true' }}
-||||||| parent of 71d82e6a (final refactor)
-      - name: Build Static Binary
-=======
       - name: Build static binary
->>>>>>> 71d82e6a (final refactor)
         run: |
           cd Cell2Fire
-<<<<<<< HEAD
-          make clean
-          make
-          ldd Cell2Fire > ldd${{ env.SUFFIX }}.txt
-          mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
-||||||| parent of 0b3b5b35 (workflow linux build tidy)
-          make clean
-          make -f makefile.static
-=======
           make -f makefile.static clean
           make -f makefile.static
->>>>>>> 0b3b5b35 (workflow linux build tidy)
 
-<<<<<<< HEAD
-      - name: Upload Suffix
-        if: ${{ env.do_dynamic == 'true' }}
-        uses: actions/upload-artifact@v5
-        with:
-          name: binaries${{ env.SUFFIX }}
-          path: |
-            Cell2Fire/ldd${{ env.SUFFIX }}.txt
-            Cell2Fire/Cell2Fire${{ env.SUFFIX }}
-          if-no-files-found: error
-
-      - name: Build Static
-||||||| parent of 71d82e6a (final refactor)
-      - name: Check Package Versions
-=======
       - name: Check package versions
->>>>>>> 71d82e6a (final refactor)
         run: |
-<<<<<<< HEAD
-          cd Cell2Fire
-          make clean
-          make -f makefile.static > ldd_manylinux.txt 2>&1 || true
-          ldd Cell2Fire > ldd_manylinux.txt 2>&1 || true
-||||||| parent of 8089279f (build fixes)
-          cd Cell2Fire
-          echo "Checking installed dependencies versions:"
-          dpkg-query -W -f='${binary:Package} ${Version}\n' ${{ env.STATIC_BUILD_DEPS }} | tee pkgs_manylinux.txt
-=======
           echo "Checking installed dependencies versions:"
           cd Cell2Fire
           dpkg-query -W -f='${binary:Package} ${Version}\n' ${{ env.STATIC_BUILD_DEPS }} 2>&1 | tee pkgs_manylinux.txt
->>>>>>> 8089279f (build fixes)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-      - name: Upload Static
-||||||| parent of 0b3b5b35 (workflow linux build tidy)
-      - name: Verify Static Linking
-        run: |
-          cd Cell2Fire
-          echo "Checking dynamic dependencies (should be minimal):"
-          ldd Cell2Fire 2>&1 | tee ldd_manylinux.txt
-
-      - name: Upload Static Binary
-=======
-      - name: Verify Static Linking
-||||||| parent of 71d82e6a (final refactor)
-      - name: Verify Static Linking
-=======
       - name: Verify static linking
->>>>>>> 71d82e6a (final refactor)
         run: |
           echo "Checking dynamic dependencies, should output: not a dynamic executable"
           cd Cell2Fire
           ldd Cell2Fire 2>&1 | tee ldd_manylinux.txt
 
-<<<<<<< HEAD
-      - name: Upload Static Binary
->>>>>>> 0b3b5b35 (workflow linux build tidy)
-||||||| parent of 71d82e6a (final refactor)
-      - name: Upload Static Binary
-=======
       - name: Upload static binary
->>>>>>> 71d82e6a (final refactor)
         uses: actions/upload-artifact@v5
         with:
           name: binaries-manylinux-x86_64
           path: |
-<<<<<<< HEAD
-            Cell2Fire/ldd_manylinux.txt
-            Cell2Fire/Cell2Fire
-||||||| parent of 8089279f (build fixes)
-            Cell2Fire/Cell2Fire
-            Cell2Fire/ldd_manylinux.txt
-            Cell2Fire/pkgs_manylinux.txt
-=======
             Cell2Fire/Cell2Fire
             Cell2Fire/pkgs_manylinux.txt
             Cell2Fire/ldd_manylinux.txt
->>>>>>> 8089279f (build fixes)
           if-no-files-found: error
 
   regression_tests:
     needs: build
     if: ${{ vars.RUN_REGRESSION_TESTS == 'true' }}
     runs-on: ubuntu-latest
-<<<<<<< HEAD
-    container: ubuntu:noble
-
-||||||| parent of 71d82e6a (final refactor)
-
-=======
->>>>>>> 71d82e6a (final refactor)
     steps:
-<<<<<<< HEAD
 
-      - name: Checkout Code
-<<<<<<< HEAD
-        uses: actions/checkout@v6
-||||||| parent of 71d82e6a (final refactor)
-      - name: Checkout Code
-        uses: actions/checkout@v6
-=======
->>>>>>> 71d82e6a (final refactor)
-
-<<<<<<< HEAD
-      - name: Install Base Dependencies
-        run: |
-          apt-get update
-          apt-get install -y unzip g++-12 make lsb-release curl
-
-      - name: Cache Catch2 header
-        uses: actions/cache@v4
-        with:
-          path: catch.hpp
-          key: ${{ runner.os }}-catch2
-
-      - name: Download Catch2 header
-        run: |
-          if [ ! -f /usr/include/catch2/catch.hpp ]; then
-            mkdir  /usr/include/catch2
-            curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /usr/include/catch2/catch.hpp
-          fi
-||||||| parent of 4d668e09 (macOS build fixes)
-        uses: actions/checkout@v5
-=======
-        uses: actions/checkout@v6
->>>>>>> 4d668e09 (macOS build fixes)
-
-      - name: Download Artifacts
-||||||| parent of 71d82e6a (final refactor)
-      - name: Download Artifacts
-=======
       - name: Checkout only tests
         uses: actions/checkout@v6
         with:
@@ -249,81 +81,14 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Download artifacts
->>>>>>> 71d82e6a (final refactor)
         uses: actions/download-artifact@v6
         with:
-          pattern: binaries*
+          name: binaries-manylinux-x86_64
           path: Cell2Fire
-          merge-multiple: true
 
-<<<<<<< HEAD
-      - name: chmod
-        run: |
-          chmod +x Cell2Fire/Cell2Fire*
-
-      - name: Unit Test
-        run: |
-          cd Cell2Fire
-          make tests
-
-      - name: Test ManyLinux
-        run: |
-||||||| parent of 71d82e6a (final refactor)
-      - name: Make Binary Executable
-        run: |
-          chmod +x Cell2Fire/Cell2Fire
-
-      - name: Run Integration Tests with Static Binary
-        run: |
-=======
       - name: Run tests
         run: |-
           chmod +x "Cell2Fire/Cell2Fire"
           chmod +x "test/test.sh"
->>>>>>> 71d82e6a (final refactor)
           cd test
-<<<<<<< HEAD
-          bash test.sh
-<<<<<<< HEAD
-
-      - name: Get Environment
-        if: ${{ env.do_dynamic == 'true' }}
-        id: get_env
-        run: |
-          DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
-          CODENAME=$( lsb_release --short --codename 2>/dev/null )
-          MACHINE=$( uname --machine 2>/dev/null )
-          echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
-
-      - name: Install Runtime Dependencies
-        if: ${{ env.do_dynamic == 'true' }}
-        run: |
-          apt-get update
-          apt-get install -y libtiff6 libstdc++6 libgomp1 libgcc1
-
-      - name: Test Suffix
-        if: ${{ env.do_dynamic == 'true' }}
-        run: |
-          cd test
-          bash test.sh ${{ env.SUFFIX }}
-||||||| parent of 0b3b5b35 (workflow linux build tidy)
-
-      - name: Install Test Dependencies
-        run: |
-          apt-get update
-          apt-get install -y unzip g++ make catch2 libboost-dev libtiff-dev
-
-      - name: Build and Run Unit Tests (Dynamic Build for Testing)
-        run: |
-          cd Cell2Fire
-          make clean
-          make tests
-          ./test_cell2fire
-
-=======
->>>>>>> 0b3b5b35 (workflow linux build tidy)
-||||||| parent of 71d82e6a (final refactor)
-          bash test.sh
-=======
           ./test.sh
->>>>>>> 71d82e6a (final refactor)

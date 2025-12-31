@@ -1,97 +1,35 @@
-<<<<<<< HEAD
-name: release
-||||||| parent of 71d82e6a (final refactor)
-name: Release
-=======
 ---
 name: Release
->>>>>>> 71d82e6a (final refactor)
 
 on:
-  # pull_request:
-  #   branches:
-  #   - main
   push:
     tags:
-<<<<<<< HEAD
-      - 'v[0-9]+.[0-9]+.[0-9]+' # Matches semantic version tags like v1.0.0
-      - 'v[0-9]+.[0-9]+.[0-9]+-\w+' # Matches pre-release tags like v1.0.0-beta
-      - 'v[0-9]+.[0-9]+.[0-9]+\w+' # Matches pre-release tags like v1.0.0beta
-||||||| parent of 71d82e6a (final refactor)
-      - 'v[0-9]+.[0-9]+.[0-9]+'        # v1.0.0
-      - 'v[0-9]+.[0-9]+.[0-9]+-*'      # v1.0.0-beta
-=======
       - v[0-9]+.[0-9]+.[0-9]+  # v1.0.0
       - v[0-9]+.[0-9]+.[0-9]+-*  # v1.0.0-beta
->>>>>>> 71d82e6a (final refactor)
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-<<<<<<< HEAD
-||||||| parent of 71d82e6a (final refactor)
-  # vars are set in the repository settings as needed to skip builds
-  # https://github.com/fire2a/C2F-W/settings/variables/actions
-  build_debian:
-    if: ${{ vars.BUILD_DEBIAN != 'false' }}
-    uses: ./.github/workflows/build-debian.yml
-=======
   # vars are set in the repository settings as needed to skip builds; unit or regression tests
   # https://github.com/fire2a/C2F-W/settings/variables/actions
   build_debian:
     if: ${{ vars.BUILD_DEBIAN == 'true' }}
     uses: ./.github/workflows/build-debian.yml
->>>>>>> 71d82e6a (final refactor)
 
   build_manylinux:
-<<<<<<< HEAD
-      uses: ./.github/workflows/build-manylinux.yml
-
-  build_debian_stable:
-      uses: ./.github/workflows/build-debian-stable.yml
-||||||| parent of 71d82e6a (final refactor)
-    if: ${{ vars.BUILD_MANYLINUX != 'false' }}
-    uses: ./.github/workflows/build-manylinux.yml
-=======
     if: ${{ vars.BUILD_MANYLINUX == 'true' }}
     uses: ./.github/workflows/build-manylinux.yml
->>>>>>> 71d82e6a (final refactor)
 
   build_macos:
-<<<<<<< HEAD
-       uses: ./.github/workflows/build-macos.yml
-||||||| parent of 71d82e6a (final refactor)
-    if: ${{ vars.BUILD_MACOS != 'false' }}
-    uses: ./.github/workflows/build-macos.yml
-=======
     if: ${{ vars.BUILD_MACOS == 'true' }}
     uses: ./.github/workflows/build-macos.yml
->>>>>>> 71d82e6a (final refactor)
 
   build_windows:
-<<<<<<< HEAD
-      uses: ./.github/workflows/build-windows.yml
-      with:
-        enabled: true
-||||||| parent of 71d82e6a (final refactor)
-    if: ${{ vars.BUILD_WINDOWS != 'false' }}
-    uses: ./.github/workflows/build-windows.yml
-=======
     if: ${{ vars.BUILD_WINDOWS == 'true' }}
     uses: ./.github/workflows/build-windows.yml
->>>>>>> 71d82e6a (final refactor)
 
-<<<<<<< HEAD
-  release:
-    needs: [build_manylinux, build_windows, build_debian_stable, build_macos]
-||||||| parent of 71d82e6a (final refactor)
-  create_release:
-    needs: [build_debian, build_manylinux, build_macos, build_windows]
-    # if: always() && (needs.build_debian.result == 'success' || needs.build_manylinux.result == 'success' || needs.build_macos.result == 'success' || needs.build_windows.result == 'success')
-    if: ${{ !failure() && !cancelled() }}
-=======
   create_release:
     needs:
       - build_debian
@@ -100,59 +38,12 @@ jobs:
       - build_windows
     # if: always() && (needs.build_debian.result == 'success' || needs.build_manylinux.result == 'success' || needs.build_macos.result == 'success' || needs.build_windows.result == 'success')
     if: ${{ !failure() && !cancelled() }}
->>>>>>> 71d82e6a (final refactor)
     runs-on: ubuntu-latest
-
     steps:
-<<<<<<< HEAD
-<<<<<<< HEAD
-    - name: Checkout
-      uses: actions/checkout@v6
-||||||| parent of 4d668e09 (macOS build fixes)
-      - name: Checkout Code
-        uses: actions/checkout@v5
-=======
-      - name: Checkout Code
-||||||| parent of 71d82e6a (final refactor)
-      - name: Checkout Code
-=======
 
       - name: Checkout code
->>>>>>> 71d82e6a (final refactor)
         uses: actions/checkout@v6
->>>>>>> 4d668e09 (macOS build fixes)
 
-<<<<<<< HEAD
-    - name: Set Release Tag
-      id: set_tag
-      run: |
-        if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          echo "RELEASE_TAG=${{ github.sha }}" >> $GITHUB_ENV
-          echo "TAG_DESCRIPTION=${{ github.sha }}" >> $GITHUB_ENV
-        else
-          echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
-          TAG_NAME=$(git describe --tags)
-          echo "TAG_DESCRIPTION=$(git tag -n99 $TAG_NAME | sed -n '2p')" >> $GITHUB_ENV
-        fi
-||||||| parent of 71d82e6a (final refactor)
-      - name: Set Release Tag
-        id: set_tag
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "RELEASE_TAG=${{ github.sha }}" >> $GITHUB_ENV
-            echo "TAG_DESCRIPTION=Manual release from commit ${{ github.sha }}" >> $GITHUB_ENV
-          else
-            echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
-            TAG_NAME=$(git describe --tags)
-            TAG_DESC=$(git tag -l -n99 "$TAG_NAME" | tail -n +2 | sed 's/^[ \t]*//')
-            if [[ -z "$TAG_DESC" ]]; then
-              TAG_DESC="Release $TAG_NAME"
-            fi
-            echo "TAG_DESCRIPTION<<EOF" >> $GITHUB_ENV
-            echo "$TAG_DESC" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-          fi
-=======
       - name: Set release tag
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -169,88 +60,19 @@ jobs:
             echo "$TAG_DESC" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
           fi
->>>>>>> 71d82e6a (final refactor)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    - name: Download All Artifacts
-      uses: actions/download-artifact@v6
-      with:
-        pattern: binaries*
-        path: Cell2Fire
-        merge-multiple: true
-||||||| parent of 8089279f (build fixes)
-      - name: Download All Artifacts
-        uses: actions/download-artifact@v6
-        with:
-          pattern: binaries*
-          path: artifacts
-=======
-      - name: Get Artifacts
-||||||| parent of 71d82e6a (final refactor)
-      - name: Get Artifacts
-=======
       - name: Get artifacts
->>>>>>> 71d82e6a (final refactor)
         uses: actions/download-artifact@v6
         with:
           pattern: binaries*
           path: artifacts
->>>>>>> 8089279f (build fixes)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    - name: Zip Binaries
-      run: |
-        cd Cell2Fire
-        ls
-||||||| parent of 8089279f (build fixes)
-      - name: List Downloaded Artifacts
-        run: |
-          echo "Downloaded artifacts:"
-          find artifacts -type f -ls
-=======
-      - name: List Artifacts
-||||||| parent of 71d82e6a (final refactor)
-      - name: List Artifacts
-=======
       - name: List artifacts
->>>>>>> 71d82e6a (final refactor)
         run: |
           echo "Downloaded artifacts:"
           find artifacts -type f -ls
->>>>>>> 8089279f (build fixes)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        if [[ -f Cell2Fire.exe ]]; then
-          zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip Cell2Fire.exe *.dll
-        else
-          zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip WINDOWS_BUILD_WAS_DISABLED.txt
-        fi
-        zip ../Cell2FireW_${RELEASE_TAG}-manylinux-x86_64-binary.zip Cell2Fire ldd_manylinux.txt
-        zip ../Cell2FireW_${RELEASE_TAG}-Debian.bookworm.x86_64-binary.zip Cell2Fire.Debian.bookworm.x86_64 ldd.Debian.bookworm.x86_64.txt
-        zip ../Cell2FireW_${RELEASE_TAG}-Debian.trixie.x86_64-binary.zip Cell2Fire.Debian.trixie.x86_64 ldd.Debian.trixie.x86_64.txt
-        zip ../Cell2FireW_${RELEASE_TAG}-Ubuntu.noble.x86_64-binary.zip Cell2Fire.Ubuntu.noble.x86_64 ldd.Ubuntu.noble.x86_64.txt
-        zip ../Cell2FireW_${RELEASE_TAG}-macOS-binaries.zip Cell2Fire_Darwin* otool*.txt
-||||||| parent of 8089279f (build fixes)
-      - name: Organize Binaries
-        run: |
-          mkdir -p Cell2Fire
-          find artifacts -name 'Cell2Fire*' -type f -exec cp {} Cell2Fire/ \;
-          find artifacts -name 'ldd*.txt' -type f -exec cp {} Cell2Fire/ \;
-          find artifacts -name 'otool*.txt' -type f -exec cp {} Cell2Fire/ \;
-          find artifacts -name '*.dll' -type f -exec cp {} Cell2Fire/ \; 2>/dev/null || true
-          find artifacts -name '*.exe' -type f -exec cp {} Cell2Fire/ \; 2>/dev/null || true
-          find artifacts -name 'WINDOWS_BUILD_WAS_DISABLED.txt' -type f -exec cp {} Cell2Fire/ \; 2>/dev/null || true
-          ls -lh Cell2Fire/
-=======
-      - name: Organize Binaries
-||||||| parent of 71d82e6a (final refactor)
-      - name: Organize Binaries
-=======
       - name: Zipped directory for release
->>>>>>> 71d82e6a (final refactor)
         run: |
           mkdir zipped
 
@@ -283,82 +105,8 @@ jobs:
           find artifacts -name '*.dll' -type f -exec cp {} Cell2Fire/ \;
           # find artifacts -name '*.exe' -type f -exec cp {} Cell2Fire/ \;
           set -e
->>>>>>> 8089279f (build fixes)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    - name: Zip Data Instances
-      run: |
-        cd data
-        for format in asc tif; do
-          for fuel_model in CanadianFBP Kitral ScottAndBurgan Portugal; do
-            if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
-                echo "found $fuel_model $format"
-||||||| parent of 8089279f (build fixes)
-      - name: Create Binary Zips - Debian distros
-        run: |
-          cd Cell2Fire
-
-          for distro in "Debian.bookworm.x86_64" "Debian.trixie.x86_64" "Ubuntu.noble.x86_64" "Ubuntu.jammy.x86_64"; do
-            if [[ -f "Cell2Fire.${distro}" ]]; then
-              zip ../Cell2FireW_${RELEASE_TAG}-${distro}-binary.zip \
-                "Cell2Fire.${distro}" \
-                "ldd.${distro}.txt" \
-                "pkgs.${distro}.txt" 
-            else
-              echo "No build found for ${distro}, skipping zip creation."
-            fi
-          done
-          
-      - name: Create Binary Zips - ManyLinux
-        run: |
-          cd Cell2Fire
-          if [[ -f Cell2Fire ]]; then
-            zip ../Cell2FireW_${RELEASE_TAG}-manylinux-x86_64-binary.zip \
-              Cell2Fire \
-              ldd_manylinux.txt
-              pkgs_manylinux.txt
-          else
-            echo "No manylinux build found, skipping zip creation."
-          fi
-
-      - name: Create Binary Zips - macOS
-        run: |
-          cd Cell2Fire
-          if [[ -f Cell2Fire_Darwin ]]; then
-            zip ../Cell2FireW_${RELEASE_TAG}-macOS-binaries.zip \
-              Cell2Fire_Darwin* \
-              otool*.txt
-          else
-            echo "No macOS binaries found, skipping zip creation."
-          fi
-
-      - name: Create Binary Zips - Windows
-        run: |
-          cd Cell2Fire
-          if [[ -f Cell2Fire.exe ]]; then
-            zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip \
-              Cell2Fire.exe *.dll
-          else
-            echo "No Windows build found, creating placeholder zip."
-            zip ../Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip \
-              WINDOWS_BUILD_WAS_DISABLED.txt
-          fi
-
-      - name: Create Data Instance Zips
-        run: |
-          cd data
-          for format in asc tif; do
-            for fuel_model in CanadianFBP Kitral ScottAndBurgan Portugal; do
-              if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
-                echo "Zipping $fuel_model $format"
-=======
-      - name: Create Binary Zips - Debian distros
-||||||| parent of 71d82e6a (final refactor)
-      - name: Create Binary Zips - Debian distros
-=======
       - name: Create binary zips - debian distros
->>>>>>> 71d82e6a (final refactor)
         if: ${{ needs.build_debian.result == 'success' }}
         run: |
           cd Cell2Fire
@@ -435,183 +183,22 @@ jobs:
             for fuel_model in CanadianFBP Kitral Portugal ScottAndBurgan; do
               if find $fuel_model/*-$format -maxdepth 0 -quit 1>/dev/null 2>&1; then
                 echo "Zipping $fuel_model $format"
-<<<<<<< HEAD
->>>>>>> 8089279f (build fixes)
-                zip -r ../$fuel_model-$format.zip $fuel_model/*-$format
-<<<<<<< HEAD
-            fi
-||||||| parent of 8089279f (build fixes)
-              fi
-            done
-=======
-||||||| parent of 71d82e6a (final refactor)
-                zip -r ../$fuel_model-$format.zip $fuel_model/*-$format
-=======
                 zip -r ../zipped/$fuel_model-$format.zip $fuel_model/*-$format
->>>>>>> 71d82e6a (final refactor)
               else
                 echo "::warning::No files found for $fuel_model $format, skipping."
               fi
             done
->>>>>>> 8089279f (build fixes)
           done
-        done
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    - name: Git Archive
-      run: |
-        git rm -r data output test
-        git rm -f *.pdf
-        git add -f Cell2Fire/*
-        astash=`git stash create`
-        git archive --prefix=C2F/ --output="Cell2FireW_${{ env.RELEASE_TAG }}.zip" $astash
-||||||| parent of 8089279f (build fixes)
-      - name: Create Source Archive
-        run: |
-          git rm -r data output test 2>/dev/null || true
-          git rm -f *.pdf 2>/dev/null || true
-          git add -f Cell2Fire/* || true
-          astash=$(git stash create || echo "HEAD")
-          git archive --prefix=C2F/ --output="Cell2FireW_${RELEASE_TAG}.zip" $astash
-=======
-      - name: Create Source Archive, excluding instances and heavy documents or images
-||||||| parent of 71d82e6a (final refactor)
-      - name: Create Source Archive, excluding instances and heavy documents or images
-=======
       - name: Create source archive, excluding instances and heavy documents or images
->>>>>>> 71d82e6a (final refactor)
         run: |
           git rm -rf data output 2>/dev/null || true
           git rm -f *.pdf 2>/dev/null || true
           git add -f Cell2Fire/* || true
           astash=$(git stash create || echo "HEAD")
-<<<<<<< HEAD
-          git archive --prefix=C2F/ --output="Cell2FireW_${RELEASE_TAG}.zip" $astash
->>>>>>> 8089279f (build fixes)
-||||||| parent of 71d82e6a (final refactor)
-          git archive --prefix=C2F/ --output="Cell2FireW_${RELEASE_TAG}.zip" $astash
-=======
           git archive --prefix=C2F/ --output="zipped/Cell2FireW_${RELEASE_TAG}.zip" $astash
->>>>>>> 71d82e6a (final refactor)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-    - name: Create Draft Release
-      uses: ncipollo/release-action@v1.20.0
-      with:
-        artifacts: |
-          Cell2FireW_${{ env.RELEASE_TAG }}.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip
-
-          Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip
-
-          Cell2FireW_${{ env.RELEASE_TAG }}-Debian.trixie.x86_64-binary.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.noble.x86_64-binary.zip
-          Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip
-          Kitral-asc.zip
-          Kitral-tif.zip
-          CanadianFBP-asc.zip
-          ScottAndBurgan-asc.zip
-          ScottAndBurgan-tif.zip
-          Portugal-asc.zip
-          Portugal-tif.zip
-        token: ${{ secrets.GITHUB_TOKEN }}
-        draft: true
-        tag: ${{ env.RELEASE_TAG }}
-        name: "C2F-W: ${{ env.RELEASE_TAG }}"
-        body: ${{ env.TAG_DESCRIPTION}}
-||||||| parent of 8089279f (build fixes)
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: |
-            Cell2FireW_${{ env.RELEASE_TAG }}.zip
-            Cell2FireW_${{ env.RELEASE_TAG }}-Debian.bookworm.x86_64-binary.zip
-            Cell2FireW_${{ env.RELEASE_TAG }}-Debian.trixie.x86_64-binary.zip
-            Cell2FireW_${{ env.RELEASE_TAG }}-Ubuntu.noble.x86_64-binary.zip
-            Cell2FireW_${{ env.RELEASE_TAG }}-manylinux-x86_64-binary.zip
-            Cell2FireW_${{ env.RELEASE_TAG }}-macOS-binaries.zip
-            Cell2FireW_${{ env.RELEASE_TAG }}-Windows-x86_64-binary.zip
-            Kitral-asc.zip
-            Kitral-tif.zip
-            CanadianFBP-asc.zip
-            ScottAndBurgan-asc.zip
-            ScottAndBurgan-tif.zip
-            Portugal-asc.zip
-            Portugal-tif.zip
-          token: ${{ secrets.GITHUB_TOKEN }}
-          draft: true
-          tag: ${{ env.RELEASE_TAG }}
-          name: "C2F-W: ${{ env.RELEASE_TAG }}"
-          body: ${{ env.TAG_DESCRIPTION }}
-=======
-      - name: Build artifact list for release
-        run: |
-          ARTIFACTS="Cell2FireW_${RELEASE_TAG}.zip"
-          for f in \
-            Cell2FireW_${RELEASE_TAG}-Debian.bookworm.x86_64-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-Debian.trixie.x86_64-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-Ubuntu.noble.x86_64-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-manylinux-x86_64-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-14-arm64-dynamic-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-14-arm64-static-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-arm64-dynamic-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-arm64-static-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-intel-x86_64-dynamic-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-intel-x86_64-static-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip \
-            Kitral-asc.zip \
-            Kitral-tif.zip \
-            CanadianFBP-asc.zip \
-            ScottAndBurgan-asc.zip \
-            ScottAndBurgan-tif.zip \
-            Portugal-asc.zip \
-            Portugal-tif.zip
-          do
-            if [[ -f "$f" ]]; then
-              ARTIFACTS="$ARTIFACTS $f"
-            fi
-          done
-          echo "$ARTIFACTS" > artifact-list.txt
-
-      - name: Create GitHub Release
-||||||| parent of 71d82e6a (final refactor)
-      - name: Build artifact list for release
-        run: |
-          ARTIFACTS="Cell2FireW_${RELEASE_TAG}.zip"
-          for f in \
-            Cell2FireW_${RELEASE_TAG}-Debian.bookworm.x86_64-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-Debian.trixie.x86_64-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-Ubuntu.noble.x86_64-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-manylinux-x86_64-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-14-arm64-dynamic-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-14-arm64-static-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-arm64-dynamic-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-arm64-static-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-intel-x86_64-dynamic-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-macOS-macos-15-intel-x86_64-static-binary.zip \
-            Cell2FireW_${RELEASE_TAG}-Windows-x86_64-binary.zip \
-            Kitral-asc.zip \
-            Kitral-tif.zip \
-            CanadianFBP-asc.zip \
-            ScottAndBurgan-asc.zip \
-            ScottAndBurgan-tif.zip \
-            Portugal-asc.zip \
-            Portugal-tif.zip
-          do
-            if [[ -f "$f" ]]; then
-              ARTIFACTS="$ARTIFACTS $f"
-            fi
-          done
-          echo "$ARTIFACTS" > artifact-list.txt
-
-      - name: Create GitHub Release
-=======
       - name: Create github release
->>>>>>> 71d82e6a (final refactor)
         uses: ncipollo/release-action@v1
         with:
           artifacts: zipped/*
@@ -620,4 +207,3 @@ jobs:
           tag: ${{ env.RELEASE_TAG }}
           name: 'C2F-W: ${{ env.RELEASE_TAG }}'
           body: ${{ env.TAG_DESCRIPTION }}
->>>>>>> 8089279f (build fixes)
