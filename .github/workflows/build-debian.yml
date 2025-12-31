@@ -145,7 +145,7 @@ jobs:
           echo "SUFFIX=${SUFFIX}" >> $GITHUB_ENV
 
       - name: Download artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: binaries${{ env.SUFFIX }}
           path: Cell2Fire
