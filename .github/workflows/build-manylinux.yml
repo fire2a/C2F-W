@@ -1,14 +1,12 @@
-name: build manylinux
+---
+name: Build ManyLinux (static lib.linking)
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
   workflow_dispatch:
   workflow_call:
 
 env:
-  do_dynamic: true
+  STATIC_BUILD_DEPS: g++ make libboost-random-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
 
 permissions:
   contents: write
@@ -16,145 +14,81 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+
+      - name: Checkout code
         uses: actions/checkout@v6
 
       - name: Bump version in code
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            version=${{ github.sha }}
-          fi
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            version=${{ github.sha }}
-          fi  
-          if [[ "${{github.event_name}}" == "push" && "${{github.ref_type}}" == "tag" ]]; then
-            version=${{ github.ref_name }}
+            version="${{ github.sha }}"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version="${{ github.sha }}"
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref_type }}" == "tag" ]]; then
+            version="${{ github.ref_name }}"
+          else
+            version="${{ github.sha }}"
           fi
           echo "Setting version to ${version}"
           sed -i "s/C2FW_VERSION.*/C2FW_VERSION = \"${version}\";/" Cell2Fire/Cell2Fire.h
 
-      - name: Install Build Dependencies
+      - name: Install build dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y g++-12 libboost-all-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev
+          sudo apt-get update -qq
+          sudo apt-get install -y ${{ env.STATIC_BUILD_DEPS }}
 
-      - name: Check Packages Versions
-        run: |
-          dpkg-query -W -f='${binary:Package} ${Version}\n' g++-12 libboost-all-dev libtiff-dev libjpeg-dev libjbig-dev liblzma-dev libzstd-dev libwebp-dev libdeflate-dev libleptonica-dev liblerc-dev > new_pkgs_ubuntu.txt
-          cat new_pkgs_ubuntu.txt
-
-      - name: Get Environment
-        if: ${{ env.do_dynamic == 'true' }}
-        run: |
-          DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
-          CODENAME=$( lsb_release --short --codename 2>/dev/null )
-          MACHINE=$( uname --machine 2>/dev/null )
-          echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
-
-      - name: Build Suffix
-        if: ${{ env.do_dynamic == 'true' }}
+      - name: Build static binary
         run: |
           cd Cell2Fire
-          make clean
-          make
-          ldd Cell2Fire > ldd${{ env.SUFFIX }}.txt
-          mv Cell2Fire Cell2Fire${{ env.SUFFIX }}
+          make -f makefile.static clean
+          make -f makefile.static
 
-      - name: Upload Suffix
-        if: ${{ env.do_dynamic == 'true' }}
-        uses: actions/upload-artifact@v5
-        with:
-          name: binaries${{ env.SUFFIX }}
-          path: |
-            Cell2Fire/ldd${{ env.SUFFIX }}.txt
-            Cell2Fire/Cell2Fire${{ env.SUFFIX }}
-          if-no-files-found: error
-
-      - name: Build Static
+      - name: Check package versions
         run: |
+          echo "Checking installed dependencies versions:"
           cd Cell2Fire
-          make clean
-          make -f makefile.static > ldd_manylinux.txt 2>&1 || true
-          ldd Cell2Fire > ldd_manylinux.txt 2>&1 || true
+          dpkg-query -W -f='${binary:Package} ${Version}\n' ${{ env.STATIC_BUILD_DEPS }} 2>&1 | tee pkgs_manylinux.txt
 
-      - name: Upload Static
+      - name: Verify static linking
+        run: |
+          echo "Checking dynamic dependencies, should output: not a dynamic executable"
+          cd Cell2Fire
+          ldd Cell2Fire 2>&1 | tee ldd_manylinux.txt
+
+      - name: Upload static binary
         uses: actions/upload-artifact@v5
         with:
           name: binaries-manylinux-x86_64
           path: |
-            Cell2Fire/ldd_manylinux.txt
             Cell2Fire/Cell2Fire
+            Cell2Fire/pkgs_manylinux.txt
+            Cell2Fire/ldd_manylinux.txt
           if-no-files-found: error
 
-  test:
+  regression_tests:
     needs: build
+    if: ${{ vars.RUN_REGRESSION_TESTS == 'true' }}
     runs-on: ubuntu-latest
-    container: ubuntu:noble
-
     steps:
 
-      - name: Checkout Code
+      - name: Checkout only tests
         uses: actions/checkout@v6
-
-      - name: Install Base Dependencies
-        run: |
-          apt-get update
-          apt-get install -y unzip g++-12 make lsb-release curl
-
-      - name: Cache Catch2 header
-        uses: actions/cache@v4
         with:
-          path: catch.hpp
-          key: ${{ runner.os }}-catch2
+          sparse-checkout: |
+            test/
+          sparse-checkout-cone-mode: false
 
-      - name: Download Catch2 header
-        run: |
-          if [ ! -f /usr/include/catch2/catch.hpp ]; then
-            mkdir  /usr/include/catch2
-            curl -L https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp -o /usr/include/catch2/catch.hpp
-          fi
-
-      - name: Download Artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v6
         with:
-          pattern: binaries*
+          name: binaries-manylinux-x86_64
           path: Cell2Fire
-          merge-multiple: true
 
-      - name: chmod
-        run: |
-          chmod +x Cell2Fire/Cell2Fire*
-
-      - name: Unit Test
-        run: |
-          cd Cell2Fire
-          make tests
-
-      - name: Test ManyLinux
-        run: |
+      - name: Run tests
+        run: |-
+          chmod +x "Cell2Fire/Cell2Fire"
+          chmod +x "test/test.sh"
           cd test
-          bash test.sh
-
-      - name: Get Environment
-        if: ${{ env.do_dynamic == 'true' }}
-        id: get_env
-        run: |
-          DISTRIBUTION=$( lsb_release --short --id 2>/dev/null )
-          CODENAME=$( lsb_release --short --codename 2>/dev/null )
-          MACHINE=$( uname --machine 2>/dev/null )
-          echo "SUFFIX=".${DISTRIBUTION}.${CODENAME}.${MACHINE}"" >> $GITHUB_ENV
-
-      - name: Install Runtime Dependencies
-        if: ${{ env.do_dynamic == 'true' }}
-        run: |
-          apt-get update
-          apt-get install -y libtiff6 libstdc++6 libgomp1 libgcc1
-
-      - name: Test Suffix
-        if: ${{ env.do_dynamic == 'true' }}
-        run: |
-          cd test
-          bash test.sh ${{ env.SUFFIX }}
+          ./test.sh

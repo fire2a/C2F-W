@@ -1,3 +1,4 @@
+---
 name: CI
 
 on:
@@ -11,10 +12,10 @@ on:
 jobs:
   quick-check:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Dependencies
         run: |
@@ -38,7 +39,7 @@ jobs:
           ./test_cell2fire
 
       - name: Show Binary Info
-        run: |
+        run: |-
           cd Cell2Fire
           ls -lh Cell2Fire test_cell2fire
           ldd Cell2Fire
