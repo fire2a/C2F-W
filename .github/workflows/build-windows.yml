@@ -51,7 +51,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path "$env:GITHUB_WORKSPACE\.github\.environment\vcpkg\downloads" | Out-Null
 
       - name: Cache vcpkg (archives, downloads, installed)
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
