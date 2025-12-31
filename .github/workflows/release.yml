@@ -14,6 +14,7 @@ permissions:
 jobs:
   # vars are set in the repository settings as needed to skip builds; unit or regression tests
   # https://github.com/fire2a/C2F-W/settings/variables/actions
+  # see also .github/github-runner/README.md
   build_debian:
     if: ${{ vars.BUILD_DEBIAN == 'true' }}
     uses: ./.github/workflows/build-debian.yml
