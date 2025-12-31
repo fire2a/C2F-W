@@ -2,7 +2,6 @@
 #define WRITECSV
 
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
 #include <cmath>
 #include <fstream>
 #include <iostream>

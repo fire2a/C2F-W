@@ -199,7 +199,9 @@ Cell2Fire/Cell2Fire
 Cell2Fire/Cell2Fire.Linux*
 Cell2Fire/Cell2Fire.Darwin*
 Cell2Fire/x64
+Cell2Fire/WindowsTests/x64
 Cell2Fire/include
+Cell2Fire/vcpkg_installed
 test/test_results
 test/target_results
 docs/html

@@ -7,7 +7,6 @@
 
 #include "tiffio.h"
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
 #include <iterator>

@@ -105,24 +105,20 @@ Cell2Fire --final-grid --output-messages --out-ros --sim S --nsims 2 --seed 123 
 # check the results: to convert to tiff or see the results in QGIS, use the plugin
 ```
 
-### Get the container
-
-![Tutorial here](container/README.md), TL;DR:
-
+### Containerized
+TL;DR:
 ```bash
-# have or install podman (or docker)
-sudo apt install podman
-
-# download the container [Dockerfile](https://github.com/fire2a/C2F-W/raw/refs/heads/feature-containerize/container/Dockerfile)
-wget https://github.com/fire2a/C2F-W/raw/refs/heads/feature-containerize/container/Dockerfile
-
-# build
-podman build -t c2f -f Dockerfile .
-
-# Done! Usage mounting the instance and results directories into the container
+podman build -t cell2fire -f container/Containerfile .
 mkdir results
-podman run -v $(pwd):/mnt c2f --input-instance-folder /mnt/data/Kitral/Portillo-tif --output-folder /mnt/results --nsims 3 --sim K --grids | tee results/log.txt
+podman run -v $(pwd):/mnt cell2fire \
+    --input-instance-folder /mnt/data/ScottAndBurgan/Vilopriu_2013-tif \
+    --output-folder /mnt/results \
+    --nsims 3 --sim S \
+    --output-messages --ignitionsLog | tee results/log.txt
+rm -r results/*
 ```
+
+[More options and tutorial here](container/README.md)
 
 ## Collaborative
 
@@ -130,9 +126,9 @@ Compile it
 
 ```bash
 # dependencies
-sudo apt install g++-12 libboost-all-dev libeigen3-dev libtiff-dev
+sudo apt install g++ libboost-random-dev libtiff-dev
 # or brew
-brew install gcc@12 libomp eigen boost libtiff # llvm ?
+brew install gcc@12 libomp boost libtiff # llvm ?
 
 # fork & clone 
 git clone git@github.com:<YOU>/C2F-W.git
