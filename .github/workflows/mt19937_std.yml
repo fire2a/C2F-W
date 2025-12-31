@@ -15,7 +15,7 @@ jobs:
           - windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup MSBuild (Windows)
         if: startsWith(matrix.os, 'windows')
         uses: microsoft/setup-msbuild@v2
