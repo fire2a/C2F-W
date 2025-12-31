@@ -81,7 +81,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Download artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: binaries-manylinux-x86_64
           path: Cell2Fire

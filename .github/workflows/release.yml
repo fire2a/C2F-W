@@ -63,7 +63,7 @@ jobs:
           fi
 
       - name: Get artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: binaries*
           path: artifacts
