@@ -60,10 +60,10 @@ foreach ($format in "asc", "tif") {
 
         # Run the simulation and tee the output to a log file
         & $Exe @cmdArgs *> $logFile 2>$null
-            (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
-            (Get-Content $logFile | Select-String -pattern 'version:' -notmatch) | Set-Content $logFile
-            (Get-Content "$outputDir/ignition_and_weather_log.csv") -replace '\\', '/' | Set-Content "$outputDir/ignition_and_weather_log.csv"
-        }
+        (Get-Content $logFile) -replace '\\', '/' | Set-Content $logFile
+        (Get-Content $logFile | Select-String -pattern 'version:' -notmatch) | Set-Content $logFile
+        (Get-Content "$outputDir/ignition_and_weather_log.csv") -replace '\\', '/' | Set-Content "$outputDir/ignition_and_weather_log.csv"
+    }
 }
 
 # Define directories to compare
