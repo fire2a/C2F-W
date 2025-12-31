@@ -1,193 +1,169 @@
-name: build and test windows
+---
+name: Build Windows
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
   workflow_dispatch:
   workflow_call:
-    inputs:
-      enabled:
-        description: 'Enable the full Windows build (set false to upload placeholder)'
-        required: false
-        type: boolean
-        default: true
 
 permissions:
   contents: write
 
-env:
-  # True means perform actual Windows build; false means skip and upload placeholder
-  ENABLED: ${{ inputs.enabled }}
-
 jobs:
-  windows_build:
+  build:
     runs-on: windows-latest
-
+    defaults:
+      run:
+        shell: powershell
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\.github\.environment\vcpkg\archives
+      VCPKG_DOWNLOADS: ${{ github.workspace }}\.github\.environment\vcpkg\downloads
+      VCPKG_FEATURE_FLAGS: manifests,binarycaching
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}\.github\.environment\vcpkg\archives,readwrite
     steps:
-    - name: Checkout
-      uses: actions/checkout@v6
 
-    - name: Skip build (placeholder artifact)
-      if: env.ENABLED != 'true'
-      run: |
-        echo "Windows build disabled (ENABLED=${{ env.ENABLED }})"
-        mkdir binaries
-        echo "Windows build disabled" > binaries/WINDOWS_BUILD_WAS_DISABLED.txt
-      shell: bash
+      - name: Checkout Code
+        uses: actions/checkout@v6
 
-    - name: Bump version in header (Windows)
-      if: env.ENABLED == 'true'
-      shell: pwsh
-      run: |
-        if ( "${{ github.event_name }}" -eq "pull_request" ){
-          $version="${{ github.sha }}"
-        }
-        if ("${{ github.event_name }}" -eq "workflow_dispatch" ){
-          $version="${{ github.sha }}"
-        } 
-        if ( ("${{github.event_name}}" -eq "push") -and ("${{github.ref_type}}" -eq "tag" )){
-          $ref="${{ github.ref }}"
-          $version=$ref.Split("/")[-1]
-        }
-        
-        Write-Host "Setting version to $version"
-        
-        $path = "Cell2Fire\Cell2Fire.h"
-        (Get-Content $path) -replace 'C2FW_VERSION\s*=\s*".*?"', "C2FW_VERSION = `"$version`"" | Set-Content $path
-        
-        Select-String 'C2FW_VERSION' $path
+      - name: Bump version in header
+        run: |
+          $version = "dev"
+          if ( "${{ github.event_name }}" -eq "pull_request" ){
+            $version="${{ github.sha }}"
+          }
+          if ("${{ github.event_name }}" -eq "workflow_dispatch" ){
+            $version="${{ github.sha }}"
+          } 
+          if ( ("${{github.event_name}}" -eq "push") -and ("${{github.ref_type}}" -eq "tag" )){
+            $ref="${{ github.ref }}"
+            $version=$ref.Split("/")[-1]
+          }
+          Write-Host "Setting version to $version"
+          $path = "Cell2Fire\Cell2Fire.h"
+          (Get-Content $path) -replace 'C2FW_VERSION\s*=\s*".*?"', "C2FW_VERSION = `"$version`"" | Set-Content $path
+          Select-String 'C2FW_VERSION' $path
 
-    - name: Cache Boost
-      if: env.ENABLED == 'true'
-      id: cache-boost
-      uses: actions/cache@v4
-      with:
-        path: |
-          Cell2Fire/include/boost_1_84_0
-        key: boost-${{ runner.os }}-1.84.0
-        restore-keys: |
-          boost-${{ runner.os }}-
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-    - name: Cache Dirent
-      if: env.ENABLED == 'true'
-      id: cache-dirent
-      uses: actions/cache@v4
-      with:
-        path: |
-          Cell2Fire/include/dirent-1.25
-        key: dirent-${{ runner.os }}-1.25
-        restore-keys: |
-          dirent-${{ runner.os }}-
+      - name: Prepare vcpkg workspace dirs
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:GITHUB_WORKSPACE\.github\.environment\vcpkg\archives" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$env:GITHUB_WORKSPACE\.github\.environment\vcpkg\downloads" | Out-Null
 
-    - name: Cache vcpkg
-      if: env.ENABLED == 'true'
-      id: cache-vcpkg
-      uses: actions/cache@v4
-      with:
-        path: |
-          Cell2Fire/include/vcpkg
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
-        restore-keys: |
-          vcpkg-${{ runner.os }}-
+      - name: Cache vcpkg (archives, downloads, installed)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+            ${{ env.VCPKG_DOWNLOADS }}
+            Cell2Fire\vcpkg_installed
+          key: vcpkg-${{ vars.CACHE_EPOCH }}-cache-key-${{ hashFiles('Cell2Fire/vcpkg.json') }}
 
-    - name: Download dependencies
-      if: env.ENABLED == 'true' && (steps.cache-vcpkg.outputs.cache-hit != 'true' || steps.cache-boost.outputs.cache-hit != 'true' || steps.cache-dirent.outputs.cache-hit != 'true')
-      env:
-        CACHE_BOOST: ${{ steps.cache-boost.outputs.cache-hit }}
-        CACHE_DIRENT: ${{ steps.cache-dirent.outputs.cache-hit }}
-        CACHE_VCPKG: ${{ steps.cache-vcpkg.outputs.cache-hit }}
-      run: |
-        cd Cell2Fire
-        New-Item -ItemType Directory -Path "include" -Force
+      - name: Show vcpkg paths (pre-build)
+        if: ${{ false }}
+        run: |
+          cd Cell2Fire
+          $archives = $env:VCPKG_DEFAULT_BINARY_CACHE
+          $downloads = $env:VCPKG_DOWNLOADS
+          $installed = Join-Path $PWD "vcpkg_installed"
+          Write-Host "Archives path=$archives"
+          Write-Host "Downloads path=$downloads"
+          Write-Host "Install root (project)=$installed"
+          function Show-DirSummary($label, $path) {
+            if (Test-Path $path) {
+              $count = (Get-ChildItem $path -Recurse -File -ErrorAction SilentlyContinue | Measure-Object).Count
+              Write-Host "$label exists, files=$count"
+            } else {
+              Write-Host "$label does not exist"
+            }
+          }
+          Show-DirSummary "Archives" $archives
+          Show-DirSummary "Downloads" $downloads
+          Show-DirSummary "Installed" $installed
 
-        Write-Host "Cache Boost: $CACHE_BOOST $($CACHE_BOOST -ne 'true')"
-        Write-Host "Cache Boost: $CACHE_VCPKG $($CACHE_VCPKG -ne 'true')"
+      - name: Ensure vcpkg registry has required baseline
+        run: |
+          $root = $env:VCPKG_INSTALLATION_ROOT
+          Write-Host "VCPKG_INSTALLATION_ROOT=$root"
+          if (Test-Path (Join-Path $root ".git")) {
+            Write-Host "Ensuring baseline commit exists in vcpkg registry (assuming complete repo)..."
+            $manifest = Get-Content "$env:GITHUB_WORKSPACE\Cell2Fire\vcpkg.json" | ConvertFrom-Json
+            $baseline = $manifest."builtin-baseline"
+            Write-Host "Pinned baseline=$baseline"
+            git -C $root fetch --prune --tags
+            git -C $root fetch origin $baseline
+            git -C $root show -s --format=%H $baseline
+          } else {
+            Write-Host "vcpkg root is not a git repo; skipping registry fetch."
+          }
 
-        # boost
-        if ($CACHE_BOOST -ne 'true') {
-          $fname = "boost_1_84_0.tar.gz"
-          Invoke-WebRequest -Uri https://archives.boost.io/release/1.84.0/source/$fname -OutFile $fname
-          tar -xzf $fname -C include
-        } else {
-          echo "Boost already cached"
-        }
+      - name: Build Solution
+        run: |
+          cd Cell2Fire
+          vcpkg integrate install
+          msbuild Cell2Fire.sln /m /t:Clean,Build /p:Configuration=Release /p:Platform=x64 /p:VcpkgEnableManifest=true
 
-        # dirent
-        if ($CACHE_DIRENT -ne 'true') {
-          Invoke-WebRequest -Uri https://github.com/tronkko/dirent/archive/refs/tags/1.25.zip -OutFile dirent-1.25.zip
-          Expand-Archive -Path .\dirent-1.25.zip -DestinationPath include
-        } else {
-          echo "Dirent already cached"
-        }
+      - name: Show vcpkg paths (post-build)
+        if: ${{ false }}
+        run: |
+          cd Cell2Fire
+          $archives = $env:VCPKG_DEFAULT_BINARY_CACHE
+          $downloads = $env:VCPKG_DOWNLOADS
+          $installed = Join-Path $PWD "vcpkg_installed"
+          Write-Host "Archives path=$archives"
+          Write-Host "Downloads path=$downloads"
+          Write-Host "Install root (project)=$installed"
+          function Show-DirSummary($label, $path) {
+            if (Test-Path $path) {
+              $count = (Get-ChildItem $path -Recurse -File -ErrorAction SilentlyContinue | Measure-Object).Count
+              Write-Host "$label exists, files=$count"
+            } else {
+              Write-Host "$label does not exist"
+            }
+          }
+          Show-DirSummary "Archives" $archives
+          Show-DirSummary "Downloads" $downloads
+          Show-DirSummary "Installed" $installed
 
-        # tiffio
-        if ($CACHE_VCPKG -ne 'true') {
-          git clone https://github.com/microsoft/vcpkg.git include\vcpkg
-        } else {
-          echo "vcpkg already cached"
-        }
+      - name: Run Unit Tests
+        if: ${{ vars.RUN_UNIT_TESTS == 'true' }}
+        run: |
+          & "Cell2Fire\x64\Release\WindowsTests.exe"
+          $exitCode = $LASTEXITCODE
+          exit $exitCode
 
-    - name: Setup vcpkg
-      if: env.ENABLED == 'true'
-      run: |
-        cd Cell2Fire\include\vcpkg
-        .\bootstrap-vcpkg.bat
-        .\vcpkg integrate install
-        .\vcpkg install tiff # --recurse --editable
-        # Write-Host "Listing all files in installed\x64-windows:"
-        # Get-ChildItem -Recurse installed\x64-windows | ForEach-Object { $_.FullName }
+      - name: Gather output
+        run: |
+          mkdir binaries
+          copy Cell2Fire\x64\Release\*.dll binaries
+          copy Cell2Fire\x64\Release\Cell2Fire.exe binaries
 
-    - name: Cache Catch2 header
-      if: env.ENABLED == 'true'
-      uses: actions/cache@v4
-      with:
-        path: Cell2Fire\include\catch2\catch.hpp
-        key: windows-catch2
+      - name: Upload artifact (real or placeholder)
+        uses: actions/upload-artifact@v5
+        with:
+          name: binaries-Windows-x86_64
+          path: binaries
 
-    - name: Download Catch2 header
-      if: env.ENABLED == 'true'
-      run: |
-        cd Cell2Fire
-        if (!(Test-Path "include\catch2\catch.hpp")) {
-          New-Item -ItemType Directory -Path "include\catch2" -Force
-          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp" -OutFile "include\catch2\catch.hpp"
-        }
+  regression_tests:
+    needs: build
+    if: ${{ vars.RUN_REGRESSION_TESTS == 'true' }}
+    runs-on: windows-latest
+    steps:
 
-    - name: Setup MSBuild
-      if: env.ENABLED == 'true'
-      uses: microsoft/setup-msbuild@v2
+      - name: Checkout tests only
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            test/
+          sparse-checkout-cone-mode: false
 
-    - name: Build Solution
-      if: env.ENABLED == 'true'
-      run: |
-        cd Cell2Fire
-        msbuild Cell2Fire.sln /p:Configuration=Release
+      - name: Download Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          name: binaries-Windows-x86_64
+          path: Cell2Fire
 
-    - name: Run Unit Tests
-      if: env.ENABLED == 'true'
-      run: |
-        & "Cell2Fire\x64\Release\WindowsTests.exe"
-        $exitCode = $LASTEXITCODE
-        exit $exitCode
-      shell: pwsh
-
-    - name: Run Regression Test
-      if: env.ENABLED == 'true'
-      run: |
-        cd test
-        ./test.ps1
-      shell: pwsh
-
-    - name: Gather output
-      if: env.ENABLED == 'true'
-      run: |
-        mkdir binaries
-        copy Cell2Fire\x64\Release\*.dll binaries
-        copy Cell2Fire\x64\Release\Cell2Fire.exe binaries
-
-    - name: Upload artifact (real or placeholder)
-      uses: actions/upload-artifact@v5
-      with:
-        name: binaries-Windows-x86_64
-        path: binaries
+      - name: Run Regression Test
+        run: |-
+          cd test
+          ./test.ps1 ../Cell2Fire/Cell2Fire.exe
