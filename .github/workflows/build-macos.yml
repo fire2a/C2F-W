@@ -200,7 +200,7 @@ jobs:
           echo "Building for: ${SUFFIX}"
 
       - name: Download artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: binaries${{ env.SUFFIX }}
           path: Cell2Fire
