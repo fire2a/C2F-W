@@ -139,7 +139,7 @@ jobs:
           copy Cell2Fire\x64\Release\Cell2Fire.exe binaries
 
       - name: Upload artifact (real or placeholder)
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: binaries-Windows-x86_64
           path: binaries
