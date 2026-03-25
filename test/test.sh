@@ -15,6 +15,7 @@ unzip -q target_results.zip
 
 # add to path
 PATH=../Cell2Fire:$PATH
+echo "Using Cell2Fire from $(which Cell2Fire$1)"
 
 # run
 set -x # enable debug tracing

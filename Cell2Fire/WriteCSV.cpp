@@ -1,7 +1,6 @@
 #include "WriteCSV.h"
 
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
 #include <cmath>
 #include <fstream>
 #include <iostream>

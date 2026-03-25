@@ -442,7 +442,13 @@ Cells::manageFire(int period,
     msg_list_aux.push_back(0);
     std::vector<int> msg_list;
 
-    int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+    int head_angle = wdf_ptr->waz - 90;
+    if (head_angle < 0)
+        head_angle += 360;
+
+    head_angle = std::round(head_angle / 45.0) * 45.0;
+
+    int head_cell = angleToNb[head_angle];  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
         head_cell = this->realId;  // as it is used only for slope calculation, if
@@ -450,6 +456,7 @@ Cells::manageFire(int period,
                                    // same
                                    // cell, so it uses a no slope scenario
     }
+
     // Compute main angle and ROSs: forward, flanks and back
     main_outs mainstruct = {};
     main_outs metrics = {};
