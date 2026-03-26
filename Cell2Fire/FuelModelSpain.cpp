@@ -2499,7 +2499,7 @@ calculate_s(inputs* data,
 
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not
     // want to include it)
-    if (args->AllowCROS && data->cbh != 0 && data->cbd != 0)
+    if (args->AllowCROS && data->cbh > 0 && data->cbd > 0)
     {
         if (activeCrown)
         {
@@ -2646,7 +2646,7 @@ determine_destiny_metrics_s(inputs* data, fuel_coefs* ptr, arguments* args, main
     metrics->cfb = 0;
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not
     // want to include it)
-    if (args->AllowCROS)
+    if (args->AllowCROS && data->cbh > 0 && data->cbd > 0)
     {
         crownFire = fire_type(data, metrics);
         if (crownFire)

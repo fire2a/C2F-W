@@ -42,13 +42,13 @@ float fire_intensity(float fc, float ros);
 
 void setup_const(fuel_coefs* ptr);
 
-char get_fueltype_number(fuel_coefs** ptr, char ft[4]);
+char get_fueltype_number(fuel_coefs** ptr, string ft);
 
 float foliar_moisture(inputs* inp, main_outs* at);
 
 float crit_surf_intensity(fuel_coefs* ptr, float fmc);
 
-float critical_ros(char ft[3], float sfc, float csi);
+float critical_ros(float sfc, float csi);
 
 int fire_type(float csi, float sfi);
 
@@ -62,7 +62,7 @@ float crown_consump(inputs* inp, fuel_coefs* ptr, float cfb);
 
 float foliar_mois_effect(float isi, float fmc);
 
-float l_to_b(char ft[3], float ws);
+float l_to_b(string ft, float ws);
 
 float ffmc_effect(float ffmc);
 

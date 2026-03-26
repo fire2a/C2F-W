@@ -1264,7 +1264,7 @@ calculate_p(inputs* data,
     at->sfi = byram_intensity_p(at, ptr);
 
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
-    if (args->AllowCROS && data->cbh != 0 && data->cbd != 0)
+    if (args->AllowCROS && data->cbh > 0 && data->cbd > 0)
     {
         if (activeCrown)
         {
@@ -1407,7 +1407,7 @@ determine_destiny_metrics_p(inputs* data, fuel_coefs* ptr, arguments* args, main
     // Set cfb value for no crown fire scenario
     metrics->cfb = 0;
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
-    if (args->AllowCROS)
+    if (args->AllowCROS && data->cbh > 0 && data->cbd > 0)
     {
         crownFire = fire_type_p(data, metrics);
         if (crownFire)
