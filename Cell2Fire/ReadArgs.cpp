@@ -87,6 +87,22 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     else
         input_hplan = &empty;
 
+    //--weather-weights
+    char* weather_weights_file = getCmdOption(argv, argv + argc, "--weather-weights");
+    if (weather_weights_file)
+    {
+        printf("WeatherWeightsFile: %s \n", weather_weights_file);
+        args_ptr->WeatherWeightsFile = weather_weights_file;
+        args_ptr->UseWeatherWeights = true;
+        input_weather = "random";
+        args_ptr->WeatherOpt = "random";
+    }
+    else {
+        args_ptr->WeatherWeightsFile = &empty;
+        args_ptr->UseWeatherWeights = false;
+    }
+
+
     // Booleans
     bool out_messages = false;
     bool out_trajectories = false;
