@@ -444,53 +444,18 @@ Cells::manageFire(int period,
     fire_struc headstruct, backstruct, flankstruct, metrics2;
 
     // Calculate parameters
-    if (args->Simulator == "K")
-    {
-        calculate_k(&df_ptr[this->realId - 1],
-                    &df_ptr[head_cell - 1],
-                    perimeterCells,
-                    coef,
-                    args,
-                    &mainstruct,
-                    &sndstruct,
-                    &headstruct,
-                    &flankstruct,
-                    &backstruct,
-                    activeCrown,
-                    wdf_ptr);
-    }
-    else if (args->Simulator == "S")
-    {
-        calculate_s(&df_ptr[this->realId - 1],
-                    coef,
-                    args,
-                    &mainstruct,
-                    &sndstruct,
-                    &headstruct,
-                    &flankstruct,
-                    &backstruct,
-                    activeCrown,
-                    wdf_ptr);
-    }
-    else if (args->Simulator == "C")
-    {
-        calculate_fbp(
-            &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, wdf_ptr);
-    }
-
-    else if (args->Simulator == "P")
-    {
-        calculate_p(&df_ptr[this->realId - 1],
-                    coef,
-                    args,
-                    &mainstruct,
-                    &sndstruct,
-                    &headstruct,
-                    &flankstruct,
-                    &backstruct,
-                    activeCrown,
-                    wdf_ptr);
-    }
+    calculate_k(&df_ptr[this->realId - 1],
+                &df_ptr[head_cell - 1],
+                perimeterCells,
+                coef,
+                args,
+                &mainstruct,
+                &sndstruct,
+                &headstruct,
+                &flankstruct,
+                &backstruct,
+                activeCrown,
+                wdf_ptr);
 
     /*  ROSs DEBUG!   */
     if (args->verbose)
@@ -618,20 +583,7 @@ Cells::manageFire(int period,
             {
                 std::cout << "     (angle, realized ros in m/min): (" << angle << ", " << ros << ")" << std::endl;
             }
-            if (args->Simulator == "S" || args->Simulator == "P")
-            {
-                // Slope effect
-                float se = slope_effect(df_ptr[this->realId - 1].elev, df_ptr[nb - 1].elev, this->perimeter / 4.);
-                if (args->verbose)
-                {
-                    std::cout << "Slope effect: " << se << std::endl;
-                }
-
-                // Workaround PeriodLen in 60 minutes
-                this->nb_progress[i] += ros * args->FirePeriodLen * se;  // Updates fire progress
-            }
-            else
-                this->nb_progress[i] += ros * args->FirePeriodLen;
+            this->nb_progress[i] += ros * args->FirePeriodLen;
 
             // If the message arrives to the adjacent cell's center, send a
             // message
@@ -642,22 +594,7 @@ Cells::manageFire(int period,
                 FSCell->push_back(double(nb));
                 FSCell->push_back(double(period));
                 FSCell->push_back(roundedRos);
-                if (args->Simulator == "K")
-                {
-                    determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
-                }
-                else if (args->Simulator == "S")
-                {
-                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
-                }
-                else if (args->Simulator == "C")
-                {
-                    determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2, wdf_ptr);
-                }
-                else if (args->Simulator == "P")
-                {
-                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
-                }
+                determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
                 RateOfSpreads[this->realId - 1] = roundedRos;  // max(roundedRos, RateOfSpreads[this->realId - 1]);
@@ -670,22 +607,8 @@ Cells::manageFire(int period,
                 surfFraction[nb] = metrics.sfc;
                 SurfaceFlameLengths[this->realId - 1] = mainstruct.fl;
                 SurfaceFlameLengths[nb - 1] = metrics.fl;
-                if ((args->AllowCROS) && (args->Simulator == "S" || args->Simulator == "P"))
-                {
-                    float comp_zero = 0;
-                    MaxFlameLengths[this->realId - 1]
-                        = std::max({ mainstruct.crown_flame_length, mainstruct.fl, comp_zero });
-                    MaxFlameLengths[nb - 1] = std::max({ metrics.crown_flame_length, metrics.fl, comp_zero });
-                    CrownFlameLengths[this->realId - 1] = mainstruct.crown_flame_length;
-                    CrownFlameLengths[nb - 1] = metrics.crown_flame_length;
-                    CrownIntensities[this->realId - 1] = mainstruct.crown_intensity;
-                    CrownIntensities[nb - 1] = metrics.crown_intensity;
-                }
-                else
-                {
-                    MaxFlameLengths[this->realId - 1] = mainstruct.fl;
-                    MaxFlameLengths[nb - 1] = metrics.fl;
-                }
+                MaxFlameLengths[this->realId - 1] = mainstruct.fl;
+                MaxFlameLengths[nb - 1] = metrics.fl;
 
                 // cannot mutate ROSangleDir during iteration.. we do it like 10
                 // lines down toPop.push_back(angle);
@@ -744,326 +667,7 @@ Cells::manageFire(int period,
     return msg_list;
 }
 
-/**
-
-        Manage fire for BBO tuning version
-
-*/
-
-std::vector<int>
-Cells::manageFireBBO(int period,
-                     std::unordered_set<int>& AvailSet,
-                     inputs* df_ptr,
-                     fuel_coefs* coef,
-                     std::vector<std::vector<int>>& coordCells,
-                     std::unordered_map<int, Cells>& Cells_Obj,
-                     arguments* args,
-                     weatherDF* wdf_ptr,
-                     std::vector<double>* FSCell,
-                     std::vector<float>* crownMetrics,
-                     bool& activeCrown,
-                     double randomROS,
-                     int perimeterCells,
-                     std::vector<float>& EllipseFactors,
-                     std::vector<int>& crownState,
-                     std::vector<float>& crownFraction,
-                     std::vector<float>& surfFraction,
-                     std::vector<float>& Intensities,
-                     std::vector<float>& RateOfSpreads,
-                     std::vector<float>& FlameLengths)
-{
-    // Special flag for repetition (False = -99 for the record)
-    int repeat = -99;
-
-    // msg lists contains integers (True = -100)
-    std::vector<int> msg_list_aux;
-    msg_list_aux.push_back(0);
-    std::vector<int> msg_list;
-
-    // Compute main angle and ROSs: forward, flanks and back
-    main_outs mainstruct, metrics;
-    snd_outs sndstruct;
-    fire_struc headstruct, backstruct, flankstruct, metrics2;
-
-    // Populate inputs
-    int _slot = this->slotByAngle(wdf_ptr->waz);
-    int head_cell = (_slot >= 0) ? this->nb_ids[_slot] : 0;  // head cell for slope calculation
-    if (head_cell <= 0)                       // solve boundaries case
-    {
-        head_cell = this->realId;  // as it is used only for slope calculation, if
-                                   // it is a boundary cell, it uses the same
-                                   // cell, so it uses a no slope scenario
-    }
-    // Calculate parameters
-
-    if (args->Simulator == "K")
-    {
-        calculate_k(&df_ptr[this->realId - 1],
-                    &df_ptr[head_cell - 1],
-                    perimeterCells,
-                    coef,
-                    args,
-                    &mainstruct,
-                    &sndstruct,
-                    &headstruct,
-                    &flankstruct,
-                    &backstruct,
-                    activeCrown,
-                    wdf_ptr);
-    }
-    else if (args->Simulator == "S")
-    {
-        calculate_s(&df_ptr[this->realId - 1],
-                    coef,
-                    args,
-                    &mainstruct,
-                    &sndstruct,
-                    &headstruct,
-                    &flankstruct,
-                    &backstruct,
-                    activeCrown,
-                    wdf_ptr);
-    }
-
-    else if (args->Simulator == "C")
-    {
-        calculate_fbp(
-            &df_ptr[this->realId - 1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, wdf_ptr);
-    }
-    else if (args->Simulator == "P")
-    {
-        calculate_p(&df_ptr[this->realId - 1],
-                    coef,
-                    args,
-                    &mainstruct,
-                    &sndstruct,
-                    &headstruct,
-                    &flankstruct,
-                    &backstruct,
-                    activeCrown,
-                    wdf_ptr);
-    }
-
-    /*  ROSs DEBUG!   */
-    if (args->verbose)
-    {
-        std::cout << "*********** ROSs debug ************" << std::endl;
-        std::cout << "-------Input Structure--------" << std::endl;
-        std::cout << "fueltype: " << df_ptr->fueltype << std::endl;
-        std::cout << "ps: " << df_ptr->ps << std::endl;
-        std::cout << "saz: " << df_ptr->saz << std::endl;
-        std::cout << "cur: " << df_ptr->cur << std::endl;
-        std::cout << "elev: " << df_ptr->elev << std::endl;
-        std::cout << "\n-------Mainout Structure--------" << std::endl;
-        std::cout << "rss: " << mainstruct.rss << std::endl;
-        std::cout << "angle: " << mainstruct.angle << std::endl;
-        std::cout << "fl: " << mainstruct.fl << std::endl;
-        std::cout << "fh: " << mainstruct.fh << std::endl;
-        std::cout << "a:" << mainstruct.a << std::endl;
-        std::cout << "b:" << mainstruct.b << std::endl;
-        std::cout << "c:" << mainstruct.c << std::endl;
-        std::cout << "covertype: " << mainstruct.covertype << std::endl;
-        std::cout << "cros: " << mainstruct.crown << std::endl;
-        std::cout << "\n-------Headout Structure--------" << std::endl;
-        std::cout << "ros: " << headstruct.ros * args->HFactor << std::endl;
-        std::cout << "rss: " << headstruct.rss << std::endl;
-        std::cout << "\n------- Flank Structure--------" << std::endl;
-        std::cout << "ros: " << flankstruct.ros * args->FFactor << std::endl;
-        std::cout << "rss: " << flankstruct.rss << std::endl;
-        std::cout << "\n------- Back Structure--------" << std::endl;
-        std::cout << "ros: " << backstruct.ros * args->BFactor << std::endl;
-        std::cout << "rss: " << backstruct.rss << std::endl;
-        std::cout << "\n------- Extra --------" << std::endl;
-        std::cout << "lb: " << sndstruct.lb * args->BFactor << std::endl;
-        std::cout << "*********** ROSs debug ************" << std::endl;
-    }
-    /*                         */
-
-    double cartesianAngle = 270 - wdf_ptr->waz;  // - 90;   // CHECK!!!!!
-    if (cartesianAngle < 0)
-    {
-        cartesianAngle += 360;
-    }
-
-    // Adjusting from Spanish forests angle
-    cartesianAngle = wdf_ptr->waz;
-    double offset = cartesianAngle + 270;
-    cartesianAngle = 360 - (offset >= 360) * (cartesianAngle - 90) - (offset < 360) * offset;
-    if (cartesianAngle == 360)
-        cartesianAngle = 0;
-    if (cartesianAngle < 0)
-        cartesianAngle += 360;
-
-    double ROSRV = 0;
-    if (args->ROSCV > 0)
-    {
-        // std::srand(args->seed);
-        // std::default_random_engine generator(args->seed);
-        // std::normal_distribution<double> distribution(0.0,1.0);
-        ROSRV = randomROS;
-    }
-
-    // Display if verbose True (ROSs, Main angle, and ROS std (if included))
-    if (args->verbose)
-    {
-        std::cout << "Main Angle (raz): " << wdf_ptr->waz << " Cartesian: " << cartesianAngle << std::endl;
-        std::cout << "Front ROS Value: " << headstruct.ros * EllipseFactors[0] << std::endl;
-        std::cout << "Flanks ROS Value: " << flankstruct.ros * EllipseFactors[1] << std::endl;
-        std::cout << "Rear ROS Value: " << backstruct.ros * EllipseFactors[2] << std::endl;
-        std::cout << "Std Normal RV for Stochastic ROS CV: " << ROSRV << std::endl;
-    }
-
-    // If cell cannot send (thresholds), then it will be burned out in the main
-    // loop
-    double HROS = (1 + args->ROSCV * ROSRV) * headstruct.ros * EllipseFactors[0];
-
-    // Extra debug step for sanity checks
-    if (args->verbose)
-    {
-        std::cout << "\nSending message conditions" << std::endl;
-        std::cout << "HROS: " << HROS << " Threshold: " << args->ROSThreshold << std::endl;
-    }
-
-    // Check thresholds for sending messages
-    if (HROS > args->ROSThreshold)
-    {
-        // True = -100
-        repeat = -100;
-
-        if (args->verbose)
-        {
-            std::cout << "\nRepeat condition: " << repeat << std::endl;
-            std::cout << "Cell can send messages" << std::endl;
-        }
-
-        // ROS distribution method
-        // ros_distr(mainstruct.raz,  headstruct.ros, flankstruct.ros,
-        // backstruct.ros); std::cout << "Entra a Ros Dist" << std::endl;
-        /*ros_distr(cartesianAngle,
-                                  headstruct.ros * EllipseFactors[0],
-                                  flankstruct.ros * EllipseFactors[1],
-                                  backstruct.ros * EllipseFactors[2],
-                                  EllipseFactors[3]);
-        */
-        ros_distr_V2(cartesianAngle,
-                     mainstruct.a * EllipseFactors[0],
-                     mainstruct.b * EllipseFactors[1],
-                     mainstruct.c * EllipseFactors[2],
-                     EllipseFactors[3]);
-        // std::cout << "Sale de Ros Dist" << std::endl;
-
-        // Fire progress using ROS from burning cell, not the neighbors //
-        // vector<double> toPop = vector<double>();
-
-        // this is a iterator through the keyset of a dictionary
-        for (int i = 0; i < this->nb_count; i++)
-        {
-            if (!this->nb_available[i]) continue;
-            double angle = this->nb_angles[i];
-            int nb = this->nb_ids[i];
-            double ros = (1 + args->ROSCV * ROSRV) * this->nb_ros[i];
-
-            if (args->verbose)
-            {
-                std::cout << "     (angle, realized ros in m/min): (" << angle << ", " << ros << ")" << std::endl;
-            }
-
-            // Workaround PeriodLen in 60 minutes
-            this->nb_progress[i] += ros * args->FirePeriodLen;  // Updates fire progress
-
-            // If the message arrives to the adjacent cell's center, send a
-            // message
-            if (this->nb_progress[i] >= this->nb_dist[i])
-            {
-                msg_list.push_back(nb);
-                FSCell->push_back(double(this->realId));
-                FSCell->push_back(double(nb));
-                FSCell->push_back(double(period));
-                FSCell->push_back(ros);
-                if (args->Simulator == "K")
-                {
-                    determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
-                }
-                else if (args->Simulator == "S")
-                {
-                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
-                }
-                else if (args->Simulator == "C")
-                {
-                    determine_destiny_metrics_fbp(&df_ptr[int(nb) - 1], coef, &metrics, &metrics2, wdf_ptr);
-                }
-                else if (args->Simulator == "P")
-                {
-                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
-                }
-                crownState[this->realId - 1] = mainstruct.crown;
-                crownState[nb - 1] = metrics.crown;
-                RateOfSpreads[this->realId - 1] = double(std::ceil(ros * 100.0) / 100.0);
-                RateOfSpreads[nb - 1] = double(std::ceil(ros * 100.0) / 100.0);
-                Intensities[this->realId - 1] = mainstruct.sfi;
-                Intensities[nb - 1] = metrics.sfi;
-                crownFraction[this->realId - 1] = mainstruct.cfb;
-                crownFraction[nb - 1] = metrics.cfb;
-                surfFraction[this->realId] = mainstruct.sfc;
-                surfFraction[nb] = metrics.sfc;
-                FlameLengths[this->realId - 1] = mainstruct.fl;
-                FlameLengths[nb - 1] = metrics.fl;
-                // cannot mutate ROSangleDir during iteration.. we do it like 10
-                // lines down toPop.push_back(angle);
-                /*if (verbose) {
-                        //fill out this verbose section
-                        std::cout << "MSG list" << msg_list << std::endl;
-                }*/
-            }
-
-            // Info for debugging status of the cell and fire evolution
-            if (this->nb_progress[i] < this->nb_dist[i] && repeat == -100 && -100 != msg_list_aux[0])
-            {
-                if (args->verbose)
-                {
-                    std::cout << "A Repeat = TRUE flag is sent in order to "
-                                 "continue with the current fire....."
-                              << std::endl;
-                    std::cout << "Main workaround of the new sim logic....." << std::endl;
-                }
-                msg_list_aux[0] = repeat;
-            }
-        }
-
-        if (args->verbose)
-        {
-            printf("fireProgress Dict: ");
-            for (int i = 0; i < this->nb_count; i++)
-            {
-                std::cout << " " << this->nb_ids[i] << " : " << this->nb_progress[i];
-            }
-            std::cout << std::endl;
-        }
-    }
-
-    // If original is empty (no messages but fire is alive if aux_list is not
-    // empty)
-    if (msg_list.empty())
-    {
-        if (msg_list_aux[0] == -100)
-        {
-            msg_list = msg_list_aux;
-        }
-
-        else
-        {
-            this->status = 2;  // we are done sending messages, call us burned
-        }
-    }
-
-    if (args->verbose)
-    {
-        std::cout << " ----------------- End of new manageFire function "
-                     "-----------------"
-                  << std::endl;
-    }
-    return msg_list;
-}
+// manageFireBBO removed (BBO tuning not used in Kitral)
 
 /**
  * @brief Checks if a cell that has been reached by fire begins to burn.
@@ -1120,52 +724,18 @@ Cells::get_burned(int period,
                                    // cell, so it uses a no slope scenario
     }
     // Calculate parameters
-    if (args->Simulator == "K")
-    {
-        calculate_k(&(df[this->id]),
-                    &(df[head_cell - 1]),
-                    perimeterCells,
-                    coef,
-                    args,
-                    &mainstruct,
-                    &sndstruct,
-                    &headstruct,
-                    &flankstruct,
-                    &backstruct,
-                    activeCrown,
-                    wdf_ptr);
-    }
-    else if (args->Simulator == "S")
-    {
-        calculate_s(&(df[this->id]),
-                    coef,
-                    args,
-                    &mainstruct,
-                    &sndstruct,
-                    &headstruct,
-                    &flankstruct,
-                    &backstruct,
-                    activeCrown,
-                    wdf_ptr);
-    }
-
-    else if (args->Simulator == "C")
-    {
-        calculate_fbp(&df[this->id], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, wdf_ptr);
-    }
-    else if (args->Simulator == "P")
-    {
-        calculate_p(&(df[this->id]),
-                    coef,
-                    args,
-                    &mainstruct,
-                    &sndstruct,
-                    &headstruct,
-                    &flankstruct,
-                    &backstruct,
-                    activeCrown,
-                    wdf_ptr);
-    }
+    calculate_k(&(df[this->id]),
+                &(df[head_cell - 1]),
+                perimeterCells,
+                coef,
+                args,
+                &mainstruct,
+                &sndstruct,
+                &headstruct,
+                &flankstruct,
+                &backstruct,
+                activeCrown,
+                wdf_ptr);
 
     if (args->verbose)
     {
@@ -1291,58 +861,18 @@ Cells::ignition(int period,
                                        // so it uses a no slope scenario
         }
         // Calculate parameters
-        if (args->Simulator == "K")
-        {
-            calculate_k(&df_ptr[this->realId - 1],
-                        &df_ptr[head_cell - 1],
-                        perimeterCells,
-                        coef,
-                        args,
-                        &mainstruct,
-                        &sndstruct,
-                        &headstruct,
-                        &flankstruct,
-                        &backstruct,
-                        activeCrown,
-                        wdf_ptr);
-        }
-        else if (args->Simulator == "S")
-        {
-            calculate_s(&df_ptr[this->realId - 1],
-                        coef,
-                        args,
-                        &mainstruct,
-                        &sndstruct,
-                        &headstruct,
-                        &flankstruct,
-                        &backstruct,
-                        activeCrown,
-                        wdf_ptr);
-        }
-        else if (args->Simulator == "C")
-        {
-            calculate_fbp(&df_ptr[this->realId - 1],
-                          coef,
-                          &mainstruct,
-                          &sndstruct,
-                          &headstruct,
-                          &flankstruct,
-                          &backstruct,
-                          wdf_ptr);
-        }
-        else if (args->Simulator == "P")
-        {
-            calculate_p(&df_ptr[this->realId - 1],
-                        coef,
-                        args,
-                        &mainstruct,
-                        &sndstruct,
-                        &headstruct,
-                        &flankstruct,
-                        &backstruct,
-                        activeCrown,
-                        wdf_ptr);
-        }
+        calculate_k(&df_ptr[this->realId - 1],
+                    &df_ptr[head_cell - 1],
+                    perimeterCells,
+                    coef,
+                    args,
+                    &mainstruct,
+                    &sndstruct,
+                    &headstruct,
+                    &flankstruct,
+                    &backstruct,
+                    activeCrown,
+                    wdf_ptr);
         if (args->verbose)
         {
             std::cout << "\nIn ignition function" << std::endl;

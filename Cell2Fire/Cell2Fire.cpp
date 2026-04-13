@@ -42,11 +42,9 @@ inputs* df_ptr;
 //  file to file, better to keep constant size;
 inputs* df;
 int currentSim = 0;
-std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;
 std::vector<float> WeatherWeights;
 std::vector<int> WeatherWeightIDs;
-std::vector<int> NFTypesCells;
 std::unordered_map<int, int> IgnitionHistory;
 std::unordered_map<int, std::string> WeatherHistory;
 
@@ -499,36 +497,6 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         }
     }
 
-    /* BBO Tuning factors (only the ones present in the instances*/
-    if (this->args.BBOTuning)
-    {
-        // Get fuel types numbers directly from already-parsed df array
-        NFTypesCells.reserve(this->nCells);
-        for (int _i = 0; _i < this->nCells; _i++)
-            NFTypesCells.push_back(df[_i].nftype);
-
-        // BBO File
-        std::string BBOFile = args.InFolder + "BBOFuels.csv";
-        std::string sep = ",";
-        CSVReader CSVBBO(BBOFile, sep);
-
-        // Populate BBO vector
-        std::vector<std::vector<std::string>> BBODF = CSVBBO.getData(BBOFile);
-        int BBONTypes = BBODF.size() - 1;
-        CSVBBO.parseBBODF(BBOFactors, BBODF, BBONTypes);
-
-        // Print-out
-        std::cout << "BBO Factors:" << std::endl;
-        for (auto it = BBOFactors.begin(); it != BBOFactors.end(); it++)
-        {
-            std::cout << " " << it->first << ": ";
-            for (auto& it2 : it->second)
-            {
-                std::cout << it2 << " ";
-            }
-        }
-        std::cout << std::endl;
-    }
     /********************************************************************
      *
      *											Global
@@ -1190,59 +1158,28 @@ Cell2Fire::SendMessages()
         if (it->second.hasAvailableNeighbor())
         {
             // std::cout << "Entra a Manage Fire" << std::endl;
-            if (!this->args.BBOTuning)
-            {
-                //&df[cell-1] replaced by full df for getting the slopes
-                aux_list = it->second.manageFire(this->fire_period[this->year - 1],
-                                                 this->availCells,
-                                                 df,
-                                                 this->coef_ptr,
-                                                 this->coordCells,
-                                                 this->Cells_Obj,
-                                                 this->args_ptr,
-                                                 &this->wdf[this->weatherPeriod],
-                                                 &this->FSCell,
-                                                 &this->crownMetrics,
-                                                 this->activeCrown,
-                                                 this->ROSRV,
-                                                 this->perimeterCells,
-                                                 this->crownState,
-                                                 this->crownFraction,
-                                                 this->surfFraction,
-                                                 this->surfaceIntensities,
-                                                 this->RateOfSpreads,
-                                                 this->surfaceFlameLengths,
-                                                 this->crownFlameLengths,
-                                                 this->crownIntensities,
-                                                 this->maxFlameLengths);
-            }
-
-            else
-            {
-                // TODO  MAY 11: Pass the slope factor or the slopes of the
-                // adjacent cells
-                auto factors = BBOFactors.find(NFTypesCells[cell - 1]);
-                aux_list = it->second.manageFireBBO(this->fire_period[this->year - 1],
-                                                    this->availCells,
-                                                    &df[cell - 1],
-                                                    this->coef_ptr,
-                                                    this->coordCells,
-                                                    this->Cells_Obj,
-                                                    this->args_ptr,
-                                                    &this->wdf[this->weatherPeriod],
-                                                    &this->FSCell,
-                                                    &this->crownMetrics,
-                                                    this->activeCrown,
-                                                    this->ROSRV,
-                                                    this->perimeterCells,
-                                                    factors->second,
-                                                    this->crownState,
-                                                    this->crownFraction,
-                                                    this->surfFraction,
-                                                    this->surfaceIntensities,
-                                                    this->RateOfSpreads,
-                                                    this->surfaceFlameLengths);
-            }
+            aux_list = it->second.manageFire(this->fire_period[this->year - 1],
+                                             this->availCells,
+                                             df,
+                                             this->coef_ptr,
+                                             this->coordCells,
+                                             this->Cells_Obj,
+                                             this->args_ptr,
+                                             &this->wdf[this->weatherPeriod],
+                                             &this->FSCell,
+                                             &this->crownMetrics,
+                                             this->activeCrown,
+                                             this->ROSRV,
+                                             this->perimeterCells,
+                                             this->crownState,
+                                             this->crownFraction,
+                                             this->surfFraction,
+                                             this->surfaceIntensities,
+                                             this->RateOfSpreads,
+                                             this->surfaceFlameLengths,
+                                             this->crownFlameLengths,
+                                             this->crownIntensities,
+                                             this->maxFlameLengths);
             // std::cout << "Sale de Manage Fire" << std::endl;
         }
 
@@ -2334,18 +2271,7 @@ main(int argc, char* argv[])
     // TODO)
     int num_threads = args.nthreads;
     Cell2Fire Forest2(args);  // generate Forest object
-    if (args.Simulator == "K")
-    {
-        setup_const();
-    }
-    else if (args.Simulator == "S")
-    {
-        initialize_coeff(args.scenario);
-    }
-    else if (args.Simulator == "P")
-    {
-        initialize_coeff_p(args.scenario);
-    }
+    setup_const();
     if (args.UseWeatherWeights)
     {
         std::string sep = ",";
