@@ -1,12 +1,8 @@
 // Include classes
 #include "Cells.h"
-#include "FuelModelFBP.h"
 #include "FuelModelKitral.h"
-#include "FuelModelPortugal.h"
-#include "FuelModelSpain.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
-#include "Spotting.h"
 // Include libraries
 #include <cmath>
 #include <iostream>
