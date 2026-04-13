@@ -61,7 +61,8 @@ Cells::Cells(int _id,
     this->id = _id;  // identifier for programming purposes: goes from 0 to size
                      // of landscape-1
     this->area = _area;
-    this->coord = _coord;
+    this->coord[0] = _coord[0];
+    this->coord[1] = _coord[1];
     this->fType = _fType;
     this->fType2 = _fType2;
     this->perimeter = _perimeter;

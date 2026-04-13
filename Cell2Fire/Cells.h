@@ -75,7 +75,7 @@ class Cells
     double perimeter;
 
     std::string fType2;
-    std::vector<int> coord;  // maybe change this into a tuple or class	CP: 2-tuple (int)
+    int coord[2];  // (x, y) — was vector<int>, saves 24 bytes heap overhead per cell
     // std::unordered_map<std::string, int> adjacents; // CP: dictionary {string:
     // [int array]}
 
