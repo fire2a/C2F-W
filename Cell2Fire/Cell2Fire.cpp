@@ -257,8 +257,11 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     // Create empty df with size of NCells
     df_ptr = &df[0];  // access reference for the first element of df
 
+    // Initialize ignProb before the streaming parse (parseDFDirect fills it from col 14)
+    this->ignProb = std::vector<float>(this->nCells, 1);
+
     // Stream Data.csv directly into df without intermediate vector<vector<string>>
-    CSVParser.parseDFDirect(df_ptr, filename, this->args_ptr, this->nCells);
+    CSVParser.parseDFDirect(df_ptr, filename, this->args_ptr, this->nCells, this->ignProb);
 
     // Initialize and populate relevant vectors
     this->fTypeCells = std::vector<int>(this->nCells, 1);
@@ -274,9 +277,6 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->crownIntensities = std::vector<float>(this->nCells, 0);
     this->crownFlameLengths = std::vector<float>(this->nCells, 0);
     this->maxFlameLengths = std::vector<float>(this->nCells, 0);
-
-    this->ignProb = std::vector<float>(this->nCells, 1);
-    CSVParser.parsePROB(this->ignProb, DF, this->nCells);
 
     // Non burnable types: populate relevant fields such as status and ftype
     std::string NoFuel = "NF ";
@@ -507,8 +507,10 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     /* BBO Tuning factors (only the ones present in the instances*/
     if (this->args.BBOTuning)
     {
-        // Get fuel types numbers
-        CSVParser.parseNDF(NFTypesCells, DF, this->nCells);
+        // Get fuel types numbers directly from already-parsed df array
+        NFTypesCells.reserve(this->nCells);
+        for (int _i = 0; _i < this->nCells; _i++)
+            NFTypesCells.push_back(df[_i].nftype);
 
         // BBO File
         std::string BBOFile = args.InFolder + "BBOFuels.csv";

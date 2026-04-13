@@ -50,7 +50,7 @@ class CSVReader
     void parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, arguments* args_ptr, int NCells);
 
     // Streaming version: parse Data.csv directly into df without intermediate storage
-    void parseDFDirect(inputs* df_ptr, const std::string& filename, arguments* args_ptr, int NCells);
+    void parseDFDirect(inputs* df_ptr, const std::string& filename, arguments* args_ptr, int NCells, std::vector<float>& ignProb);
 
     // Populate NFtypes (Spanish version)
     void parseNDF(std::vector<int>& NFTypes, std::vector<std::vector<std::string>>& DF, int NCells);

@@ -456,7 +456,7 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
  * @param NCells number of data rows expected (excluding header)
  */
 void
-CSVReader::parseDFDirect(inputs* df_ptr, const std::string& filename, arguments* args_ptr, int NCells)
+CSVReader::parseDFDirect(inputs* df_ptr, const std::string& filename, arguments* args_ptr, int NCells, std::vector<float>& ignProb)
 {
     std::ifstream file(filename);
     if (!file.is_open())
@@ -522,7 +522,8 @@ CSVReader::parseDFDirect(inputs* df_ptr, const std::string& filename, arguments*
         // col 13: FMC
         df_ptr->FMC = row[13].empty() ? args_ptr->FMC : std::stoi(row[13], &sz);
 
-        // col 14: probMap — not stored in inputs
+        // col 14: probMap — fill ignProb, not stored in inputs
+        ignProb[count] = (row[14].empty()) ? 1.f : std::stof(row[14], &sz);
 
         // col 15: jd
         df_ptr->jd = row[15].empty() ? 0 : std::stoi(row[15], &sz);
