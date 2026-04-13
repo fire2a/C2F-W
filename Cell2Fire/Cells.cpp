@@ -23,6 +23,10 @@
 
 using namespace std;
 
+// C++14 requires out-of-class definitions for static constexpr members that are ODR-used
+constexpr const char* Cells::FTypeD[3];
+constexpr const char* Cells::StatusD[5];
+
 /**
  * @brief Constructs a Cell object for the wildfire simulation.
  *
