@@ -588,7 +588,6 @@ Cell2Fire::InitCell(int id)
                this->areaCells,
                this->coordCells[id - 1],
                this->fTypeCells[id - 1],
-               this->fTypeCells2[id - 1],
                this->perimeterCells,
                this->statusCells[id - 1],
                id);

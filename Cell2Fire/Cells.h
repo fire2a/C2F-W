@@ -74,7 +74,6 @@ class Cells
     double area;
     double perimeter;
 
-    std::string fType2;
     int coord[2];  // (x, y) — was vector<int>, saves 24 bytes heap overhead per cell
     // std::unordered_map<std::string, int> adjacents; // CP: dictionary {string:
     // [int array]}
@@ -124,7 +123,6 @@ class Cells
           double _area,
           std::vector<int> _coord,
           int _fType,
-          std::string _fType2,
           double _perimeter,
           int _status,
           int _realId);

@@ -52,7 +52,6 @@ Cells::Cells(int _id,
              double _area,
              std::vector<int> _coord,
              int _fType,
-             std::string _fType2,
              double _perimeter,
              int _status,
              int _realId)
@@ -64,7 +63,6 @@ Cells::Cells(int _id,
     this->coord[0] = _coord[0];
     this->coord[1] = _coord[1];
     this->fType = _fType;
-    this->fType2 = _fType2;
     this->perimeter = _perimeter;
     this->status = _status;
     this->realId = _realId;  // real identifier of the landscape (goes from 1 to
