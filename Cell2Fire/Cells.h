@@ -79,8 +79,8 @@ class Cells
     // std::unordered_map<std::string, int> adjacents; // CP: dictionary {string:
     // [int array]}
 
-    string FTypeD[3];
-    string StatusD[5];
+    static constexpr const char* FTypeD[3]  = {"NonBurnable", "Normal", "Burnable"};
+    static constexpr const char* StatusD[5] = {"Available", "Burning", "Burnt", "Harvested", "Non Fuel"};
 
     // mutable
     int status;

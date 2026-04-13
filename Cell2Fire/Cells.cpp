@@ -53,20 +53,6 @@ Cells::Cells(int _id,
              int _status,
              int _realId)
 {
-    // Global "dictionaries" (vectors) for status and types
-    // Status: 0: "Available", 1: "Burning", 2: "Burnt", 3: "Harvested", 4:"Non
-    // Fuel"
-    this->StatusD[0] = "Available";
-    this->StatusD[1] = "Burning";
-    this->StatusD[2] = "Burnt";
-    this->StatusD[3] = "Harvested";
-    this->StatusD[4] = "Non Fuel";
-
-    // FTypeD: 0: "NonBurnable", 1: "Normal", 2: "Burnable
-    this->FTypeD[0] = "NonBurnable";
-    this->FTypeD[1] = "Normal";
-    this->FTypeD[2] = "Burnable";
-
     // Initialize fields of the Cell object
     this->id = _id;  // identifier for programming purposes: goes from 0 to size
                      // of landscape-1
