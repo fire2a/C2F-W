@@ -581,26 +581,21 @@ DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells)
  * @param InFolder Input data directory
  * @return An array of arrays representing a cell.
  */
-std::vector<std::vector<std::unique_ptr<std::string>>>
-GenerateDat(const std::vector<std::string>& GFuelType,
-            const std::vector<int>& GFuelTypeN,
-            const std::vector<float>& Elevation,
-            const std::vector<float>& PS,
-            const std::vector<float>& SAZ,
-            const std::vector<float>& Curing,
-            const std::vector<float>& CBD,
-            const std::vector<float>& CBH,
-            const std::vector<float>& CCF,
-            const std::vector<float>& ProbMap,
-            const std::vector<float>& FMC,
-            const std::vector<float>& TreeHeight,
-            const std::string& InFolder)
+void
+writeDataFileDirect(const std::vector<std::string>& GFuelType,
+                    const std::vector<int>& GFuelTypeN,
+                    const std::vector<float>& Elevation,
+                    const std::vector<float>& PS,
+                    const std::vector<float>& SAZ,
+                    const std::vector<float>& Curing,
+                    const std::vector<float>& CBD,
+                    const std::vector<float>& CBH,
+                    const std::vector<float>& CCF,
+                    const std::vector<float>& ProbMap,
+                    const std::vector<float>& FMC,
+                    const std::vector<float>& TreeHeight,
+                    const std::string& InFolder)
 {
-    // DF columns
-    std::vector<std::string> Columns
-        = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",     "ps",         "saz",    "cur",
-            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "probMap", "jd",         "jd_min", "pc",
-            "pdf",      "time", "ffmc", "bui",    "gfl", "pattern", "tree_height" };
 
     // GFL dictionary (FBP)
     std::unordered_map<std::string, float> GFLD = { { "C1", 0.75f },
@@ -672,235 +667,69 @@ GenerateDat(const std::vector<std::string>& GFuelType,
             { "M3M4_65", 65 }, { "M3M4_70", 70 }, { "M3M4_75", 75 }, { "M3M4_80", 80 }, { "M3M4_85", 85 },
             { "M3M4_90", 90 }, { "M3M4_95", 95 } };
 
-    // Create a vector to store unique_ptr of ~BaseData
-    std::vector<std::vector<std::unique_ptr<std::string>>> dataGrids;
-    // Dataframe
-    // std::vector<std::vector<boost::any>> DF(GFuelType.size(),
-    // std::vector<boost::any>(Columns.size()));
-
-    // Populate DF
-    for (size_t i = 0; i < GFuelType.size(); ++i)
-    {
-
-        std::vector<std::unique_ptr<std::string>> rowData;
-
-        // Fuel Type 0
-        rowData.emplace_back(std::make_unique<std::string>(GFuelType[i]));
-
-        // lat 1
-        rowData.emplace_back(std::make_unique<std::string>("51.621244"));
-
-        // lon 2
-        rowData.emplace_back(std::make_unique<std::string>("-115.608378"));
-
-        // Elevation 3
-
-        if (std::isnan(Elevation[i]))
-
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(Elevation[i])));
-        }
-
-        // Blank space (task: check why) 4,5
-        rowData.emplace_back(std::make_unique<std::string>(""));
-        rowData.emplace_back(std::make_unique<std::string>(""));
-
-        // PS 6
-        if (std::isnan(PS[i]))
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PS[i])));
-        }
-
-        // SAZ 7
-        if (std::isnan(SAZ[i]))
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(SAZ[i])));
-        }
-
-        // Handle special cases 8
-        if (std::isnan(Curing[i]) && (GFuelType[i] == "O1a" || GFuelType[i] == "O1b"))
-        {
-            rowData.emplace_back(std::make_unique<std::string>("60"));  // "cur"
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-
-        // CBD 9
-        if (std::isnan(CBD[i]))
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(CBD[i])));
-        }
-
-        // CBH 10
-        if (std::isnan(CBH[i]))
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(CBH[i])));
-        }
-
-        // CCF 11
-        if (std::isnan(CCF[i]))
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(CCF[i])));
-        }
-
-        // Fuel Type N 12
-        // if (std::isnan(GFuelTypeN[i]))
-        if (std::isnan(static_cast<double>(GFuelTypeN[i])))
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(GFuelTypeN[i])));
-        }
-
-        // FMC 13
-        if (std::isnan(FMC[i]))
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(FMC[i])));
-        }
-
-        // ProbMap 14
-        if (std::isnan(ProbMap[i]))
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(ProbMap[i])));
-        }
-
-        // Blank space (jd,jd_min) 15,16
-        rowData.emplace_back(std::make_unique<std::string>(""));
-        rowData.emplace_back(std::make_unique<std::string>(""));
-
-        // Populate PC 17
-        if (PCD.find(GFuelType[i]) != PCD.end())
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PCD[GFuelType[i]])));  // "pc"
-        }
-        else
-        {
-
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-
-        // Populate PDF 18
-        if (PDFD.find(GFuelType[i]) != PDFD.end())
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(PDFD[GFuelType[i]])));  // "pdf"
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-
-        // time 19
-        rowData.emplace_back(std::make_unique<std::string>("20"));
-
-        // Blank space (ffmc,bui) 20,21
-        rowData.emplace_back(std::make_unique<std::string>(""));
-        rowData.emplace_back(std::make_unique<std::string>(""));
-
-        // GFL 22
-        if (GFLD.find(GFuelType[i]) != GFLD.end())
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(GFLD[GFuelType[i]])));  // "gfl"
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-
-        rowData.emplace_back(std::make_unique<std::string>(""));
-
-        // TreeHeight 24
-
-        if (std::isnan(TreeHeight[i]))
-        {
-            rowData.emplace_back(std::make_unique<std::string>(""));
-        }
-        else
-        {
-            rowData.emplace_back(std::make_unique<std::string>(std::to_string(TreeHeight[i])));
-        }
-
-        // Add the rowData to dataGrids
-        dataGrids.push_back(std::move(rowData));
-
-        rowData.clear();
-    }
-
-    return dataGrids;
-}
-
-/**
- * @brief Save data matrix into a CSV file called `Data.csv`.
- * @param dataGrids Array of arrays storing each cell's input data
- * @param InFolder Directory where the CSV file will be created.
- */
-void
-writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids, const std::string& InFolder)
-{
-
     std::ofstream dataFile(InFolder + separator() + "Data.csv");
-    std::vector<std::string> Columns
-        = { "fueltype", "lat",  "lon",  "elev",   "ws",  "waz",         "ps",         "saz",    "cur",
-            "cbd",      "cbh",  "ccf",  "ftypeN", "fmc", "probability", "jd",         "jd_min", "pc",
-            "pdf",      "time", "ffmc", "bui",    "gfl", "pattern",     "tree_height" };
-    if (dataFile.is_open())
-    {
-        // Write header
-        for (const auto& col : Columns)
-        {
-            dataFile << col << ",";
-        }
-        dataFile << "\n";
-
-        // Write data
-        for (const auto& rowData : dataGrids)
-        {
-            for (const auto& item : rowData)
-            {
-                dataFile << *item << ",";  // Dereference the unique_ptr before writing
-            }
-            dataFile << "\n";
-        }
-        dataFile.close();
-    }
-    else
+    if (!dataFile.is_open())
     {
         std::cerr << "Error: Unable to open data file for writing" << std::endl;
+        return;
+    }
+
+    // Write header
+    dataFile << "fueltype,lat,lon,elev,ws,waz,ps,saz,cur,cbd,cbh,ccf,ftypeN,fmc,probability,"
+                "jd,jd_min,pc,pdf,time,ffmc,bui,gfl,pattern,tree_height,\n";
+
+    // Write one row per cell directly to file — no intermediate storage
+    for (size_t i = 0; i < GFuelType.size(); ++i)
+    {
+        // fueltype 0
+        dataFile << GFuelType[i] << ',';
+        // lat 1, lon 2 (hardcoded)
+        dataFile << "51.621244,-115.608378,";
+        // elev 3
+        std::isnan(Elevation[i]) ? dataFile << ',' : dataFile << Elevation[i] << ',';
+        // ws, waz 4,5 (blank)
+        dataFile << ",,";
+        // ps 6
+        std::isnan(PS[i]) ? dataFile << ',' : dataFile << PS[i] << ',';
+        // saz 7
+        std::isnan(SAZ[i]) ? dataFile << ',' : dataFile << SAZ[i] << ',';
+        // cur 8
+        if (std::isnan(Curing[i]) && (GFuelType[i] == "O1a" || GFuelType[i] == "O1b"))
+            dataFile << "60,";
+        else
+            dataFile << ',';
+        // cbd 9
+        std::isnan(CBD[i]) ? dataFile << ',' : dataFile << CBD[i] << ',';
+        // cbh 10
+        std::isnan(CBH[i]) ? dataFile << ',' : dataFile << CBH[i] << ',';
+        // ccf 11
+        std::isnan(CCF[i]) ? dataFile << ',' : dataFile << CCF[i] << ',';
+        // ftypeN 12 (int, can't be NaN)
+        dataFile << GFuelTypeN[i] << ',';
+        // fmc 13
+        std::isnan(FMC[i]) ? dataFile << ',' : dataFile << FMC[i] << ',';
+        // probMap 14
+        std::isnan(ProbMap[i]) ? dataFile << ',' : dataFile << ProbMap[i] << ',';
+        // jd, jd_min 15,16 (blank)
+        dataFile << ",,";
+        // pc 17
+        auto pcIt = PCD.find(GFuelType[i]);
+        pcIt != PCD.end() ? dataFile << pcIt->second << ',' : dataFile << ',';
+        // pdf 18
+        auto pdfIt = PDFD.find(GFuelType[i]);
+        pdfIt != PDFD.end() ? dataFile << pdfIt->second << ',' : dataFile << ',';
+        // time 19
+        dataFile << "20,";
+        // ffmc, bui 20,21 (blank)
+        dataFile << ",,";
+        // gfl 22
+        auto gflIt = GFLD.find(GFuelType[i]);
+        gflIt != GFLD.end() ? dataFile << gflIt->second << ',' : dataFile << ',';
+        // pattern 23 (blank)
+        dataFile << ',';
+        // tree_height 24
+        std::isnan(TreeHeight[i]) ? dataFile << ',' : dataFile << TreeHeight[i] << ',';
+        dataFile << '\n';
     }
 }
 
@@ -1113,10 +942,7 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
         }
     }
 
-    // Call GenerateDat function
-    std::vector<std::vector<std::unique_ptr<std::string>>> result = GenerateDat(
-        GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, ProbMap, FMC, TreeHeight, InFolder);
-
-    writeDataToFile(result, InFolder);
+    // Write Data.csv directly without intermediate storage
+    writeDataFileDirect(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, ProbMap, FMC, TreeHeight, InFolder);
     std::cout << "Generated data file" << std::endl;
 }

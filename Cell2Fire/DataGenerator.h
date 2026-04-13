@@ -27,23 +27,19 @@ bool fileExists(const std::string& filename);
 
 void DataGrids(const std::string& filename, std::vector<float>& data, int nCells);
 
-std::vector<std::vector<std::unique_ptr<std::string>>> GenerateDat(const std::vector<std::string>& GFuelType,
-                                                                   const std::vector<int>& GFuelTypeN,
-                                                                   const std::vector<float>& Elevation,
-                                                                   const std::vector<float>& PS,
-                                                                   const std::vector<float>& SAZ,
-                                                                   const std::vector<float>& Curing,
-                                                                   const std::vector<float>& CBD,
-                                                                   const std::vector<float>& CBH,
-                                                                   const std::vector<float>& CCF,
-                                                                   const std::vector<float>& ProbMap,
-                                                                   const std::vector<float>& FMC,
-                                                                   const std::vector<float>& TreeHeight,
-
-                                                                   const std::string& InFolder);
-
-void writeDataToFile(const std::vector<std::vector<std::unique_ptr<std::string>>>& dataGrids,
-                     const std::string& InFolder);
+void writeDataFileDirect(const std::vector<std::string>& GFuelType,
+                         const std::vector<int>& GFuelTypeN,
+                         const std::vector<float>& Elevation,
+                         const std::vector<float>& PS,
+                         const std::vector<float>& SAZ,
+                         const std::vector<float>& Curing,
+                         const std::vector<float>& CBD,
+                         const std::vector<float>& CBH,
+                         const std::vector<float>& CCF,
+                         const std::vector<float>& ProbMap,
+                         const std::vector<float>& FMC,
+                         const std::vector<float>& TreeHeight,
+                         const std::string& InFolder);
 
 void GenDataFile(const std::string& InFolder, const std::string& Simulator);
 

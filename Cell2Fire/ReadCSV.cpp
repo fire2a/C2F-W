@@ -448,6 +448,122 @@ CSVReader::parseDF(inputs* df_ptr, std::vector<std::vector<std::string>>& DF, ar
 }
 
 /**
+ * @brief Streams Data.csv directly into df_ptr without building an intermediate
+ *        vector<vector<string>>. This avoids the ~5.6 GB spike at 7M cells.
+ * @param df_ptr pointer to pre-allocated inputs array (NCells elements)
+ * @param filename path to Data.csv
+ * @param args_ptr command-line arguments (used for default FMC)
+ * @param NCells number of data rows expected (excluding header)
+ */
+void
+CSVReader::parseDFDirect(inputs* df_ptr, const std::string& filename, arguments* args_ptr, int NCells)
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+        throw std::runtime_error("parseDFDirect: cannot open " + filename);
+
+    std::string line;
+    // Skip header row
+    if (!std::getline(file, line))
+        throw std::runtime_error("parseDFDirect: file is empty: " + filename);
+
+    std::string::size_type sz;
+    int count = 0;
+
+    while (std::getline(file, line) && count < NCells) {
+        std::vector<std::string> row = split_any_of(line, ",", false);
+
+        // col 0: fueltype
+        const char* faux = row[0].append(" ").c_str();
+        strncpy(df_ptr->fueltype, faux, 4);
+
+        // col 1: lat
+        df_ptr->lat = row[1].empty() ? 0.f : std::stof(row[1], &sz);
+
+        // col 2: lon
+        df_ptr->lon = row[2].empty() ? 0.f : std::stof(row[2], &sz);
+
+        // col 3: elev
+        df_ptr->elev = row[3].empty() ? 0.f : std::stof(row[3], &sz);
+
+        // col 4: ws
+        df_ptr->ws = row[4].empty() ? 0.f : std::stof(row[4], &sz);
+
+        // col 5: waz (+180 wrap)
+        if (row[5].empty()) {
+            df_ptr->waz = 0;
+        } else {
+            int waz_tmp = std::stoi(row[5], &sz) + 180;
+            if (waz_tmp >= 360) waz_tmp -= 360;
+            df_ptr->waz = waz_tmp;
+        }
+
+        // col 6: ps
+        df_ptr->ps = row[6].empty() ? 0.f : std::stof(row[6], &sz);
+
+        // col 7: saz
+        df_ptr->saz = row[7].empty() ? 0.f : std::stof(row[7], &sz);
+
+        // col 8: cur
+        df_ptr->cur = row[8].empty() ? 0.f : std::stof(row[8], &sz);
+
+        // col 9: cbd
+        df_ptr->cbd = row[9].empty() ? -9999.f : std::stof(row[9], &sz);
+
+        // col 10: cbh
+        df_ptr->cbh = row[10].empty() ? -9999.f : std::stof(row[10], &sz);
+
+        // col 11: ccf
+        df_ptr->ccf = row[11].empty() ? 0.f : std::stof(row[11], &sz);
+
+        // col 12: nftype
+        df_ptr->nftype = row[12].empty() ? 0 : std::stoi(row[12], &sz);
+
+        // col 13: FMC
+        df_ptr->FMC = row[13].empty() ? args_ptr->FMC : std::stoi(row[13], &sz);
+
+        // col 14: probMap — not stored in inputs
+
+        // col 15: jd
+        df_ptr->jd = row[15].empty() ? 0 : std::stoi(row[15], &sz);
+
+        // col 16: jd_min
+        df_ptr->jd_min = row[16].empty() ? 0 : std::stoi(row[16], &sz);
+
+        // col 17: pc
+        df_ptr->pc = row[17].empty() ? 0 : std::stoi(row[17], &sz);
+
+        // col 18: pdf
+        df_ptr->pdf = row[18].empty() ? 0 : std::stoi(row[18], &sz);
+
+        // col 19: time
+        df_ptr->time = row[19].empty() ? 0 : std::stoi(row[19], &sz);
+
+        // col 20: ffmc
+        df_ptr->ffmc = row[20].empty() ? 0.f : std::stof(row[20], &sz);
+
+        // col 21: bui
+        df_ptr->bui = row[21].empty() ? 0.f : std::stof(row[21], &sz);
+
+        // col 22: gfl
+        df_ptr->gfl = row[22].empty() ? 0.f : std::stof(row[22], &sz);
+
+        // col 23: pattern
+        df_ptr->pattern = row[23].empty() ? 0 : 1;
+
+        // col 24: tree_height
+        df_ptr->tree_height = (row.size() > 24 && !row[24].empty()) ? std::stof(row[24], &sz) : -9999.f;
+
+        df_ptr++;
+        count++;
+    }
+
+    if (count != NCells)
+        throw std::runtime_error("parseDFDirect: expected " + std::to_string(NCells) +
+                                 " rows but read " + std::to_string(count));
+}
+
+/**
  * @brief Populates a vector of size NCells with fuel type number per cell
  * @param NFTypes vector of fuel type per cell
  * @param DF 2D vector of input data

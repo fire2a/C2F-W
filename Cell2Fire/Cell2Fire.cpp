@@ -250,22 +250,15 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     std::string sep = ",";
     CSVReader CSVParser(filename, sep);
 
-    // Populate DF
-    std::vector<std::vector<std::string>> DF = CSVParser.getData(filename);
     std::cout << "Forest DataFrame from instance " << filename << std::endl;
-    // DEBUGCSVParser.printData(DF);
     std::cout << "Number of cells: " << this->nCells << std::endl;
     df = new inputs[this->nCells];
 
     // Create empty df with size of NCells
     df_ptr = &df[0];  // access reference for the first element of df
 
-    // Populate the df [nCells] objects
-    CSVParser.parseDF(df_ptr,
-                      DF,
-                      this->args_ptr,
-                      this->nCells);  // iterates from the first element of df, using DF,
-                                      // args_ptr and the number of cells
+    // Stream Data.csv directly into df without intermediate vector<vector<string>>
+    CSVParser.parseDFDirect(df_ptr, filename, this->args_ptr, this->nCells);
 
     // Initialize and populate relevant vectors
     this->fTypeCells = std::vector<int>(this->nCells, 1);
