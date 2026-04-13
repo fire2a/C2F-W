@@ -265,7 +265,6 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
 
     // Initialize and populate relevant vectors
     this->fTypeCells = std::vector<int>(this->nCells, 1);
-    this->fTypeCells2 = std::vector<string>(this->nCells, "Burnable");
     this->statusCells = std::vector<int>(this->nCells, 0);
     // Outputs
     this->crownState = std::vector<int>(this->nCells, 0);
@@ -291,7 +290,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         if (strcmp(df[l].fueltype, NF) == 0 || strcmp(df[l].fueltype, ND) == 0)
         {
             this->fTypeCells[l] = 0;
-            this->fTypeCells2[l] = "NonBurnable";
+
             this->statusCells[l] = 4;
         }
     }
@@ -317,7 +316,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
             for (auto& it2 : it->second)
             {
                 this->fTypeCells[it2 - 1] = 0;
-                this->fTypeCells2[it2 - 1] = "NonBurnable";
+    
                 this->statusCells[it2 - 1] = 3;
             }
         }
@@ -735,7 +734,6 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
 
     // Reset status
     this->fTypeCells.assign(this->nCells, 1);
-    this->fTypeCells2.assign(this->nCells, "Burnable");
     this->statusCells.assign(this->nCells, 0);
     this->crownState.assign(this->nCells, 0);
     this->crownFraction.assign(this->nCells, 0);
@@ -762,7 +760,6 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         if (strcmp(df[i].fueltype, NF) == 0 || strcmp(df[i].fueltype, ND) == 0)
         {
             this->fTypeCells[i] = 0;
-            this->fTypeCells2[i] = "NonBurnable";
             this->statusCells[i] = 4;
         }
     }
@@ -780,7 +777,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         for (auto& it2 : it->second)
         {
             this->fTypeCells[it2 - 1] = 0;
-            this->fTypeCells2[it2 - 1] = "NonBurnable";
+
             this->statusCells[it2 - 1] = 3;
         }
     }

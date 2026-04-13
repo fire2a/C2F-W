@@ -100,7 +100,6 @@ class Cell2Fire
     std::vector<float> ignProb;       // (long int&, int);
     std::vector<int> statusCells;     //(long int, int);
     std::vector<int> fTypeCells;      // (long int&, int);
-    std::vector<string> fTypeCells2;  // (long int&, const char [9]);
     std::vector<std::vector<std::string>> WeatherData;
     std::vector<int> IgnitionPoints;
     vector<int> burnedOutList;
