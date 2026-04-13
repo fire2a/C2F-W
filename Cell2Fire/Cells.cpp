@@ -96,11 +96,7 @@ Cells::Cells(int _id,
     this->tYears = 4;
 
     this->gMsgListSeason = std::unordered_map<int, std::vector<int>>();
-    this->fireProgress = std::unordered_map<int, double>();
-    this->angleDict = std::unordered_map<int, double>();
-    this->ROSAngleDir = std::unordered_map<int, double>();
-    this->distToCenter = std::unordered_map<int, double>();
-    this->angleToNb = std::unordered_map<int, int>();
+    this->nb_count = 0;
 }
 
 /**
@@ -127,6 +123,7 @@ Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,
                             int cols,
                             int rows)  // WORKING CHECK OK
 {
+    this->nb_count = 0;
     std::vector<int> adj = adjacentCells(this->realId, rows, cols);
 
     for (auto& nb : adj)
@@ -165,16 +162,13 @@ Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,
                     temp += 360;
                 angle = temp;
             }
-            this->angleDict[nb] = angle;
-            if (availSet.find(nb) != availSet.end())
-            {
-                // TODO: cannot be None, replaced None = -1   and ROSAngleDir has
-                // a double inside
-                this->ROSAngleDir[angle] = -1;
-            }
-            this->angleToNb[angle] = nb;
-            this->fireProgress[nb] = 0.0;
-            this->distToCenter[nb] = std::sqrt(a * a + b * b) * this->_ctr2ctrdist;
+            int slot = this->nb_count++;
+            this->nb_ids[slot] = nb;
+            this->nb_angles[slot] = angle;
+            this->nb_available[slot] = (availSet.find(nb) != availSet.end());
+            this->nb_ros[slot] = -1;
+            this->nb_progress[slot] = 0.0;
+            this->nb_dist[slot] = std::sqrt(a * a + b * b) * this->_ctr2ctrdist;
         }
     }
 }
@@ -241,9 +235,10 @@ void
 Cells::ros_distr_old(double thetafire, double forward, double flank, double back)
 {
     // WORKING CHECK OK
-    for (auto& angle : this->ROSAngleDir)
+    for (int i = 0; i < this->nb_count; i++)
     {
-        double offset = std::abs(angle.first - thetafire);
+        if (!this->nb_available[i]) continue;
+        double offset = std::abs(this->nb_angles[i] - thetafire);
 
         double base = ((int)(offset)) / 90 * 90;
         double result;
@@ -265,7 +260,7 @@ Cells::ros_distr_old(double thetafire, double forward, double flank, double back
         {
             result = this->allocate(offset, 270, flank, forward);
         }
-        this->ROSAngleDir[angle.first] = result;
+        this->nb_ros[i] = result;
     }
 }
 
@@ -322,9 +317,10 @@ Cells::ros_distr_V2(double thetafire, double a, double b, double c, double EFact
 {
 
     // Ros allocation for each angle inside the dictionary
-    for (auto& angle : this->ROSAngleDir)
+    for (int i = 0; i < this->nb_count; i++)
     {
-        double offset = angle.first - thetafire;
+        if (!this->nb_available[i]) continue;
+        double offset = this->nb_angles[i] - thetafire;
 
         if (offset < 0)
         {
@@ -334,7 +330,7 @@ Cells::ros_distr_V2(double thetafire, double a, double b, double c, double EFact
         {
             offset -= 360;
         }
-        this->ROSAngleDir[angle.first] = rhoTheta(offset, a, b) * EFactor;
+        this->nb_ros[i] = rhoTheta(offset, a, b) * EFactor;
     }
 }
 
@@ -448,7 +444,8 @@ Cells::manageFire(int period,
 
     head_angle = std::round(head_angle / 45.0) * 45.0;
 
-    int head_cell = angleToNb[head_angle];  // head cell for slope calculation
+    int _slot = this->slotByAngle(head_angle);
+    int head_cell = (_slot >= 0) ? this->nb_ids[_slot] : 0;  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
         head_cell = this->realId;  // as it is used only for slope calculation, if
@@ -621,11 +618,12 @@ Cells::manageFire(int period,
         // vector<double> toPop = vector<double>();
 
         // this is a iterator through the keyset of a dictionary
-        for (auto& _angle : this->ROSAngleDir)
+        for (int i = 0; i < this->nb_count; i++)
         {
-            double angle = _angle.first;
-            int nb = angleToNb[angle];
-            float ros = (1 + args->ROSCV * ROSRV) * _angle.second;
+            if (!this->nb_available[i]) continue;
+            double angle = this->nb_angles[i];
+            int nb = this->nb_ids[i];
+            float ros = (1 + args->ROSCV * ROSRV) * this->nb_ros[i];
             float roundedRos = static_cast<float>(std::ceil(ros * 100.0) / 100.0);
 
             if (std::isnan(ros))
@@ -647,14 +645,14 @@ Cells::manageFire(int period,
                 }
 
                 // Workaround PeriodLen in 60 minutes
-                this->fireProgress[nb] += ros * args->FirePeriodLen * se;  // Updates fire progress
+                this->nb_progress[i] += ros * args->FirePeriodLen * se;  // Updates fire progress
             }
             else
-                this->fireProgress[nb] += ros * args->FirePeriodLen;
+                this->nb_progress[i] += ros * args->FirePeriodLen;
 
             // If the message arrives to the adjacent cell's center, send a
             // message
-            if (this->fireProgress[nb] >= this->distToCenter[nb])
+            if (this->nb_progress[i] >= this->nb_dist[i])
             {
                 msg_list.push_back(nb);
                 FSCell->push_back(double(this->realId));
@@ -715,7 +713,7 @@ Cells::manageFire(int period,
             }
 
             // Info for debugging status of the cell and fire evolution
-            if (this->fireProgress[nb] < this->distToCenter[nb] && repeat == -100 && -100 != msg_list_aux[0])
+            if (this->nb_progress[i] < this->nb_dist[i] && repeat == -100 && -100 != msg_list_aux[0])
             {
                 if (args->verbose)
                 {
@@ -731,9 +729,9 @@ Cells::manageFire(int period,
         if (args->verbose)
         {
             printf("fireProgress Dict: ");
-            for (auto& nb : this->fireProgress)
+            for (int i = 0; i < this->nb_count; i++)
             {
-                std::cout << " " << nb.first << " : " << nb.second;
+                std::cout << " " << this->nb_ids[i] << " : " << this->nb_progress[i];
             }
             std::cout << std::endl;
         }
@@ -805,7 +803,8 @@ Cells::manageFireBBO(int period,
     fire_struc headstruct, backstruct, flankstruct, metrics2;
 
     // Populate inputs
-    int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+    int _slot = this->slotByAngle(wdf_ptr->waz);
+    int head_cell = (_slot >= 0) ? this->nb_ids[_slot] : 0;  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
         head_cell = this->realId;  // as it is used only for slope calculation, if
@@ -974,11 +973,12 @@ Cells::manageFireBBO(int period,
         // vector<double> toPop = vector<double>();
 
         // this is a iterator through the keyset of a dictionary
-        for (auto& _angle : this->ROSAngleDir)
+        for (int i = 0; i < this->nb_count; i++)
         {
-            double angle = _angle.first;
-            int nb = angleToNb[angle];
-            double ros = (1 + args->ROSCV * ROSRV) * _angle.second;
+            if (!this->nb_available[i]) continue;
+            double angle = this->nb_angles[i];
+            int nb = this->nb_ids[i];
+            double ros = (1 + args->ROSCV * ROSRV) * this->nb_ros[i];
 
             if (args->verbose)
             {
@@ -986,11 +986,11 @@ Cells::manageFireBBO(int period,
             }
 
             // Workaround PeriodLen in 60 minutes
-            this->fireProgress[nb] += ros * args->FirePeriodLen;  // Updates fire progress
+            this->nb_progress[i] += ros * args->FirePeriodLen;  // Updates fire progress
 
             // If the message arrives to the adjacent cell's center, send a
             // message
-            if (this->fireProgress[nb] >= this->distToCenter[nb])
+            if (this->nb_progress[i] >= this->nb_dist[i])
             {
                 msg_list.push_back(nb);
                 FSCell->push_back(double(this->realId));
@@ -1034,7 +1034,7 @@ Cells::manageFireBBO(int period,
             }
 
             // Info for debugging status of the cell and fire evolution
-            if (this->fireProgress[nb] < this->distToCenter[nb] && repeat == -100 && -100 != msg_list_aux[0])
+            if (this->nb_progress[i] < this->nb_dist[i] && repeat == -100 && -100 != msg_list_aux[0])
             {
                 if (args->verbose)
                 {
@@ -1050,9 +1050,9 @@ Cells::manageFireBBO(int period,
         if (args->verbose)
         {
             printf("fireProgress Dict: ");
-            for (auto& nb : this->fireProgress)
+            for (int i = 0; i < this->nb_count; i++)
             {
-                std::cout << " " << nb.first << " : " << nb.second;
+                std::cout << " " << this->nb_ids[i] << " : " << this->nb_progress[i];
             }
             std::cout << std::endl;
         }
@@ -1128,7 +1128,8 @@ Cells::get_burned(int period,
     fire_struc headstruct, backstruct, flankstruct;
 
     // Compute main angle and ROSs: forward, flanks and back
-    int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+    int _slot = this->slotByAngle(wdf_ptr->waz);
+    int head_cell = (_slot >= 0) ? this->nb_ids[_slot] : 0;  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
         head_cell = this->realId;  // as it is used only for slope calculation, if
@@ -1298,7 +1299,8 @@ Cells::ignition(int period,
         // << "  bui: " <<   wdf_ptr->bui << std::endl;
 
         // Populate inputs
-        int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+        int _slot = this->slotByAngle(wdf_ptr->waz);
+    int head_cell = (_slot >= 0) ? this->nb_ids[_slot] : 0;  // head cell for slope calculation
         if (head_cell <= 0)                       // solve boundaries case
         {
             head_cell = this->realId;  // as it is used only for slope calculation, if
@@ -1423,37 +1425,28 @@ Cells::print_info()
     std::cout << std::endl;
 
     printf("Angle Dict: ");
-    for (auto& nb : this->angleDict)
-    {
-        std::cout << " " << nb.first << " : " << nb.second;
-    }
+    for (int i = 0; i < this->nb_count; i++)
+        std::cout << " " << this->nb_ids[i] << " : " << this->nb_angles[i];
     std::cout << std::endl;
 
     printf("Ros Angle Dict: ");
-    for (auto& nb : this->ROSAngleDir)
-    {
-        std::cout << " " << nb.first << " : " << nb.second;
-    }
+    for (int i = 0; i < this->nb_count; i++)
+        if (this->nb_available[i])
+            std::cout << " " << this->nb_angles[i] << " : " << this->nb_ros[i];
     std::cout << std::endl;
 
     printf("angleToNb Dict: ");
-    for (auto& nb : this->angleToNb)
-    {
-        std::cout << " " << nb.first << " : " << nb.second;
-    }
+    for (int i = 0; i < this->nb_count; i++)
+        std::cout << " " << this->nb_angles[i] << " : " << this->nb_ids[i];
     std::cout << std::endl;
 
     printf("fireProgress Dict: ");
-    for (auto& nb : this->fireProgress)
-    {
-        std::cout << " " << nb.first << " : " << nb.second;
-    }
+    for (int i = 0; i < this->nb_count; i++)
+        std::cout << " " << this->nb_ids[i] << " : " << this->nb_progress[i];
     std::cout << std::endl;
 
     printf("distToCenter Dict: ");
-    for (auto& nb : this->distToCenter)
-    {
-        std::cout << " " << nb.first << " : " << nb.second;
-    }
+    for (int i = 0; i < this->nb_count; i++)
+        std::cout << " " << this->nb_ids[i] << " : " << this->nb_dist[i];
     std::cout << std::endl;
 }

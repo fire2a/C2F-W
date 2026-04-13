@@ -93,13 +93,32 @@ class Cells
 
     std::unordered_map<int, std::vector<int>> gMsgList;  // {40 -> [1, 2, 3] }
     std::unordered_map<int, std::vector<int>> gMsgListSeason;
-    std::unordered_map<int, double> fireProgress;  // CP: dictionary {int: double}
-    std::unordered_map<int, double> angleDict;     // CP: dictionary {int: double}
-    std::unordered_map<int, double> ROSAngleDir;   // CP: dictionary {int: double|None}   Instead of None we
-                                                   // can use a determined number like -9999 = None  TODO:
-                                                   // maybe int : double
-    std::unordered_map<int, double> distToCenter;  // CP: dictionary {int: double}
-    std::unordered_map<int, int> angleToNb;        // CP: dictionary {double: int}
+
+    // Flat neighbor arrays replacing 5 unordered_maps (max 8 neighbors per cell)
+    int nb_count;           // number of valid neighbors
+    int nb_ids[8];          // neighbor cell IDs
+    int nb_angles[8];       // angle to each neighbor
+    double nb_ros[8];       // ROS value per neighbor direction (replaces ROSAngleDir)
+    double nb_progress[8];  // fire progress per neighbor (replaces fireProgress)
+    double nb_dist[8];      // distance to center per neighbor (replaces distToCenter)
+    bool nb_available[8];   // whether neighbor is burnable (was in ROSAngleDir)
+
+    // Lookup helpers — linear scan over max 8 elements
+    int slotByNb(int nb) const {
+        for (int i = 0; i < nb_count; i++)
+            if (nb_ids[i] == nb) return i;
+        return -1;
+    }
+    int slotByAngle(int angle) const {
+        for (int i = 0; i < nb_count; i++)
+            if (nb_angles[i] == angle) return i;
+        return -1;
+    }
+    bool hasAvailableNeighbor() const {
+        for (int i = 0; i < nb_count; i++)
+            if (nb_available[i]) return true;
+        return false;
+    }
 
     // TODO: reference to shared object
 

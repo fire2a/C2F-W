@@ -740,20 +740,21 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     std::unordered_map<int, Cells>::iterator it;
 
     // Reset status
-    this->fTypeCells = std::vector<int>(this->nCells, 1);
-    this->fTypeCells2 = std::vector<string>(this->nCells, "Burnable");
-    this->statusCells = std::vector<int>(this->nCells, 0);
-    this->crownState = std::vector<int>(this->nCells, 0);
-    this->crownFraction = std::vector<float>(this->nCells, 0);
-    this->surfFraction = std::vector<float>(this->nCells, 0);
-    this->surfaceIntensities = std::vector<float>(this->nCells, 0);
-    this->crownIntensities = std::vector<float>(this->nCells, 0);
-    this->RateOfSpreads = std::vector<float>(this->nCells, 0);
-    this->surfaceFlameLengths = std::vector<float>(this->nCells, 0);
-    this->crownFlameLengths = std::vector<float>(this->nCells, 0);
-    this->maxFlameLengths = std::vector<float>(this->nCells, 0);
+    this->fTypeCells.assign(this->nCells, 1);
+    this->fTypeCells2.assign(this->nCells, "Burnable");
+    this->statusCells.assign(this->nCells, 0);
+    this->crownState.assign(this->nCells, 0);
+    this->crownFraction.assign(this->nCells, 0);
+    this->surfFraction.assign(this->nCells, 0);
+    this->surfaceIntensities.assign(this->nCells, 0);
+    this->crownIntensities.assign(this->nCells, 0);
+    this->RateOfSpreads.assign(this->nCells, 0);
+    this->surfaceFlameLengths.assign(this->nCells, 0);
+    this->crownFlameLengths.assign(this->nCells, 0);
+    this->maxFlameLengths.assign(this->nCells, 0);
 
     this->FSCell.clear();
+    this->FSCell.reserve(this->nCells * 4);  // 4 entries per spread event (src, dst, period, ros)
     this->crownMetrics.clear();  // intensity and crown
 
     // Non burnable types: populate relevant fields such as status and ftype
@@ -1199,7 +1200,7 @@ Cell2Fire::SendMessages()
         /*
                         Manage Fire method main step
         */
-        if (it->second.ROSAngleDir.size() > 0)
+        if (it->second.hasAvailableNeighbor())
         {
             // std::cout << "Entra a Manage Fire" << std::endl;
             if (!this->args.BBOTuning)
@@ -1521,17 +1522,18 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
 
                     // Cleaning step
                     // Fire can't be propagated back
-                    int cellNum = it->second.realId - 1;
-                    for (auto& angle : it->second.angleToNb)
+                    for (int i = 0; i < it->second.nb_count; i++)
                     {
-                        int origToNew = angle.first;
+                        int origToNew = it->second.nb_angles[i];
                         // Which neighbor am I to the burnt cell
                         int newToOrig = (origToNew + 180) % 360;
-                        int adjCellNum = angle.second;  // Check
+                        int adjCellNum = it->second.nb_ids[i];
                         auto adjIt = Cells_Obj.find(adjCellNum);
                         if (adjIt != Cells_Obj.end())
                         {
-                            adjIt->second.ROSAngleDir.erase(newToOrig);
+                            int backSlot = adjIt->second.slotByAngle(newToOrig);
+                            if (backSlot >= 0)
+                                adjIt->second.nb_available[backSlot] = false;
                         }
                     }
                 }
@@ -1929,6 +1931,8 @@ Cell2Fire::Results()
 
         CSVWriter ignitionsFile(this->args.OutFolder + sim_log_filename);
         ignitionsFile.printIgnitions(IgnitionHistory, WeatherHistory);
+        IgnitionHistory.clear();
+        WeatherHistory.clear();
     }
 }
 
@@ -2333,6 +2337,8 @@ main(int argc, char* argv[])
     arguments args;
     arguments* args_ptr = &args;
     parseArgs(argc, argv, args_ptr);
+    IgnitionHistory.reserve(args.TotalSims);
+    WeatherHistory.reserve(args.TotalSims);
     GenDataFile(args.InFolder, args.Simulator);
     int ep = 0;
     // Episodes loop (episode = replication)
@@ -2341,7 +2347,6 @@ main(int argc, char* argv[])
     // TODO)
     int num_threads = args.nthreads;
     Cell2Fire Forest2(args);  // generate Forest object
-    std::vector<Cell2Fire> Forests(num_threads, Forest2);
     if (args.Simulator == "K")
     {
         setup_const();
@@ -2382,7 +2387,7 @@ main(int argc, char* argv[])
             }
         }
 
-        Cell2Fire Forest = Forests[TID];
+        Cell2Fire Forest = Forest2;  // each thread gets its own copy of the initial state
         // Random seed
 
         // Random numbers (weather file and ROS-CV)
