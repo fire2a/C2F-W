@@ -91,9 +91,6 @@ class Cells
     int burntP;
     int tYears;
 
-    std::unordered_map<int, std::vector<int>> gMsgList;  // {40 -> [1, 2, 3] }
-    std::unordered_map<int, std::vector<int>> gMsgListSeason;
-
     // Flat neighbor arrays replacing 5 unordered_maps (max 8 neighbors per cell)
     int nb_count;           // number of valid neighbors
     int nb_ids[8];          // neighbor cell IDs

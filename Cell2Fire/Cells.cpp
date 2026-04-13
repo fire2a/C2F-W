@@ -73,7 +73,6 @@ Cells::Cells(int _id,
     }
 
     // Inner fields
-    this->gMsgList = std::unordered_map<int, std::vector<int>>();
     this->hPeriod = 0;
 
     this->fireStarts = 0;
@@ -81,7 +80,6 @@ Cells::Cells(int _id,
     this->fireStartsSeason = 0;
     this->tYears = 4;
 
-    this->gMsgListSeason = std::unordered_map<int, std::vector<int>>();
     this->nb_count = 0;
 }
 
