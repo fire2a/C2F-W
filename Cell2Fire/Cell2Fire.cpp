@@ -46,6 +46,9 @@ std::vector<float> WeatherWeights;
 std::vector<int> WeatherWeightIDs;
 std::unordered_map<int, int> IgnitionHistory;
 std::unordered_map<int, std::string> WeatherHistory;
+// Per-simulation stats: [mean_surface_fl, mean_crown_fl, max_fl] — indexed by sim-1
+// Written once per sim in Results() (each sim index is unique across threads → no lock needed)
+std::vector<std::array<float, 3>> simStats;
 
 /******************************************************************************
                                                                                                                                 Utils
@@ -1645,6 +1648,25 @@ Cell2Fire::Results()
         IgnitionHistory.clear();
         WeatherHistory.clear();
     }
+
+    // Per-simulation fire stats
+    if (this->args.Stats)
+    {
+        float sum_sfl = 0.0f, sum_cfl = 0.0f, max_fl = 0.0f;
+        int count = 0;
+        for (int i = 0; i < (int)this->nCells; i++)
+        {
+            if (this->RateOfSpreads[i] == 0) continue;
+            sum_sfl += this->surfaceFlameLengths[i];
+            sum_cfl += this->crownFlameLengths[i];
+            if (this->maxFlameLengths[i] > max_fl)
+                max_fl = this->maxFlameLengths[i];
+            count++;
+        }
+        float mean_sfl = count > 0 ? sum_sfl / count : 0.0f;
+        float mean_cfl = count > 0 ? sum_cfl / count : 0.0f;
+        simStats[this->sim - 1] = {mean_sfl, mean_cfl, max_fl};
+    }
 }
 
 /**
@@ -2051,6 +2073,8 @@ main(int argc, char* argv[])
     parseArgs(argc, argv, args_ptr);
     IgnitionHistory.reserve(args.TotalSims);
     WeatherHistory.reserve(args.TotalSims);
+    if (args.Stats)
+        simStats.resize(args.TotalSims, {0.0f, 0.0f, 0.0f});
     GenDataFile(args.InFolder);
     int ep = 0;
     // Episodes loop (episode = replication)
@@ -2126,6 +2150,18 @@ main(int argc, char* argv[])
             }
         }
     }
+    // Write per-simulation stats CSV
+    if (args.Stats)
+    {
+        std::string statsPath = args.OutFolder + "stats.csv";
+        std::ofstream sfs(statsPath);
+        sfs << "simulation,mean_surface_fl,mean_crown_fl,max_fl\n";
+        for (int s = 0; s < args.TotalSims; s++)
+            sfs << (s + 1) << "," << simStats[s][0] << "," << simStats[s][1] << "," << simStats[s][2] << "\n";
+        sfs.close();
+        std::cout << "Stats written to: " << statsPath << "\n";
+    }
+
     delete[] df;
     return 0;
 }

@@ -221,11 +221,12 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     //	printf("PromTuned: %d \n", prom_tuned);
     //}
 
-    //--statistics
-    // if (cmdOptionExists(argv, argv + argc, "--statistics")) {
-    //	out_stats = true;
-    //	printf("Statistics: %d \n", out_stats);
-    //}
+    //--stats
+    if (cmdOptionExists(argv, argv + argc, "--stats"))
+    {
+        out_stats = true;
+        printf("Stats: %s \n", btoa(out_stats));
+    }
 
     //--bbo
     if (cmdOptionExists(argv, argv + argc, "--bbo"))
