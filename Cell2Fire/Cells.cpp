@@ -561,6 +561,13 @@ Cells::manageFire(int period,
                      args->EFactor);
         // std::cout << "Sale de Ros Dist" << std::endl;
 
+        // Surface ellipse params (headstruct.rss / backstruct.rss are always
+        // the pre-crown surface values; mainstruct.a/b may be crown-adjusted)
+        float surf_a = (headstruct.rss + backstruct.rss) / 2.0f;
+        float surf_b = (sndstruct.lb > 0)
+                           ? (headstruct.rss + backstruct.rss) / (2.0f * sndstruct.lb)
+                           : surf_a;
+
         // Fire progress using ROS from burning cell, not the neighbors //
         // vector<double> toPop = vector<double>();
 
@@ -588,16 +595,24 @@ Cells::manageFire(int period,
             // message
             if (this->nb_progress[i] >= this->nb_dist[i])
             {
+                // Surface directional ROS (pre-crown ellipse, same CV factor)
+                double nb_offset = angle - cartesianAngle;
+                if (nb_offset < 0) nb_offset += 360;
+                if (nb_offset > 360) nb_offset -= 360;
+                float surfRos = static_cast<float>(
+                    (1 + args->ROSCV * ROSRV) * rhoTheta(nb_offset, surf_a, surf_b) * args->EFactor);
+                float surfRoundedRos = static_cast<float>(std::ceil(surfRos * 100.0) / 100.0);
+
                 msg_list.push_back(nb);
                 FSCell->push_back(double(this->realId));
                 FSCell->push_back(double(nb));
                 FSCell->push_back(double(period));
-                FSCell->push_back(roundedRos);
+                FSCell->push_back(surfRoundedRos);   // col 4: surface ROS
                 metrics.rss = roundedRos;
                 determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
                 if (args->OutCrown && args->AllowCROS)
                 {
-                    FSCell->push_back(roundedRos);
+                    FSCell->push_back(roundedRos);   // col 5: final ROS (crown-adjusted)
                     FSCell->push_back(double(mainstruct.crown));
                     FSCell->push_back(double(metrics.crown));
                 }
