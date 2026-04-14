@@ -9,7 +9,9 @@ ifeq ($(UNAME_S),Darwin)
     LIBTIFF_INC = $(HOMEBREW_PREFIX)/opt/libtiff/include
     LIBTIFF_LIB = $(HOMEBREW_PREFIX)/opt/libtiff/lib
     BOOST_INC = $(HOMEBREW_PREFIX)/opt/boost/include
-    CXXFLAGS = -fPIC -fno-strict-aliasing -fexceptions -Xpreprocessor -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I$(LIBOMP_INC) -I$(LIBTIFF_INC) -I$(BOOST_INC)
+    CATCH2_INC = $(HOMEBREW_PREFIX)/opt/catch2/include
+    CATCH2_LIB = $(HOMEBREW_PREFIX)/opt/catch2/lib
+    CXXFLAGS = -fPIC -fno-strict-aliasing -fexceptions -Xpreprocessor -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I$(LIBOMP_INC) -I$(LIBTIFF_INC) -I$(BOOST_INC) -I$(CATCH2_INC)
     LDFLAGS   = -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -lm -lpthread -L$(LIBOMP_LIB) -lomp -L$(LIBTIFF_LIB) -ltiff
 else
     CXX = g++
@@ -21,7 +23,7 @@ endif
 # Detect Catch2 version from package (for info only)
 CATCH2_PKG_VERSION := $(shell dpkg-query -W -f='$${Version}' catch2 2>/dev/null || dpkg-query -W -f='$${Version}' libcatch2-dev 2>/dev/null || echo "unknown")
 # Auto-detect if Catch2 v3 libraries are available by trying to link
-CATCH2_V3_LIBS := $(shell echo "int main(){}" | $(CXX) -x c++ - -lCatch2Main -lCatch2 -o /dev/null 2>/dev/null && echo "-lCatch2Main -lCatch2" || echo "")
+CATCH2_V3_LIBS := $(shell echo "int main(){}" | $(CXX) -x c++ - $(if $(CATCH2_LIB),-L$(CATCH2_LIB)) -lCatch2Main -lCatch2 -o /dev/null 2>/dev/null && echo "$(if $(CATCH2_LIB),-L$(CATCH2_LIB)) -lCatch2Main -lCatch2" || echo "")
 TEST_LDFLAGS = $(LDFLAGS) $(CATCH2_V3_LIBS)
 
 # Source files

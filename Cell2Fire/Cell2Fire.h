@@ -91,13 +91,10 @@ class Cell2Fire
 
     // Vectors
     std::vector<int> fire_period;
-    std::vector<std::vector<int>> coordCells;
     std::vector<std::unordered_map<std::string, int>> adjCells;
     std::vector<std::vector<std::string>> DF;
     std::vector<std::vector<std::string>> WDist;
-    std::vector<float> ignProb;       // (long int&, int);
     std::vector<int> statusCells;     //(long int, int);
-    std::vector<int> fTypeCells;      // (long int&, int);
     std::vector<std::vector<std::string>> WeatherData;
     std::vector<int> IgnitionPoints;
     vector<int> burnedOutList;
@@ -117,7 +114,6 @@ class Cell2Fire
 
     // Sets
     std::unordered_set<int> availCells;
-    std::unordered_set<int> nonBurnableCells;
     std::unordered_set<int> burningCells;
     std::unordered_set<int> burntCells;
     std::unordered_set<int> harvestCells;

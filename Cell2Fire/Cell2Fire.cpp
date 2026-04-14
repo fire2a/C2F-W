@@ -35,12 +35,13 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios
 
 using namespace std;
 
-// Global Variables (DFs with cells and weather info)
+// Global Variables — read-only after construction, shared across all threads
 inputs* df_ptr;
-// weatherDF* wdf_ptr;
-// weatherDF wdf[100000];  // hard to dynamic allocate memory since it changes from
-//  file to file, better to keep constant size;
 inputs* df;
+std::vector<std::vector<int>> coordCells;
+std::vector<float> ignProb;
+std::vector<int> fTypeCells;
+std::unordered_set<int> nonBurnableCells;
 int currentSim = 0;
 std::unordered_map<int, std::vector<int>> HarvestedCells;
 std::vector<float> WeatherWeights;
@@ -230,7 +231,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->xllcorner = frdf.xllcorner;
     this->yllcorner = frdf.yllcorner;
 
-    this->coordCells = frdf.coordCells;
+    coordCells = frdf.coordCells;
     // this->adjCells = frdf.adjCells;
 
     /********************************************************************
@@ -252,13 +253,13 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     df_ptr = &df[0];  // access reference for the first element of df
 
     // Initialize ignProb before the streaming parse (parseDFDirect fills it from col 14)
-    this->ignProb = std::vector<float>(this->nCells, 1);
+    ignProb = std::vector<float>(this->nCells, 1);
 
     // Stream Data.csv directly into df without intermediate vector<vector<string>>
-    CSVParser.parseDFDirect(df_ptr, filename, this->args_ptr, this->nCells, this->ignProb);
+    CSVParser.parseDFDirect(df_ptr, filename, this->args_ptr, this->nCells, ignProb);
 
     // Initialize and populate relevant vectors
-    this->fTypeCells = std::vector<int>(this->nCells, 1);
+    fTypeCells = std::vector<int>(this->nCells, 1);
     this->statusCells = std::vector<int>(this->nCells, 0);
     // Outputs
     this->crownState = std::vector<int>(this->nCells, 0);
@@ -283,7 +284,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     {
         if (strcmp(df[l].fueltype, NF) == 0 || strcmp(df[l].fueltype, ND) == 0)
         {
-            this->fTypeCells[l] = 0;
+            fTypeCells[l] = 0;
 
             this->statusCells[l] = 4;
         }
@@ -309,7 +310,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         {
             for (auto& it2 : it->second)
             {
-                this->fTypeCells[it2 - 1] = 0;
+                fTypeCells[it2 - 1] = 0;
     
                 this->statusCells[it2 - 1] = 3;
             }
@@ -332,7 +333,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
 
     // Relevant sets: Initialization
     this->availCells.clear();
-    this->nonBurnableCells.clear();
+    nonBurnableCells.clear();
     this->burningCells.clear();
     this->burntCells.clear();
     this->harvestCells.clear();
@@ -341,7 +342,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         if (this->statusCells[i] < 3)
             this->availCells.insert(i + 1);
         else if (this->statusCells[i] == 4)
-            this->nonBurnableCells.insert(i + 1);
+            nonBurnableCells.insert(i + 1);
         else if (this->statusCells[i] == 3)
             this->harvestCells.insert(i + 1);
     }
@@ -549,8 +550,8 @@ Cell2Fire::InitCell(int id)
     // Initialize cell, insert it inside the unordered map
     Cells Cell(id - 1,
                this->areaCells,
-               this->coordCells[id - 1],
-               this->fTypeCells[id - 1],
+               coordCells[id - 1],
+               fTypeCells[id - 1],
                this->perimeterCells,
                this->statusCells[id - 1],
                id);
@@ -560,7 +561,7 @@ Cell2Fire::InitCell(int id)
     it2 = this->Cells_Obj.find(id);
 
     // Initialize the fire fields for the selected cel
-    it2->second.initializeFireFields(this->coordCells, this->availCells, this->cols, this->rows);
+    it2->second.initializeFireFields(coordCells, this->availCells, this->cols, this->rows);
 
     // Print info for debugging
     if (this->args.verbose)
@@ -658,7 +659,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     std::unordered_map<int, Cells>::iterator it;
 
     // Reset status
-    this->fTypeCells.assign(this->nCells, 1);
+    fTypeCells.assign(this->nCells, 1);
     this->statusCells.assign(this->nCells, 0);
     this->crownState.assign(this->nCells, 0);
     this->crownFraction.assign(this->nCells, 0);
@@ -685,14 +686,14 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     {
         if (strcmp(df[i].fueltype, NF) == 0 || strcmp(df[i].fueltype, ND) == 0)
         {
-            this->fTypeCells[i] = 0;
+            fTypeCells[i] = 0;
             this->statusCells[i] = 4;
         }
     }
 
     // Relevant sets: Initialization
     this->availCells.clear();
-    this->nonBurnableCells.clear();
+    nonBurnableCells.clear();
     this->burningCells.clear();
     this->burntCells.clear();
     this->harvestCells.clear();
@@ -702,7 +703,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     {
         for (auto& it2 : it->second)
         {
-            this->fTypeCells[it2 - 1] = 0;
+            fTypeCells[it2 - 1] = 0;
 
             this->statusCells[it2 - 1] = 3;
         }
@@ -713,7 +714,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         if (this->statusCells[i] < 3)
             this->availCells.insert(i + 1);
         else if (this->statusCells[i] == 4)
-            this->nonBurnableCells.insert(i + 1);
+            nonBurnableCells.insert(i + 1);
         else if (this->statusCells[i] == 3)
             this->harvestCells.insert(i + 1);
     }
@@ -721,7 +722,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     // Print-out sets information
     if (this->args.verbose)
     {
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
     }
 }
 
@@ -805,7 +806,7 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
             {
                 aux = distribution(generator2);
                 float rd_number = (float)rand() / ((float)(RAND_MAX / 0.999999999));
-                if (this->ignProb[aux - 1] > rd_number)
+                if (ignProb[aux - 1] > rd_number)
                 {
                     break;
                 }
@@ -965,7 +966,7 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
         if (this->args.verbose)
         {
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells, nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
         }
     }
 
@@ -1093,7 +1094,7 @@ Cell2Fire::SendMessages()
                      "Ignition ----------------------"
                   << std::endl;
         std::cout << "Current Fire Period:" << this->fire_period[this->year - 1] << std::endl;
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
     }
 
     /*
@@ -1124,7 +1125,7 @@ Cell2Fire::SendMessages()
                                              this->availCells,
                                              df,
                                              this->coef_ptr,
-                                             this->coordCells,
+                                             coordCells,
                                              this->Cells_Obj,
                                              this->args_ptr,
                                              &this->wdf[this->weatherPeriod],
@@ -1204,7 +1205,7 @@ Cell2Fire::SendMessages()
         }
     }
     if (this->args.verbose)
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
 
     return sendMessageList;
 }
@@ -1264,7 +1265,7 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
                      "messages from Ignition ----------------------"
                   << std::endl;
         std::cout << "Current Fire Period: " << this->fire_period[this->year - 1] << std::endl;
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
     }
 
     // Conditions depending on number of messages and repeatFire flag
@@ -1311,7 +1312,7 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
         this->burningCells.clear();
         if (this->args.verbose)
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells, nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
     }
 
     // Mesages and no repeat
@@ -1455,7 +1456,7 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
         if (this->args.verbose)
         {
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells, nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
         }
 
         /*
@@ -1582,7 +1583,7 @@ Cell2Fire::Results()
     // Final report
     float ACells = this->availCells.size();
     float BCells = this->burntCells.size();
-    float NBCells = this->nonBurnableCells.size();
+    float NBCells = nonBurnableCells.size();
     float HCells = this->harvestCells.size();
 
     std::cout << "\nSimulation " << this->sim << " Results:\n"
@@ -1864,7 +1865,7 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
         std::cout << "Fire Period: " << this->fire_period[this->year - 1] << std::endl;
         std::cout << "WeatherPeriod: " << this->weatherPeriod << std::endl;
         std::cout << "MaxFirePeriods: " << this->totalFirePeriods << std::endl;
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
         std::cout << "********************************************" << std::endl;
     }
     // One step (one fire period, ignition - if needed -, sending messages and
