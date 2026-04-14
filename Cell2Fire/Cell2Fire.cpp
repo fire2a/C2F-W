@@ -643,7 +643,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         (this->args.OutCrown && this->args.AllowCROS) ||
         (this->args.OutCrownConsumption && this->args.AllowCROS))
     {
-        this->cellMetricsFolder = Cell2Fire::createOutputFolder("CellMetrics");
+        this->cellStatsFolder = Cell2Fire::createOutputFolder("cellStats");
     }
 
     chooseWeather(this->args.WeatherOpt, rnumber, simExt);
@@ -1642,7 +1642,7 @@ Cell2Fire::Results()
     {
         std::ostringstream oss;
         oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        std::string metricsName = this->cellMetricsFolder + "CellMetrics" + oss.str() + ".csv";
+        std::string metricsName = this->cellStatsFolder + "cellStats" + oss.str() + ".csv";
 
         std::ofstream mfs(metricsName);
         // header
