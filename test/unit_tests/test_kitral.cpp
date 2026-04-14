@@ -3,6 +3,7 @@
 //
 #include "../../Cell2Fire/FuelModelKitral.h"
 #include "../../Cell2Fire/FuelModelUtils.h"
+#include "../../Cell2Fire/ReadArgs.h"
 #include <string.h>
 // catch v3 or v2 compatibility
 #if __has_include(<catch2/catch_test_macros.hpp>)
@@ -370,4 +371,184 @@ TEST_CASE_METHOD(NativeFuelFixture, "Test backfire ros in crown fire changes wit
     REQUIRE_THAT(backfire_ros10_k(hptr, sec), WithinAbs(4.061, 0.001));
     hptr->ros = 16;
     REQUIRE_THAT(backfire_ros10_k(hptr, sec), WithinAbs(8.122, 0.001));
+}
+
+// ---------------------------------------------------------------------------
+// Portillo fixture
+// Golden values derived from main branch using Portillo landscape defaults:
+//   fuel=BN03 nftype=16, elev_origin=1500m, elev_dest=1510m, cellsize=100m
+//   weather: ws=26.2 waz=137 tmp=26.8 rh=28.1  (Portillo Weather.csv row 1)
+//   FMC=87, CBD=0.15, CBH=7.5, tree_height=21
+// ---------------------------------------------------------------------------
+class PortilloFixture
+{
+  public:
+    inputs*     data;
+    inputs*     head;
+    weatherDF*  wdf;
+    fuel_coefs* ptr;
+    main_outs*  at;
+    snd_outs*   sec;
+    fire_struc* hptr;
+    fire_struc* fptr;
+    fire_struc* bptr;
+    arguments*  args;
+    int         cellsize;
+
+    PortilloFixture()
+    {
+        setup_const();
+
+        data = new inputs();
+        head = new inputs();
+        wdf  = new weatherDF();
+        ptr  = new fuel_coefs();
+        at   = new main_outs();
+        sec  = new snd_outs();
+        hptr = new fire_struc();
+        fptr = new fire_struc();
+        bptr = new fire_struc();
+        args = new arguments();
+
+        set_fueltype(data, "BN03");
+        data->nftype      = 16;
+        data->elev        = 1500.0f;
+        data->cbh         = 7.5f;
+        data->cbd         = 0.15f;
+        data->tree_height = 21.0f;
+
+        head->elev = 1510.0f;  // 10 m rise over 100 m cell
+
+        wdf->ws  = 26.2f;
+        wdf->waz = 137.0f;  // 317 + 180 - 360
+        wdf->tmp = 26.8f;
+        wdf->rh  = 28.1f;
+
+        args->FMC       = 87;
+        args->AllowCROS = true;
+        args->verbose   = false;
+
+        cellsize = 100;
+    }
+};
+
+// --- fire_type ---
+
+TEST_CASE_METHOD(PortilloFixture, "fire_type returns false below critical intensity", "[fire_type]")
+{
+    // critical_intensity(cbh=7.5, FMC=87) = 2902.94
+    at->sfi = 2901.94f;
+    REQUIRE(fire_type(data, at, args->FMC) == false);
+}
+
+TEST_CASE_METHOD(PortilloFixture, "fire_type returns true above critical intensity", "[fire_type]")
+{
+    at->sfi = 2903.94f;
+    REQUIRE(fire_type(data, at, args->FMC) == true);
+}
+
+TEST_CASE_METHOD(PortilloFixture, "fire_type never triggers when cbh is zero", "[fire_type]")
+{
+    data->cbh = 0.0f;
+    at->sfi   = 200000.0f;
+    REQUIRE(fire_type(data, at, args->FMC) == false);
+}
+
+// --- calculate_k ---
+
+TEST_CASE_METHOD(PortilloFixture, "calculate_k surface fire (AllowCROS=false)", "[calculate_k]")
+{
+    args->AllowCROS = false;
+    bool ac = false;
+    calculate_k(data, head, cellsize, ptr, args, at, sec, hptr, fptr, bptr, ac, wdf);
+
+    REQUIRE(at->crown == 0);
+    REQUIRE(ac == false);
+    REQUIRE_THAT(at->rss,  WithinAbs(3.8863, 0.001));
+    REQUIRE_THAT(at->sfi,  WithinAbs(4371.78, 0.1));
+    REQUIRE_THAT(at->fl,   WithinAbs(3.6644, 0.001));
+    REQUIRE_THAT(at->fh,   WithinAbs(1.8602, 0.001));
+    REQUIRE_THAT(sec->lb,  WithinAbs(1.4796, 0.001));
+    REQUIRE_THAT(hptr->ros, WithinAbs(3.8863, 0.001));
+    REQUIRE_THAT(bptr->ros, WithinAbs(0.5884, 0.001));
+    REQUIRE_THAT(fptr->ros, WithinAbs(1.5122, 0.001));
+    REQUIRE_THAT(at->a,    WithinAbs(2.2373, 0.001));
+    REQUIRE_THAT(at->b,    WithinAbs(1.5122, 0.001));
+    REQUIRE_THAT(at->c,    WithinAbs(1.6490, 0.001));
+}
+
+TEST_CASE_METHOD(PortilloFixture, "calculate_k crown fire (Portillo hot/dry/windy)", "[calculate_k]")
+{
+    bool ac = false;
+    calculate_k(data, head, cellsize, ptr, args, at, sec, hptr, fptr, bptr, ac, wdf);
+
+    REQUIRE(at->crown == 1);
+    REQUIRE(ac == true);
+    REQUIRE_THAT(at->cfb,   WithinAbs(0.1745, 0.001));
+    REQUIRE_THAT(at->rss,   WithinAbs(8.3281, 0.001));
+    REQUIRE_THAT(hptr->ros, WithinAbs(8.3281, 0.001));
+    REQUIRE_THAT(bptr->ros, WithinAbs(1.2609, 0.001));
+    REQUIRE_THAT(fptr->ros, WithinAbs(3.2405, 0.001));
+    REQUIRE_THAT(at->a,     WithinAbs(4.7945, 0.001));
+    REQUIRE_THAT(at->b,     WithinAbs(3.2405, 0.001));
+}
+
+TEST_CASE_METHOD(PortilloFixture, "calculate_k no crown when cbh is zero", "[calculate_k]")
+{
+    data->cbh = 0.0f;
+    bool ac = false;
+    calculate_k(data, head, cellsize, ptr, args, at, sec, hptr, fptr, bptr, ac, wdf);
+
+    REQUIRE(at->crown == 0);
+    REQUIRE(ac == false);
+    REQUIRE_THAT(at->cfb,  WithinAbs(0.0, 0.001));
+    REQUIRE_THAT(at->rss,  WithinAbs(3.8863, 0.001));
+    REQUIRE_THAT(at->sfi,  WithinAbs(4371.78, 0.1));
+}
+
+TEST_CASE_METHOD(PortilloFixture, "calculate_k mild weather produces lower spread", "[calculate_k]")
+{
+    wdf->ws  = 10.0f;
+    wdf->tmp = 20.0f;
+    wdf->rh  = 60.0f;
+    head->elev = 1500.0f;  // flat terrain
+    bool ac = false;
+    calculate_k(data, head, cellsize, ptr, args, at, sec, hptr, fptr, bptr, ac, wdf);
+
+    REQUIRE(at->crown == 0);
+    REQUIRE_THAT(at->rss,  WithinAbs(0.7185, 0.001));
+    REQUIRE_THAT(at->sfi,  WithinAbs(808.31, 0.1));
+    REQUIRE_THAT(at->fl,   WithinAbs(1.6857, 0.001));
+    REQUIRE_THAT(sec->lb,  WithinAbs(1.0588, 0.001));
+}
+
+// --- determine_destiny_metrics_k ---
+
+TEST_CASE_METHOD(PortilloFixture, "determine_destiny_metrics_k surface fire", "[determine_destiny_metrics_k]")
+{
+    // rss from surface-only calculate_k scenario
+    main_outs metrics = {};
+    metrics.rss = 3.8863f;
+    args->AllowCROS = false;
+
+    determine_destiny_metrics_k(data, ptr, args, &metrics);
+
+    REQUIRE(metrics.crown == 0);
+    REQUIRE_THAT(metrics.cfb, WithinAbs(0.0, 0.001));
+    REQUIRE_THAT(metrics.sfi, WithinAbs(4371.78, 0.1));
+    REQUIRE_THAT(metrics.fl,  WithinAbs(3.6644, 0.001));
+}
+
+TEST_CASE_METHOD(PortilloFixture, "determine_destiny_metrics_k crown fire", "[determine_destiny_metrics_k]")
+{
+    // rss from crown fire calculate_k scenario
+    main_outs metrics = {};
+    metrics.rss = 8.3281f;
+
+    determine_destiny_metrics_k(data, ptr, args, &metrics);
+
+    REQUIRE(metrics.crown == 1);
+    REQUIRE_THAT(metrics.cfb, WithinAbs(0.5701, 0.001));
+    REQUIRE_THAT(metrics.sfi, WithinAbs(9368.55, 0.1));
+    REQUIRE_THAT(metrics.fl,  WithinAbs(5.2032, 0.001));
 }
