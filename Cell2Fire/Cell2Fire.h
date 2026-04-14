@@ -95,6 +95,8 @@ class Cell2Fire
     std::vector<std::vector<std::string>> DF;
     std::vector<std::vector<std::string>> WDist;
     std::vector<int> statusCells;     //(long int, int);
+    std::vector<int> fTypeCells;
+    std::unordered_set<int> nonBurnableCells;
     std::vector<std::vector<std::string>> WeatherData;
     std::vector<int> IgnitionPoints;
     vector<int> burnedOutList;

@@ -40,8 +40,6 @@ inputs* df_ptr;
 inputs* df;
 std::vector<std::vector<int>> coordCells;
 std::vector<float> ignProb;
-std::vector<int> fTypeCells;
-std::unordered_set<int> nonBurnableCells;
 int currentSim = 0;
 std::unordered_map<int, std::vector<int>> HarvestedCells;
 std::vector<float> WeatherWeights;
