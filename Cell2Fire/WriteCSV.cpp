@@ -168,29 +168,24 @@ CSVWriter::printCSVDouble(int rows, int cols, std::vector<double> network)
 void
 CSVWriter::printCSVDouble_V2(int rows, int cols, std::vector<double> network)
 {
-    bool outs = false;
     std::ofstream ofs(this->fileName, std::ofstream::out);
     for (int r = 0; r < rows; r++)
     {
+        int base = r * cols;
+        // first two values must be positive integers (source/dest cell ids)
+        if (network[base] < 1 || network[base + 1] < 1 ||
+            std::ceil(network[base]) != network[base])
+            break;
         for (int c = 0; c < cols; c++)
         {
-            if (network[c + r * cols] < 1 || network[c + r * cols + 1] < 1
-                || std::ceil(network[c + r * cols]) != network[c + r * cols])
-            {
-                outs = true;
-                break;
-            }
-            ofs << (int)network[c + r * cols] << this->delimeter << (int)network[c + r * cols + 1] << this->delimeter
-                << (int)network[c + r * cols + 2] << this->delimeter << network[c + r * cols + 3] << "\n";
-            c += cols;
+            if (c > 0) ofs << this->delimeter;
+            if (c < 3)
+                ofs << (int)network[base + c];
+            else
+                ofs << network[base + c];
         }
-
-        if (outs)
-        {
-            break;
-        }
+        ofs << "\n";
     }
-    // Close file
     ofs.close();
 }
 

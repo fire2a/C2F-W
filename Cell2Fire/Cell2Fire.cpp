@@ -638,30 +638,12 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     {
         this->messagesFolder = Cell2Fire::createOutputFolder("Messages");
     }
-    // ROS Folder
-    if (this->args.OutRos)
+    // Cell Metrics CSV folder (replaces per-metric .asc folders)
+    if (this->args.OutRos || this->args.OutFl || this->args.OutIntensity ||
+        (this->args.OutCrown && this->args.AllowCROS) ||
+        (this->args.OutCrownConsumption && this->args.AllowCROS))
     {
-        this->rosFolder = Cell2Fire::createOutputFolder("RateOfSpread");
-    }
-    // Surface Byram Intensity Folder
-    if (this->args.OutIntensity)
-    {
-        this->surfaceIntensityFolder = Cell2Fire::createOutputFolder("SurfaceIntensity");
-    }
-    // Surface Flame Length Folder
-    if (this->args.OutFl)
-    {
-        this->surfaceFlameLengthFolder = Cell2Fire::createOutputFolder("SurfaceFlameLength");
-    }
-    // Crown Folder
-    if (this->args.OutCrown && this->args.AllowCROS)
-    {
-        this->crownFolder = Cell2Fire::createOutputFolder("CrownFire");
-    }
-    // Crown Fraction Burn Folder
-    if (this->args.OutCrownConsumption && this->args.AllowCROS)
-    {
-        this->cfbFolder = Cell2Fire::createOutputFolder("CrownFractionBurn");
+        this->cellMetricsFolder = Cell2Fire::createOutputFolder("CellMetrics");
     }
 
     chooseWeather(this->args.WeatherOpt, rnumber, simExt);
@@ -689,7 +671,8 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->maxFlameLengths.assign(this->nCells, 0);
 
     this->FSCell.clear();
-    this->FSCell.reserve(this->nCells * 4);  // 4 entries per spread event (src, dst, period, ros)
+    int fsCols = (this->args.OutCrown && this->args.AllowCROS) ? 7 : 4;
+    this->FSCell.reserve(this->nCells * fsCols);
     this->crownMetrics.clear();  // intensity and crown
 
     // Non burnable types: populate relevant fields such as status and ftype
@@ -1648,102 +1631,41 @@ Cell2Fire::Results()
             std::cout << "We are generating the network messages to a csv file " << messagesName << std::endl;
         }
         CSVWriter CSVPloter(messagesName, ",");
-        // CSVPloter.printCSVDouble_V2(this->FSCell.size() - this->nIgnitions, 4,
-        // this->FSCell);
-        CSVPloter.printCSVDouble_V2(this->FSCell.size() / 4, 4, this->FSCell);
+        int fsCols = (this->args.OutCrown && this->args.AllowCROS) ? 7 : 4;
+        CSVPloter.printCSVDouble_V2(this->FSCell.size() / fsCols, fsCols, this->FSCell);
     }
 
-    // RateOfSpread
-    if (this->args.OutRos)
+    // Cell Metrics CSV — one row per burned cell, columns depend on active flags
+    if (this->args.OutRos || this->args.OutFl || this->args.OutIntensity ||
+        (this->args.OutCrown && this->args.AllowCROS) ||
+        (this->args.OutCrownConsumption && this->args.AllowCROS))
     {
-        std::string rosName;
         std::ostringstream oss;
-        oss.str("");
         oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        rosName = this->rosFolder + "ROSFile" + oss.str() + ".asc";
-        if (this->args.verbose)
-        {
-            std::cout << "We are generating the Rate of Spread to a asc file " << rosName << std::endl;
-        }
-        CSVWriter CSVPloter(rosName, " ");
-        CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->RateOfSpreads);
-    }
+        std::string metricsName = this->cellMetricsFolder + "CellMetrics" + oss.str() + ".csv";
 
-    // Intensity
-    if (this->args.OutIntensity)
-    {
-        this->surfaceIntensityFolder = this->args.OutFolder + "SurfaceIntensity" + separator();
-        std::string intensityName;
-        std::ostringstream oss;
-        oss.str("");
-        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        intensityName = this->surfaceIntensityFolder + "SurfaceIntensity" + oss.str() + ".asc";
-
-        if (this->args.verbose)
+        std::ofstream mfs(metricsName);
+        // header
+        mfs << "cell_id";
+        if (this->args.OutRos)                                          mfs << ",ros";
+        if (this->args.OutFl)                                           mfs << ",fl";
+        if (this->args.OutIntensity)                                    mfs << ",intensity";
+        if (this->args.OutCrownConsumption && this->args.AllowCROS)     mfs << ",cfb";
+        if (this->args.OutCrown && this->args.AllowCROS)                mfs << ",crown";
+        mfs << "\n";
+        // rows — only burned cells (RateOfSpreads > 0 always for burned cells)
+        for (int i = 0; i < this->nCells; i++)
         {
-            std::cout << "We are generating the Byram Intensity to a asc file " << intensityName << std::endl;
+            if (this->RateOfSpreads[i] == 0) continue;
+            mfs << (i + 1);
+            if (this->args.OutRos)                                      mfs << "," << this->RateOfSpreads[i];
+            if (this->args.OutFl)                                       mfs << "," << this->surfaceFlameLengths[i];
+            if (this->args.OutIntensity)                                mfs << "," << this->surfaceIntensities[i];
+            if (this->args.OutCrownConsumption && this->args.AllowCROS) mfs << "," << this->crownFraction[i];
+            if (this->args.OutCrown && this->args.AllowCROS)            mfs << "," << this->crownState[i];
+            mfs << "\n";
         }
-        CSVWriter CSVPloter(intensityName, " ");
-        CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfaceIntensities);
-    }
-
-    // Surface Flame Length
-    if (this->args.OutFl)
-    {
-        this->surfaceFlameLengthFolder = this->args.OutFolder + "SurfaceFlameLength" + separator();
-        std::string flName;
-        std::ostringstream oss;
-        oss.str("");
-        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        flName = this->surfaceFlameLengthFolder + "SurfaceFlameLength" + oss.str() + ".asc";
-        if (this->args.verbose)
-        {
-            std::cout << "We are generating the Flame Length to a asc file " << flName << std::endl;
-        }
-        CSVWriter CSVPloter(flName, " ");
-        CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfaceFlameLengths);
-    }
-
-    // Intensity
-    if ((this->args.OutCrownConsumption) && (this->args.AllowCROS))
-    {
-        this->cfbFolder = this->args.OutFolder + "CrownFractionBurn" + separator();
-        std::string cfbName;
-        std::ostringstream oss;
-        oss.str("");
-        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        cfbName = this->cfbFolder + "Cfb" + oss.str() + ".asc";
-        if (this->args.verbose)
-        {
-            std::cout << "We are generating the Crown Fraction Burn to a asc file " << cfbName << std::endl;
-        }
-        CSVWriter CSVPloter(cfbName, " ");
-        CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFraction);
-    }
-
-    // Crown
-    if ((this->args.OutCrown) && (this->args.AllowCROS))
-    {
-        this->crownFolder = this->args.OutFolder + "CrownFire" + separator();
-        std::string crownName;
-        std::ostringstream oss;
-        oss.str("");
-        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        crownName = this->crownFolder + "Crown" + oss.str() + ".asc";
-        if (this->args.verbose)
-        {
-            std::cout << "We are generating the Crown behavior to a asc file " << crownName << std::endl;
-        }
-        CSVWriter CSVPloter(crownName, " ");
-        // CSVPloter.printCrownAscii(this->rows, this->cols, this->xllcorner,
-        // this->yllcorner, this->cellSide, this->crownMetrics, statusCells2);
-        // /OLD VERSION
-        CSVPloter.printASCIIInt(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownState);
+        mfs.close();
     }
 
     // Ignition Logfile

@@ -596,20 +596,22 @@ Cells::manageFire(int period,
                 FSCell->push_back(roundedRos);
                 metrics.rss = roundedRos;
                 determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
-                crownState[this->realId - 1] = mainstruct.crown;
-                crownState[nb - 1] = metrics.crown;
-                RateOfSpreads[this->realId - 1] = roundedRos;  // max(roundedRos, RateOfSpreads[this->realId - 1]);
-                RateOfSpreads[nb - 1] = roundedRos;
-                Intensities[this->realId - 1] = mainstruct.sfi;
-                Intensities[nb - 1] = metrics.sfi;
-                crownFraction[this->realId - 1] = mainstruct.cfb;
-                crownFraction[nb - 1] = metrics.cfb;
-                surfFraction[this->realId] = mainstruct.sfc;
-                surfFraction[nb] = metrics.sfc;
-                SurfaceFlameLengths[this->realId - 1] = mainstruct.fl;
-                SurfaceFlameLengths[nb - 1] = metrics.fl;
-                MaxFlameLengths[this->realId - 1] = mainstruct.fl;
-                MaxFlameLengths[nb - 1] = metrics.fl;
+                if (args->OutCrown && args->AllowCROS)
+                {
+                    FSCell->push_back(roundedRos);
+                    FSCell->push_back(double(mainstruct.crown));
+                    FSCell->push_back(double(metrics.crown));
+                }
+                crownState[this->realId - 1] |= mainstruct.crown;
+                crownState[nb - 1] |= metrics.crown;
+                RateOfSpreads[this->realId - 1] = std::max(RateOfSpreads[this->realId - 1], roundedRos);
+                RateOfSpreads[nb - 1] = std::max(RateOfSpreads[nb - 1], roundedRos);
+                Intensities[this->realId - 1] = std::max(Intensities[this->realId - 1], mainstruct.sfi);
+                Intensities[nb - 1] = std::max(Intensities[nb - 1], metrics.sfi);
+                crownFraction[this->realId - 1] = std::max(crownFraction[this->realId - 1], mainstruct.cfb);
+                crownFraction[nb - 1] = std::max(crownFraction[nb - 1], metrics.cfb);
+                SurfaceFlameLengths[this->realId - 1] = std::max(SurfaceFlameLengths[this->realId - 1], mainstruct.fl);
+                SurfaceFlameLengths[nb - 1] = std::max(SurfaceFlameLengths[nb - 1], metrics.fl);
 
                 // cannot mutate ROSangleDir during iteration.. we do it like 10
                 // lines down toPop.push_back(angle);
