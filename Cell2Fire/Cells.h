@@ -140,7 +140,6 @@ class Cells
                                 inputs df[],
                                 fuel_coefs* coef,
                                 std::vector<std::vector<int>>& coordCells,
-                                std::unordered_map<int, Cells>& Cells_Obj,
                                 arguments* args,
                                 weatherDF* wdf_ptr,
                                 std::vector<double>* FSCell,

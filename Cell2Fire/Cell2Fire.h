@@ -120,11 +120,12 @@ class Cell2Fire
     std::unordered_set<int> burntCells;
     std::unordered_set<int> harvestCells;
 
-    // Cells Dictionary
-    std::unordered_map<int, Cells> Cells_Obj;
+    // Cells flat array (index = cell_id - 1, nullptr = not yet ignited)
+    std::vector<Cells*> cells_flat;
 
     // Constructor
     Cell2Fire(arguments args);
+    ~Cell2Fire();
 
     // Methods
     void InitCell(int id);

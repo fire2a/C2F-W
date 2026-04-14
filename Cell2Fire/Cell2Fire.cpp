@@ -259,6 +259,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     // Initialize and populate relevant vectors
     fTypeCells = std::vector<int>(this->nCells, 1);
     this->statusCells = std::vector<int>(this->nCells, 0);
+    this->cells_flat.assign(this->nCells, nullptr);
     // Outputs
     this->crownState = std::vector<int>(this->nCells, 0);
     this->crownFraction = std::vector<float>(this->nCells, 0);
@@ -511,6 +512,11 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->fire_period = vector<int>(this->args.TotalYears, 0);
 }
 
+Cell2Fire::~Cell2Fire()
+{
+    for (auto& p : this->cells_flat) { delete p; p = nullptr; }
+}
+
 /******************************************************************************
                                                                                                                                 Methods
 *******************************************************************************/
@@ -542,28 +548,18 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
 void
 Cell2Fire::InitCell(int id)
 {
-    // Declare an iterator to unordered_map
-    std::unordered_map<int, Cells>::iterator it2;
-
-    // Initialize cell, insert it inside the unordered map
-    Cells Cell(id - 1,
-               this->areaCells,
-               coordCells[id - 1],
-               fTypeCells[id - 1],
-               this->perimeterCells,
-               this->statusCells[id - 1],
-               id);
-    this->Cells_Obj.insert(std::make_pair(id, Cell));
-
-    // Get object from unordered map
-    it2 = this->Cells_Obj.find(id);
-
-    // Initialize the fire fields for the selected cel
-    it2->second.initializeFireFields(coordCells, this->availCells, this->cols, this->rows);
+    this->cells_flat[id - 1] = new Cells(id - 1,
+                                          this->areaCells,
+                                          coordCells[id - 1],
+                                          fTypeCells[id - 1],
+                                          this->perimeterCells,
+                                          this->statusCells[id - 1],
+                                          id);
+    this->cells_flat[id - 1]->initializeFireFields(coordCells, this->availCells, this->cols, this->rows);
 
     // Print info for debugging
     if (this->args.verbose)
-        it2->second.print_info();
+        this->cells_flat[id - 1]->print_info();
 }
 
 /**
@@ -650,8 +646,8 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->ROSRV = std::abs(rnumber2);
     // std::cout << "ROSRV: " << this->ROSRV << std::endl;
 
-    // Cells dictionary
-    this->Cells_Obj.clear();
+    // Cells flat array: free any ignited cells from the previous simulation
+    for (auto& p : this->cells_flat) { delete p; p = nullptr; }
 
     // Declare an iterator to unordered_map
     std::unordered_map<int, Cells>::iterator it;
@@ -671,7 +667,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
 
     this->FSCell.clear();
     int fsCols = (this->args.OutCrown && this->args.AllowCROS) ? 7 : 4;
-    this->FSCell.reserve(this->nCells * fsCols);
+    this->FSCell.reserve(this->nCells * fsCols * 4);  // 4x: each cell can send multiple messages across periods
     this->crownMetrics.clear();  // intensity and crown
 
     // Non burnable types: populate relevant fields such as status and ftype
@@ -790,8 +786,9 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
     // std::default_random_engine generator2(args.seed * ep * this->nCells);  // * time(NULL)); //creates a different
     //  generator solving cases when parallel
     //  running creates simulations at same time
-    std::unordered_map<int, Cells>::iterator it;
     // std::uniform_int_distribution<int> distribution(1, this->nCells);
+
+    Cells* ignited_cell = nullptr;  // set when ignition succeeds
 
     // No Ignitions provided
     if (this->args.Ignitions == 0)
@@ -823,39 +820,38 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
             }
 
             // If cell is available and not initialized, initialize it
-            if (this->statusCells[aux - 1] < 3 && this->burntCells.find(aux) == this->burntCells.end())
+            if (this->statusCells[aux - 1] < 2)
             {
-                if (this->Cells_Obj.find(aux) == this->Cells_Obj.end())
-                {
+                if (!this->cells_flat[aux - 1])
                     InitCell(aux);
-                    it = this->Cells_Obj.find(aux);
-                }
 
-                if (it->second.getStatus() == "Available" && it->second.fType != 0)
+                Cells* cell_ptr = this->cells_flat[aux - 1];
+                if (cell_ptr->getStatus() == "Available" && cell_ptr->fType != 0)
                 {
                     IgnitionHistory[sim] = aux;
                     // std::cout << "Selected (Random) ignition point: " << aux << std::endl;
                     std::vector<int> ignPts = { aux };
-                    if (it->second.ignition(this->fire_period[year - 1],
-                                            this->year,
-                                            ignPts,
-                                            &df[aux - 1],
-                                            this->coef_ptr,
-                                            this->args_ptr,
-                                            &(this->wdf[this->weatherPeriod]),
-                                            this->activeCrown,
-                                            this->perimeterCells))
+                    if (cell_ptr->ignition(this->fire_period[year - 1],
+                                           this->year,
+                                           ignPts,
+                                           &df[aux - 1],
+                                           this->coef_ptr,
+                                           this->args_ptr,
+                                           &(this->wdf[this->weatherPeriod]),
+                                           this->activeCrown,
+                                           this->perimeterCells))
                     {
                         // Printing info about ignitions
                         if (this->args.verbose)
                         {
-                            std::cout << "Cell " << it->second.realId << " Ignites" << std::endl;
-                            std::cout << "Cell " << it->second.realId << " Status: " << it->second.getStatus()
+                            std::cout << "Cell " << cell_ptr->realId << " Ignites" << std::endl;
+                            std::cout << "Cell " << cell_ptr->realId << " Status: " << cell_ptr->getStatus()
                                       << std::endl;
                         }
 
                         // Status
-                        this->statusCells[it->second.realId - 1] = 1;
+                        this->statusCells[cell_ptr->realId - 1] = 1;
+                        ignited_cell = cell_ptr;
 
                         // Plotter placeholder
                         if (this->args.OutputGrids)
@@ -896,47 +892,43 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
         IgnitionHistory[sim] = temp;
 
         // If cell is available
-        if (this->burntCells.find(temp) == this->burntCells.end() && this->statusCells[temp - 1] < 3)
+        if (this->statusCells[temp - 1] < 2)
         {
-            if (this->Cells_Obj.find(temp) == this->Cells_Obj.end())
-            {
-                // Initialize cell, insert it inside the unordered map
+            if (!this->cells_flat[temp - 1])
                 InitCell(temp);
-            }
 
-            // Iterator
-            it = this->Cells_Obj.find(temp);
+            Cells* cell_ptr = this->cells_flat[temp - 1];
 
             // Not available or non burnable: no ignition
-            if (it->second.getStatus() != "Available" || it->second.fType == 0)
+            if (cell_ptr->getStatus() != "Available" || cell_ptr->fType == 0)
             {
                 this->noIgnition = true;
             }
 
             // Available and Burnable: ignition
-            if (it->second.getStatus() == "Available" && it->second.fType != 0)
+            if (cell_ptr->getStatus() == "Available" && cell_ptr->fType != 0)
             {
                 std::vector<int> ignPts = { temp };
-                if (it->second.ignition(this->fire_period[year - 1],
-                                        this->year,
-                                        ignPts,
-                                        &df[temp - 1],
-                                        this->coef_ptr,
-                                        this->args_ptr,
-                                        &(this->wdf[this->weatherPeriod]),
-                                        this->activeCrown,
-                                        this->perimeterCells))
+                if (cell_ptr->ignition(this->fire_period[year - 1],
+                                       this->year,
+                                       ignPts,
+                                       &df[temp - 1],
+                                       this->coef_ptr,
+                                       this->args_ptr,
+                                       &(this->wdf[this->weatherPeriod]),
+                                       this->activeCrown,
+                                       this->perimeterCells))
                 {
-
                     // Printing info about ignitions
                     if (this->args.verbose)
                     {
-                        std::cout << "Cell " << it->second.realId << " Ignites" << std::endl;
-                        std::cout << "Cell " << it->second.realId << " Status: " << it->second.getStatus() << std::endl;
+                        std::cout << "Cell " << cell_ptr->realId << " Ignites" << std::endl;
+                        std::cout << "Cell " << cell_ptr->realId << " Status: " << cell_ptr->getStatus() << std::endl;
                     }
 
                     // Status
-                    this->statusCells[it->second.realId - 1] = 1;
+                    this->statusCells[cell_ptr->realId - 1] = 1;
+                    ignited_cell = cell_ptr;
                 }
             }
         }
@@ -948,9 +940,9 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
     }
 
     // If ignition occurs, we update the forest status
-    if (!this->noIgnition)
+    if (!this->noIgnition && ignited_cell)
     {
-        int newId = it->second.realId;
+        int newId = ignited_cell->realId;
         if (this->args.verbose)
         std:
             cout << "New ID for burning cell: " << newId << std::endl;
@@ -958,6 +950,7 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
         this->nIgnitions++;
         this->burningCells.insert(newId);
         this->burntCells.insert(newId);
+        this->statusCells[newId - 1] = 2;
         this->availCells.erase(newId);
 
         // Print sets information
@@ -1066,9 +1059,6 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
 std::unordered_map<int, std::vector<int>>
 Cell2Fire::SendMessages()
 {
-    // Iterator
-    std::unordered_map<int, Cells>::iterator it;
-
     // Clean list
     this->burnedOutList.clear();
 
@@ -1104,43 +1094,39 @@ Cell2Fire::SendMessages()
     for (int cell : this->burningCells)
     {
         std::vector<int> aux_list;
-        // Get object from unordered map
-        it = this->Cells_Obj.find(cell);
+        Cells* cell_ptr = this->cells_flat[cell - 1];
 
         // Cell's info
         if (this->args.verbose)
-        {
-            it->second.print_info();
-        }
+            cell_ptr->print_info();
 
         /*
                         Manage Fire method main step
         */
-        if (it->second.hasAvailableNeighbor())
+        if (cell_ptr->hasAvailableNeighbor())
         {
             // std::cout << "Entra a Manage Fire" << std::endl;
-            aux_list = it->second.manageFire(this->fire_period[this->year - 1],
-                                             this->availCells,
-                                             df,
-                                             this->coef_ptr,
-                                             coordCells,
-                                             this->Cells_Obj,
-                                             this->args_ptr,
-                                             &this->wdf[this->weatherPeriod],
-                                             &this->FSCell,
-                                             &this->crownMetrics,
-                                             this->activeCrown,
-                                             this->ROSRV,
-                                             this->perimeterCells,
-                                             this->crownState,
-                                             this->crownFraction,
-                                             this->surfFraction,
-                                             this->surfaceIntensities,
-                                             this->RateOfSpreads,
-                                             this->surfaceFlameLengths,
-                                             this->crownFlameLengths,
-                                             this->crownIntensities,
-                                             this->maxFlameLengths);
+            aux_list = cell_ptr->manageFire(this->fire_period[this->year - 1],
+                                            this->availCells,
+                                            df,
+                                            this->coef_ptr,
+                                            coordCells,
+                                            this->args_ptr,
+                                            &this->wdf[this->weatherPeriod],
+                                            &this->FSCell,
+                                            &this->crownMetrics,
+                                            this->activeCrown,
+                                            this->ROSRV,
+                                            this->perimeterCells,
+                                            this->crownState,
+                                            this->crownFraction,
+                                            this->surfFraction,
+                                            this->surfaceIntensities,
+                                            this->RateOfSpreads,
+                                            this->surfaceFlameLengths,
+                                            this->crownFlameLengths,
+                                            this->crownIntensities,
+                                            this->maxFlameLengths);
             // std::cout << "Sale de Manage Fire" << std::endl;
         }
 
@@ -1159,11 +1145,11 @@ Cell2Fire::SendMessages()
             if (this->args.verbose)
                 std::cout << "\nList is not empty" << std::endl;
             this->messagesSent = true;
-            sendMessageList[it->second.realId] = aux_list;
+            sendMessageList[cell_ptr->realId] = aux_list;
             if (this->args.verbose)
             {
                 std::cout << "Message list content" << std::endl;
-                for (auto& msg : sendMessageList[it->second.realId])
+                for (auto& msg : sendMessageList[cell_ptr->realId])
                 {
                     std::cout << "  Fire reaches the center of the cell " << msg
                               << "  Distance to cell (in meters) was 100.0"
@@ -1182,7 +1168,7 @@ Cell2Fire::SendMessages()
         if (aux_list.size() == 0)
         {
             // not parallel here
-            this->burnedOutList.push_back(it->second.realId);
+            this->burnedOutList.push_back(cell_ptr->realId);
             if (this->args.verbose)
             {
                 std::cout << "\nMessage and Aux Lists are empty; adding to "
@@ -1254,8 +1240,6 @@ void
 Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMessageList)
 {
     // Iterator
-    std::unordered_map<int, Cells>::iterator it;
-
     // Information of the current step
     if (this->args.verbose)
     {
@@ -1306,6 +1290,7 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
         for (auto& bc : this->burningCells)
         {
             this->burntCells.insert(bc);
+            this->statusCells[bc - 1] = 2;
         }
         this->burningCells.clear();
         if (this->args.verbose)
@@ -1338,13 +1323,8 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
         for (auto& _bc : globalMessagesList)
         {
             int bc = _bc.first;
-            if (this->Cells_Obj.find(bc) == this->Cells_Obj.end()
-                && this->burntCells.find(bc) == this->burntCells.end())
-            {
-                // Initialize cell, insert it inside the unordered map
+            if (!this->cells_flat[bc - 1] && this->statusCells[bc - 1] < 2)
                 InitCell(bc);
-                it = this->Cells_Obj.find(bc);
-            }
         }
 
         // Get burnt loop
@@ -1363,30 +1343,25 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
             // printf("\n\nWE ARE DEBUGGING!!!! CELL TO BE ANALYZED GET BURNT IS
             // %d\n", _bc.first);
             int bc = _bc.first;
-            if (this->burntCells.find(bc) == this->burntCells.end())
+            if (this->statusCells[bc - 1] < 2)
             {
-                if (this->Cells_Obj.find(bc) == this->Cells_Obj.end())
-                {
-
-                    // Initialize cell, insert it inside the unordered map
+                if (!this->cells_flat[bc - 1])
                     InitCell(bc);
-                    it = this->Cells_Obj.find(bc);
-                }
-                else
-                    it = this->Cells_Obj.find(bc);
+
+                Cells* bc_ptr = this->cells_flat[bc - 1];
 
                 // Check if burnable, then check potential ignition
-                if (it->second.fType != 0)
+                if (bc_ptr->fType != 0)
                 {
-                    checkBurnt = it->second.get_burned(this->fire_period[this->year - 1],
-                                                       1,
-                                                       this->year,
-                                                       df,
-                                                       this->coef_ptr,
-                                                       this->args_ptr,
-                                                       &this->wdf[this->weatherPeriod],
-                                                       this->activeCrown,
-                                                       this->perimeterCells);
+                    checkBurnt = bc_ptr->get_burned(this->fire_period[this->year - 1],
+                                                    1,
+                                                    this->year,
+                                                    df,
+                                                    this->coef_ptr,
+                                                    this->args_ptr,
+                                                    &this->wdf[this->weatherPeriod],
+                                                    this->activeCrown,
+                                                    this->perimeterCells);
                 }
                 else
                 {
@@ -1396,29 +1371,29 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
                 // Print-out regarding the burnt cell
                 if (this->args.verbose)
                 {
-                    std::cout << "\nCell " << it->second.realId << " got burnt (1 true, 0 false): " << checkBurnt
+                    std::cout << "\nCell " << bc_ptr->realId << " got burnt (1 true, 0 false): " << checkBurnt
                               << std::endl;
                 }
 
                 // Update the burntlist
                 if (checkBurnt)
                 {
-                    burntList.insert(it->second.realId);
+                    burntList.insert(bc_ptr->realId);
 
-                    // Cleaning step
-                    // Fire can't be propagated back
-                    for (int i = 0; i < it->second.nb_count; i++)
+                    // Cleaning step: fire can't propagate back into the newly burnt cell
+                    for (int i = 0; i < bc_ptr->nb_count; i++)
                     {
-                        int origToNew = it->second.nb_angles[i];
-                        // Which neighbor am I to the burnt cell
+                        int origToNew = bc_ptr->nb_angles[i];
                         int newToOrig = (origToNew + 180) % 360;
-                        int adjCellNum = it->second.nb_ids[i];
-                        auto adjIt = Cells_Obj.find(adjCellNum);
-                        if (adjIt != Cells_Obj.end())
+                        int adjCellNum = bc_ptr->nb_ids[i];
+                        Cells* adj_ptr = (adjCellNum > 0 && adjCellNum <= this->nCells)
+                                             ? this->cells_flat[adjCellNum - 1]
+                                             : nullptr;
+                        if (adj_ptr)
                         {
-                            int backSlot = adjIt->second.slotByAngle(newToOrig);
+                            int backSlot = adj_ptr->slotByAngle(newToOrig);
                             if (backSlot >= 0)
-                                adjIt->second.nb_available[backSlot] = false;
+                                adj_ptr->nb_available[backSlot] = false;
                         }
                     }
                 }
@@ -1429,11 +1404,13 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
         for (auto& bc : burntList)
         {
             this->burntCells.insert(bc);
+            this->statusCells[bc - 1] = 2;
         }
 
         for (auto& bc : this->burnedOutList)
         {
             this->burntCells.insert(bc);
+            this->statusCells[bc - 1] = 2;
         }
 
         for (auto& bc : burntList)
@@ -1545,33 +1522,16 @@ Cell2Fire::Results()
      *4: Results and outputs
      *
      ******************************************************************************/
-    // Iterator
-    // Declare an iterator to unordered_map
-    std::unordered_map<int, Cells>::iterator it;
-    int i;
-
     for (auto& br : this->burntCells)
     {
-        if (this->Cells_Obj.find(br) != this->Cells_Obj.end())
-        {
-            // Get object from unordered map
-            it = this->Cells_Obj.find(br);
-
-            // Initialize the fire fields for the selected cel
-            it->second.status = 2;
-        }
+        if (this->cells_flat[br - 1])
+            this->cells_flat[br - 1]->status = 2;
     }
 
     for (auto& br : this->burningCells)
     {
-        if (this->Cells_Obj.find(br) != this->Cells_Obj.end())
-        {
-            // Get object from unordered map
-            it = this->Cells_Obj.find(br);
-
-            // Initialize the fire fields for the selected cel
-            it->second.status = 2;
-        }
+        if (this->cells_flat[br - 1])
+            this->cells_flat[br - 1]->status = 2;
     }
 
     // Final results for comparison with Python
@@ -1674,7 +1634,7 @@ Cell2Fire::Results()
         if (this->args.verbose)
         {
             std::cout << "\nWriting (simulation, cell & weather ids): ";
-            for (i = 1; i < IgnitionHistory.size() + 1; i++)
+            for (int i = 1; i < (int)IgnitionHistory.size() + 1; i++)
             {
                 std::cout << "(" << i << "," << IgnitionHistory[i] << "," << WeatherHistory[i] << ")\t";
             }
@@ -1957,6 +1917,7 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
                 this->availCells.erase(bc);
             }
             this->burntCells.insert(bc);
+            this->statusCells[bc - 1] = 2;
         }
         this->burningCells.clear();
     }
