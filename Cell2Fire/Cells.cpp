@@ -594,6 +594,7 @@ Cells::manageFire(int period,
                 FSCell->push_back(double(nb));
                 FSCell->push_back(double(period));
                 FSCell->push_back(roundedRos);
+                metrics.rss = roundedRos;
                 determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
