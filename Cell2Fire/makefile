@@ -1,10 +1,21 @@
 # Compiler
-CXX = g++
 # bookworm:12, trixie:14, ubuntu24.04:13
-
-# Compiler and linker flags
-CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3
-LDFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    HOMEBREW_PREFIX := $(shell brew --prefix 2>/dev/null || echo /opt/homebrew)
+    CXX = clang++
+    LIBOMP_INC = $(HOMEBREW_PREFIX)/opt/libomp/include
+    LIBOMP_LIB = $(HOMEBREW_PREFIX)/opt/libomp/lib
+    LIBTIFF_INC = $(HOMEBREW_PREFIX)/opt/libtiff/include
+    LIBTIFF_LIB = $(HOMEBREW_PREFIX)/opt/libtiff/lib
+    BOOST_INC = $(HOMEBREW_PREFIX)/opt/boost/include
+    CXXFLAGS = -fPIC -fno-strict-aliasing -fexceptions -Xpreprocessor -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3 -I$(LIBOMP_INC) -I$(LIBTIFF_INC) -I$(BOOST_INC)
+    LDFLAGS   = -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD -lm -lpthread -L$(LIBOMP_LIB) -lomp -L$(LIBTIFF_LIB) -ltiff
+else
+    CXX = g++
+    CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3
+    LDFLAGS   = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -lm -lpthread -ltiff
+endif
 
 # Test-specific linker flags (for Catch2 v3 - optional, will be ignored if not available)
 # Detect Catch2 version from package (for info only)
