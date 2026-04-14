@@ -14,7 +14,7 @@ CATCH2_V3_LIBS := $(shell echo "int main(){}" | $(CXX) -x c++ - -lCatch2Main -lC
 TEST_LDFLAGS = $(LDFLAGS) $(CATCH2_V3_LIBS)
 
 # Source files
-SRCS = Cell2Fire.cpp Cells.cpp FuelModelUtils.cpp FuelModelSpain.cpp FuelModelPortugal.cpp FuelModelKitral.cpp FuelModelFBP.cpp Spotting.cpp ReadCSV.cpp ReadArgs.cpp Lightning.cpp WriteCSV.cpp DataGenerator.cpp
+SRCS = Cell2Fire.cpp Cells.cpp FuelModelUtils.cpp FuelModelKitral.cpp ReadCSV.cpp ReadArgs.cpp WriteCSV.cpp DataGenerator.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)

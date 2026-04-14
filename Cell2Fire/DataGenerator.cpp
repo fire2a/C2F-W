@@ -759,35 +759,13 @@ writeDataFileDirect(const std::vector<std::string>& GFuelType,
  * @param Simulator Simulation model code
  */
 void
-GenDataFile(const std::string& InFolder, const std::string& Simulator)
+GenDataFile(const std::string& InFolder)
 {
     std::cout << "\n------ Reading input data ------\n\n";
     std::unordered_map<std::string, std::string> FBPDict;
     std::unordered_map<std::string, std::tuple<float, float, float, float>> ColorsDict;
 
-    // Determine the lookup table based on the Simulator
-    std::string lookupTable;
-    if (Simulator == "K")
-    {
-        lookupTable = InFolder + separator() + "kitral_lookup_table.csv";
-    }
-    else if (Simulator == "S")
-    {
-        lookupTable = InFolder + separator() + "spain_lookup_table.csv";
-    }
-    else if (Simulator == "C")
-    {
-        lookupTable = InFolder + separator() + "fbp_lookup_table.csv";
-    }
-    else if (Simulator == "P")
-    {
-        lookupTable = InFolder + separator() + "portugal_lookup_table.csv";
-    }
-    else
-    {
-        std::cerr << "Error: Simulator not recognized:" << Simulator << std::endl;
-        exit(1);
-    }
+    std::string lookupTable = InFolder + separator() + "kitral_lookup_table.csv";
 
     // Check if the lookup table exists
     if (!fileExists(lookupTable))

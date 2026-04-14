@@ -41,6 +41,6 @@ void writeDataFileDirect(const std::vector<std::string>& GFuelType,
                          const std::vector<float>& TreeHeight,
                          const std::string& InFolder);
 
-void GenDataFile(const std::string& InFolder, const std::string& Simulator);
+void GenDataFile(const std::string& InFolder);
 
 #endif

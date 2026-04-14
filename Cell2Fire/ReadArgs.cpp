@@ -290,30 +290,6 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     else
         args_ptr->TotalSims = dnsims;
 
-    //--nsims
-    char* simulator_option = getCmdOption(argv, argv + argc, "--sim");
-    if (simulator_option)
-    {
-        std::string s = simulator_option;
-        if (s != "S" && s != "K" && s != "C" && s != "P")
-        {
-            printf("%s Simulator Option not recognized or not developed, using "
-                   "S&B as default!!! \n",
-                   simulator_option);
-            args_ptr->Simulator = simulator_option;
-        }
-        else
-        {
-            printf("Simulator: %s \n", simulator_option);
-            args_ptr->Simulator = simulator_option;
-        }
-    }
-    else
-    {
-        printf("No Simulator Option Selected, using S&B as default!!! \n");
-        args_ptr->Simulator = "S";
-    }
-
     //--Weather-Period-Length
     char* weather_period_len = getCmdOption(argv, argv + argc, "--Weather-Period-Length");
     if (weather_period_len)
@@ -651,7 +627,6 @@ printArgs(arguments args)
     std::cout << "nthreads: " << args.nthreads << std::endl;
     */
 
-    std::cout << "Simulator: " << args.Simulator << std::endl;
     std::cout << "InFolder: " << args.InFolder << std::endl;
     std::cout << "OutFolder: " << args.OutFolder << std::endl;
     std::cout << "WeatherOpt: " << args.WeatherOpt << std::endl;

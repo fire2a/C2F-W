@@ -648,26 +648,10 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     {
         this->surfaceIntensityFolder = Cell2Fire::createOutputFolder("SurfaceIntensity");
     }
-    // Crown Byram Intensity Folder
-    if ((this->args.OutIntensity) && (this->args.AllowCROS)
-        && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
-    {
-        this->crownIntensityFolder = Cell2Fire::createOutputFolder("CrownIntensity");
-    }
     // Surface Flame Length Folder
     if (this->args.OutFl)
     {
         this->surfaceFlameLengthFolder = Cell2Fire::createOutputFolder("SurfaceFlameLength");
-    }
-    // Crown Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
-    {
-        this->crownFlameLengthFolder = Cell2Fire::createOutputFolder("CrownFlameLength");
-    }
-    // max Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
-    {
-        this->maxFlameLengthFolder = Cell2Fire::createOutputFolder("MaxFlameLength");
     }
     // Crown Folder
     if (this->args.OutCrown && this->args.AllowCROS)
@@ -678,11 +662,6 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     if (this->args.OutCrownConsumption && this->args.AllowCROS)
     {
         this->cfbFolder = Cell2Fire::createOutputFolder("CrownFractionBurn");
-    }
-    // Surf Fraction Burn Folder
-    if (this->args.OutSurfConsumption && this->args.Simulator == "C")
-    {
-        this->sfbFolder = Cell2Fire::createOutputFolder("SurfFractionBurn");
     }
 
     chooseWeather(this->args.WeatherOpt, rnumber, simExt);
@@ -1710,25 +1689,6 @@ Cell2Fire::Results()
             this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfaceIntensities);
     }
 
-    // Crown Intensity
-    if ((this->args.OutIntensity) && (this->args.AllowCROS)
-        && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
-    {
-        this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
-        std::string intensityName;
-        std::ostringstream oss;
-        oss.str("");
-        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        intensityName = this->crownIntensityFolder + "CrownIntensity" + oss.str() + ".asc";
-        if (this->args.verbose)
-        {
-            std::cout << "We are generating the Crown Intensity to a asc file " << intensityName << std::endl;
-        }
-        CSVWriter CSVPloter(intensityName, " ");
-        CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownIntensities);
-    }
-
     // Surface Flame Length
     if (this->args.OutFl)
     {
@@ -1747,42 +1707,6 @@ Cell2Fire::Results()
             this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfaceFlameLengths);
     }
 
-    // Crown Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
-    {
-        this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
-        std::string fileName;
-        std::ostringstream oss;
-        oss.str("");
-        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        fileName = this->crownFlameLengthFolder + "CrownFlameLength" + oss.str() + ".asc";
-        if (this->args.verbose)
-        {
-            std::cout << "We are generating the Crown Flame Length to a asc file " << fileName << std::endl;
-        }
-        CSVWriter CSVPloter(fileName, " ");
-        CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFlameLengths);
-    }
-
-    // Max Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
-    {
-        this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength" + separator();
-        std::string fileName;
-        std::ostringstream oss;
-        oss.str("");
-        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        fileName = this->maxFlameLengthFolder + "MaxFlameLength" + oss.str() + ".asc";
-        if (this->args.verbose)
-        {
-            std::cout << "We are generating the Max Flame Length to a asc file " << fileName << std::endl;
-        }
-        CSVWriter CSVPloter(fileName, " ");
-        CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->maxFlameLengths);
-    }
-
     // Intensity
     if ((this->args.OutCrownConsumption) && (this->args.AllowCROS))
     {
@@ -1799,24 +1723,6 @@ Cell2Fire::Results()
         CSVWriter CSVPloter(cfbName, " ");
         CSVPloter.printASCII(
             this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFraction);
-    }
-
-    // Intensity
-    if ((this->args.OutSurfConsumption) && (this->args.Simulator == "C"))
-    {
-        this->sfbFolder = this->args.OutFolder + "SurfFractionBurn" + separator();
-        std::string sfbName;
-        std::ostringstream oss;
-        oss.str("");
-        oss << std::setfill('0') << std::setw(this->widthSims) << this->sim;
-        sfbName = this->sfbFolder + "Sfb" + oss.str() + ".asc";
-        if (this->args.verbose)
-        {
-            std::cout << "We are generating the Surface Fraction Burn to a asc file " << sfbName << std::endl;
-        }
-        CSVWriter CSVPloter(sfbName, " ");
-        CSVPloter.printASCII(
-            this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->surfFraction);
     }
 
     // Crown
@@ -2185,7 +2091,7 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
         // this->wdf_ptr = &(this->wdf[0]);
 
         // Populate the wdf objects
-        this->CSVWeather.parseWeatherDF(this->wdf, this->args_ptr, this->WeatherData, WPeriods);
+        this->CSVWeather.parseWeatherDF(this->wdf, this->WeatherData, WPeriods);
     }
     else if (weatherOpt == "random")
     {
@@ -2213,7 +2119,7 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
         // std::cout << "Weather Periods: " << WPeriods << std::endl;
 
         // Populate the wdf object
-        this->CSVWeather.parseWeatherDF(this->wdf, this->args_ptr, this->WeatherData, WPeriods);
+        this->CSVWeather.parseWeatherDF(this->wdf, this->WeatherData, WPeriods);
     }
     int maxFP = this->args.MinutesPerWP / this->args.FirePeriodLen * WPeriods;
     if (this->args.MaxFirePeriods > maxFP || this->args.MaxFirePeriods < 0)
@@ -2263,7 +2169,7 @@ main(int argc, char* argv[])
     parseArgs(argc, argv, args_ptr);
     IgnitionHistory.reserve(args.TotalSims);
     WeatherHistory.reserve(args.TotalSims);
-    GenDataFile(args.InFolder, args.Simulator);
+    GenDataFile(args.InFolder);
     int ep = 0;
     // Episodes loop (episode = replication)
     // CP: Modified to account the case when no ignition occurs and no grids are

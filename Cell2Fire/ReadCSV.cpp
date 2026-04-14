@@ -634,14 +634,12 @@ CSVReader::parsePROB(std::vector<float>& probabilities, std::vector<std::vector<
  */
 void
 CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
-                          arguments* args_ptr,
                           std::vector<std::vector<std::string>>& DF,
                           int WPeriods)
 {
     std::string::size_type sz;  // alias of size_t
 
     float ws = 0, waz = 0, tmp = 27, rh = 40;
-    float apcp = 0, ffmc = 0, dmc = 0, dc = 0, isi = 0, bui = 0, fwi = 0;
 
     // One element per weather period
     if (static_cast<int>(wdf.size()) < WPeriods)
@@ -662,42 +660,14 @@ CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
         }
 
         ws = DF[i][2].empty() ? 0 : std::stof(DF[i][2], &sz);
-
-        if (args_ptr->Simulator == "K")
-        {
-            tmp = DF[i][4].empty() ? 0 : std::stof(DF[i][4], &sz);
-            rh = DF[i][5].empty() ? 0 : std::stof(DF[i][5], &sz);
-        }
-        else if (args_ptr->Simulator == "C")
-        {
-            waz = DF[i][6].empty() ? 0 : std::stoi(DF[i][6], &sz);
-            if (waz >= 360)
-                waz -= 360;
-
-            apcp = DF[i][2].empty() ? 0 : std::stof(DF[i][2], &sz);
-            tmp = DF[i][3].empty() ? 0 : std::stof(DF[i][3], &sz);
-            rh = DF[i][4].empty() ? 0 : std::stof(DF[i][4], &sz);
-            ws = DF[i][5].empty() ? 0 : std::stof(DF[i][5], &sz);
-            ffmc = DF[i][7].empty() ? 0 : std::stof(DF[i][7], &sz);
-            dmc = DF[i][8].empty() ? 0 : std::stof(DF[i][8], &sz);
-            dc = DF[i][9].empty() ? 0 : std::stof(DF[i][9], &sz);
-            isi = DF[i][10].empty() ? 0 : std::stof(DF[i][10], &sz);
-            bui = DF[i][11].empty() ? 0 : std::stof(DF[i][11], &sz);
-            fwi = DF[i][12].empty() ? 0 : std::stof(DF[i][12], &sz);
-        }
+        tmp = DF[i][4].empty() ? 0 : std::stof(DF[i][4], &sz);
+        rh = DF[i][5].empty() ? 0 : std::stof(DF[i][5], &sz);
 
         // Assign parsed values
         w.ws = ws;
         w.waz = waz;
         w.tmp = tmp;
         w.rh = rh;
-        w.apcp = apcp;
-        w.ffmc = ffmc;
-        w.dmc = dmc;
-        w.dc = dc;
-        w.isi = isi;
-        w.bui = bui;
-        w.fwi = fwi;
     }
 }
 
