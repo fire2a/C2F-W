@@ -610,11 +610,9 @@ Cells::manageFire(int period,
                 FSCell->push_back(surfRoundedRos);   // col 4: surface ROS
                 metrics.rss = roundedRos;
                 determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
-                if (args->OutCrown && args->AllowCROS)
+                if (args->AllowCROS)
                 {
                     FSCell->push_back(roundedRos);   // col 5: final ROS (crown-adjusted)
-                    FSCell->push_back(double(mainstruct.crown));
-                    FSCell->push_back(double(metrics.crown));
                 }
                 crownState[this->realId - 1] |= mainstruct.crown;
                 crownState[nb - 1] |= metrics.crown;

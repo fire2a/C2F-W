@@ -638,7 +638,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     }
     // Cell Metrics CSV folder (replaces per-metric .asc folders)
     if (this->args.OutRos || this->args.OutFl || this->args.OutIntensity ||
-        (this->args.OutCrown && this->args.AllowCROS) ||
+        (this->args.AllowCROS) ||
         (this->args.OutCrownConsumption && this->args.AllowCROS))
     {
         this->cellStatsFolder = Cell2Fire::createOutputFolder("cellStats");
@@ -669,7 +669,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->maxFlameLengths.assign(this->nCells, 0);
 
     this->FSCell.clear();
-    int fsCols = (this->args.OutCrown && this->args.AllowCROS) ? 7 : 4;
+    int fsCols = (this->args.AllowCROS) ? 5 : 4;
     this->FSCell.reserve(this->nCells * fsCols * 4);  // 4x: each cell can send multiple messages across periods
     this->crownMetrics.clear();  // intensity and crown
 
@@ -1592,14 +1592,29 @@ Cell2Fire::Results()
         {
             std::cout << "We are generating the network messages to a csv file " << messagesName << std::endl;
         }
-        CSVWriter CSVPloter(messagesName, ",");
-        int fsCols = (this->args.OutCrown && this->args.AllowCROS) ? 7 : 4;
-        CSVPloter.printCSVDouble_V2(this->FSCell.size() / fsCols, fsCols, this->FSCell);
+        int fsCols = (this->args.AllowCROS) ? 5 : 4;
+        std::ofstream mof(messagesName);
+        mof << "source,target,period,surface_ros";
+        if (this->args.AllowCROS) mof << ",final_ros";
+        mof << "\n";
+        int rows = this->FSCell.size() / fsCols;
+        for (int r = 0; r < rows; r++)
+        {
+            int base = r * fsCols;
+            if (this->FSCell[base] < 1 || this->FSCell[base + 1] < 1 ||
+                std::ceil(this->FSCell[base]) != this->FSCell[base])
+                break;
+            mof << (int)this->FSCell[base] << "," << (int)this->FSCell[base + 1]
+                << "," << (int)this->FSCell[base + 2] << "," << this->FSCell[base + 3];
+            if (fsCols == 5) mof << "," << this->FSCell[base + 4];
+            mof << "\n";
+        }
+        mof.close();
     }
 
     // Cell Metrics CSV — one row per burned cell, columns depend on active flags
     if (this->args.OutRos || this->args.OutFl || this->args.OutIntensity ||
-        (this->args.OutCrown && this->args.AllowCROS) ||
+        (this->args.AllowCROS) ||
         (this->args.OutCrownConsumption && this->args.AllowCROS))
     {
         std::ostringstream oss;
@@ -1613,7 +1628,7 @@ Cell2Fire::Results()
         if (this->args.OutFl)                                           mfs << ",fl";
         if (this->args.OutIntensity)                                    mfs << ",intensity";
         if (this->args.OutCrownConsumption && this->args.AllowCROS)     mfs << ",cfb";
-        if (this->args.OutCrown && this->args.AllowCROS)                mfs << ",crown";
+        if (this->args.AllowCROS)                mfs << ",crown";
         mfs << "\n";
         // rows — only burned cells (RateOfSpreads > 0 always for burned cells)
         for (int i = 0; i < this->nCells; i++)
@@ -1624,7 +1639,7 @@ Cell2Fire::Results()
             if (this->args.OutFl)                                       mfs << "," << this->surfaceFlameLengths[i];
             if (this->args.OutIntensity)                                mfs << "," << this->surfaceIntensities[i];
             if (this->args.OutCrownConsumption && this->args.AllowCROS) mfs << "," << this->crownFraction[i];
-            if (this->args.OutCrown && this->args.AllowCROS)            mfs << "," << this->crownState[i];
+            if (this->args.AllowCROS)            mfs << "," << this->crownState[i];
             mfs << "\n";
         }
         mfs.close();

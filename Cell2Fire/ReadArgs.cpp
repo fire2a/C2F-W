@@ -114,7 +114,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     bool out_fl = false;
     bool out_intensity = false;
     bool out_ros = false;
-    bool out_crown = false;
+
     bool out_crown_consumption = false;
     bool out_surf_consumption = false;
     bool out_finalgrid = false;
@@ -149,13 +149,6 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         out_ros = true;
         printf("OutROS: %s \n", btoa(out_ros));
     }
-    //--fire-behavior
-    if (cmdOptionExists(argv, argv + argc, "--out-crown"))
-    {
-        out_crown = true;
-        printf("OutCrown: %s \n", btoa(out_crown));
-    }
-
     if (cmdOptionExists(argv, argv + argc, "--out-cfb"))
     {
         out_crown_consumption = true;
@@ -576,7 +569,6 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->OutFl = out_fl;
     args_ptr->OutIntensity = out_intensity;
     args_ptr->OutRos = out_ros;
-    args_ptr->OutCrown = out_crown;
     args_ptr->OutCrownConsumption = out_crown_consumption;
     args_ptr->OutSurfConsumption = out_surf_consumption;
     args_ptr->Trajectories = out_trajectories;
@@ -608,7 +600,7 @@ printArgs(arguments args)
     std::cout << "OutFlameLength: " << args.OutFl << std::endl;
     std::cout << "OutIntensity: " << args.OutIntensity << std::endl;
     std::cout << "OutROS: " << args.OutRos << std::endl;
-    std::cout << "OutCrown: " << args.OutCrown << std::endl;
+
     std::cout << "OutCrownConsumption: " << args.OutCrownConsumption <<
     std::endl; std::cout << "OutSurfConsumption: " << args.OutSurfConsumption <<
     std::endl; std::cout << "HarvestPlan: " << args.HarvestPlan << std::endl;
@@ -639,7 +631,7 @@ printArgs(arguments args)
     std::cout << "OutFlameLength: " << args.OutFl << std::endl;
     std::cout << "OutIntensity: " << args.OutIntensity << std::endl;
     std::cout << "OutROS: " << args.OutRos << std::endl;
-    std::cout << "OutCrown: " << args.OutCrown << std::endl;
+
     std::cout << "OutCrownConsumption: " << args.OutCrownConsumption << std::endl;
     std::cout << "OutSurfConsumption: " << args.OutSurfConsumption << std::endl;
 
