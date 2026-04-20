@@ -107,7 +107,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     char* fuels_folder = getCmdOption(argv, argv + argc, "--fuels-path");
     if (fuels_folder)
     {
-        printf("FuelsFolder: %s \n", fuels_folder);
+        printf("FuelsPath: %s \n", fuels_folder);
     }
     else
         fuels_folder = &empty;
@@ -546,13 +546,21 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
 
     if (fuels_folder == &empty)
     {
-        args_ptr->FuelsFolder = args_ptr->InFolder;
+        args_ptr->FuelsPath = args_ptr->InFolder + "fuels";
     }
     else
     {
-        args_ptr->FuelsFolder = fuels_folder;
-        if (!args_ptr->FuelsFolder.empty() && *args_ptr->FuelsFolder.rbegin() != separator())
-            args_ptr->FuelsFolder += separator();
+        args_ptr->FuelsPath = fuels_folder;
+        // Strip known raster extensions so getData() can append the right one
+        for (const std::string ext : {".asc", ".tif", ".tiff"})
+        {
+            if (args_ptr->FuelsPath.size() > ext.size() &&
+                args_ptr->FuelsPath.substr(args_ptr->FuelsPath.size() - ext.size()) == ext)
+            {
+                args_ptr->FuelsPath.erase(args_ptr->FuelsPath.size() - ext.size());
+                break;
+            }
+        }
     }
 
     if (output_folder == &empty && input_folder != &empty)
