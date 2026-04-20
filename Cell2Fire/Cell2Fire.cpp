@@ -375,8 +375,19 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.FuelsFolder + "fuels", "
     int IgnitionYears;
     std::vector<int> IgnitionPoints;
 
-    if (this->args.Ignitions)
+    if (this->args.Ignitions || this->args.IgnitionCell != -1)
     {
+        this->args.Ignitions = true;
+
+        if (this->args.IgnitionCell != -1)
+        {
+            // Fixed ignition cell provided via --ignition-cell
+            IgnitionYears = this->args.TotalYears;
+            this->IgnitionPoints = std::vector<int>(IgnitionYears, this->args.IgnitionCell);
+            this->IgnitionSets = std::vector<std::vector<int>>(this->args.TotalYears);
+        }
+        else
+        {
         // DEBUGstd::cout << "\nWe have specific ignition points:" << std::endl;
 
         /* Ignition points */
@@ -404,6 +415,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.FuelsFolder + "fuels", "
         // this->IgnitionSets =
         // std::vector<unordered_set<int>>(this->IgnitionPoints.size());
         this->IgnitionSets = std::vector<std::vector<int>>(this->args.TotalYears);
+        } // end CSV path
 
         // Ignition radius
         if (this->args.IgnitionRadius > 0)

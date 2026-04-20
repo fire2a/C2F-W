@@ -203,6 +203,15 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         printf("Ignitions: %s \n", btoa(input_ignitions));
     }
 
+    //--ignition-cell
+    char* ignition_cell = getCmdOption(argv, argv + argc, "--ignition-cell");
+    if (ignition_cell)
+    {
+        printf("IgnitionCell: %s \n", ignition_cell);
+    }
+    else
+        ignition_cell = &empty;
+
     //--grids
     if (cmdOptionExists(argv, argv + argc, "--grids"))
     {
@@ -596,6 +605,13 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->verbose = verbose_input;
     args_ptr->IgnitionsLog = iplog_input;
     args_ptr->Ignitions = input_ignitions;
+    if (ignition_cell != &empty)
+    {
+        std::size_t sz;
+        args_ptr->IgnitionCell = std::stoi(ignition_cell, &sz);
+    }
+    else
+        args_ptr->IgnitionCell = -1;
     args_ptr->OutputGrids = out_grids;
     args_ptr->FinalGrid = out_finalgrid;
     args_ptr->PromTuned = prom_tuned;
