@@ -167,7 +167,7 @@ separator()
  * - Validates and adjusts simulation parameters based on the weather file
  * consistency.
  */
-Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
+Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.FuelsFolder + "fuels", " ")
 {
     // Aux
     int i;
@@ -215,7 +215,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     forestDF frdf;
     // DEBUG
     std::cout << "\n------------------Forest Data ----------------------\n" << std::endl;
-    std::vector<std::vector<std::string>> FDF = this->CSVForest.getData(_args.InFolder + "fuels");
+    std::vector<std::vector<std::string>> FDF = this->CSVForest.getData(_args.FuelsFolder + "fuels");
 
     // DEBUGthis->CSVForest.printData(FDF);
     this->CSVForest.parseForestDF(&frdf, FDF);

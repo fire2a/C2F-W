@@ -103,6 +103,15 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     }
 
 
+    //--fuels-path
+    char* fuels_folder = getCmdOption(argv, argv + argc, "--fuels-path");
+    if (fuels_folder)
+    {
+        printf("FuelsFolder: %s \n", fuels_folder);
+    }
+    else
+        fuels_folder = &empty;
+
     // Booleans
     bool out_messages = false;
     bool out_trajectories = false;
@@ -524,6 +533,17 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     if (!args_ptr->InFolder.empty() && *args_ptr->InFolder.rbegin() != separator())
     {
         args_ptr->InFolder += separator();
+    }
+
+    if (fuels_folder == &empty)
+    {
+        args_ptr->FuelsFolder = args_ptr->InFolder;
+    }
+    else
+    {
+        args_ptr->FuelsFolder = fuels_folder;
+        if (!args_ptr->FuelsFolder.empty() && *args_ptr->FuelsFolder.rbegin() != separator())
+            args_ptr->FuelsFolder += separator();
     }
 
     if (output_folder == &empty && input_folder != &empty)
