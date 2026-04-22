@@ -733,11 +733,112 @@ writeDataFileDirect(const std::vector<std::string>& GFuelType,
     }
 }
 
+// ---- Helpers used only within GenDataFile --------------------------------
+
+struct RasterMeta
+{
+    int ncols = 0;
+    int nrows = 0;
+    double cellsize = 0.0;
+};
+
+// Read ncols, nrows, cellsize from an ASC header (first 5 key-value pairs).
+static RasterMeta
+readAscMeta(const std::string& filename)
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+        throw std::runtime_error("Cannot open raster file: '" + filename + "'");
+    RasterMeta m{};
+    std::string key, value;
+    for (int i = 0; i < 5; ++i)
+    {
+        if (!(file >> key >> value))
+            throw std::runtime_error("Malformed ASC header in '" + filename + "'");
+        if (key == "ncols")
+            m.ncols = std::stoi(value);
+        else if (key == "nrows")
+            m.nrows = std::stoi(value);
+        else if (key == "cellsize")
+            m.cellsize = std::stod(value);
+    }
+    return m;
+}
+
+// Read ncols, nrows, cellsize from a GeoTIFF.
+static RasterMeta
+readTifMeta(const std::string& filename)
+{
+    TIFF* tif = TIFFOpen(filename.c_str(), "r");
+    if (!tif)
+        throw std::runtime_error("Cannot open raster file: '" + filename + "'");
+    RasterMeta m{};
+    uint32_t w = 0, h = 0;
+    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
+    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
+    m.ncols = static_cast<int>(w);
+    m.nrows = static_cast<int>(h);
+    double* scale = nullptr;
+    uint32_t count = 0;
+    if (TIFFGetField(tif, 33550, &count, &scale) && scale)
+        m.cellsize = scale[0];
+    TIFFClose(tif);
+    return m;
+}
+
+// Resolve a fuels path to a concrete file path (with extension).
+// If the path already ends in .tif or .asc the file must exist.
+// Otherwise .tif is probed first, then .asc.
+// Throws std::runtime_error when no file can be found.
+static std::string
+resolveFuelsPath(const std::string& path)
+{
+    auto endsWith = [&](const std::string& s) {
+        return path.size() >= s.size() &&
+               path.compare(path.size() - s.size(), s.size(), s) == 0;
+    };
+    if (endsWith(".tif") || endsWith(".asc"))
+    {
+        if (!fileExists(path))
+            throw std::runtime_error("Fuels file not found: '" + path + "'");
+        return path;
+    }
+    if (fileExists(path + ".tif")) return path + ".tif";
+    if (fileExists(path + ".asc")) return path + ".asc";
+    throw std::runtime_error(
+        "Fuels file not found: tried '" + path + ".tif' and '" + path + ".asc'");
+}
+
+// Throw a descriptive error if an auxiliary raster's grid dimensions or
+// cellsize differ from the fuels raster.
+static void
+checkMetaMatch(int fuelsCols, int fuelsRows, double fuelsCellSize,
+               const RasterMeta& aux,
+               const std::string& fuelsFile, const std::string& auxFile)
+{
+    std::string mismatch;
+    if (fuelsCols != aux.ncols)
+        mismatch = "ncols " + std::to_string(fuelsCols) + " (fuels) vs " +
+                   std::to_string(aux.ncols) + " (" + auxFile + ")";
+    else if (fuelsRows != aux.nrows)
+        mismatch = "nrows " + std::to_string(fuelsRows) + " (fuels) vs " +
+                   std::to_string(aux.nrows) + " (" + auxFile + ")";
+    else if (std::fabs(fuelsCellSize - aux.cellsize) > 1e-6 * fuelsCellSize)
+        mismatch = "cellsize " + std::to_string(fuelsCellSize) + " (fuels) vs " +
+                   std::to_string(aux.cellsize) + " (" + auxFile + ")";
+    if (!mismatch.empty())
+        throw std::runtime_error(
+            "Raster metadata mismatch between '" + fuelsFile + "' and '" +
+            auxFile + "': " + mismatch);
+}
+
+// ---- End helpers ---------------------------------------------------------
+
 /**
  * @brief Reads all available input raster files and generates a new file called 'Data.csv' in which each row contains
  * the input data for a cell.
  *
- * If the 'fuels' raster file is in `tif` format, then it assumes all other rasters are also in that format.
+ * If the fuels raster is in `tif` format, then it assumes all other rasters are also in that format.
  * Otherwise, it assumes `ascii` format.
  *
  * The function looks for the following files in `InFolder`:
@@ -756,10 +857,10 @@ writeDataFileDirect(const std::vector<std::string>& GFuelType,
  * blank), wind direction (always blank), slope, slope azimuth, curing level, canopy bulk density, canopy base height,
  * canopy cover fraction, fuel type number ,foliage moisture content, ignition probability.
  * @param InFolder Input data directory
- * @param Simulator Simulation model code
+ * @param fuelsPath Resolved path to the fuels raster (from --fuels-path, or InFolder/fuels by default)
  */
 void
-GenDataFile(const std::string& InFolder)
+GenDataFile(const std::string& InFolder, const std::string& fuelsPath)
 {
     std::cout << "\n------ Reading input data ------\n\n";
     std::unordered_map<std::string, std::string> FBPDict;
@@ -777,20 +878,13 @@ GenDataFile(const std::string& InFolder)
     // Call Dictionary function to read lookup table
     std::tie(FBPDict, ColorsDict) = Dictionary(lookupTable);
 
-    // Call ForestGrid function
-    // If fuels.tif exists, then .tif's are used, otherwise .asc
-    std::string extension;
-    if (fileExists(InFolder + separator() + "fuels.tif"))
-    {
-        extension = ".tif";
-    }
-    else
-    {
-        extension = ".asc";
-    }
+    // Resolve fuels file path; throws if the file cannot be found.
+    std::string FGrid = resolveFuelsPath(fuelsPath);
+
+    // Determine raster format from the resolved fuels path.
+    std::string extension = (FGrid.size() >= 4 && FGrid.substr(FGrid.size() - 4) == ".tif")
+                             ? ".tif" : ".asc";
     std::cout << "Using " << extension << '\n';
-    // Call ForestGrid function
-    std::string FGrid = InFolder + "fuels" + extension;
     std::vector<int> GFuelTypeN;
     std::vector<std::string> GFuelType;
     int FBPDicts, Cols;
@@ -867,6 +961,11 @@ GenDataFile(const std::string& InFolder)
 
         if (fileExists(filePath))
         {
+            // Verify grid dimensions and cellsize match the fuels raster.
+            RasterMeta auxMeta = (extension == ".tif") ? readTifMeta(filePath)
+                                                       : readAscMeta(filePath);
+            checkMetaMatch(Cols, FBPDicts, static_cast<double>(CellSide), auxMeta, FGrid, filePath);
+
             if (name == "elevation.asc")
             {
                 DataGrids(filePath, Elevation, NCells);
