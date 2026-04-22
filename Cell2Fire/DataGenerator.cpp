@@ -950,73 +950,57 @@ GenDataFile(const std::string& InFolder, const std::string& fuelsPath)
     std::vector<float> FMC(NCells, static_cast<float>(std::nanf("")));
     std::vector<float> TreeHeight(NCells, static_cast<float>(std::nanf("")));
 
-    std::vector<std::string> filenames
-        = { "elevation" + extension, "saz" + extension, "slope" + extension, "cur" + extension,
-            "cbd" + extension,       "cbh" + extension, "ccf" + extension,   "probabilityMap" + extension,
-            "fmc" + extension,       "hm" + extension };
+    // Each auxiliary raster is probed independently for .asc then .tif,
+    // regardless of the fuels raster format.
+    std::vector<std::string> basenames
+        = { "elevation", "saz", "slope", "cur", "cbd", "cbh", "ccf", "probabilityMap", "fmc", "hm" };
 
-    for (const auto& name : filenames)
+    for (const auto& base : basenames)
     {
-        std::string filePath = InFolder + separator() + name;
+        std::string filePath;
+        std::string auxExt;
 
-        if (fileExists(filePath))
+        std::string tryAsc = InFolder + separator() + base + ".asc";
+        std::string tryTif = InFolder + separator() + base + ".tif";
+
+        if (fileExists(tryAsc))
         {
-            // Verify grid dimensions and cellsize match the fuels raster.
-            RasterMeta auxMeta = (extension == ".tif") ? readTifMeta(filePath)
-                                                       : readAscMeta(filePath);
-            checkMetaMatch(Cols, FBPDicts, static_cast<double>(CellSide), auxMeta, FGrid, filePath);
-
-            if (name == "elevation.asc")
-            {
-                DataGrids(filePath, Elevation, NCells);
-            }
-            else if (name == "saz.asc")
-            {
-                DataGrids(filePath, SAZ, NCells);
-            }
-            else if (name == "slope.asc")
-            {
-                DataGrids(filePath, PS, NCells);
-            }
-            else if (name == "cur.asc")
-            {
-                DataGrids(filePath, Curing, NCells);
-            }
-            else if (name == "cbd.asc")
-            {
-                DataGrids(filePath, CBD, NCells);
-            }
-            else if (name == "cbh.asc")
-            {
-                DataGrids(filePath, CBH, NCells);
-            }
-            else if (name == "ccf.asc")
-            {
-                DataGrids(filePath, CCF, NCells);
-            }
-            else if (name == "probabilityMap.asc")
-            {
-                DataGrids(filePath, ProbMap, NCells);
-            }
-            else if (name == "fmc.asc")
-            {
-                DataGrids(filePath, FMC, NCells);
-            }
-            else if (name == "hm.asc")
-            {
-                DataGrids(filePath, TreeHeight, NCells);
-            }
-            else
-            {
-                // Handle the case where the file name doesn't match any
-                // condition std::cout << "Unhandled file: " << name <<
-                // std::endl;
-            }
+            filePath = tryAsc;
+            auxExt = ".asc";
+        }
+        else if (fileExists(tryTif))
+        {
+            filePath = tryTif;
+            auxExt = ".tif";
         }
         else
         {
-            std::cout << "No " << name << " file, filling with NaN" << std::endl;
+            std::cout << "No " << base << " file, filling with NaN" << std::endl;
+            continue;
         }
+
+        // Verify grid dimensions and cellsize match the fuels raster.
+        RasterMeta auxMeta = (auxExt == ".tif") ? readTifMeta(filePath) : readAscMeta(filePath);
+        checkMetaMatch(Cols, FBPDicts, static_cast<double>(CellSide), auxMeta, FGrid, filePath);
+
+        // Read data using the appropriate reader for the detected format.
+        auto readGrid = [&](std::vector<float>& data) {
+            if (auxExt == ".asc")
+                DataGrids(filePath, data, NCells);
+            else
+                DataGridsTif(filePath, data, NCells);
+        };
+
+        if      (base == "elevation")     readGrid(Elevation);
+        else if (base == "saz")           readGrid(SAZ);
+        else if (base == "slope")         readGrid(PS);
+        else if (base == "cur")           readGrid(Curing);
+        else if (base == "cbd")           readGrid(CBD);
+        else if (base == "cbh")           readGrid(CBH);
+        else if (base == "ccf")           readGrid(CCF);
+        else if (base == "probabilityMap") readGrid(ProbMap);
+        else if (base == "fmc")           readGrid(FMC);
+        else if (base == "hm")            readGrid(TreeHeight);
     }
 
     // Write Data.csv directly without intermediate storage
