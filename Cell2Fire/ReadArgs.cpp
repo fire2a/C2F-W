@@ -112,6 +112,15 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     else
         fuels_folder = &empty;
 
+    //--instance-tif
+    char* instance_tif = getCmdOption(argv, argv + argc, "--instance-tif");
+    if (instance_tif)
+    {
+        printf("InstanceTif: %s \n", instance_tif);
+    }
+    else
+        instance_tif = &empty;
+
     // Booleans
     bool out_messages = false;
     bool out_trajectories = false;
@@ -532,12 +541,21 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
 
     // Populate structure
     // Strings
-    if (input_folder == &empty)
+    if (input_folder != &empty)
+    {
+        args_ptr->InFolder = input_folder;
+    }
+    else if (instance_tif != &empty)
+    {
+        // Derive InFolder from the directory containing the instance TIF.
+        std::string tif_path(instance_tif);
+        size_t last_sep = tif_path.find_last_of("/\\");
+        args_ptr->InFolder = (last_sep != std::string::npos) ? tif_path.substr(0, last_sep) : ".";
+    }
+    else
     {
         args_ptr->InFolder = "";
     }
-    else
-        args_ptr->InFolder = input_folder;
 
     if (!args_ptr->InFolder.empty() && *args_ptr->InFolder.rbegin() != separator())
     {
@@ -551,6 +569,19 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     else
     {
         args_ptr->FuelsPath = fuels_folder;
+    }
+
+    if (instance_tif == &empty)
+    {
+        args_ptr->InstanceTif = "";
+    }
+    else
+    {
+        args_ptr->InstanceTif = instance_tif;
+        // When --instance-tif is given but --fuels-path is not, use the
+        // instance TIF as FuelsPath so parseForestDF gets correct grid dims.
+        if (fuels_folder == &empty)
+            args_ptr->FuelsPath = instance_tif;
     }
 
     if (output_folder == &empty && input_folder != &empty)

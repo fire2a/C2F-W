@@ -791,6 +791,178 @@ checkMetaMatch(int fuelsCols, int fuelsRows, double fuelsCellSize,
             auxFile + "': " + mismatch);
 }
 
+// Read all 11 bands from a multi-band instance GeoTIFF (produced by pack_instance.py).
+// Band layout: 0=fuels, 1=elevation, 2=saz, 3=slope, 4=cur, 5=cbd, 6=cbh,
+//              7=ccf, 8=probabilityMap, 9=fmc, 10=hm
+static void
+readInstanceTif(const std::string& tifPath,
+                const std::unordered_map<std::string, std::string>& FBPDict,
+                std::vector<int>& GFuelTypeN,
+                std::vector<std::string>& GFuelType,
+                int& NRows, int& NCols, float& cellSide,
+                std::vector<float>& Elevation,
+                std::vector<float>& SAZ,
+                std::vector<float>& PS,
+                std::vector<float>& Curing,
+                std::vector<float>& CBD,
+                std::vector<float>& CBH,
+                std::vector<float>& CCF,
+                std::vector<float>& ProbMap,
+                std::vector<float>& FMC,
+                std::vector<float>& TreeHeight)
+{
+    TIFF* tif = TIFFOpen(tifPath.c_str(), "r");
+    if (!tif)
+        throw std::runtime_error("Cannot open instance TIF: '" + tifPath + "'");
+
+    uint32_t w = 0, h = 0;
+    uint16_t nSamples = 1, planarConfig = PLANARCONFIG_CONTIG;
+    uint16_t bitsPerSample = 32, sampleFormat = SAMPLEFORMAT_UINT;
+    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
+    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
+    TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &nSamples);
+    TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &planarConfig);
+    TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bitsPerSample);
+    TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
+
+    if (planarConfig != PLANARCONFIG_SEPARATE)
+    {
+        TIFFClose(tif);
+        throw std::runtime_error(
+            "Instance TIF must use PLANARCONFIG_SEPARATE (interleave='band'): '" + tifPath + "'");
+    }
+    if (nSamples < 11)
+    {
+        TIFFClose(tif);
+        throw std::runtime_error(
+            "Instance TIF must have at least 11 bands, found " +
+            std::to_string(nSamples) + ": '" + tifPath + "'");
+    }
+
+    NCols = static_cast<int>(w);
+    NRows = static_cast<int>(h);
+    int NCells = NCols * NRows;
+
+    double* scale = nullptr;
+    uint32_t count = 0;
+    if (TIFFGetField(tif, 33550, &count, &scale) && scale)
+        cellSide = static_cast<float>(scale[0]);
+    else
+        cellSide = 1.0f;
+
+    bool is_float64 = (bitsPerSample == 64 && sampleFormat == SAMPLEFORMAT_IEEEFP);
+    bool is_float32 = (bitsPerSample == 32 && sampleFormat == SAMPLEFORMAT_IEEEFP);
+
+    // Nodata convention: pack_instance.py always writes -9999 for missing cells.
+    // We do not read the GDAL_NODATA tag (42113) directly because libtiff does
+    // not register it as a known tag, which leads to undefined behaviour.
+    static constexpr float INSTANCE_NODATA = -9999.0f;
+    bool has_nodata = true;
+    float nodata_value = INSTANCE_NODATA;
+
+    // For PLANARCONFIG_SEPARATE, TIFFScanlineSize gives ncols * bytes_per_sample.
+    tsize_t scanlineSize = TIFFScanlineSize(tif);
+    void* buf = _TIFFmalloc(scanlineSize);
+    if (!buf)
+    {
+        TIFFClose(tif);
+        throw std::runtime_error("Could not allocate scanline buffer");
+    }
+
+    GFuelType.resize(NCells);
+    GFuelTypeN.resize(NCells);
+    Elevation.assign(NCells, static_cast<float>(std::nanf("")));
+    SAZ.assign(NCells, static_cast<float>(std::nanf("")));
+    PS.assign(NCells, static_cast<float>(std::nanf("")));
+    Curing.assign(NCells, static_cast<float>(std::nanf("")));
+    CBD.assign(NCells, static_cast<float>(std::nanf("")));
+    CBH.assign(NCells, static_cast<float>(std::nanf("")));
+    CCF.assign(NCells, static_cast<float>(std::nanf("")));
+    ProbMap.assign(NCells, static_cast<float>(std::nanf("")));
+    FMC.assign(NCells, static_cast<float>(std::nanf("")));
+    TreeHeight.assign(NCells, static_cast<float>(std::nanf("")));
+
+    // Helper: read one float band (sample index) into a vector.
+    // Nodata values are converted to NaN.
+    auto readFloatBand = [&](uint16_t sample, std::vector<float>& data) {
+        for (int row = 0; row < NRows; ++row)
+        {
+            if (TIFFReadScanline(tif, buf, row, sample) != 1)
+            {
+                _TIFFfree(buf);
+                TIFFClose(tif);
+                throw std::runtime_error(
+                    "Read error on row " + std::to_string(row) +
+                    " band " + std::to_string(sample) + " in '" + tifPath + "'");
+            }
+            for (int col = 0; col < NCols; ++col)
+            {
+                float val;
+                if (is_float64)
+                    val = static_cast<float>(((double*)buf)[col]);
+                else if (is_float32)
+                    val = ((float*)buf)[col];
+                else
+                    val = static_cast<float>(((int32_t*)buf)[col]);
+                if (has_nodata && val == nodata_value)
+                    val = std::numeric_limits<float>::quiet_NaN();
+                data[row * NCols + col] = val;
+            }
+        }
+    };
+
+    // Band 0: fuels — integer lookup via FBPDict.
+    for (int row = 0; row < NRows; ++row)
+    {
+        if (TIFFReadScanline(tif, buf, row, 0) != 1)
+        {
+            _TIFFfree(buf);
+            TIFFClose(tif);
+            throw std::runtime_error(
+                "Read error on fuels band, row " + std::to_string(row) + " in '" + tifPath + "'");
+        }
+        for (int col = 0; col < NCols; ++col)
+        {
+            float pixVal;
+            if (is_float64)
+                pixVal = static_cast<float>(((double*)buf)[col]);
+            else if (is_float32)
+                pixVal = ((float*)buf)[col];
+            else
+                pixVal = static_cast<float>(((int32_t*)buf)[col]);
+
+            int idx = row * NCols + col;
+            bool isMissing = (pixVal != pixVal) || (has_nodata && pixVal == nodata_value);
+            std::string token = isMissing ? "" : std::to_string(static_cast<int>(pixVal));
+            if (isMissing || FBPDict.find(token) == FBPDict.end())
+            {
+                GFuelType[idx] = "NF";
+                GFuelTypeN[idx] = 0;
+            }
+            else
+            {
+                GFuelType[idx] = FBPDict.at(token);
+                GFuelTypeN[idx] = static_cast<int>(pixVal);
+            }
+        }
+    }
+
+    // Bands 1-10: float data layers.
+    readFloatBand(1, Elevation);
+    readFloatBand(2, SAZ);
+    readFloatBand(3, PS);
+    readFloatBand(4, Curing);
+    readFloatBand(5, CBD);
+    readFloatBand(6, CBH);
+    readFloatBand(7, CCF);
+    readFloatBand(8, ProbMap);
+    readFloatBand(9, FMC);
+    readFloatBand(10, TreeHeight);
+
+    _TIFFfree(buf);
+    TIFFClose(tif);
+}
+
 // ---- End helpers ---------------------------------------------------------
 
 /**
@@ -817,9 +989,11 @@ checkMetaMatch(int fuelsCols, int fuelsRows, double fuelsCellSize,
  * canopy cover fraction, fuel type number ,foliage moisture content, ignition probability.
  * @param InFolder Input data directory
  * @param fuelsPath Resolved path to the fuels raster (from --fuels-path, or InFolder/fuels by default)
+ * @param instanceTif Path to a packed multi-band instance GeoTIFF (from --instance-tif). When non-empty,
+ *                    all raster data is read from this single file and individual rasters are ignored.
  */
 void
-GenDataFile(const std::string& InFolder, const std::string& fuelsPath)
+GenDataFile(const std::string& InFolder, const std::string& fuelsPath, const std::string& instanceTif)
 {
     std::cout << "\n------ Reading input data ------\n\n";
     std::unordered_map<std::string, std::string> FBPDict;
@@ -827,142 +1001,119 @@ GenDataFile(const std::string& InFolder, const std::string& fuelsPath)
 
     std::string lookupTable = InFolder + separator() + "kitral_lookup_table.csv";
 
-    // Check if the lookup table exists
     if (!fileExists(lookupTable))
     {
         std::cerr << "Error: Lookup table '" << lookupTable << "' not found" << std::endl;
         return;
     }
 
-    // Call Dictionary function to read lookup table
     std::tie(FBPDict, ColorsDict) = Dictionary(lookupTable);
 
-    // Resolve fuels file path; throws if the file cannot be found.
-    std::string FGrid = resolveFuelsPath(fuelsPath);
-
-    // Determine raster format from the resolved fuels path.
-    std::string extension = (FGrid.size() >= 4 && FGrid.substr(FGrid.size() - 4) == ".tif")
-                             ? ".tif" : ".asc";
-    std::cout << "Using " << extension << '\n';
     std::vector<int> GFuelTypeN;
     std::vector<std::string> GFuelType;
-    int FBPDicts, Cols;
-    float CellSide;
-    if (extension == ".tif")
+    int FBPDicts = 0, Cols = 0;
+    float CellSide = 1.0f;
+
+    std::vector<float> Elevation;
+    std::vector<float> SAZ;
+    std::vector<float> PS;
+    std::vector<float> Curing;
+    std::vector<float> CBD;
+    std::vector<float> CBH;
+    std::vector<float> CCF;
+    std::vector<float> ProbMap;
+    std::vector<float> FMC;
+    std::vector<float> TreeHeight;
+
+    if (!instanceTif.empty())
     {
-        std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGridTif(FGrid, FBPDict);
+        // ---- Single multi-band instance TIF path -------------------------
+        std::cout << "Reading instance TIF: " << instanceTif << '\n';
+        readInstanceTif(instanceTif, FBPDict,
+                        GFuelTypeN, GFuelType,
+                        FBPDicts, Cols, CellSide,
+                        Elevation, SAZ, PS, Curing,
+                        CBD, CBH, CCF, ProbMap, FMC, TreeHeight);
     }
     else
     {
-        std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGrid(FGrid, FBPDict);
-    }
+        // ---- Individual raster files path --------------------------------
 
-    // FOR DEBUGING ----------------------------------------------------------
-    /*
+        // Resolve fuels file path; throws if the file cannot be found.
+        std::string FGrid = resolveFuelsPath(fuelsPath);
 
-    // Print FBPDict
-    std::cout << "FBPDict:\n";
-    for (const auto& entry : FBPDict) {
-        std::cout << "  " << entry.first << ": " << entry.second << std::endl;
-    }
+        std::string extension = (FGrid.size() >= 4 && FGrid.substr(FGrid.size() - 4) == ".tif")
+                                 ? ".tif" : ".asc";
+        std::cout << "Using " << extension << '\n';
 
-    // Print ColorsDict
-    std::cout << "ColorsDict:\n";
-    for (const auto& entry : ColorsDict) {
-        std::cout << "  " << entry.first << ": " << std::get<0>(entry.second) <<
-    ", "
-                  << std::get<1>(entry.second) << ", " <<
-    std::get<2>(entry.second) << ", "
-                  << std::get<3>(entry.second) << std::endl;
-    }
-
-    // Print ForestGrid outputs
-    std::cout << "\nForestGrid Outputs:\n";
-    std::cout << "GFuelTypeN: ";
-    for (const auto& value : GFuelTypeN) {
-        std::cout << value << " ";
-    }
-    std::cout << "\nGFuelType: ";
-    for (const auto& value : GFuelType) {
-        std::cout << value << " ";
-    }
-
-    std::cout << "\n" << "FBPDicts:" << FBPDicts << "\n";
-    std::cout << "\n" << "Cols:" << Cols << "\n";
-    std::cout << "\n" << "CellSide:" << CellSide << "\n";
-
-    */
-    // FOR DEBUGING ENDS
-    // HERE-----------------------------------------------------
-
-    int NCells = GFuelType.size();
-
-    // Call DataGrids function (formerly DataGrids)
-    std::vector<float> Elevation(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> SAZ(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> PS(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> Curing(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> CBD(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> CBH(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> CCF(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> ProbMap(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> FMC(NCells, static_cast<float>(std::nanf("")));
-    std::vector<float> TreeHeight(NCells, static_cast<float>(std::nanf("")));
-
-    // Each auxiliary raster is probed independently for .asc then .tif,
-    // regardless of the fuels raster format.
-    std::vector<std::string> basenames
-        = { "elevation", "saz", "slope", "cur", "cbd", "cbh", "ccf", "probabilityMap", "fmc", "hm" };
-
-    for (const auto& base : basenames)
-    {
-        std::string filePath;
-        std::string auxExt;
-
-        std::string tryAsc = InFolder + separator() + base + ".asc";
-        std::string tryTif = InFolder + separator() + base + ".tif";
-
-        if (fileExists(tryAsc))
-        {
-            filePath = tryAsc;
-            auxExt = ".asc";
-        }
-        else if (fileExists(tryTif))
-        {
-            filePath = tryTif;
-            auxExt = ".tif";
-        }
+        if (extension == ".tif")
+            std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGridTif(FGrid, FBPDict);
         else
+            std::tie(GFuelTypeN, GFuelType, FBPDicts, Cols, CellSide) = ForestGrid(FGrid, FBPDict);
+
+        int NCells = static_cast<int>(GFuelType.size());
+
+        Elevation.assign(NCells, static_cast<float>(std::nanf("")));
+        SAZ.assign(NCells, static_cast<float>(std::nanf("")));
+        PS.assign(NCells, static_cast<float>(std::nanf("")));
+        Curing.assign(NCells, static_cast<float>(std::nanf("")));
+        CBD.assign(NCells, static_cast<float>(std::nanf("")));
+        CBH.assign(NCells, static_cast<float>(std::nanf("")));
+        CCF.assign(NCells, static_cast<float>(std::nanf("")));
+        ProbMap.assign(NCells, static_cast<float>(std::nanf("")));
+        FMC.assign(NCells, static_cast<float>(std::nanf("")));
+        TreeHeight.assign(NCells, static_cast<float>(std::nanf("")));
+
+        std::vector<std::string> basenames
+            = { "elevation", "saz", "slope", "cur", "cbd", "cbh", "ccf", "probabilityMap", "fmc", "hm" };
+
+        for (const auto& base : basenames)
         {
-            std::cout << "No " << base << " file, filling with NaN" << std::endl;
-            continue;
-        }
+            std::string filePath;
+            std::string auxExt;
 
-        // Verify grid dimensions and cellsize match the fuels raster.
-        RasterMeta auxMeta = (auxExt == ".tif") ? readTifMeta(filePath) : readAscMeta(filePath);
-        checkMetaMatch(Cols, FBPDicts, static_cast<double>(CellSide), auxMeta, FGrid, filePath);
+            std::string tryAsc = InFolder + separator() + base + ".asc";
+            std::string tryTif = InFolder + separator() + base + ".tif";
 
-        // Read data using the appropriate reader for the detected format.
-        auto readGrid = [&](std::vector<float>& data) {
-            if (auxExt == ".asc")
-                DataGrids(filePath, data, NCells);
+            if (fileExists(tryAsc))
+            {
+                filePath = tryAsc;
+                auxExt = ".asc";
+            }
+            else if (fileExists(tryTif))
+            {
+                filePath = tryTif;
+                auxExt = ".tif";
+            }
             else
-                DataGridsTif(filePath, data, NCells);
-        };
+            {
+                std::cout << "No " << base << " file, filling with NaN" << std::endl;
+                continue;
+            }
 
-        if      (base == "elevation")     readGrid(Elevation);
-        else if (base == "saz")           readGrid(SAZ);
-        else if (base == "slope")         readGrid(PS);
-        else if (base == "cur")           readGrid(Curing);
-        else if (base == "cbd")           readGrid(CBD);
-        else if (base == "cbh")           readGrid(CBH);
-        else if (base == "ccf")           readGrid(CCF);
-        else if (base == "probabilityMap") readGrid(ProbMap);
-        else if (base == "fmc")           readGrid(FMC);
-        else if (base == "hm")            readGrid(TreeHeight);
+            RasterMeta auxMeta = (auxExt == ".tif") ? readTifMeta(filePath) : readAscMeta(filePath);
+            checkMetaMatch(Cols, FBPDicts, static_cast<double>(CellSide), auxMeta, FGrid, filePath);
+
+            auto readGrid = [&](std::vector<float>& data) {
+                if (auxExt == ".asc")
+                    DataGrids(filePath, data, NCells);
+                else
+                    DataGridsTif(filePath, data, NCells);
+            };
+
+            if      (base == "elevation")      readGrid(Elevation);
+            else if (base == "saz")            readGrid(SAZ);
+            else if (base == "slope")          readGrid(PS);
+            else if (base == "cur")            readGrid(Curing);
+            else if (base == "cbd")            readGrid(CBD);
+            else if (base == "cbh")            readGrid(CBH);
+            else if (base == "ccf")            readGrid(CCF);
+            else if (base == "probabilityMap") readGrid(ProbMap);
+            else if (base == "fmc")            readGrid(FMC);
+            else if (base == "hm")             readGrid(TreeHeight);
+        }
     }
 
-    // Write Data.csv directly without intermediate storage
     writeDataFileDirect(GFuelType, GFuelTypeN, Elevation, PS, SAZ, Curing, CBD, CBH, CCF, ProbMap, FMC, TreeHeight, InFolder);
     std::cout << "Generated data file" << std::endl;
 }

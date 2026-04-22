@@ -149,7 +149,9 @@ CSVReader::getData(string filename)
         double cellSizeX{ modelPixelScale[0] };
         double cellSizeY{ modelPixelScale[1] };
         const double epsilon = std::numeric_limits<double>::epsilon();
-        tsize_t scan_size = TIFFRasterScanlineSize(fuelsDataset);
+        // TIFFScanlineSize gives bytes per one sample's scanline regardless of
+        // band count or planar config — safe for both single and multi-band TIFs.
+        tsize_t scan_size = TIFFScanlineSize(fuelsDataset);
         int n_bits = (scan_size / nXSize) * 8;
         if (fabs(cellSizeX - cellSizeY) > epsilon)
         {

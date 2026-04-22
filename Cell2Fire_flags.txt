@@ -1,0 +1,200 @@
+Cell2Fire - All CLI Flags
+=========================
+
+--- PATH / I/O ---
+
+--input-instance-folder <path>
+    Path to the input instance folder (contains grid, fuels, ignitions, weathers, etc.)
+    Default: (empty)
+
+--output-folder <path>
+    Path to the output folder.
+    Default: <input-instance-folder>/simOuts  (or ./simOuts if no input folder given)
+
+--weather <string>
+    Weather selection mode. Options: "rows" (sequential) | "random" (random file per sim)
+    Default: "rows"
+
+--FirebreakCells <path>
+    Path to a firebreak plan file (CSV listing cell IDs to treat as firebreaks).
+    Default: (none)
+
+--weather-weights <path>
+    Path to a CSV file with probability weights per weather file.
+    Implies --weather random. Weather files are sampled according to these weights.
+    Default: (none, uniform random used if --weather random)
+
+
+--- SIMULATION CONTROL ---
+
+--nsims <int>
+    Total number of fire simulations to run.
+    Default: 1
+
+--sim-years <int>
+    Number of years per simulation.
+    Default: 1
+
+--seed <int>
+    Master random seed. Controls all stochastic elements:
+      - Weather file selection (when random)
+      - ROS coefficient of variation sampling
+      - Random ignition cell selection
+    Each simulation epoch uses seed*ep, ensuring reproducibility.
+    Default: 123
+
+--nthreads <int>
+    Number of parallel OpenMP threads.
+    Default: 1
+
+--max-fire-periods <int>
+    Maximum number of fire periods per simulation. Use -1 for unlimited.
+    Default: -1
+
+--Fire-Period-Length <float>
+    Duration of each fire period in minutes. Capped at --Weather-Period-Length.
+    Default: 1.0
+
+--Weather-Period-Length <int>
+    Duration of each weather period in minutes.
+    Default: 60
+
+--nweathers <int>
+    Number of weather files available. If not set, auto-counted from Weathers/ folder
+    (when --weather random) or defaults to 1.
+    Default: (auto)
+
+
+--- IGNITION ---
+
+--ignitions
+    Flag (no value). Use ignition points from the ignitions file (Data.csv / ignitions input).
+    Default: false (random ignition cell selected by probability map)
+
+--IgnitionRad <int>
+    Radius (in cells) around the ignition point where fire can start.
+    Default: 0
+
+--ignitionsLog
+    Flag (no value). Log ignition points to output.
+    Default: false
+
+
+--- FIRE BEHAVIOR / PHYSICS ---
+
+--fmc <int>
+    Foliar moisture content (%).
+    Default: 100
+
+--scenario <int>
+    Fire scenario index (fuel/weather scenario selector).
+    Default: 3
+
+--ROS-CV <float>
+    Coefficient of variation for Rate of Spread stochasticity (normal distribution std dev).
+    Set to 0 to disable ROS randomness.
+    Default: 0.0
+
+--ROS-Threshold <float>
+    Minimum ROS (m/min) required to propagate fire to a neighbor cell.
+    Default: 0.1
+
+--HFI-Threshold <float>
+    Minimum Head Fire Intensity threshold.
+    Default: 0.1
+
+--CROS-Threshold <float>
+    Crown ROS threshold to trigger crown fire.
+    Default: 0.5
+
+--CROSAct-Threshold <float>
+    Active crown fire ROS threshold.
+    Default: 0.5
+
+--cros
+    Flag (no value). Enable crown fire ROS computation.
+    Default: false
+
+
+--- TUNING FACTORS ---
+
+--HFactor <float>
+    Head ROS multiplier.
+    Default: 1.0
+
+--FFactor <float>
+    Flanking ROS multiplier.
+    Default: 1.0
+
+--BFactor <float>
+    Backing ROS multiplier.
+    Default: 1.0
+
+--EFactor <float>
+    Ellipse adjustment factor.
+    Default: 1.0
+
+--CBDFactor <float>
+    Crown bulk density multiplier (used for crown fire, Spain model).
+    Default: 0.0
+
+--CCFFactor <float>
+    Crown competition factor multiplier (Spain model).
+    Default: 0.0
+
+--ROS10Factor <float>
+    ROS at 10-minute wind speed factor (Spain model).
+    Default: 3.34
+
+
+--- OUTPUT FLAGS (boolean, no value required) ---
+
+--output-messages
+    Write fire spread messages file (Messages.csv) per simulation.
+    Default: false
+
+--grids
+    Write per-period raster grids for each simulation.
+    Default: false
+
+--final-grid
+    Write final burned area raster grid per simulation.
+    Default: false
+
+--out-fl
+    Output flame length grids.
+    Default: false
+
+--out-intensity
+    Output fire intensity grids.
+    Default: false
+
+--out-ros
+    Output Rate of Spread grids.
+    Default: false
+
+--out-cfb
+    Output crown fuel consumption grids.
+    Default: false
+
+--out-sfb
+    Output surface fuel consumption grids.
+    Default: false
+
+--stats
+    Output per-simulation fire statistics CSV (Stats.csv).
+    Default: false
+
+
+--- MISC ---
+
+--bbo
+    Enable BBO (Blind Bayesian Optimization) tuning mode.
+    Default: false
+
+--verbose
+    Print verbose output during simulation.
+    Default: false
+
+-h
+    Print help message.

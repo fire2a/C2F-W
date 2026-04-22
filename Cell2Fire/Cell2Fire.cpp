@@ -2117,7 +2117,7 @@ main(int argc, char* argv[])
     WeatherHistory.reserve(args.TotalSims);
     if (args.Stats)
         simStats.resize(args.TotalSims, {0.0f, 0.0f, 0.0f});
-    GenDataFile(args.InFolder, args.FuelsPath);
+    GenDataFile(args.InFolder, args.FuelsPath, args.InstanceTif);
     int ep = 0;
     // Episodes loop (episode = replication)
     // CP: Modified to account the case when no ignition occurs and no grids are
