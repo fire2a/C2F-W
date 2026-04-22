@@ -21,6 +21,19 @@
 #include <unordered_map>
 #include <vector>
 
+// Suppress libtiff warnings about GeoTIFF/GDAL metadata tags it doesn't know
+// about (33550, 33922, 34736, 34737, 42113).  These are registered by
+// libgeotiff/GDAL and are harmless; libtiff on Linux prints them as "Unknown
+// field" warnings which confuse users.
+static void suppressTiffWarnings(const char* /*module*/, const char* fmt, va_list /*ap*/)
+{
+    if (std::strstr(fmt, "Unknown field with tag") != nullptr) return;
+    // Let other warnings reach stderr so real problems are visible
+    // (we intentionally don't forward them here to avoid va_list re-use issues)
+}
+static const TIFFErrorHandler s_tiffWarningHandlerInstalled =
+    (TIFFSetWarningHandler(suppressTiffWarnings), nullptr);
+
 inline char
 separator()
 {
