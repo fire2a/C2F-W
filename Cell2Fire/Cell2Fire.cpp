@@ -805,8 +805,22 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
 
     Cells* ignited_cell = nullptr;  // set when ignition succeeds
 
-    // No Ignitions provided
-    if (this->args.Ignitions == 0)
+    // If --ignition-cell points to a non-fuel cell, fall back to probability-map selection.
+    bool forceRandom = false;
+    if (this->args.IgnitionCell != -1)
+    {
+        int fixedCell = this->IgnitionPoints[this->year - 1];
+        if (nonBurnableCells.count(fixedCell))
+        {
+            std::cout << "Warning: --ignition-cell " << fixedCell
+                      << " is a non-fuel cell (NF/ND). Selecting new ignition point via probability map."
+                      << std::endl;
+            forceRandom = true;
+        }
+    }
+
+    // No Ignitions provided (or forced random due to non-fuel ignition cell)
+    if (this->args.Ignitions == 0 || forceRandom)
     {
         std::srand(args.seed);
         while (true)
@@ -844,7 +858,8 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
                 if (cell_ptr->getStatus() == "Available" && cell_ptr->fType != 0)
                 {
                     IgnitionHistory[sim] = aux;
-                    // std::cout << "Selected (Random) ignition point: " << aux << std::endl;
+                    if (forceRandom)
+                        std::cout << "Selected new ignition point: " << aux << std::endl;
                     std::vector<int> ignPts = { aux };
                     if (cell_ptr->ignition(this->fire_period[year - 1],
                                            this->year,
