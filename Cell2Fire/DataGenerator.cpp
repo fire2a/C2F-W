@@ -540,6 +540,82 @@ DataGridsTif(const std::string& filename, std::vector<float>& data, int nCells)
  * @param InFolder Input data directory
  * @return An array of arrays representing a cell.
  */
+
+// ---- File-scope lookup tables (shared by writeDataFileDirect & populateInputsDirect) ----
+
+static const std::unordered_map<std::string, float> s_GFLD = {
+    { "C1", 0.75f }, { "C2", 0.8f },  { "C3", 1.15f }, { "C4", 1.2f },  { "C5", 1.2f },
+    { "C6", 1.2f },  { "C7", 1.2f },
+    { "D1", std::numeric_limits<float>::quiet_NaN() },
+    { "D2", std::numeric_limits<float>::quiet_NaN() },
+    { "S1", std::numeric_limits<float>::quiet_NaN() },
+    { "S2", std::numeric_limits<float>::quiet_NaN() },
+    { "S3", std::numeric_limits<float>::quiet_NaN() },
+    { "O1a", 0.35f }, { "O1b", 0.35f },
+    { "M1", std::numeric_limits<float>::quiet_NaN() },
+    { "M2", std::numeric_limits<float>::quiet_NaN() },
+    { "M3", std::numeric_limits<float>::quiet_NaN() },
+    { "M4", std::numeric_limits<float>::quiet_NaN() },
+    { "NF", std::numeric_limits<float>::quiet_NaN() },
+    { "M1_5", 0.1f },  { "M1_10", 0.2f }, { "M1_15", 0.3f }, { "M1_20", 0.4f },
+    { "M1_25", 0.5f }, { "M1_30", 0.6f }, { "M1_35", 0.7f }, { "M1_40", 0.8f },
+    { "M1_45", 0.8f }, { "M1_50", 0.8f }, { "M1_55", 0.8f }, { "M1_60", 0.8f },
+    { "M1_65", 1.0f }, { "M1_70", 1.0f }, { "M1_75", 1.0f }, { "M1_80", 1.0f },
+    { "M1_85", 1.0f }, { "M1_90", 1.0f }, { "M1_95", 1.0f }
+};
+
+static const std::unordered_map<std::string, int> s_PDFD = {
+    { "M3_5", 5 }, { "M3_10", 10 }, { "M3_15", 15 }, { "M3_20", 20 }, { "M3_25", 25 },
+    { "M3_30", 30 }, { "M3_35", 35 }, { "M3_40", 40 }, { "M3_45", 45 }, { "M3_50", 50 },
+    { "M3_55", 55 }, { "M3_60", 60 }, { "M3_65", 65 }, { "M3_70", 70 }, { "M3_75", 75 },
+    { "M3_80", 80 }, { "M3_85", 85 }, { "M3_90", 90 }, { "M3_95", 95 },
+    { "M4_5", 5 }, { "M4_10", 10 }, { "M4_15", 15 }, { "M4_20", 20 }, { "M4_25", 25 },
+    { "M4_30", 30 }, { "M4_35", 35 }, { "M4_40", 40 }, { "M4_45", 45 }, { "M4_50", 50 },
+    { "M4_55", 55 }, { "M4_60", 60 }, { "M4_65", 65 }, { "M4_70", 70 }, { "M4_75", 75 },
+    { "M4_80", 80 }, { "M4_85", 85 }, { "M4_90", 90 }, { "M4_95", 95 },
+    { "M3M4_5", 5 }, { "M3M4_10", 10 }, { "M3M4_15", 15 }, { "M3M4_20", 20 }, { "M3M4_25", 25 },
+    { "M3M4_30", 30 }, { "M3M4_35", 35 }, { "M3M4_40", 40 }, { "M3M4_45", 45 }, { "M3M4_50", 50 },
+    { "M3M4_55", 55 }, { "M3M4_60", 60 }, { "M3M4_65", 65 }, { "M3M4_70", 70 }, { "M3M4_75", 75 },
+    { "M3M4_80", 80 }, { "M3M4_85", 85 }, { "M3M4_90", 90 }, { "M3M4_95", 95 }
+};
+
+static const std::unordered_map<std::string, int> s_PCD = {
+    { "M3_5", 5 }, { "M3_10", 10 }, { "M3_15", 15 }, { "M3_20", 20 }, { "M3_25", 25 },
+    { "M3_30", 30 }, { "M3_35", 35 }, { "M3_40", 40 }, { "M3_45", 45 }, { "M3_50", 50 },
+    { "M3_55", 55 }, { "M3_60", 60 }, { "M3_65", 65 }, { "M3_70", 70 }, { "M3_75", 75 },
+    { "M3_80", 80 }, { "M3_85", 85 }, { "M3_90", 90 }, { "M3_95", 95 },
+    { "M4_5", 5 }, { "M4_10", 10 }, { "M4_15", 15 }, { "M4_20", 20 }, { "M4_25", 25 },
+    { "M4_30", 30 }, { "M4_35", 35 }, { "M4_40", 40 }, { "M4_45", 45 }, { "M4_50", 50 },
+    { "M4_55", 55 }, { "M4_60", 60 }, { "M4_65", 65 }, { "M4_70", 70 }, { "M4_75", 75 },
+    { "M4_80", 80 }, { "M4_85", 85 }, { "M4_90", 90 }, { "M4_95", 95 },
+    { "M3M4_5", 5 }, { "M3M4_10", 10 }, { "M3M4_15", 15 }, { "M3M4_20", 20 }, { "M3M4_25", 25 },
+    { "M3M4_30", 30 }, { "M3M4_35", 35 }, { "M3M4_40", 40 }, { "M3M4_45", 45 }, { "M3M4_50", 50 },
+    { "M3M4_55", 55 }, { "M3M4_60", 60 }, { "M3M4_65", 65 }, { "M3M4_70", 70 }, { "M3M4_75", 75 },
+    { "M3M4_80", 80 }, { "M3M4_85", 85 }, { "M3M4_90", 90 }, { "M3M4_95", 95 }
+};
+
+// ---- Module-level cache: filled by GenDataFile (TIF path), consumed by populateInputsDirect ----
+
+struct InstanceCache
+{
+    std::vector<std::string> GFuelType;
+    std::vector<int>         GFuelTypeN;
+    std::vector<float>       Elevation;
+    std::vector<float>       SAZ;
+    std::vector<float>       PS;
+    std::vector<float>       Curing;
+    std::vector<float>       CBD;
+    std::vector<float>       CBH;
+    std::vector<float>       CCF;
+    std::vector<float>       ProbMap;
+    std::vector<float>       FMC;
+    std::vector<float>       TreeHeight;
+    bool valid = false;
+};
+static InstanceCache g_instanceCache;
+
+// ---- End file-scope tables and cache ----
+
 void
 writeDataFileDirect(const std::vector<std::string>& GFuelType,
                     const std::vector<int>& GFuelTypeN,
@@ -556,75 +632,9 @@ writeDataFileDirect(const std::vector<std::string>& GFuelType,
                     const std::string& InFolder)
 {
 
-    // GFL dictionary (FBP)
-    std::unordered_map<std::string, float> GFLD = { { "C1", 0.75f },
-                                                    { "C2", 0.8f },
-                                                    { "C3", 1.15f },
-                                                    { "C4", 1.2f },
-                                                    { "C5", 1.2f },
-                                                    { "C6", 1.2f },
-                                                    { "C7", 1.2f },
-                                                    { "D1", static_cast<float>(std::nanf("")) },
-                                                    { "D2", static_cast<float>(std::nanf("")) },
-                                                    { "S1", static_cast<float>(std::nanf("")) },
-                                                    { "S2", static_cast<float>(std::nanf("")) },
-                                                    { "S3", static_cast<float>(std::nanf("")) },
-                                                    { "O1a", 0.35f },
-                                                    { "O1b", 0.35f },
-                                                    { "M1", static_cast<float>(std::nanf("")) },
-                                                    { "M2", static_cast<float>(std::nanf("")) },
-                                                    { "M3", static_cast<float>(std::nanf("")) },
-                                                    { "M4", static_cast<float>(std::nanf("")) },
-                                                    { "NF", static_cast<float>(std::nanf("")) },
-                                                    { "M1_5", 0.1f },
-                                                    { "M1_10", 0.2f },
-                                                    { "M1_15", 0.3f },
-                                                    { "M1_20", 0.4f },
-                                                    { "M1_25", 0.5f },
-                                                    { "M1_30", 0.6f },
-                                                    { "M1_35", 0.7f },
-                                                    { "M1_40", 0.8f },
-                                                    { "M1_45", 0.8f },
-                                                    { "M1_50", 0.8f },
-                                                    { "M1_55", 0.8f },
-                                                    { "M1_60", 0.8f },
-                                                    { "M1_65", 1.0f },
-                                                    { "M1_70", 1.0f },
-                                                    { "M1_75", 1.0f },
-                                                    { "M1_80", 1.0f },
-                                                    { "M1_85", 1.0f },
-                                                    { "M1_90", 1.0f },
-                                                    { "M1_95", 1.0f } };
-
-    // PDF dictionary (CANADA)
-    std::unordered_map<std::string, int> PDFD
-        = { { "M3_5", 5 },     { "M3_10", 10 },   { "M3_15", 15 },   { "M3_20", 20 },   { "M3_25", 25 },
-            { "M3_30", 30 },   { "M3_35", 35 },   { "M3_40", 40 },   { "M3_45", 45 },   { "M3_50", 50 },
-            { "M3_55", 55 },   { "M3_60", 60 },   { "M3_65", 65 },   { "M3_70", 70 },   { "M3_75", 75 },
-            { "M3_80", 80 },   { "M3_85", 85 },   { "M3_90", 90 },   { "M3_95", 95 },   { "M4_5", 5 },
-            { "M4_10", 10 },   { "M4_15", 15 },   { "M4_20", 20 },   { "M4_25", 25 },   { "M4_30", 30 },
-            { "M4_35", 35 },   { "M4_40", 40 },   { "M4_45", 45 },   { "M4_50", 50 },   { "M4_55", 55 },
-            { "M4_60", 60 },   { "M4_65", 65 },   { "M4_70", 70 },   { "M4_75", 75 },   { "M4_80", 80 },
-            { "M4_85", 85 },   { "M4_90", 90 },   { "M4_95", 95 },   { "M3M4_5", 5 },   { "M3M4_10", 10 },
-            { "M3M4_15", 15 }, { "M3M4_20", 20 }, { "M3M4_25", 25 }, { "M3M4_30", 30 }, { "M3M4_35", 35 },
-            { "M3M4_40", 40 }, { "M3M4_45", 45 }, { "M3M4_50", 50 }, { "M3M4_55", 55 }, { "M3M4_60", 60 },
-            { "M3M4_65", 65 }, { "M3M4_70", 70 }, { "M3M4_75", 75 }, { "M3M4_80", 80 }, { "M3M4_85", 85 },
-            { "M3M4_90", 90 }, { "M3M4_95", 95 } };
-
-    // PCD dictionary (CANADA)
-    std::unordered_map<std::string, int> PCD
-        = { { "M3_5", 5 },     { "M3_10", 10 },   { "M3_15", 15 },   { "M3_20", 20 },   { "M3_25", 25 },
-            { "M3_30", 30 },   { "M3_35", 35 },   { "M3_40", 40 },   { "M3_45", 45 },   { "M3_50", 50 },
-            { "M3_55", 55 },   { "M3_60", 60 },   { "M3_65", 65 },   { "M3_70", 70 },   { "M3_75", 75 },
-            { "M3_80", 80 },   { "M3_85", 85 },   { "M3_90", 90 },   { "M3_95", 95 },   { "M4_5", 5 },
-            { "M4_10", 10 },   { "M4_15", 15 },   { "M4_20", 20 },   { "M4_25", 25 },   { "M4_30", 30 },
-            { "M4_35", 35 },   { "M4_40", 40 },   { "M4_45", 45 },   { "M4_50", 50 },   { "M4_55", 55 },
-            { "M4_60", 60 },   { "M4_65", 65 },   { "M4_70", 70 },   { "M4_75", 75 },   { "M4_80", 80 },
-            { "M4_85", 85 },   { "M4_90", 90 },   { "M4_95", 95 },   { "M3M4_5", 5 },   { "M3M4_10", 10 },
-            { "M3M4_15", 15 }, { "M3M4_20", 20 }, { "M3M4_25", 25 }, { "M3M4_30", 30 }, { "M3M4_35", 35 },
-            { "M3M4_40", 40 }, { "M3M4_45", 45 }, { "M3M4_50", 50 }, { "M3M4_55", 55 }, { "M3M4_60", 60 },
-            { "M3M4_65", 65 }, { "M3M4_70", 70 }, { "M3M4_75", 75 }, { "M3M4_80", 80 }, { "M3M4_85", 85 },
-            { "M3M4_90", 90 }, { "M3M4_95", 95 } };
+    const auto& GFLD = s_GFLD;
+    const auto& PDFD = s_PDFD;
+    const auto& PCD  = s_PCD;
 
     std::ofstream dataFile(InFolder + separator() + "Data.csv");
     if (!dataFile.is_open())
@@ -992,6 +1002,96 @@ readInstanceTif(const std::string& tifPath,
  * @param instanceTif Path to a packed multi-band instance GeoTIFF (from --instance-tif). When non-empty,
  *                    all raster data is read from this single file and individual rasters are ignored.
  */
+
+/**
+ * @brief Populate the inputs[] array directly from the in-memory instance cache.
+ *
+ * Called instead of parseDFDirect when --instance-tif is used. Replicates the
+ * exact field mapping produced by writeDataFileDirect + parseDFDirect, but
+ * operates purely in memory — no Data.csv is written or read.
+ */
+void
+populateInputsDirect(inputs* df_ptr, int nCells, std::vector<float>& ignProb, arguments* args_ptr)
+{
+    if (!g_instanceCache.valid)
+        throw std::runtime_error("populateInputsDirect: instance cache is empty");
+
+    const auto& GT  = g_instanceCache.GFuelType;
+    const auto& GTN = g_instanceCache.GFuelTypeN;
+    const auto& EL  = g_instanceCache.Elevation;
+    const auto& SAZ = g_instanceCache.SAZ;
+    const auto& PS  = g_instanceCache.PS;
+    const auto& CUR = g_instanceCache.Curing;
+    const auto& CBD = g_instanceCache.CBD;
+    const auto& CBH = g_instanceCache.CBH;
+    const auto& CCF = g_instanceCache.CCF;
+    const auto& PM  = g_instanceCache.ProbMap;
+    const auto& FMC = g_instanceCache.FMC;
+    const auto& TH  = g_instanceCache.TreeHeight;
+
+    for (int i = 0; i < nCells; ++i, ++df_ptr)
+    {
+        const std::string& ft = GT[i];
+
+        // fueltype: char[5], same truncation as parseDFDirect
+        std::string faux = ft + " ";
+        std::strncpy(df_ptr->fueltype, faux.c_str(), 4);
+        df_ptr->fueltype[4] = '\0';
+
+        // hardcoded coords (match writeDataFileDirect)
+        df_ptr->lat = 51.621244f;
+        df_ptr->lon = -115.608378f;
+
+        // terrain
+        df_ptr->elev = std::isnan(EL[i])  ? 0.f : EL[i];
+        df_ptr->ps   = std::isnan(PS[i])  ? 0.f : PS[i];
+        df_ptr->saz  = std::isnan(SAZ[i]) ? 0.f : SAZ[i];
+
+        // weather (always blank in Data.csv → defaults)
+        df_ptr->ws  = 0.f;
+        df_ptr->waz = 0;
+
+        // curing — writeDataFileDirect only writes "60" for O1a/O1b with no data
+        if (std::isnan(CUR[i]) && (ft == "O1a" || ft == "O1b"))
+            df_ptr->cur = 60.f;
+        else
+            df_ptr->cur = 0.f;
+
+        // canopy
+        df_ptr->cbd = std::isnan(CBD[i]) ? -9999.f : CBD[i];
+        df_ptr->cbh = std::isnan(CBH[i]) ? -9999.f : CBH[i];
+        df_ptr->ccf = std::isnan(CCF[i]) ? 0.f     : CCF[i];
+
+        // fuel type number
+        df_ptr->nftype = GTN[i];
+
+        // FMC (integer in inputs)
+        df_ptr->FMC = std::isnan(FMC[i]) ? args_ptr->FMC : static_cast<int>(FMC[i]);
+
+        // ignition probability — stored in ignProb, not in inputs
+        ignProb[i] = std::isnan(PM[i]) ? 1.f : PM[i];
+
+        // calendar / time (blank in Data.csv → 0 except time=20)
+        df_ptr->jd     = 0;
+        df_ptr->jd_min = 0;
+        df_ptr->time   = 20;
+        df_ptr->ffmc   = 0.f;
+        df_ptr->bui    = 0.f;
+        df_ptr->pattern = 0;
+
+        // fuel-model lookups
+        auto pcIt  = s_PCD.find(ft);
+        df_ptr->pc  = (pcIt  != s_PCD.end())  ? pcIt->second  : 0;
+        auto pdfIt = s_PDFD.find(ft);
+        df_ptr->pdf = (pdfIt != s_PDFD.end()) ? pdfIt->second : 0;
+        auto gflIt = s_GFLD.find(ft);
+        df_ptr->gfl = (gflIt != s_GFLD.end()) ? gflIt->second : 0.f;
+
+        // tree height
+        df_ptr->tree_height = std::isnan(TH[i]) ? -9999.f : TH[i];
+    }
+}
+
 void
 GenDataFile(const std::string& InFolder, const std::string& fuelsPath, const std::string& instanceTif)
 {
@@ -1034,6 +1134,25 @@ GenDataFile(const std::string& InFolder, const std::string& fuelsPath, const std
                         FBPDicts, Cols, CellSide,
                         Elevation, SAZ, PS, Curing,
                         CBD, CBH, CCF, ProbMap, FMC, TreeHeight);
+
+        // Store in module-level cache so populateInputsDirect can fill
+        // inputs[] directly without writing/reading Data.csv.
+        g_instanceCache.GFuelType  = GFuelType;
+        g_instanceCache.GFuelTypeN = GFuelTypeN;
+        g_instanceCache.Elevation  = Elevation;
+        g_instanceCache.SAZ        = SAZ;
+        g_instanceCache.PS         = PS;
+        g_instanceCache.Curing     = Curing;
+        g_instanceCache.CBD        = CBD;
+        g_instanceCache.CBH        = CBH;
+        g_instanceCache.CCF        = CCF;
+        g_instanceCache.ProbMap    = ProbMap;
+        g_instanceCache.FMC        = FMC;
+        g_instanceCache.TreeHeight = TreeHeight;
+        g_instanceCache.valid      = true;
+
+        std::cout << "Instance data cached (" << GFuelType.size() << " cells)\n";
+        return;  // skip Data.csv write entirely
     }
     else
     {

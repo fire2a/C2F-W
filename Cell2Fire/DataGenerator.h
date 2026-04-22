@@ -1,6 +1,8 @@
 #ifndef DATAGENERATOR_H
 #define DATAGENERATOR_H
 
+#include "Cells.h"
+#include "ReadArgs.h"
 #include "tiffio.h"
 #include <algorithm>
 #include <array>
@@ -42,5 +44,7 @@ void writeDataFileDirect(const std::vector<std::string>& GFuelType,
                          const std::string& InFolder);
 
 void GenDataFile(const std::string& InFolder, const std::string& fuelsPath, const std::string& instanceTif);
+
+void populateInputsDirect(inputs* df_ptr, int nCells, std::vector<float>& ignProb, arguments* args_ptr);
 
 #endif

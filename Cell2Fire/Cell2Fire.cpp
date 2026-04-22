@@ -242,22 +242,26 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.FuelsPath, " ")
     // DEBUGstd::cout << "\n------ Read DataFrames: Forest and Weather ------\n";
 
     /* Forest DataFrame */
-    std::string filename = this->args.InFolder + "Data.csv";
-    std::string sep = ",";
-    CSVReader CSVParser(filename, sep);
-
-    std::cout << "Forest DataFrame from instance " << filename << std::endl;
     std::cout << "Number of cells: " << this->nCells << std::endl;
     df = new inputs[this->nCells];
-
-    // Create empty df with size of NCells
-    df_ptr = &df[0];  // access reference for the first element of df
-
-    // Initialize ignProb before the streaming parse (parseDFDirect fills it from col 14)
+    df_ptr = &df[0];
     ignProb = std::vector<float>(this->nCells, 1);
 
-    // Stream Data.csv directly into df without intermediate vector<vector<string>>
-    CSVParser.parseDFDirect(df_ptr, filename, this->args_ptr, this->nCells, ignProb);
+    if (!this->args.InstanceTif.empty())
+    {
+        // Direct in-memory path: no Data.csv written or read
+        std::cout << "Populating inputs from instance cache (no Data.csv)" << std::endl;
+        populateInputsDirect(df_ptr, this->nCells, ignProb, this->args_ptr);
+    }
+    else
+    {
+        // Standard path: read Data.csv written by GenDataFile
+        std::string filename = this->args.InFolder + "Data.csv";
+        std::string sep = ",";
+        CSVReader CSVParser(filename, sep);
+        std::cout << "Forest DataFrame from instance " << filename << std::endl;
+        CSVParser.parseDFDirect(df_ptr, filename, this->args_ptr, this->nCells, ignProb);
+    }
 
     // Initialize and populate relevant vectors
     fTypeCells = std::vector<int>(this->nCells, 1);
