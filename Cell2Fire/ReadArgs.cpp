@@ -121,6 +121,13 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     else
         instance_tif = &empty;
 
+    //--weather-folder
+    char* weather_folder = getCmdOption(argv, argv + argc, "--weather-folder");
+    if (weather_folder)
+        printf("WeatherFolder: %s \n", weather_folder);
+    else
+        weather_folder = &empty;
+
     // Booleans
     bool out_messages = false;
     bool out_trajectories = false;
@@ -334,8 +341,9 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         if (std::string(input_weather) == "random")
         {
             // std::cout << "Counting" << std::endl;
-            std::string input_string = input_folder;
-            args_ptr->NWeatherFiles = countWeathers(input_string + "/Weathers");
+            std::string wbase = (weather_folder != &empty) ? std::string(weather_folder)
+                                                           : std::string(input_folder);
+            args_ptr->NWeatherFiles = countWeathers(wbase + "/Weathers");
         }
         else
         {
@@ -582,6 +590,19 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         // instance TIF as FuelsPath so parseForestDF gets correct grid dims.
         if (fuels_folder == &empty)
             args_ptr->FuelsPath = instance_tif;
+    }
+
+    // WeatherFolder: explicit --weather-folder overrides InFolder for all
+    // weather file lookups.  Defaults to InFolder when not provided.
+    if (weather_folder != &empty)
+    {
+        args_ptr->WeatherFolder = weather_folder;
+        if (!args_ptr->WeatherFolder.empty() && *args_ptr->WeatherFolder.rbegin() != separator())
+            args_ptr->WeatherFolder += separator();
+    }
+    else
+    {
+        args_ptr->WeatherFolder = args_ptr->InFolder;
     }
 
     if (output_folder == &empty && input_folder != &empty)

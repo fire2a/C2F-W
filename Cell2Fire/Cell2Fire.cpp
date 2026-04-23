@@ -360,8 +360,8 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.FuelsPath, " ")
 
     if (this->args.WeatherOpt.compare("distribution") == 0)
     {
-        CSVReader CSVWeatherDistribution(_args.InFolder + "WeatherDistribution.csv", ",");
-        this->WDist = CSVWeatherDistribution.getData(_args.InFolder + "WeatherDistribution.csv");
+        CSVReader CSVWeatherDistribution(_args.WeatherFolder + "WeatherDistribution.csv", ",");
+        this->WDist = CSVWeatherDistribution.getData(_args.WeatherFolder + "WeatherDistribution.csv");
         CSVWeatherDistribution.printData(WDist);
     }
 
@@ -2025,7 +2025,7 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
     int WPeriods;
     if (weatherOpt == "rows")
     {
-        weatherFilename = this->args.InFolder + "Weather" + ".csv";
+        weatherFilename = this->args.WeatherFolder + "Weather" + ".csv";
         try
         {
             this->WeatherData = this->CSVWeather.getData(weatherFilename);
@@ -2046,7 +2046,7 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
     else if (weatherOpt == "random")
     {
         // Random Weather
-        weatherFilename = this->args.InFolder + "Weathers" + separator() + "Weather" + std::to_string(rnumber) + ".csv";
+        weatherFilename = this->args.WeatherFolder + "Weathers" + separator() + "Weather" + std::to_string(rnumber) + ".csv";
         
         // this->CSVWeather.setFilename(weatherFilename);
 
