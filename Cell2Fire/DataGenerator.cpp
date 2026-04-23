@@ -1149,6 +1149,26 @@ GenDataFile(const std::string& InFolder, const std::string& fuelsPath, const std
                         Elevation, SAZ, PS, Curing,
                         CBD, CBH, CCF, ProbMap, FMC, TreeHeight);
 
+        // If --fuels-path was explicitly provided (i.e. it differs from the
+        // instance TIF itself), override the fuel types read from the TIF with
+        // those from the separate fuels file.  This lets the caller apply a
+        // modified fuel map (e.g. cells set to non-fuel) on top of the aux
+        // rasters packed in the TIF.
+        if (fuelsPath != instanceTif)
+        {
+            std::cout << "Overriding fuels from: " << fuelsPath << '\n';
+            std::string FGrid = resolveFuelsPath(fuelsPath);
+            bool isTif = FGrid.size() >= 4 && FGrid.substr(FGrid.size() - 4) == ".tif";
+            int tmpFBPDicts = 0, tmpCols = 0;
+            float tmpCellSide = 1.0f;
+            if (isTif)
+                std::tie(GFuelTypeN, GFuelType, tmpFBPDicts, tmpCols, tmpCellSide) =
+                    ForestGridTif(FGrid, FBPDict);
+            else
+                std::tie(GFuelTypeN, GFuelType, tmpFBPDicts, tmpCols, tmpCellSide) =
+                    ForestGrid(FGrid, FBPDict);
+        }
+
         // Store in module-level cache so populateInputsDirect can fill
         // inputs[] directly without writing/reading Data.csv.
         g_instanceCache.GFuelType  = GFuelType;
