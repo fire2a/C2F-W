@@ -71,12 +71,13 @@ def _read_raster(path: Path) -> "tuple[np.ndarray, dict]":
         return data, src.profile
 
 
-def pack(instance_folder: Path, output: Path) -> None:
+def pack(instance_folder: Path, output: Path, bands: "list[str] | None" = None) -> None:
     folder = instance_folder.resolve()
     arrays: "list[np.ndarray]" = []
     ref_profile: "dict | None" = None
+    active_bands = bands if bands is not None else BANDS
 
-    for band_name in BANDS:
+    for band_name in active_bands:
         path = _find_raster(folder, band_name)
         if path is None:
             if ref_profile is None:
@@ -108,7 +109,7 @@ def pack(instance_folder: Path, output: Path) -> None:
         "dtype": "float32",
         "width": ref_profile["width"],
         "height": ref_profile["height"],
-        "count": len(BANDS),
+        "count": len(active_bands),
         "crs": ref_profile.get("crs"),
         "transform": ref_profile.get("transform"),
         "nodata": NODATA,
@@ -119,11 +120,11 @@ def pack(instance_folder: Path, output: Path) -> None:
     with rasterio.open(output, "w", **out_profile) as dst:
         for i, arr in enumerate(arrays, start=1):
             dst.write(arr, i)
-            dst.update_tags(i, band_name=BANDS[i - 1])
+            dst.update_tags(i, band_name=active_bands[i - 1])
 
     print(
         f"\nWrote: {output}\n"
-        f"       {len(BANDS)} bands, "
+        f"       {len(active_bands)} bands, "
         f"{out_profile['width']} x {out_profile['height']} cells"
     )
 
@@ -139,6 +140,11 @@ def main() -> None:
         "--output",
         help="Output GeoTIFF path (default: <instance_folder>/instance.tif)",
     )
+    ap.add_argument(
+        "--no-prob-map",
+        action="store_true",
+        help="Exclude the probabilityMap band from the output TIF",
+    )
     args = ap.parse_args()
 
     folder = Path(args.instance_folder)
@@ -148,8 +154,10 @@ def main() -> None:
 
     output = Path(args.output) if args.output else folder / "instance.tif"
 
+    bands = [b for b in BANDS if b != "probabilityMap"] if args.no_prob_map else BANDS
+
     print(f"Packing instance: {folder}")
-    pack(folder, output)
+    pack(folder, output, bands)
 
 
 if __name__ == "__main__":
