@@ -715,6 +715,8 @@ crownfractionburn(inputs* data, main_outs* at, int FMC)
         a = 0.23;
     }
     cfb = 1 - exp(-a * (ros - ros0));
+    if (cfb < 0.0f) cfb = 0.0f;
+    if (cfb > 1.0f) cfb = 1.0f;
 
     return cfb;
 }
