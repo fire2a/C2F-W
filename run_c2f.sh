@@ -41,38 +41,35 @@ COMMON_FLAGS=(
 )
 
 # ============================================================
-# Loop: each instance × each weather folder
+# Loop: instance[i] paired with weather_folder[i]
 # ============================================================
-for instance in "${INSTANCES[@]}"; do
-    if [[ -z "$instance" ]]; then
-        echo "Skipping empty instance entry" >&2
+for i in "${!INSTANCES[@]}"; do
+    instance="${INSTANCES[$i]}"
+    weather_folder="${WEATHER_FOLDERS[$i]}"
+
+    if [[ -z "$instance" || -z "$weather_folder" ]]; then
+        echo "Skipping empty entry at index $i" >&2
         continue
     fi
-    # Derive a short name from the TIF filename (no path, no extension)
+
     instance_name=$(basename "$instance" .tif)
+    weather_name=$(basename "$weather_folder")
 
-    for weather_folder in "${WEATHER_FOLDERS[@]}"; do
-        if [[ -z "$weather_folder" ]]; then
-            echo "Skipping empty weather folder entry" >&2
-            continue
-        fi
-        weather_name=$(basename "$weather_folder")
+    out_dir="${OUT_BASE}/${instance_name}/${weather_name}"
+    mkdir -p "$out_dir"
 
-        out_dir="${OUT_BASE}/${instance_name}/${weather_name}"
-        mkdir -p "$out_dir"
+    echo "============================================================"
+    echo "Run $((i+1))"
+    echo "Instance : $instance_name"
+    echo "Weather  : $weather_name"
+    echo "Output   : $out_dir"
+    echo "============================================================"
 
-        echo "============================================================"
-        echo "Instance : $instance_name"
-        echo "Weather  : $weather_name"
-        echo "Output   : $out_dir"
-        echo "============================================================"
+    "$BINARY" \
+        --instance-tif    "$instance" \
+        --weather-folder  "$weather_folder" \
+        --output-folder   "$out_dir" \
+        "${COMMON_FLAGS[@]}"
 
-        "$BINARY" \
-            --instance-tif    "$instance" \
-            --weather-folder  "$weather_folder" \
-            --output-folder   "$out_dir" \
-            "${COMMON_FLAGS[@]}"
-
-        echo ""
-    done
+    echo ""
 done
