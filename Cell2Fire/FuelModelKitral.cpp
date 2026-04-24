@@ -956,6 +956,25 @@ calculate_k(inputs* data,
         }
     }
 
+    // Crown flame length and max flame length.
+    // at->rss is now the crown-adjusted ROS when crown fire is active.
+    // Byram intensity at that ROS gives crown fire intensity; applying the
+    // same fl formula gives the crown flame length.
+    // max_flame_length is the larger of surface fl and crown fl.
+    if (at->crown)
+    {
+        float crown_sfi        = byram_intensity(data, at);           // crown ROS already in at->rss
+        at->crown_intensity    = crown_sfi;
+        at->crown_flame_length = 0.0775f * std::pow(crown_sfi, 0.46f);
+        at->max_flame_length   = std::max(at->fl, at->crown_flame_length);
+    }
+    else
+    {
+        at->crown_intensity    = 0.0f;
+        at->crown_flame_length = 0.0f;
+        at->max_flame_length   = at->fl;
+    }
+
     if (args->verbose)
     {
         cout << "--------------- Inputs --------------- \n";
@@ -1026,4 +1045,20 @@ determine_destiny_metrics_k(inputs* data, fuel_coefs* ptr, arguments* args, main
     }
 
     metrics->crown = int(crownFire);
+
+    // Crown and max flame lengths for the receiving cell.
+    // metrics->rss is the final (crown-adjusted) ROS supplied by manageFire,
+    // so metrics->sfi / metrics->fl already reflect the total fire behaviour.
+    if (crownFire)
+    {
+        metrics->crown_intensity    = metrics->sfi;
+        metrics->crown_flame_length = metrics->fl;
+        metrics->max_flame_length   = metrics->fl;
+    }
+    else
+    {
+        metrics->crown_intensity    = 0.0f;
+        metrics->crown_flame_length = 0.0f;
+        metrics->max_flame_length   = metrics->fl;
+    }
 }

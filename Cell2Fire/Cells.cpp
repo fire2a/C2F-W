@@ -623,7 +623,11 @@ Cells::manageFire(int period,
                 crownFraction[this->realId - 1] = std::max(crownFraction[this->realId - 1], mainstruct.cfb);
                 crownFraction[nb - 1] = std::max(crownFraction[nb - 1], metrics.cfb);
                 SurfaceFlameLengths[this->realId - 1] = std::max(SurfaceFlameLengths[this->realId - 1], mainstruct.fl);
-                SurfaceFlameLengths[nb - 1] = std::max(SurfaceFlameLengths[nb - 1], metrics.fl);
+                SurfaceFlameLengths[nb - 1]           = std::max(SurfaceFlameLengths[nb - 1],           metrics.fl);
+                CrownFlameLengths[this->realId - 1]   = std::max(CrownFlameLengths[this->realId - 1],   mainstruct.crown_flame_length);
+                CrownFlameLengths[nb - 1]             = std::max(CrownFlameLengths[nb - 1],             metrics.crown_flame_length);
+                MaxFlameLengths[this->realId - 1]     = std::max(MaxFlameLengths[this->realId - 1],     mainstruct.max_flame_length);
+                MaxFlameLengths[nb - 1]               = std::max(MaxFlameLengths[nb - 1],               metrics.max_flame_length);
 
                 // cannot mutate ROSangleDir during iteration.. we do it like 10
                 // lines down toPop.push_back(angle);
