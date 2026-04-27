@@ -269,6 +269,14 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         printf("CrownROS: %s \n", btoa(allow_cros));
     }
 
+    //--no-prob-map
+    bool no_prob_map = false;
+    if (cmdOptionExists(argv, argv + argc, "--no-prob-map"))
+    {
+        no_prob_map = true;
+        printf("NoProbMap: true (uniform random ignition)\n");
+    }
+
     // Floats and ints
     // defaults
     int dsim_years = 1;
@@ -667,7 +675,8 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->PromTuned = prom_tuned;
     args_ptr->Stats = out_stats;
     args_ptr->BBOTuning = bbo_tuning;
-    args_ptr->AllowCROS = allow_cros;
+    args_ptr->AllowCROS  = allow_cros;
+    args_ptr->NoProbMap  = no_prob_map;
 }
 
 void
