@@ -71,14 +71,16 @@ def _read_raster(path: Path) -> "tuple[np.ndarray, dict]":
         return data, src.profile
 
 
-def pack(instance_folder: Path, output: Path, bands: "list[str] | None" = None) -> None:
+def pack(instance_folder: Path, output: Path, skip: "set[str] | None" = None) -> None:
+    """Always writes all 11 bands.  Bands in *skip* are filled with NODATA
+    instead of being read from disk (the file is ignored even if it exists)."""
     folder = instance_folder.resolve()
     arrays: "list[np.ndarray]" = []
     ref_profile: "dict | None" = None
-    active_bands = bands if bands is not None else BANDS
+    skip = skip or set()
 
-    for band_name in active_bands:
-        path = _find_raster(folder, band_name)
+    for band_name in BANDS:
+        path = None if band_name in skip else _find_raster(folder, band_name)
         if path is None:
             if ref_profile is None:
                 if band_name == "fuels":
@@ -89,7 +91,8 @@ def pack(instance_folder: Path, output: Path, bands: "list[str] | None" = None) 
                 raise RuntimeError(
                     "Could not find any raster to establish grid dimensions."
                 )
-            print(f"  {band_name:<18} not found — filling with {NODATA}")
+            reason = "skipped" if band_name in skip else "not found"
+            print(f"  {band_name:<18} {reason} — filling with {NODATA}")
             data = np.full(
                 (ref_profile["height"], ref_profile["width"]), NODATA, dtype=np.float32
             )
@@ -109,7 +112,7 @@ def pack(instance_folder: Path, output: Path, bands: "list[str] | None" = None) 
         "dtype": "float32",
         "width": ref_profile["width"],
         "height": ref_profile["height"],
-        "count": len(active_bands),
+        "count": len(BANDS),
         "crs": ref_profile.get("crs"),
         "transform": ref_profile.get("transform"),
         "nodata": NODATA,
@@ -120,11 +123,11 @@ def pack(instance_folder: Path, output: Path, bands: "list[str] | None" = None) 
     with rasterio.open(output, "w", **out_profile) as dst:
         for i, arr in enumerate(arrays, start=1):
             dst.write(arr, i)
-            dst.update_tags(i, band_name=active_bands[i - 1])
+            dst.update_tags(i, band_name=BANDS[i - 1])
 
     print(
         f"\nWrote: {output}\n"
-        f"       {len(active_bands)} bands, "
+        f"       {len(BANDS)} bands, "
         f"{out_profile['width']} x {out_profile['height']} cells"
     )
 
@@ -154,10 +157,10 @@ def main() -> None:
 
     output = Path(args.output) if args.output else folder / "instance.tif"
 
-    bands = [b for b in BANDS if b != "probabilityMap"] if args.no_prob_map else BANDS
+    skip = {"probabilityMap"} if args.no_prob_map else set()
 
     print(f"Packing instance: {folder}")
-    pack(folder, output, bands)
+    pack(folder, output, skip)
 
 
 if __name__ == "__main__":
