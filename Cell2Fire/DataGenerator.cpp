@@ -1083,7 +1083,7 @@ populateInputsDirect(inputs* df_ptr, int nCells, std::vector<float>& ignProb, ar
         df_ptr->FMC = std::isnan(FMC[i]) ? args_ptr->FMC : static_cast<int>(FMC[i]);
 
         // ignition probability — stored in ignProb, not in inputs
-        ignProb[i] = (args_ptr->NoProbMap || std::isnan(PM[i])) ? 1.f : PM[i];
+        ignProb[i] = (args_ptr->UseProbMap && !std::isnan(PM[i])) ? PM[i] : 1.f;
 
         // calendar / time (blank in Data.csv → 0 except time=20)
         df_ptr->jd     = 0;

@@ -269,12 +269,12 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         printf("CrownROS: %s \n", btoa(allow_cros));
     }
 
-    //--no-prob-map
-    bool no_prob_map = false;
-    if (cmdOptionExists(argv, argv + argc, "--no-prob-map"))
+    //--prob-map
+    bool use_prob_map = false;
+    if (cmdOptionExists(argv, argv + argc, "--prob-map"))
     {
-        no_prob_map = true;
-        printf("NoProbMap: true (uniform random ignition)\n");
+        use_prob_map = true;
+        printf("UseProbMap: true\n");
     }
 
     // Floats and ints
@@ -676,7 +676,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->Stats = out_stats;
     args_ptr->BBOTuning = bbo_tuning;
     args_ptr->AllowCROS  = allow_cros;
-    args_ptr->NoProbMap  = no_prob_map;
+    args_ptr->UseProbMap = use_prob_map;
 }
 
 void

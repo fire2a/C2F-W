@@ -525,7 +525,7 @@ CSVReader::parseDFDirect(inputs* df_ptr, const std::string& filename, arguments*
         df_ptr->FMC = row[13].empty() ? args_ptr->FMC : std::stoi(row[13], &sz);
 
         // col 14: probMap — fill ignProb, not stored in inputs
-        ignProb[count] = (args_ptr->NoProbMap || row[14].empty()) ? 1.f : std::stof(row[14], &sz);
+        ignProb[count] = (args_ptr->UseProbMap && !row[14].empty()) ? std::stof(row[14], &sz) : 1.f;
 
         // col 15: jd
         df_ptr->jd = row[15].empty() ? 0 : std::stoi(row[15], &sz);
