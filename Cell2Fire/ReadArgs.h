@@ -18,7 +18,7 @@ typedef struct
     int IgnitionCell;
     bool OutMessages, OutFl, OutIntensity, OutRos, OutCrownConsumption, OutSurfConsumption, Trajectories,
         NoOutput, verbose, IgnitionsLog, Ignitions, OutputGrids, FinalGrid, PromTuned, Stats, BBOTuning, AllowCROS, UseWeatherWeights,
-        UseProbMap;
+        UseProbMap, WeatherFolderExplicit;
     float ROSCV, ROSThreshold, CROSThreshold, HFIThreshold, HFactor, FFactor, BFactor, EFactor, FirePeriodLen;
     float CBDFactor, CCFFactor, ROS10Factor, CROSActThreshold;
     int MinutesPerWP, MaxFirePeriods, TotalYears, TotalSims, NWeatherFiles, IgnitionRadius, seed, nthreads, FMC,

@@ -2046,7 +2046,13 @@ Cell2Fire::chooseWeather(const string& weatherOpt, int rnumber, int simExt)
     else if (weatherOpt == "random")
     {
         // Random Weather
-        weatherFilename = this->args.WeatherFolder + "Weathers" + separator() + "Weather" + std::to_string(rnumber) + ".csv";
+        // When --weather-folder is given explicitly it already points to the
+        // folder containing WeatherN.csv files.  Otherwise fall back to the
+        // legacy layout: InFolder/Weathers/WeatherN.csv.
+        if (this->args.WeatherFolderExplicit)
+            weatherFilename = this->args.WeatherFolder + "Weather" + std::to_string(rnumber) + ".csv";
+        else
+            weatherFilename = this->args.WeatherFolder + "Weathers" + separator() + "Weather" + std::to_string(rnumber) + ".csv";
         
         // this->CSVWeather.setFilename(weatherFilename);
 

@@ -348,10 +348,10 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
         // std::endl;
         if (std::string(input_weather) == "random")
         {
-            // std::cout << "Counting" << std::endl;
-            std::string wbase = (weather_folder != &empty) ? std::string(weather_folder)
-                                                           : std::string(input_folder);
-            args_ptr->NWeatherFiles = countWeathers(wbase + "/Weathers");
+            if (weather_folder != &empty)
+                args_ptr->NWeatherFiles = countWeathers(std::string(weather_folder));
+            else
+                args_ptr->NWeatherFiles = countWeathers(std::string(input_folder) + "/Weathers");
         }
         else
         {
@@ -600,16 +600,19 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
             args_ptr->FuelsPath = instance_tif;
     }
 
-    // WeatherFolder: explicit --weather-folder overrides InFolder for all
-    // weather file lookups.  Defaults to InFolder when not provided.
+    // WeatherFolder: when --weather-folder is given explicitly it points
+    // directly at the folder containing WeatherN.csv files.  When not given,
+    // fall back to InFolder/Weathers/ (legacy layout).
     if (weather_folder != &empty)
     {
+        args_ptr->WeatherFolderExplicit = true;
         args_ptr->WeatherFolder = weather_folder;
         if (!args_ptr->WeatherFolder.empty() && *args_ptr->WeatherFolder.rbegin() != separator())
             args_ptr->WeatherFolder += separator();
     }
     else
     {
+        args_ptr->WeatherFolderExplicit = false;
         args_ptr->WeatherFolder = args_ptr->InFolder;
     }
 
