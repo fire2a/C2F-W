@@ -148,7 +148,7 @@ CSVReader::getData(string filename)
         // Gets cell size
         double cellSizeX{ modelPixelScale[0] };
         double cellSizeY{ modelPixelScale[1] };
-        const double epsilon = std::numeric_limits<double>::epsilon();
+        const double epsilon = 1e-9; //std::numeric_limits<double>::epsilon();
         tsize_t scan_size = TIFFRasterScanlineSize(fuelsDataset);
         int n_bits = (scan_size / nXSize) * 8;
         if (fabs(cellSizeX - cellSizeY) > epsilon)
@@ -159,6 +159,7 @@ CSVReader::getData(string filename)
         TIFFGetField(fuelsDataset, 33922, &count, &positions);
         double xllcorner{ positions[3] };
         double yllcorner{ positions[4] };
+        yllcorner -= cellSizeY;
         std::vector<std::string> vec;
         vec.push_back("ncols");
         vec.push_back(std::to_string(nXSize));
