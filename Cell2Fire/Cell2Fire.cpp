@@ -1,7 +1,7 @@
 /* coding: utf-8
 __version__ = "3.0"
-__author__ = "Cristobal Pais"
-__maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff, David Palacios"
+__author__ = "Jaime Carrasco-Barra, Cristobal Pais"
+__maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
 */
 // Unified version by David Palacios
 //  Include classes
