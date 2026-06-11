@@ -1,3 +1,8 @@
+/* coding: utf-8
+__version__ = "3.0"
+__author__ = "Jaime Carrasco-Barra"
+__maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
+*/
 #ifndef FUELMODELKITRAL
 #define FUELMODELKITRAL
 #include "Cells.h"
