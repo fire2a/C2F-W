@@ -554,9 +554,7 @@ CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
         else if (args_ptr->Simulator == "C")
         {
             waz = DF[i][6].empty() ? 0 : std::stoi(DF[i][6], &sz);
-            if (waz >= 360)
-                waz -= 360;
-
+            waz = fmod((waz + 180.0), 360.0); //JC: correccion del viento a "desde"
             apcp = DF[i][2].empty() ? 0 : std::stof(DF[i][2], &sz);
             tmp = DF[i][3].empty() ? 0 : std::stof(DF[i][3], &sz);
             rh = DF[i][4].empty() ? 0 : std::stof(DF[i][4], &sz);
