@@ -40,7 +40,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install gsed for version bumping
         run: brew install gsed
@@ -186,7 +186,7 @@ jobs:
     steps:
 
       - name: Checkout only tests
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             test/

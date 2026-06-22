@@ -22,7 +22,7 @@ jobs:
     steps:
 
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Bump version in header
         run: |
@@ -151,7 +151,7 @@ jobs:
     steps:
 
       - name: Checkout tests only
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             test/
