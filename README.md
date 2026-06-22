@@ -1,4 +1,4 @@
-# Cell2Fire W
+# Cell2Fire-World (C2F-W)
 
 [![build & test debian-stable](https://github.com/fire2a/C2F-W/actions/workflows/build-debian-stable.yml/badge.svg)](https://github.com/fire2a/C2F-W/actions/workflows/build-debian-stable.yml)
 [![build & test manylinux & ubuntu-jammy](https://github.com/fire2a/C2F-W/actions/workflows/build-manylinux.yml/badge.svg)](https://github.com/fire2a/C2F-W/actions/workflows/build-manylinux.yml)
