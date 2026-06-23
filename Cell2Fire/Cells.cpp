@@ -661,6 +661,8 @@ Cells::manageFire(int period,
                 FSCell->push_back(double(nb));
                 FSCell->push_back(double(period));
                 FSCell->push_back(roundedRos);
+                metrics.rss = roundedRos;
+
                 if (args->Simulator == "K")
                 {
                     determine_destiny_metrics_k(&df_ptr[int(nb) - 1], coef, args, &metrics);
