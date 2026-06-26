@@ -105,6 +105,15 @@ Cell2Fire --final-grid --output-messages --out-ros --sim S --nsims 2 --seed 123 
 # check the results: to convert to tiff or see the results in QGIS, use the plugin
 ```
 
+#### Spread neighborhood radius (`--SpreadRad`)
+`--SpreadRad` controls how far a burning cell can send spread messages in one neighborhood-layer definition:
+
+- `--SpreadRad 1` (default): immediate neighborhood (legacy behavior)
+- `--SpreadRad 2`: includes one additional ring of neighbors
+- in general, interior cells have `(2n+1)^2 - 1` candidate neighbors for radius `n`
+
+The spread model keeps the original assumption that outgoing spread from a source cell `i` uses the ROS computed at source cell `i` for all candidate destination cells.
+
 ### Containerized
 TL;DR:
 ```bash
