@@ -603,7 +603,7 @@ Cell2Fire::InitCell(int id)
     it2 = this->Cells_Obj.find(id);
 
     // Initialize the fire fields for the selected cel
-    it2->second.initializeFireFields(this->coordCells, this->availCells, this->cols, this->rows);
+    it2->second.initializeFireFields(this->coordCells, this->availCells, this->cols, this->rows, this->args.SpreadRadius);
 
     // Print info for debugging
     if (this->args.verbose)
@@ -1520,18 +1520,18 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
                     burntList.insert(it->second.realId);
 
                     // Cleaning step
-                    // Fire can't be propagated back
-                    int cellNum = it->second.realId - 1;
-                    for (auto& angle : it->second.angleToNb)
+                    // Fire can't be propagated back: remove the burnt cell from
+                    // every neighbor's spread bookkeeping (all keyed by cell id).
+                    for (auto& nbAndAngle : it->second.angleDict)
                     {
-                        int origToNew = angle.first;
-                        // Which neighbor am I to the burnt cell
-                        int newToOrig = (origToNew + 180) % 360;
-                        int adjCellNum = angle.second;  // Check
+                        int adjCellNum = nbAndAngle.first;
                         auto adjIt = Cells_Obj.find(adjCellNum);
                         if (adjIt != Cells_Obj.end())
                         {
-                            adjIt->second.ROSAngleDir.erase(newToOrig);
+                            adjIt->second.ROSAngleDir.erase(it->second.realId);
+                            adjIt->second.fireProgress.erase(it->second.realId);
+                            adjIt->second.angleDict.erase(it->second.realId);
+                            adjIt->second.distToCenter.erase(it->second.realId);
                         }
                     }
                 }

@@ -19,7 +19,7 @@ typedef struct
         NoOutput, verbose, IgnitionsLog, Ignitions, OutputGrids, FinalGrid, PromTuned, Stats, BBOTuning, AllowCROS, UseWeatherWeights;
     float ROSCV, ROSThreshold, CROSThreshold, HFIThreshold, HFactor, FFactor, BFactor, EFactor, FirePeriodLen;
     float CBDFactor, CCFFactor, ROS10Factor, CROSActThreshold;
-    int MinutesPerWP, MaxFirePeriods, TotalYears, TotalSims, NWeatherFiles, IgnitionRadius, seed, nthreads, FMC,
+    int MinutesPerWP, MaxFirePeriods, TotalYears, TotalSims, NWeatherFiles, IgnitionRadius, SpreadRadius, seed, nthreads, FMC,
         scenario;
     std::unordered_set<int> HCells, BCells;
 } arguments;

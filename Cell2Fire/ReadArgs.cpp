@@ -249,6 +249,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     int dmax_fire_periods = -1;
     int dseed = 123;
     int diradius = 0;
+    int dspreadradius = 1;
     int dnthreads = 1;
     int dfmc = 100;
     int dscen = 3;
@@ -371,6 +372,20 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     }
     else
         args_ptr->IgnitionRadius = diradius;
+
+    //--SpreadRad
+    char* input_sprad = getCmdOption(argv, argv + argc, "--SpreadRad");
+    if (input_sprad)
+    {
+        printf("SpreadRadius: %s \n", input_sprad);
+        args_ptr->SpreadRadius = std::stoi(input_sprad, &sz);
+    }
+    else
+        args_ptr->SpreadRadius = dspreadradius;
+    if (args_ptr->SpreadRadius < 1)
+    {
+        args_ptr->SpreadRadius = 1;
+    }
 
     //--fmc
     char* input_fmc = getCmdOption(argv, argv + argc, "--fmc");
@@ -640,6 +655,7 @@ printArgs(arguments args)
     std::cout << "FirePeriodLen: " << args.FirePeriodLen << std::endl;
     std::cout << "Ignitions: " << args.Ignitions << std::endl;
     std::cout << "IgnitionRad: " << args.IgnitionRadius << std::endl;
+    std::cout << "SpreadRad: " << args.SpreadRadius << std::endl;
     std::cout << "OutputGrid: " << args.OutputGrids << std::endl;
     std::cout << "FinalGrid: " << args.FinalGrid << std::endl;
     std::cout << "PromTuned: " << args.PromTuned << std::endl;
@@ -672,6 +688,7 @@ printArgs(arguments args)
     std::cout << "FirePeriodLen: " << args.FirePeriodLen << std::endl;
     std::cout << "Ignitions: " << args.Ignitions << std::endl;
     std::cout << "IgnitionRad: " << args.IgnitionRadius << std::endl;
+    std::cout << "SpreadRad: " << args.SpreadRadius << std::endl;
     std::cout << "OutputGrid: " << args.OutputGrids << std::endl;
     std::cout << "FinalGrid: " << args.FinalGrid << std::endl;
     std::cout << "PromTuned: " << args.PromTuned << std::endl;
