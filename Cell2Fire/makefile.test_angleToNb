@@ -1,0 +1,27 @@
+# Makefile for angleToNb unit test
+# Usage: make -f makefile.test_angleToNb
+
+CXX = g++
+CXXFLAGS = -m64 -fPIC -fno-strict-aliasing -fexceptions -fopenmp -DNDEBUG -DIL_STD -std=c++14 -O3
+CATCH2_V3_LIBS := $(shell echo "int main(){}" | $(CXX) -x c++ - -lCatch2Main -lCatch2 -o /dev/null 2>/dev/null && echo "-lCatch2Main -lCatch2" || echo "")
+LDFLAGS = -lm -lpthread $(CATCH2_V3_LIBS)
+
+# Source files needed for the test
+TEST_SRC = ../test/unit_tests/test_angleToNb.cpp
+SRCS = Cells.cpp FuelModel*.cpp
+
+# Target executable
+TARGET = test_angleToNb
+
+all: $(TARGET)
+
+$(TARGET): $(TEST_SRC) $(SRCS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(TEST_SRC) $(SRCS) $(LDFLAGS)
+
+run: $(TARGET)
+	./$(TARGET)
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: all run clean
