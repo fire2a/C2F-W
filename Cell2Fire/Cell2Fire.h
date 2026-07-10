@@ -103,6 +103,7 @@ class Cell2Fire
     std::vector<string> fTypeCells2;  // (long int&, const char [9]);
     std::vector<std::vector<std::string>> WeatherData;
     std::vector<int> IgnitionPoints;
+    std::vector<int> ActiveFrontCells;  // seed cells of an active front
     vector<int> burnedOutList;
     std::vector<double> FSCell;
     std::vector<float> crownMetrics;

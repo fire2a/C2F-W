@@ -511,6 +511,29 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         }
     }
 
+    /* Active front: read a set of cells to ignite simultaneously (ActiveFront.csv) */
+    if (this->args.ActiveFront)
+    {
+        std::string sepAF = ",";
+        std::string activeFile = args.InFolder + "ActiveFront.csv";
+        CSVReader CSVActive(activeFile, sepAF);
+        std::vector<std::vector<std::string>> ActiveDF = CSVActive.getData(activeFile);
+        this->ActiveFrontCells.clear();
+        for (size_t rr = 1; rr < ActiveDF.size(); ++rr)  // skip header row
+        {
+            if (ActiveDF[rr].size() >= 2 && !ActiveDF[rr][1].empty())
+                this->ActiveFrontCells.push_back(std::stoi(ActiveDF[rr][1]));
+        }
+        if (!this->ActiveFrontCells.empty())
+        {
+            this->args.TotalYears = 1;  // the front is a single scenario
+            this->IgnitionPoints = std::vector<int>(1, this->ActiveFrontCells[0]);
+            this->IgnitionSets = std::vector<std::vector<int>>(1);
+            std::cout << "Active front: " << this->ActiveFrontCells.size()
+                      << " seed cells will ignite simultaneously" << std::endl;
+        }
+    }
+
     /* BBO Tuning factors (only the ones present in the instances*/
     if (this->args.BBOTuning)
     {
@@ -1049,6 +1072,46 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
             printSets(
                 this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
         }
+    }
+
+    // --- Active front: ignite all remaining seed cells simultaneously ---
+    if (this->args.ActiveFront)
+    {
+        bool anyAF = false;
+        for (size_t k = 0; k < this->ActiveFrontCells.size(); ++k)
+        {
+            int fc = this->ActiveFrontCells[k];
+            if (fc < 1 || fc > this->nCells)
+                continue;
+            if (this->burntCells.find(fc) != this->burntCells.end())  // already lit (e.g. first cell)
+            {
+                anyAF = true;
+                continue;
+            }
+            if (this->statusCells[fc - 1] >= 3)  // non-burnable / harvested / firebreak
+                continue;
+            if (this->Cells_Obj.find(fc) == this->Cells_Obj.end())
+                InitCell(fc);
+            std::unordered_map<int, Cells>::iterator itf = this->Cells_Obj.find(fc);
+            if (itf->second.getStatus() != "Available" || itf->second.fType == 0)
+                continue;
+            std::vector<int> ipf = { fc };
+            if (itf->second.ignition(this->fire_period[this->year - 1],
+                                     this->year, ipf, &df[fc - 1],
+                                     this->coef_ptr, this->args_ptr,
+                                     &(this->wdf[this->weatherPeriod]),
+                                     this->activeCrown, this->perimeterCells))
+            {
+                this->statusCells[fc - 1] = 1;
+                this->nIgnitions++;
+                this->burningCells.insert(fc);
+                this->burntCells.insert(fc);
+                this->availCells.erase(fc);
+                anyAF = true;
+            }
+        }
+        if (anyAF)
+            this->noIgnition = false;
     }
 
     // Plotter placeholder

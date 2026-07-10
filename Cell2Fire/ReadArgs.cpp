@@ -110,6 +110,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     bool verbose_input = false;
     bool iplog_input = false;
     bool input_ignitions = false;
+    bool active_front = false;
     bool out_grids = false;
     bool out_fl = false;
     bool out_intensity = false;
@@ -199,6 +200,14 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     {
         input_ignitions = true;
         printf("Ignitions: %s \n", btoa(input_ignitions));
+    }
+
+    //--active-front (ignite a set of cells simultaneously, read from ActiveFront.csv)
+    if (cmdOptionExists(argv, argv + argc, "--active-front"))
+    {
+        active_front = true;
+        input_ignitions = true;  // active front uses the ignition-from-file path
+        printf("Active front: %s \n", btoa(active_front));
     }
 
     //--grids
@@ -607,6 +616,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->verbose = verbose_input;
     args_ptr->IgnitionsLog = iplog_input;
     args_ptr->Ignitions = input_ignitions;
+    args_ptr->ActiveFront = active_front;
     args_ptr->OutputGrids = out_grids;
     args_ptr->FinalGrid = out_finalgrid;
     args_ptr->PromTuned = prom_tuned;
