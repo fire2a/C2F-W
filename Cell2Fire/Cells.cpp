@@ -8,6 +8,7 @@
 #include "ReadCSV.h"
 #include "Spotting.h"
 // Include libraries
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <math.h>
@@ -100,7 +101,6 @@ Cells::Cells(int _id,
     this->angleDict = std::unordered_map<int, double>();
     this->ROSAngleDir = std::unordered_map<int, double>();
     this->distToCenter = std::unordered_map<int, double>();
-    this->angleToNb = std::unordered_map<int, int>();
 }
 
 /**
@@ -125,9 +125,16 @@ Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,
                             // TODO: should probably make a coordinate type
                             std::unordered_set<int>& availSet,
                             int cols,
-                            int rows)  // WORKING CHECK OK
+                            int rows,
+                            int spreadRadius)  // WORKING CHECK OK
 {
-    std::vector<int> adj = adjacentCells(this->realId, rows, cols);
+    this->angleDict.clear();
+    this->ROSAngleDir.clear();
+    this->distToCenter.clear();
+    this->fireProgress.clear();
+
+    std::vector<int> adj = adjacentCells(this->realId, rows, cols, spreadRadius);
+    const double radToDeg = 180.0 / M_PI;
 
     for (auto& nb : adj)
     {
@@ -138,41 +145,20 @@ Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,
             int a = -1 * coordCells[nb - 1][0] + coordCells[this->id][0];
             int b = -1 * coordCells[nb - 1][1] + coordCells[this->id][1];
 
-            int angle = -1;
-            if (a == 0)
+            // Angle (degrees, w.r.t. E-W, East positive, non-negative). atan2
+            // keeps neighbors at the same compass bearing distinct across rings,
+            // which the old integer-bucketed scheme could not.
+            double angle = std::atan2(-1.0 * b, -1.0 * a) * radToDeg;
+            if (angle < 0.0)
             {
-                if (b >= 0)
-                    angle = 270;
-                else
-                    angle = 90;
-            }
-            else if (b == 0)
-            {
-                if (a >= 0)
-                    angle = 180;
-                else
-                    angle = 0;
-            }
-            else
-            {
-                // TODO: check this logi
-                double radToDeg = 180 / M_PI;
-                // TODO: i think all the negatives and abs cancel out
-                double temp = std::atan(b * 1.0 / a) * radToDeg;
-                if (a > 0)
-                    temp += 180;
-                if (a < 0 && b > 0)
-                    temp += 360;
-                angle = temp;
+                angle += 360.0;
             }
             this->angleDict[nb] = angle;
             if (availSet.find(nb) != availSet.end())
             {
-                // TODO: cannot be None, replaced None = -1   and ROSAngleDir has
-                // a double inside
-                this->ROSAngleDir[angle] = -1;
+                // ROSAngleDir is keyed by neighbor id; -1 means "not yet set"
+                this->ROSAngleDir[nb] = -1;
             }
-            this->angleToNb[angle] = nb;
             this->fireProgress[nb] = 0.0;
             this->distToCenter[nb] = std::sqrt(a * a + b * b) * this->_ctr2ctrdist;
         }
@@ -197,24 +183,80 @@ Cells::initializeFireFields(std::vector<std::vector<int>>& coordCells,
  * -1.
  */
 std::vector<int>
-adjacentCells(int cell, int nrows, int ncols)
+adjacentCells(int cell, int nrows, int ncols, int radius)
 {
     if (cell <= 0 || cell > nrows * ncols)
     {
-        std::vector<int> adjacents(8, -1);
+        std::vector<int> adjacents;
         return adjacents;
     }
-    int total_cells = nrows * ncols;
-    int north = cell <= ncols ? -1 : cell - ncols;
-    int south = cell + ncols > total_cells ? -1 : cell + ncols;
-    int east = cell % ncols == 0 ? -1 : cell + 1;
-    int west = cell % ncols == 1 ? -1 : cell - 1;
-    int northeast = cell < ncols || cell % ncols == 0 ? -1 : cell - ncols + 1;
-    int southeast = cell + ncols > total_cells || cell % ncols == 0 ? -1 : cell + ncols + 1;
-    int southwest = cell % ncols == 1 || cell + ncols > total_cells ? -1 : cell + ncols - 1;
-    int northwest = cell % ncols == 1 || cell < ncols ? -1 : cell - ncols - 1;
-    std::vector<int> adjacents = { west, east, southwest, southeast, south, northwest, northeast, north };
+    if (radius < 1)
+    {
+        radius = 1;
+    }
+    int row = (cell - 1) / ncols;
+    int col = (cell - 1) % ncols;
+    std::vector<int> adjacents;
+    for (int dr = -radius; dr <= radius; ++dr)
+    {
+        for (int dc = -radius; dc <= radius; ++dc)
+        {
+            if (dr == 0 && dc == 0)
+            {
+                continue;
+            }
+            int nr = row + dr;
+            int nc = col + dc;
+            if (nr < 0 || nr >= nrows || nc < 0 || nc >= ncols)
+            {
+                continue;
+            }
+            adjacents.push_back(nr * ncols + nc + 1);
+        }
+    }
     return adjacents;
+}
+
+/**
+ * @brief Selects the neighbor whose bearing is closest to the wind azimuth.
+ *
+ * Replaces the old angleToNb[waz] lookup, which assumed a unique neighbor at
+ * each integer angle. With a spread radius greater than 1, several neighbors
+ * can share a bearing, so the closest-by-angle (then closest-by-distance)
+ * neighbor is chosen. Returns this cell's own id when there are no neighbors.
+ */
+int
+Cells::selectHeadCell(double windAzimuth) const
+{
+    if (this->angleDict.empty())
+    {
+        return this->realId;
+    }
+    double target = std::fmod(windAzimuth, 360.0);
+    if (target < 0.0)
+    {
+        target += 360.0;
+    }
+
+    int bestNeighbor = this->realId;
+    double bestAngleDiff = 1e9;
+    double bestDistance = 1e18;
+    for (const auto& nbAndAngle : this->angleDict)
+    {
+        const int nb = nbAndAngle.first;
+        const double angle = nbAndAngle.second;
+        double diff = std::fabs(angle - target);
+        diff = std::min(diff, 360.0 - diff);
+        double dist = this->distToCenter.count(nb) ? this->distToCenter.at(nb) : 1e18;
+
+        if (diff < bestAngleDiff || (std::fabs(diff - bestAngleDiff) < 1e-9 && dist < bestDistance))
+        {
+            bestAngleDiff = diff;
+            bestDistance = dist;
+            bestNeighbor = nb;
+        }
+    }
+    return bestNeighbor;
 }
 
 /*
@@ -241,9 +283,10 @@ void
 Cells::ros_distr_old(double thetafire, double forward, double flank, double back)
 {
     // WORKING CHECK OK
-    for (auto& angle : this->ROSAngleDir)
+    // ROSAngleDir is keyed by neighbor id; look up the bearing via angleDict.
+    for (auto& nbRos : this->ROSAngleDir)
     {
-        double offset = std::abs(angle.first - thetafire);
+        double offset = std::abs(this->angleDict[nbRos.first] - thetafire);
 
         double base = ((int)(offset)) / 90 * 90;
         double result;
@@ -265,7 +308,7 @@ Cells::ros_distr_old(double thetafire, double forward, double flank, double back
         {
             result = this->allocate(offset, 270, flank, forward);
         }
-        this->ROSAngleDir[angle.first] = result;
+        this->ROSAngleDir[nbRos.first] = result;
     }
 }
 
@@ -321,10 +364,11 @@ void
 Cells::ros_distr_V2(double thetafire, double a, double b, double c, double EFactor)
 {
 
-    // Ros allocation for each angle inside the dictionary
-    for (auto& angle : this->ROSAngleDir)
+    // Ros allocation for each neighbor inside the dictionary
+    // ROSAngleDir is keyed by neighbor id; look up the bearing via angleDict.
+    for (auto& nbRos : this->ROSAngleDir)
     {
-        double offset = angle.first - thetafire;
+        double offset = this->angleDict[nbRos.first] - thetafire;
 
         if (offset < 0)
         {
@@ -334,7 +378,7 @@ Cells::ros_distr_V2(double thetafire, double a, double b, double c, double EFact
         {
             offset -= 360;
         }
-        this->ROSAngleDir[angle.first] = rhoTheta(offset, a, b) * EFactor;
+        this->ROSAngleDir[nbRos.first] = rhoTheta(offset, a, b) * EFactor;
     }
 }
 
@@ -448,7 +492,7 @@ Cells::manageFire(int period,
 
     head_angle = std::round(head_angle / 45.0) * 45.0;
 
-    int head_cell = angleToNb[head_angle];  // head cell for slope calculation
+    int head_cell = selectHeadCell(head_angle);  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
         head_cell = this->realId;  // as it is used only for slope calculation, if
@@ -623,8 +667,8 @@ Cells::manageFire(int period,
         // this is a iterator through the keyset of a dictionary
         for (auto& _angle : this->ROSAngleDir)
         {
-            double angle = _angle.first;
-            int nb = angleToNb[angle];
+            int nb = _angle.first;
+            double angle = this->angleDict[nb];
             float ros = (1 + args->ROSCV * ROSRV) * _angle.second;
             float roundedRos = static_cast<float>(std::ceil(ros * 100.0) / 100.0);
 
@@ -805,7 +849,7 @@ Cells::manageFireBBO(int period,
     fire_struc headstruct, backstruct, flankstruct, metrics2;
 
     // Populate inputs
-    int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+    int head_cell = selectHeadCell(wdf_ptr->waz);  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
         head_cell = this->realId;  // as it is used only for slope calculation, if
@@ -976,8 +1020,8 @@ Cells::manageFireBBO(int period,
         // this is a iterator through the keyset of a dictionary
         for (auto& _angle : this->ROSAngleDir)
         {
-            double angle = _angle.first;
-            int nb = angleToNb[angle];
+            int nb = _angle.first;
+            double angle = this->angleDict[nb];
             double ros = (1 + args->ROSCV * ROSRV) * _angle.second;
 
             if (args->verbose)
@@ -1128,7 +1172,7 @@ Cells::get_burned(int period,
     fire_struc headstruct, backstruct, flankstruct;
 
     // Compute main angle and ROSs: forward, flanks and back
-    int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+    int head_cell = selectHeadCell(wdf_ptr->waz);  // head cell for slope calculation
     if (head_cell <= 0)                       // solve boundaries case
     {
         head_cell = this->realId;  // as it is used only for slope calculation, if
@@ -1298,7 +1342,7 @@ Cells::ignition(int period,
         // << "  bui: " <<   wdf_ptr->bui << std::endl;
 
         // Populate inputs
-        int head_cell = angleToNb[wdf_ptr->waz];  // head cell for slope calculation
+        int head_cell = selectHeadCell(wdf_ptr->waz);  // head cell for slope calculation
         if (head_cell <= 0)                       // solve boundaries case
         {
             head_cell = this->realId;  // as it is used only for slope calculation, if
@@ -1431,13 +1475,6 @@ Cells::print_info()
 
     printf("Ros Angle Dict: ");
     for (auto& nb : this->ROSAngleDir)
-    {
-        std::cout << " " << nb.first << " : " << nb.second;
-    }
-    std::cout << std::endl;
-
-    printf("angleToNb Dict: ");
-    for (auto& nb : this->angleToNb)
     {
         std::cout << " " << nb.first << " : " << nb.second;
     }

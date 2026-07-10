@@ -156,3 +156,10 @@ jobs:
           chmod +x "test/test.sh"
           cd test
           ./test.sh "${{ env.SUFFIX }}"
+
+      - name: Run SpreadRad test
+        run: |-
+          chmod +x "Cell2Fire/Cell2Fire${{ env.SUFFIX }}"
+          chmod +x "test/spreadrad_test.sh"
+          cd test
+          ./spreadrad_test.sh "${{ env.SUFFIX }}"
