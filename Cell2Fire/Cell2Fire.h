@@ -4,8 +4,8 @@
 // Headers
 #include "Cells.h"
 #include "DataGenerator.h"
-#include "FuelModelKitral.h"
-#include "FuelModelSpain.h"
+#include "KitralKernel.h"
+#include "ScottAndBurganKernel.h"
 #include "FuelModelUtils.h"
 #include "Lightning.h"
 #include "ReadArgs.h"

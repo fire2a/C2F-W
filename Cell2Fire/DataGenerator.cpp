@@ -4,7 +4,7 @@
  */
 
 #include "DataGenerator.h"
-// Declarado en FuelModelSpain.cpp: codigos de combustible para lookup identidad
+// Declarado en ScottAndBurganKernel.cpp: codigos de combustible para lookup identidad
 std::vector<int> sbAllFuelCodes();
 
 #include "tiffio.h"

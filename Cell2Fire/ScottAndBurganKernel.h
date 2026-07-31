@@ -3,8 +3,8 @@ __version__ = "3.0"
 __author__ = "Jaime Carrasco-Barra"
 __maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
 */
-#ifndef FUELMODELSPAIN
-#define FUELMODELSPAIN
+#ifndef SCOTTANDBURGANKERNEL
+#define SCOTTANDBURGANKERNEL
 #include "Cells.h"
 #include "FuelModelUtils.h"
 #include "ReadArgs.h"

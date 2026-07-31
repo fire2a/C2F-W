@@ -142,7 +142,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\FuelModelKitral.cpp" />
+    <ClCompile Include="..\KitralKernel.cpp" />
     <ClCompile Include="..\FuelModelUtils.cpp" />
   </ItemGroup>
   <ItemGroup>

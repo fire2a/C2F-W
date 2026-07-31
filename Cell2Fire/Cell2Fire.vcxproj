@@ -136,9 +136,9 @@
     <ClCompile Include="Cells.cpp" />
     <ClCompile Include="DataGenerator.cpp" />
     <ClCompile Include="Forest.cpp" />
-    <ClCompile Include="FuelModelFBP.cpp" />
-    <ClCompile Include="FuelModelKitral.cpp" />
-    <ClCompile Include="FuelModelSpain.cpp" />
+    <ClCompile Include="CanadianFBPKernel.cpp" />
+    <ClCompile Include="KitralKernel.cpp" />
+    <ClCompile Include="ScottAndBurganKernel.cpp" />
     <ClCompile Include="FuelModelUtils.cpp" />
     <ClCompile Include="Lightning.cpp" />
     <ClCompile Include="ReadArgs.cpp" />
@@ -151,9 +151,9 @@
     <ClInclude Include="Cells.h" />
     <ClInclude Include="DataGenerator.h" />
     <ClInclude Include="Forest.h" />
-    <ClInclude Include="FuelModelFBP.h" />
-    <ClInclude Include="FuelModelKitral.h" />
-    <ClInclude Include="FuelModelSpain.h" />
+    <ClInclude Include="CanadianFBPKernel.h" />
+    <ClInclude Include="KitralKernel.h" />
+    <ClInclude Include="ScottAndBurganKernel.h" />
     <ClInclude Include="FuelModelUtils.h" />
     <ClInclude Include="Lightning.h" />
     <ClInclude Include="ReadArgs.h" />

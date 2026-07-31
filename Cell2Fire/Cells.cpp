@@ -1,8 +1,8 @@
 // Include classes
 #include "Cells.h"
-#include "FuelModelFBP.h"
-#include "FuelModelKitral.h"
-#include "FuelModelSpain.h"
+#include "CanadianFBPKernel.h"
+#include "KitralKernel.h"
+#include "ScottAndBurganKernel.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
 #include "Spotting.h"

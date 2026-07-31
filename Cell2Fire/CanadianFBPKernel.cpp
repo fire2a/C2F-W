@@ -75,7 +75,7 @@ is 10.0 5.0  Oct 2014
             - forgot to change the encoded version number to 5.0.  now 5.0001
             - updated header to FBP5.h
 */
-#include "FuelModelFBP.h"
+#include "CanadianFBPKernel.h"
 #include "Cells.h"
 #include <math.h>
 #include <stdlib.h>

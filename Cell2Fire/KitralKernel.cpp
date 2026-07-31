@@ -3,7 +3,7 @@ __version__ = "3.0"
 __author__ = "Jaime Carrasco-Barra"
 __maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
 */
-#include "FuelModelKitral.h"
+#include "KitralKernel.h"
 #include <cstdint>   // int16_t: no llega transitivamente en MinGW/MSVC
 #include "Cells.h"
 #include "FuelModelUtils.h"

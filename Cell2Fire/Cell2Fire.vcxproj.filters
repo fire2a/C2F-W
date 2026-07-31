@@ -24,10 +24,10 @@
     <ClCompile Include="FuelModelUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FuelModelKitral.cpp">
+    <ClCompile Include="KitralKernel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FuelModelSpain.cpp">
+    <ClCompile Include="ScottAndBurganKernel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Lightning.cpp">
@@ -42,7 +42,7 @@
     <ClCompile Include="WriteCSV.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FuelModelFBP.cpp">
+    <ClCompile Include="CanadianFBPKernel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Cells.cpp">
@@ -65,10 +65,10 @@
     <ClInclude Include="FuelModelUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FuelModelKitral.h">
+    <ClInclude Include="KitralKernel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FuelModelSpain.h">
+    <ClInclude Include="ScottAndBurganKernel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Lightning.h">
@@ -83,7 +83,7 @@
     <ClInclude Include="WriteCSV.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FuelModelFBP.h">
+    <ClInclude Include="CanadianFBPKernel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cells.h">
