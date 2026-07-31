@@ -4,6 +4,11 @@
 #include <dirent.h>
 #include <fstream>
 #include <sys/stat.h>   // stat/S_ISREG: reemplaza dirent d_type (no existe en MinGW)
+
+// S_ISREG no es estandar en MSVC (solo _S_IFMT/_S_IFREG). Sin esta guarda falla msbuild.
+#ifndef S_ISREG
+#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
+#endif
 #include <sys/types.h>
 #include <iostream>
 #include <iterator>
