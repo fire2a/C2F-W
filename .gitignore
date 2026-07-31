@@ -207,3 +207,12 @@ test/target_results
 docs/html
 docs/latex
 Data.csv
+
+# Binarios con el sufijo de plataforma que espera get_ext() del plugin FAT
+Cell2Fire/Cell2Fire.exe
+Cell2Fire/Cell2Fire_Darwin*
+Cell2Fire/Cell2Fire.Ubuntu*
+Cell2Fire/Cell2Fire.Debian*
+
+# Salidas generadas por el simulador dentro de las instancias
+Results/

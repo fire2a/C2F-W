@@ -1,2 +1,7 @@
 *.py export-subst
 *.git* export-ignore
+
+# Los makefiles van en LF: con CRLF, la continuacion de linea (\ + CR) rompe make
+makefile text eol=lf
+makefile.* text eol=lf
+*.sh text eol=lf
