@@ -4,6 +4,7 @@ __author__ = "Jaime Carrasco-Barra"
 __maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
 */
 #include "FuelModelSpain.h"
+#include <cstdint>   // int16_t: no llega transitivamente en MinGW/MSVC
 #include "Cells.h"
 #include "FuelModelUtils.h"
 #include "ReadArgs.h"

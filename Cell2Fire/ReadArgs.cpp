@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <dirent.h>
 #include <fstream>
+#include <sys/stat.h>   // stat/S_ISREG: reemplaza dirent d_type (no existe en MinGW)
+#include <sys/types.h>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -695,13 +697,22 @@ countWeathers(const std::string directory_path)
     {
         while ((ent = readdir(dir)) != NULL)
         {
-            if (ent->d_type == DT_REG)
+            const std::string filename = ent->d_name;
+            // Length guard FIRST: entries such as "." and ".." are shorter than the
+            // pattern and the substr()/compare() below would throw std::out_of_range.
+            // Previously d_type==DT_REG filtered them out, but d_type is a POSIX
+            // extension that MinGW does not provide, so we cannot rely on it.
+            if (filename.size() < 11)  // "Weather" + ".csv"
+                continue;
+            if (filename.compare(0, 7, "Weather") != 0
+                || filename.compare(filename.size() - 4, 4, ".csv") != 0)
+                continue;
+            // regular-file test: portable across POSIX and MinGW (replaces d_type)
+            struct stat st;
+            const std::string full = directory_path + "/" + filename;
+            if (stat(full.c_str(), &st) == 0 && S_ISREG(st.st_mode))
             {
-                std::string filename = ent->d_name;
-                if (filename.substr(0, 7) == "Weather" && filename.substr(filename.size() - 4) == ".csv")
-                {
-                    file_count++;
-                }
+                file_count++;
             }
         }
         closedir(dir);
