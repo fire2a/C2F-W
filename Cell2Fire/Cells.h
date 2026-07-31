@@ -21,6 +21,8 @@ typedef struct
     float ws, waz, rh, tmp, apcp, ffmc, dmc, dc, isi, bui,
         fwi;  // David: some variables only used on C2FK and not on C2FSB and
               // viceversa
+    float m1h, m10h, m100h, mlh, mlw;  // continuous fuel moisture (fraction) for S&B Rothermel
+    float doy, hour;  // day-of-year y hora (solar/reloj) para humedad espacial Modo 2
 } weatherDF;  // David: Moved here to simplify inclusion
 
 typedef struct

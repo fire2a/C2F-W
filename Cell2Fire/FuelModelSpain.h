@@ -21,13 +21,11 @@ __maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
                Functions
 */
 // Initialize coefficients
-void initialize_coeff(int scenario);
 
 // Calculate flank fire
 float flankfire_ros_s(float ros, float bros, float lb);
 
 // Calculate rate of spread
-float rate_of_spread_s(inputs* data, fuel_coefs* ptr, main_outs* at, float ws);
 
 // Length-to-Breadth ratio
 float l_to_b(float ws);
@@ -36,7 +34,6 @@ float l_to_b(float ws);
 float backfire_ros_s(main_outs* at, snd_outs* sec);
 
 // Flame length [m])
-float flame_length(inputs* data, fuel_coefs* ptr, float ws);
 
 // byram intensity
 float byram_intensity(inputs* data, fuel_coefs* ptr);
@@ -70,5 +67,8 @@ void calculate_s(inputs* data,
                  weatherDF* wdf_ptr);
 
 void determine_destiny_metrics_s(inputs* data, fuel_coefs* ptr, arguments* args, main_outs* at, weatherDF* wdf_ptr);
+
+// Todos los codigos de combustible en sbTable (para lookup identidad opcional)
+std::vector<int> sbAllFuelCodes();
 
 #endif

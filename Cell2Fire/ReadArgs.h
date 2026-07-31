@@ -14,9 +14,19 @@
  */
 typedef struct
 {
-    std::string InFolder, OutFolder, WeatherOpt, HarvestPlan, Simulator, WeatherWeightsFile;
+    std::string InFolder, OutFolder, WeatherOpt, HarvestPlan, Simulator, WeatherWeightsFile, MoistureMode;
+    std::string FchMode = "kitral";  // --fch-mode: kitral|emc|ffmc|isi
+    std::string LbMode = "kitral";   // --lb-mode: kitral|sb
+    bool FmcShading = false;         // --fmc-shading: acond. espacial humedad (sunny/shade)
+    double BreachFactor = 0.0;       // --breach-factor k: breaching Prometheus (0=off). Cruza barrera si k*FL >= ancho
+    double SpotFactor = 0.0;         // --spot-factor k: spotting Albini (0=off). Cruza si k*FL*viento(m/s) >= ancho
+    std::string RiverShp = "";       // --river-shp: shapefile del rio (polilinea/poligono, CRS de la instancia)
+    float Latitude = 0.0f;       // latitud (grados, +N) para humedad espacial Modo 2 (--latitude)
+    bool HasLatitude = false;    // true si --latitude fue provisto (si no, usa data->lat por celda)
+    std::string Scenario = "D2L2";  // escenario S&B DkLm (--scenario; reemplaza la columna del Weather)
+    bool PortugalPreset = false;    // --sim P: preset Portugal (Fernandes) sobre motor S&B/rothermel_s
     bool OutMessages, OutFl, OutIntensity, OutRos, OutCrown, OutCrownConsumption, OutSurfConsumption, Trajectories,
-        NoOutput, verbose, IgnitionsLog, Ignitions, OutputGrids, FinalGrid, PromTuned, Stats, BBOTuning, AllowCROS, UseWeatherWeights;
+        NoOutput, verbose, IgnitionsLog, Ignitions, OutputGrids, FinalGrid, PromTuned, Stats, BBOTuning, AllowCROS, UseWeatherWeights, ActiveFront;
     float ROSCV, ROSThreshold, CROSThreshold, HFIThreshold, HFactor, FFactor, BFactor, EFactor, FirePeriodLen;
     float CBDFactor, CCFFactor, ROS10Factor, CROSActThreshold;
     int MinutesPerWP, MaxFirePeriods, TotalYears, TotalSims, NWeatherFiles, IgnitionRadius, seed, nthreads, FMC,

@@ -2,7 +2,6 @@
 #include "Cells.h"
 #include "FuelModelFBP.h"
 #include "FuelModelKitral.h"
-#include "FuelModelPortugal.h"
 #include "FuelModelSpain.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
@@ -500,7 +499,7 @@ Cells::manageFire(int period,
 
     else if (args->Simulator == "P")
     {
-        calculate_p(&df_ptr[this->realId - 1],
+        calculate_s(&df_ptr[this->realId - 1],
                     coef,
                     args,
                     &mainstruct,
@@ -559,6 +558,8 @@ Cells::manageFire(int period,
 
     // Adjusting from Spanish forests angle
     cartesianAngle = wdf_ptr->waz;
+    if (args->Simulator == "S" || args->Simulator == "K")
+        cartesianAngle = mainstruct.raz;  // FARSITE/KITRAL: dir. resultante viento+pendiente
     double offset = cartesianAngle + 270;
     cartesianAngle = 360 - (offset >= 360) * (cartesianAngle - 90) - (offset < 360) * offset;
     if (cartesianAngle == 360)
@@ -637,19 +638,18 @@ Cells::manageFire(int period,
             {
                 std::cout << "     (angle, realized ros in m/min): (" << angle << ", " << ros << ")" << std::endl;
             }
-            if (args->Simulator == "S" || args->Simulator == "P")
+            if (args->Simulator == "P")
             {
-                // Slope effect
+                // Portugal: mantiene su efecto de pendiente pareado (lineal entre celdas)
                 float se = slope_effect(df_ptr[this->realId - 1].elev, df_ptr[nb - 1].elev, this->perimeter / 4.);
                 if (args->verbose)
                 {
                     std::cout << "Slope effect: " << se << std::endl;
                 }
-
-                // Workaround PeriodLen in 60 minutes
                 this->fireProgress[nb] += ros * args->FirePeriodLen * se;  // Updates fire progress
             }
             else
+                // S&B (FARSITE): la pendiente ya está en ROS de cabeza + dirección (raz)
                 this->fireProgress[nb] += ros * args->FirePeriodLen;
 
             // If the message arrives to the adjacent cell's center, send a
@@ -675,7 +675,7 @@ Cells::manageFire(int period,
                 }
                 else if (args->Simulator == "P")
                 {
-                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
+                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
@@ -689,7 +689,7 @@ Cells::manageFire(int period,
                 surfFraction[nb] = metrics.sfc;
                 SurfaceFlameLengths[this->realId - 1] = mainstruct.fl;
                 SurfaceFlameLengths[nb - 1] = metrics.fl;
-                if ((args->AllowCROS) && (args->Simulator == "S" || args->Simulator == "P"))
+                if ((args->AllowCROS) && (args->Simulator == "S" || args->Simulator == "P" || args->Simulator == "K"))
                 {
                     float comp_zero = 0;
                     MaxFlameLengths[this->realId - 1]
@@ -850,7 +850,7 @@ Cells::manageFireBBO(int period,
     }
     else if (args->Simulator == "P")
     {
-        calculate_p(&df_ptr[this->realId - 1],
+        calculate_s(&df_ptr[this->realId - 1],
                     coef,
                     args,
                     &mainstruct,
@@ -905,6 +905,8 @@ Cells::manageFireBBO(int period,
 
     // Adjusting from Spanish forests angle
     cartesianAngle = wdf_ptr->waz;
+    if (args->Simulator == "S" || args->Simulator == "K")
+        cartesianAngle = mainstruct.raz;  // FARSITE/KITRAL: dir. resultante viento+pendiente
     double offset = cartesianAngle + 270;
     cartesianAngle = 360 - (offset >= 360) * (cartesianAngle - 90) - (offset < 360) * offset;
     if (cartesianAngle == 360)
@@ -1011,7 +1013,7 @@ Cells::manageFireBBO(int period,
                 }
                 else if (args->Simulator == "P")
                 {
-                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
+                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
@@ -1171,7 +1173,7 @@ Cells::get_burned(int period,
     }
     else if (args->Simulator == "P")
     {
-        calculate_p(&(df[this->id]),
+        calculate_s(&(df[this->id]),
                     coef,
                     args,
                     &mainstruct,
@@ -1347,7 +1349,7 @@ Cells::ignition(int period,
         }
         else if (args->Simulator == "P")
         {
-            calculate_p(&df_ptr[this->realId - 1],
+            calculate_s(&df_ptr[this->realId - 1],
                         coef,
                         args,
                         &mainstruct,

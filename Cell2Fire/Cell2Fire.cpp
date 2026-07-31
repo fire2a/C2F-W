@@ -1,4 +1,5 @@
 /* coding: utf-8
+#include <fstream>
 __version__ = "3.0"
 __author__ = "Jaime Carrasco-Barra, Cristobal Pais"
 __maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
@@ -9,12 +10,12 @@ __maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
 #include "Cells.h"
 #include "DataGenerator.h"
 #include "FuelModelKitral.h"
-#include "FuelModelPortugal.h"
 #include "FuelModelSpain.h"
 #include "FuelModelUtils.h"
 #include "Lightning.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
+#include "ReadShp.h"
 #include "Spotting.h"
 #include "WriteCSV.h"
 
@@ -235,6 +236,41 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->perimeterCells = 4 * cellSide;
     this->xllcorner = frdf.xllcorner;
     this->yllcorner = frdf.yllcorner;
+
+    // ---- Rio: leer shapefile (--river-shp) y rasterizar a celdas-rio ----
+    if (!this->args.RiverShp.empty())
+    {
+        std::vector<ShpPart> parts;
+        if (readShapefileParts(this->args.RiverShp, parts))
+        {
+            double step = this->cellSide * 0.5;  // muestreo denso a lo largo de cada segmento
+            for (auto& part : parts)
+            {
+                for (size_t s = 0; s + 1 < part.size(); ++s)
+                {
+                    double x0 = part[s].x, y0 = part[s].y, x1 = part[s + 1].x, y1 = part[s + 1].y;
+                    double seg = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+                    int nstep = std::max(1, (int)std::ceil(seg / step));
+                    for (int t = 0; t <= nstep; ++t)
+                    {
+                        double x = x0 + (x1 - x0) * t / nstep;
+                        double y = y0 + (y1 - y0) * t / nstep;
+                        int col = (int)((x - this->xllcorner) / this->cellSide);
+                        int row = this->rows - 1 - (int)((y - this->yllcorner) / this->cellSide);
+                        if (row >= 0 && row < this->rows && col >= 0 && col < this->cols)
+                            this->riverCells.insert(row * this->cols + col + 1);
+                    }
+                }
+            }
+            std::cout << "River: " << this->riverCells.size() << " celdas-rio desde "
+                      << this->args.RiverShp << " (" << parts.size() << " polilineas)" << std::endl;
+        }
+        else
+        {
+            std::cout << "River: no se pudo leer " << this->args.RiverShp
+                      << " (revisa que sea PolyLine/Polygon en la CRS de la instancia)" << std::endl;
+        }
+    }
 
     this->coordCells = frdf.coordCells;
     // this->adjCells = frdf.adjCells;
@@ -511,6 +547,29 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         }
     }
 
+    /* Active front: read a set of cells to ignite simultaneously (ActiveCells.csv) */
+    if (this->args.ActiveFront)
+    {
+        std::string sepAF = ",";
+        std::string activeFile = args.InFolder + "ActiveCells.csv";
+        CSVReader CSVActive(activeFile, sepAF);
+        std::vector<std::vector<std::string>> ActiveDF = CSVActive.getData(activeFile);
+        this->ActiveFrontCells.clear();
+        for (size_t rr = 1; rr < ActiveDF.size(); ++rr)  // skip header row
+        {
+            if (ActiveDF[rr].size() >= 2 && !ActiveDF[rr][1].empty())
+                this->ActiveFrontCells.push_back(std::stoi(ActiveDF[rr][1]));
+        }
+        if (!this->ActiveFrontCells.empty())
+        {
+            this->args.TotalYears = 1;  // the front is a single scenario
+            this->IgnitionPoints = std::vector<int>(1, this->ActiveFrontCells[0]);
+            this->IgnitionSets = std::vector<std::vector<int>>(1);
+            std::cout << "Active front: " << this->ActiveFrontCells.size()
+                      << " seed cells will ignite simultaneously" << std::endl;
+        }
+    }
+
     /* BBO Tuning factors (only the ones present in the instances*/
     if (this->args.BBOTuning)
     {
@@ -693,7 +752,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     }
     // Crown Byram Intensity Folder
     if ((this->args.OutIntensity) && (this->args.AllowCROS)
-        && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+        && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->crownIntensityFolder = Cell2Fire::createOutputFolder("CrownIntensity");
     }
@@ -703,12 +762,12 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->surfaceFlameLengthFolder = Cell2Fire::createOutputFolder("SurfaceFlameLength");
     }
     // Crown Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->crownFlameLengthFolder = Cell2Fire::createOutputFolder("CrownFlameLength");
     }
     // max Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->maxFlameLengthFolder = Cell2Fire::createOutputFolder("MaxFlameLength");
     }
@@ -1051,6 +1110,46 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
         }
     }
 
+    // --- Active front: ignite all remaining seed cells simultaneously ---
+    if (this->args.ActiveFront)
+    {
+        bool anyAF = false;
+        for (size_t k = 0; k < this->ActiveFrontCells.size(); ++k)
+        {
+            int fc = this->ActiveFrontCells[k];
+            if (fc < 1 || fc > this->nCells)
+                continue;
+            if (this->burntCells.find(fc) != this->burntCells.end())  // already lit (e.g. first cell)
+            {
+                anyAF = true;
+                continue;
+            }
+            if (this->statusCells[fc - 1] >= 3)  // non-burnable / harvested / firebreak
+                continue;
+            if (this->Cells_Obj.find(fc) == this->Cells_Obj.end())
+                InitCell(fc);
+            std::unordered_map<int, Cells>::iterator itf = this->Cells_Obj.find(fc);
+            if (itf->second.getStatus() != "Available" || itf->second.fType == 0)
+                continue;
+            std::vector<int> ipf = { fc };
+            if (itf->second.ignition(this->fire_period[this->year - 1],
+                                     this->year, ipf, &df[fc - 1],
+                                     this->coef_ptr, this->args_ptr,
+                                     &(this->wdf[this->weatherPeriod]),
+                                     this->activeCrown, this->perimeterCells))
+            {
+                this->statusCells[fc - 1] = 1;
+                this->nIgnitions++;
+                this->burningCells.insert(fc);
+                this->burntCells.insert(fc);
+                this->availCells.erase(fc);
+                anyAF = true;
+            }
+        }
+        if (anyAF)
+            this->noIgnition = false;
+    }
+
     // Plotter placeholder
     if (this->args.OutputGrids)
     {
@@ -1316,6 +1415,81 @@ Cell2Fire::SendMessages()
             this->burningCells.erase(bc);
         }
     }
+    // ============ CRUCE DE BARRERA: BREACHING (Prometheus) + SPOTTING (Albini) ============
+    // Una celda ardiendo puede cruzar una barrera no-quemable a favor del viento por:
+    //   - Breaching (contacto de llama):  R_breach = BreachFactor * FL          (barreras angostas)
+    //   - Spotting  (lofting de pavesas): d_spot   = SpotFactor  * FL * U_ms    (barreras anchas)
+    // Cruza si  max(R_breach, d_spot) >= W (ancho de la barrera).  Determinista.
+    // Si la barrera cruzada incluye celdas-rio (--river-shp), se registra el evento.
+    if (this->args.BreachFactor > 0.0 || this->args.SpotFactor > 0.0)
+    {
+        double waz = this->wdf[this->weatherPeriod].waz;          // rumbo a favor del viento (compass)
+        double U_ms = this->wdf[this->weatherPeriod].ws / 3.6;    // viento en m/s (ws en km/h)
+        double dr = -std::cos(waz * M_PI / 180.0);
+        double dc = std::sin(waz * M_PI / 180.0);
+        std::vector<std::pair<int, int>> crossings;              // (origen, objetivo)
+        std::unordered_set<int> src = this->burningCells;
+        for (auto& b : this->burnedOutList) src.insert(b);
+        for (auto& bc : src)
+        {
+            int id = bc;
+            double L = this->maxFlameLengths[id - 1];                 // llama efectiva = max(copa, superficie) - compartido por todos los kernels
+            if (L <= 0.0) L = this->surfaceFlameLengths[id - 1];
+            if (L <= 0.0 && this->args.Simulator == "K")              // fallback KITRAL (usa arrays de KITRAL): solo --sim K
+                L = flame_length_from_ros(&df[id - 1], this->RateOfSpreads[id - 1]);
+            if (L <= 0.0) continue;
+            double R_breach = this->args.BreachFactor * L;
+            double d_spot = this->args.SpotFactor * L * U_ms;
+            double reach = std::max(R_breach, d_spot);            // alcance total (m)
+            if (reach <= 0.0) continue;
+            int r0 = (id - 1) / this->cols;
+            int c0 = (id - 1) % this->cols;
+            // paso 1: barrera inmediata a favor del viento (no-quemable o rio)
+            int r1 = (int)std::round(r0 + dr);
+            int c1 = (int)std::round(c0 + dc);
+            if (r1 < 0 || r1 >= this->rows || c1 < 0 || c1 >= this->cols) continue;
+            int nid = r1 * this->cols + c1 + 1;
+            bool barrier = (this->nonBurnableCells.find(nid) != this->nonBurnableCells.end())
+                        || (this->riverCells.find(nid) != this->riverCells.end());
+            if (!barrier) continue;
+            // caminar la barrera hasta la 1a celda quemable, midiendo W y si cruza rio
+            int maxSteps = (int)std::ceil(reach / this->cellSide) + 2;
+            int target = -1; double W = 0.0; bool crossedRiver = false;
+            for (int s = 2; s <= maxSteps; ++s)
+            {
+                int rr = (int)std::round(r0 + dr * s);
+                int cc = (int)std::round(c0 + dc * s);
+                if (rr < 0 || rr >= this->rows || cc < 0 || cc >= this->cols) break;
+                int cid = rr * this->cols + cc + 1;
+                if (this->riverCells.find(cid) != this->riverCells.end()) crossedRiver = true;
+                if (this->nonBurnableCells.find(cid) != this->nonBurnableCells.end()
+                    || this->riverCells.find(cid) != this->riverCells.end())
+                    continue;                                    // sigue en la barrera
+                W = (s - 1) * this->cellSide;                    // ancho cruzado (m)
+                if (this->availCells.find(cid) != this->availCells.end()) target = cid;
+                break;
+            }
+            if (target > 0 && reach >= W)
+            {
+                crossings.push_back(std::make_pair(id, target));
+                const char* mech = (d_spot >= W) ? "spotting" : "breaching";
+                if (crossedRiver || this->args.verbose)
+                    this->riverCrossingLog.push_back(
+                        std::to_string(this->weatherPeriod) + "," + std::to_string(id) + ","
+                        + std::to_string(target) + "," + mech + "," + std::to_string(W) + ","
+                        + std::to_string(L) + "," + std::to_string(reach) + ","
+                        + (crossedRiver ? "river" : "barrier"));
+            }
+        }
+        for (auto& cr : crossings)
+        {
+            sendMessageList[cr.first].push_back(cr.second);
+            this->messagesSent = true;
+        }
+        if (this->args.verbose && !crossings.empty())
+            std::cout << "Cruce de barrera: " << crossings.size() << " evento(s)" << std::endl;
+    }
+
     if (this->args.verbose)
         printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
 
@@ -1730,6 +1904,18 @@ Cell2Fire::Results()
         outputGrid();
     }
 
+    // Log de cruces de barrera/rio (breaching + spotting)
+    if (!this->riverCrossingLog.empty() && !this->args.OutFolder.empty())
+    {
+        std::string rcName = this->args.OutFolder + "RiverCrossings" + std::to_string(this->sim) + ".csv";
+        std::ofstream rc(rcName);
+        rc << "weatherPeriod,sourceCell,targetCell,mechanism,widthM,flameLenM,reachM,type\n";
+        for (auto& line : this->riverCrossingLog) rc << line << "\n";
+        rc.close();
+        std::cout << "RiverCrossings: " << this->riverCrossingLog.size()
+                  << " evento(s) -> " << rcName << std::endl;
+    }
+
     // Messages
     if (this->args.OutMessages)
     {
@@ -1786,7 +1972,7 @@ Cell2Fire::Results()
 
     // Crown Intensity
     if ((this->args.OutIntensity) && (this->args.AllowCROS)
-        && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+        && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
         std::string intensityName;
@@ -1822,7 +2008,7 @@ Cell2Fire::Results()
     }
 
     // Crown Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
         std::string fileName;
@@ -1840,7 +2026,7 @@ Cell2Fire::Results()
     }
 
     // Max Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength" + separator();
         std::string fileName;
@@ -2348,11 +2534,6 @@ main(int argc, char* argv[])
     }
     else if (args.Simulator == "S")
     {
-        initialize_coeff(args.scenario);
-    }
-    else if (args.Simulator == "P")
-    {
-        initialize_coeff_p(args.scenario);
     }
     if (args.UseWeatherWeights)
     {

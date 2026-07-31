@@ -23,10 +23,13 @@ void setup_const();
 float flankfire_ros_k(float ros, float bros, float lb);
 
 // Calculate rate of spread
-float rate_of_spread_k(inputs* data, fuel_coefs* ptr, main_outs* at, weatherDF* wdf_ptr);
+float rate_of_spread_k(inputs* data, fuel_coefs* ptr, main_outs* at, weatherDF* wdf_ptr, arguments* args);
 
 // Length-to-Breadth ratio
 float l_to_b(float ws, fuel_coefs*);
+float flame_length_from_ros(inputs* data, float ros);
+float crown_byram_intensity_k(main_outs* at, inputs* data);
+float crown_flame_length_k(float intensity);
 
 // BROS
 float backfire_ros_k(const main_outs* at, const snd_outs* sec);
@@ -43,7 +46,7 @@ bool fire_type(inputs* data, main_outs* atr, int FMC);
 bool checkActive(inputs* data, main_outs* at, int FMC);
 // CROS adjustements
 float final_rate_of_spreadPL04(main_outs* at);
-float active_rate_of_spreadPL04(inputs* data, main_outs* at, weatherDF* wdf_ptr);  // En KITRAL SE USA PL04
+float active_rate_of_spreadPL04(inputs* data, main_outs* at, weatherDF* wdf_ptr, arguments* args);  // En KITRAL SE USA PL04
 float crownfractionburn(inputs* data, main_outs* at, int FMC);
 
 // Back fire with CROS

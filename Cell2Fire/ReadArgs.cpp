@@ -73,6 +73,17 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
 
     //--weather
     char* input_weather = getCmdOption(argv, argv + argc, "--weather");
+    { char* fm = getCmdOption(argv, argv + argc, "--fch-mode");
+      if (fm) args_ptr->FchMode = std::string(fm); }
+    { char* lm = getCmdOption(argv, argv + argc, "--lb-mode");
+      if (lm) args_ptr->LbMode = std::string(lm); }
+    args_ptr->FmcShading = cmdOptionExists(argv, argv + argc, "--fmc-shading");
+    { char* bf = getCmdOption(argv, argv + argc, "--breach-factor");
+      if (bf) args_ptr->BreachFactor = std::stod(bf); }
+    { char* sf = getCmdOption(argv, argv + argc, "--spot-factor");
+      if (sf) args_ptr->SpotFactor = std::stod(sf); }
+    { char* rv = getCmdOption(argv, argv + argc, "--river-shp");
+      if (rv) args_ptr->RiverShp = std::string(rv); }
     if (input_weather)
     {
         printf("WeatherOpt: %s \n", input_weather);
@@ -112,6 +123,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     bool verbose_input = false;
     bool iplog_input = false;
     bool input_ignitions = false;
+    bool active_front = false;
     bool out_grids = false;
     bool out_fl = false;
     bool out_intensity = false;
@@ -201,6 +213,14 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     {
         input_ignitions = true;
         printf("Ignitions: %s \n", btoa(input_ignitions));
+    }
+
+    //--active-front (ignite a set of cells simultaneously, read from ActiveCells.csv)
+    if (cmdOptionExists(argv, argv + argc, "--active-front"))
+    {
+        active_front = true;
+        input_ignitions = true;  // active front uses the ignition-from-file path
+        printf("Active front: %s \n", btoa(active_front));
     }
 
     //--grids
@@ -304,6 +324,15 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
                    simulator_option);
             args_ptr->Simulator = simulator_option;
         }
+        else if (s == "P")
+        {
+            // Portugal: preset sobre el motor S&B (rothermel_s = BehavePlus). Los combustibles
+            // portugueses (211-237) viven en sbTable; la fisica es Rothermel/BehavePlus, no el
+            // antiguo ajuste de regresion. Internamente corre como "S".
+            printf("Simulator: P (preset Portugal sobre motor S&B/rothermel_s)\n");
+            args_ptr->Simulator = "S";
+            args_ptr->PortugalPreset = true;
+        }
         else
         {
             printf("Simulator: %s \n", simulator_option);
@@ -384,15 +413,66 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     else
         args_ptr->FMC = dfmc;
 
-    //--scenario
+    //--scenario  (Portugal: critical|moderate|soft o 1|2|3; tambien entero para otros usos)
     char* input_scenario = getCmdOption(argv, argv + argc, "--scenario");
     if (input_scenario)
     {
         printf("scenario: %s \n", input_scenario);
-        args_ptr->scenario = std::stoi(input_scenario, &sz);
+        std::string sc = input_scenario;
+        for (char& c : sc) c = static_cast<char>(std::tolower((unsigned char)c));
+        if (sc == "critical")      args_ptr->scenario = 1;
+        else if (sc == "moderate") args_ptr->scenario = 2;
+        else if (sc == "soft")     args_ptr->scenario = 3;
+        else                       args_ptr->scenario = std::stoi(input_scenario, &sz);
     }
     else
         args_ptr->scenario = dscen;
+
+    //--moisture-mode  (S&B: direct | scenario | ffmc | conditioning | spatial | portugal)
+    char* input_mmode = getCmdOption(argv, argv + argc, "--moisture-mode");
+    if (input_mmode)
+    {
+        std::string m = input_mmode;
+        if (m != "direct" && m != "scenario" && m != "ffmc" && m != "conditioning" && m != "spatial" && m != "portugal")
+        {
+            printf("moisture-mode '%s' no reconocido; usando 'direct'\n", input_mmode);
+            args_ptr->MoistureMode = "direct";
+        }
+        else
+        {
+            printf("moisture-mode: %s \n", input_mmode);
+            args_ptr->MoistureMode = m;
+        }
+    }
+    else if (args_ptr->PortugalPreset)
+        // preset Portugal sin --moisture-mode explicito: usa los escenarios nombrados (Fernandes)
+        args_ptr->MoistureMode = "portugal";
+    else
+        args_ptr->MoistureMode = "direct";
+
+    //--latitude  (grados, +N) para humedad espacial Modo 2; si no, usa data->lat por celda
+    char* input_lat = getCmdOption(argv, argv + argc, "--latitude");
+    if (input_lat)
+    {
+        args_ptr->Latitude = std::stof(input_lat);
+        args_ptr->HasLatitude = true;
+        printf("latitude: %.4f \n", args_ptr->Latitude);
+    }
+    else
+    {
+        args_ptr->HasLatitude = false;
+    }
+
+    //--moisture-scenario  (S&B DkLm, p.ej. D2L1; o entero 1..4 = diagonal). Reemplaza la columna del Weather.
+    char* input_scn = getCmdOption(argv, argv + argc, "--moisture-scenario");
+    if (input_scn)
+    {
+        args_ptr->Scenario = input_scn;
+        printf("moisture-scenario: %s \n", input_scn);
+        if (!input_mmode) args_ptr->MoistureMode = "scenario";  // activa el modo si no se fijó otro
+    }
+    else
+        args_ptr->Scenario = "D2L2";
 
     //--ROS-Threshold
     char* ROS_Threshold = getCmdOption(argv, argv + argc, "--ROS-Threshold");
@@ -609,6 +689,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->verbose = verbose_input;
     args_ptr->IgnitionsLog = iplog_input;
     args_ptr->Ignitions = input_ignitions;
+    args_ptr->ActiveFront = active_front;
     args_ptr->OutputGrids = out_grids;
     args_ptr->FinalGrid = out_finalgrid;
     args_ptr->PromTuned = prom_tuned;

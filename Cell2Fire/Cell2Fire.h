@@ -30,7 +30,12 @@
 #include <vector>
 
 using namespace std;
-string C2FW_VERSION = "v0.0.0";
+// Version: se puede inyectar desde el makefile con -DC2FW_VERSION_STR='"vX.Y.Z"'
+// (el makefile la deriva de `git describe` si hay tags, si no usa el default).
+#ifndef C2FW_VERSION_STR
+#define C2FW_VERSION_STR "v2.0.0"
+#endif
+string C2FW_VERSION = C2FW_VERSION_STR;
 string sim_log_filename = "ignition_and_weather_log.csv";
 
 class Cell2Fire
@@ -103,6 +108,7 @@ class Cell2Fire
     std::vector<string> fTypeCells2;  // (long int&, const char [9]);
     std::vector<std::vector<std::string>> WeatherData;
     std::vector<int> IgnitionPoints;
+    std::vector<int> ActiveFrontCells;  // seed cells of an active front
     vector<int> burnedOutList;
     std::vector<double> FSCell;
     std::vector<float> crownMetrics;
@@ -121,6 +127,8 @@ class Cell2Fire
     // Sets
     std::unordered_set<int> availCells;
     std::unordered_set<int> nonBurnableCells;
+    std::unordered_set<int> riverCells;              // celdas atravesadas por el rio (--river-shp)
+    std::vector<std::string> riverCrossingLog;       // registro de cruces de rio
     std::unordered_set<int> burningCells;
     std::unordered_set<int> burntCells;
     std::unordered_set<int> harvestCells;
