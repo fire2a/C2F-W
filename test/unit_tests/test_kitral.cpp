@@ -1,7 +1,7 @@
 //
 // Created by mati on 20-02-25.
 //
-#include "../../Cell2Fire/FuelModelKitral.h"
+#include "../../Cell2Fire/KitralKernel.h"
 #include "../../Cell2Fire/FuelModelUtils.h"
 #include <string.h>
 // catch v3 or v2 compatibility
