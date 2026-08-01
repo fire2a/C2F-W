@@ -39,7 +39,7 @@ using namespace std;
  * @param _fType2 The secondary fuel type as a descriptive string.
  * @param _perimeter The perimeter of the cell.
  * @param _status The fire status of the cell (0: Available, 1: Burning, 2:
- * Burnt, 3: Harvested, 4: Non Fuel).
+ * Burnt, 3: Firebreak, 4: Non Fuel).
  * @param _realId Alternative identifier of the cell (1 to size of the
  * landscape).
  */
@@ -53,12 +53,12 @@ Cells::Cells(int _id,
              int _realId)
 {
     // Global "dictionaries" (vectors) for status and types
-    // Status: 0: "Available", 1: "Burning", 2: "Burnt", 3: "Harvested", 4:"Non
+    // Status: 0: "Available", 1: "Burning", 2: "Burnt", 3: "Firebreak", 4:"Non
     // Fuel"
     this->StatusD[0] = "Available";
     this->StatusD[1] = "Burning";
     this->StatusD[2] = "Burnt";
-    this->StatusD[3] = "Harvested";
+    this->StatusD[3] = "Firebreak";
     this->StatusD[4] = "Non Fuel";
 
     // FTypeD: 0: "NonBurnable", 1: "Normal", 2: "Burnable
@@ -90,7 +90,7 @@ Cells::Cells(int _id,
     this->hPeriod = 0;
 
     this->fireStarts = 0;
-    this->harvestStarts = 0;
+    this->firebreakStarts = 0;
     this->fireStartsSeason = 0;
     this->tYears = 4;
 
@@ -1220,7 +1220,7 @@ Cells::get_burned(int period,
 
 /**
  * @brief Sets a cell's fire status (0: Available, 1: Burning, 2: Burnt, 3:
- * Harvested, 4: Non Fuel).
+ * Firebreak, 4: Non Fuel).
  * @param status_int Code for new status.
  */
 void
@@ -1396,11 +1396,11 @@ Cells::ignition(int period,
         period       int
 */
 void
-Cells::harvested(int id, int period)
+Cells::firebreak(int id, int period)
 {
     // TODO: unused param
     this->status = 3;
-    this->harvestStarts = period;
+    this->firebreakStarts = period;
 }
 
 /*

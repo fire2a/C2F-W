@@ -676,10 +676,10 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
 
     if (input_hplan == &empty)
     {
-        args_ptr->HarvestPlan = "";
+        args_ptr->FirebreakPlan = "";
     }
     else
-        args_ptr->HarvestPlan = input_hplan;
+        args_ptr->FirebreakPlan = input_hplan;
 
     // booleans
     args_ptr->OutMessages = out_messages;
@@ -722,7 +722,7 @@ printArgs(arguments args)
     std::cout << "OutCrown: " << args.OutCrown << std::endl;
     std::cout << "OutCrownConsumption: " << args.OutCrownConsumption <<
     std::endl; std::cout << "OutSurfConsumption: " << args.OutSurfConsumption <<
-    std::endl; std::cout << "HarvestPlan: " << args.HarvestPlan << std::endl;
+    std::endl; std::cout << "FirebreakPlan: " << args.FirebreakPlan << std::endl;
     std::cout << "TotalYears: " << args.TotalYears << std::endl;
     std::cout << "TotalSims: " << args.TotalSims << std::endl;
     std::cout << "FirePeriodLen: " << args.FirePeriodLen << std::endl;
@@ -743,7 +743,7 @@ printArgs(arguments args)
     std::cout << "InFolder: " << args.InFolder << std::endl;
     std::cout << "OutFolder: " << args.OutFolder << std::endl;
     std::cout << "WeatherOpt: " << args.WeatherOpt << std::endl;
-    std::cout << "FirebreakCells: " << args.HarvestPlan << std::endl;
+    std::cout << "FirebreakCells: " << args.FirebreakPlan << std::endl;
     std::cout << "NWeatherFiles: " << args.NWeatherFiles << std::endl;
     std::cout << "MinutesPerWP: " << args.MinutesPerWP << std::endl;
     std::cout << "MaxFirePeriods: " << args.MaxFirePeriods << std::endl;

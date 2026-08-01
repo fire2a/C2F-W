@@ -48,7 +48,7 @@ inputs* df_ptr;
 inputs* df;
 int currentSim = 0;
 std::unordered_map<int, std::vector<float>> BBOFactors;
-std::unordered_map<int, std::vector<int>> HarvestedCells;
+std::unordered_map<int, std::vector<int>> firebreakPlan;
 std::vector<float> WeatherWeights;
 std::vector<int> WeatherWeightIDs;
 std::vector<int> NFTypesCells;
@@ -68,7 +68,7 @@ printSets(std::unordered_set<int> availCells,
           std::unordered_set<int> nonBurnableCells,
           std::unordered_set<int> burningCells,
           std::unordered_set<int> burntCells,
-          std::unordered_set<int> harvestCells)
+          std::unordered_set<int> firebreakCells)
 {
     std::cout << "\nSet information period" << std::endl;
     std::cout << "Available Cells:";
@@ -100,7 +100,7 @@ printSets(std::unordered_set<int> availCells,
     std::cout << std::endl;
 
     std::cout << "Firebreak Cells:";
-    for (auto& hc : harvestCells)
+    for (auto& hc : firebreakCells)
     {
         std::cout << " " << hc;
     }
@@ -166,7 +166,7 @@ separator()
  * `WeatherDistribution.csv`.
  * - Processes ignition points from `Ignitions.csv` (if provided) and computes
  * adjacent cells based on the ignition radius.
- * - Categorizes cells as burnable, non-burnable, or harvested based on input
+ * - Categorizes cells as burnable, non-burnable, or firebreak based on input
  * data.
  * - If BBO tuning is enabled, initializes tuning factors using `BBOFuels.csv`.
  * - Validates and adjusts simulation parameters based on the weather file
@@ -339,23 +339,23 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         }
     }
 
-    // Harvested cells
-    if (strcmp(this->args.HarvestPlan.c_str(), EM) != 0)
+    // Firebreak cells
+    if (strcmp(this->args.FirebreakPlan.c_str(), EM) != 0)
     {
         std::string sep = ",";
-        CSVReader CSVHPlan(this->args.HarvestPlan, sep);
+        CSVReader CSVFirebreakPlan(this->args.FirebreakPlan, sep);
 
         // Populate Ignitions vector
-        std::vector<std::vector<std::string>> HarvestedDF = CSVHPlan.getData(this->args.HarvestPlan);
-        // CSVHPlan.printData(HarvestedDF);
+        std::vector<std::vector<std::string>> firebreakDF = CSVFirebreakPlan.getData(this->args.FirebreakPlan);
+        // CSVFirebreakPlan.printData(firebreakDF);
 
         // Cells
-        int HCellsP = HarvestedDF.size() - 1;
-        CSVHPlan.parseHarvestedDF(HarvestedCells, HarvestedDF, HCellsP);
+        int HCellsP = firebreakDF.size() - 1;
+        CSVFirebreakPlan.parseFirebreakDF(firebreakPlan, firebreakDF, HCellsP);
 
         // Print-out
-        std::cout << "Number of Firebreak Cells :" << HarvestedCells.size() << std::endl;
-        for (auto it = HarvestedCells.begin(); it != HarvestedCells.end(); it++)
+        std::cout << "Number of Firebreak Cells :" << firebreakPlan.size() << std::endl;
+        for (auto it = firebreakPlan.begin(); it != firebreakPlan.end(); it++)
         {
             for (auto& it2 : it->second)
             {
@@ -385,7 +385,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->nonBurnableCells.clear();
     this->burningCells.clear();
     this->burntCells.clear();
-    this->harvestCells.clear();
+    this->firebreakCells.clear();
     for (i = 0; i < this->statusCells.size(); i++)
     {
         if (this->statusCells[i] < 3)
@@ -393,7 +393,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         else if (this->statusCells[i] == 4)
             this->nonBurnableCells.insert(i + 1);
         else if (this->statusCells[i] == 3)
-            this->harvestCells.insert(i + 1);
+            this->firebreakCells.insert(i + 1);
     }
 
     // POTENCIALMENTE AQUI ESTA MALO
@@ -836,10 +836,10 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->nonBurnableCells.clear();
     this->burningCells.clear();
     this->burntCells.clear();
-    this->harvestCells.clear();
+    this->firebreakCells.clear();
 
-    // Harvest Cells
-    for (auto it = HarvestedCells.begin(); it != HarvestedCells.end(); it++)
+    // Firebreak Cells
+    for (auto it = firebreakPlan.begin(); it != firebreakPlan.end(); it++)
     {
         for (auto& it2 : it->second)
         {
@@ -856,13 +856,13 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         else if (this->statusCells[i] == 4)
             this->nonBurnableCells.insert(i + 1);
         else if (this->statusCells[i] == 3)
-            this->harvestCells.insert(i + 1);
+            this->firebreakCells.insert(i + 1);
     }
 
     // Print-out sets information
     if (this->args.verbose)
     {
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
     }
 }
 
@@ -1106,7 +1106,7 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
         if (this->args.verbose)
         {
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
         }
     }
 
@@ -1124,7 +1124,7 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
                 anyAF = true;
                 continue;
             }
-            if (this->statusCells[fc - 1] >= 3)  // non-burnable / harvested / firebreak
+            if (this->statusCells[fc - 1] >= 3)  // non-burnable / firebreak / firebreak
                 continue;
             if (this->Cells_Obj.find(fc) == this->Cells_Obj.end())
                 InitCell(fc);
@@ -1239,7 +1239,7 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
  * - Prints detailed logs of the fire progress and messages sent by each
  * burning cell.
  * - Outputs the current fire period, sets of cells (available, non-burnable,
- * burning, burnt, harvested), and fire message details.
+ * burning, burnt, firebreak), and fire message details.
  *
  * ### Warning:
  * - A warning is issued if the fire period approaches the maximum allowed
@@ -1274,7 +1274,7 @@ Cell2Fire::SendMessages()
                      "Ignition ----------------------"
                   << std::endl;
         std::cout << "Current Fire Period:" << this->fire_period[this->year - 1] << std::endl;
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
     }
 
     /*
@@ -1491,7 +1491,7 @@ Cell2Fire::SendMessages()
     }
 
     if (this->args.verbose)
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
 
     return sendMessageList;
 }
@@ -1530,7 +1530,7 @@ Cell2Fire::SendMessages()
  * - Logs detailed information about fire messages, ignition, and cell state
  * transitions.
  * - Prints the current state of cell sets (available, non-burnable, burning,
- * burnt, harvested).
+ * burnt, firebreak).
  *
  * ### Weather Updates:
  * - Calls `updateWeather` to apply weather conditions for the next fire
@@ -1551,7 +1551,7 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
                      "messages from Ignition ----------------------"
                   << std::endl;
         std::cout << "Current Fire Period: " << this->fire_period[this->year - 1] << std::endl;
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
     }
 
     // Conditions depending on number of messages and repeatFire flag
@@ -1598,7 +1598,7 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
         this->burningCells.clear();
         if (this->args.verbose)
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
     }
 
     // Mesages and no repeat
@@ -1741,7 +1741,7 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
         if (this->args.verbose)
         {
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
         }
 
         /*
@@ -1869,7 +1869,7 @@ Cell2Fire::Results()
     float ACells = this->availCells.size();
     float BCells = this->burntCells.size();
     float NBCells = this->nonBurnableCells.size();
-    float HCells = this->harvestCells.size();
+    float HCells = this->firebreakCells.size();
 
     std::cout << "\nSimulation " << this->sim << " Results:\n"
               << "\t" << std::left << std::setw(16) << "Cell Status" << std::right << std::setw(12) << "Count"
@@ -2122,7 +2122,7 @@ Cell2Fire::Results()
  * @brief Outputs the current state of the forest grid to a CSV file.
  *
  * This method generates a binary representation of the forest grid, with cell
- * statuses indicating their condition (burning, burnt, harvested, etc.) during
+ * statuses indicating their condition (burning, burnt, firebreak, etc.) during
  * the simulation. The file is saved with a unique name in the designated
  * output folder.
  *
@@ -2131,7 +2131,7 @@ Cell2Fire::Results()
  *   - Updates a vector (`statusCells2`) to reflect the current statuses of
  * cells:
  *     - `1` for burning or burnt cells.
- *     - `-1` for harvested cells.
+ *     - `-1` for firebreak cells.
  *     - `0` for all other cells.
  * - **File Naming**:
  *   - Constructs a file name based on the simulation's `gridNumber` and saves
@@ -2176,7 +2176,7 @@ Cell2Fire::outputGrid()
     {
         statusCells2[ac - 1] = 1;
     }
-    for (auto& hc : this->harvestCells)
+    for (auto& hc : this->firebreakCells)
     {
         statusCells2[hc - 1] = -1;
     }
@@ -2294,7 +2294,7 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
         std::cout << "Fire Period: " << this->fire_period[this->year - 1] << std::endl;
         std::cout << "WeatherPeriod: " << this->weatherPeriod << std::endl;
         std::cout << "MaxFirePeriods: " << this->totalFirePeriods << std::endl;
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
         std::cout << "********************************************" << std::endl;
     }
     // One step (one fire period, ignition - if needed -, sending messages and

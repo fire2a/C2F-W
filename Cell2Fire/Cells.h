@@ -88,7 +88,7 @@ class Cells
     int status;
     int hPeriod;
     int fireStarts;
-    int harvestStarts;
+    int firebreakStarts;
     int fireStartsSeason;
     int burntP;
     int tYears;
@@ -193,7 +193,7 @@ class Cells
                   bool& activeCrown,
                   int perimeterCells);
 
-    void harvested(int id, int period);
+    void firebreak(int id, int period);
 
     void print_info();
 

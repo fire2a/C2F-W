@@ -131,7 +131,7 @@ class Cell2Fire
     std::vector<std::string> riverCrossingLog;       // registro de cruces de rio
     std::unordered_set<int> burningCells;
     std::unordered_set<int> burntCells;
-    std::unordered_set<int> harvestCells;
+    std::unordered_set<int> firebreakCells;
 
     // Cells Dictionary
     std::unordered_map<int, Cells> Cells_Obj;

@@ -768,23 +768,23 @@ CSVReader::parseWeatherWeights(std::vector<float>& WeatherWeights, std::vector<i
 }
 
 /*
- * Populate HarvestedDF
+ * Populate firebreakDF
  */
 void
-CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
+CSVReader::parseFirebreakDF(std::unordered_map<int, std::vector<int>>& hc,
                             std::vector<std::vector<std::string>>& DF,
                             int HPeriods)
 {
     // Integers
     int i, j, hcell;
-    std::vector<int> toHarvestCells;
+    std::vector<int> toFirebreakCells;
     std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= HPeriods; i++)
     {
         // Clean the vector before the new year
-        toHarvestCells.clear();
+        toFirebreakCells.clear();
 
         // Loop over years of the simulation
         for (j = 1; j < DF[i].size(); j++)
@@ -792,11 +792,11 @@ CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
             hcell = std::stoi(DF[i][j], &sz);
 
             // Set values
-            toHarvestCells.push_back(hcell);
+            toFirebreakCells.push_back(hcell);
         }
 
         // Populate unordered set
-        hc.insert(std::make_pair(i, toHarvestCells));
+        hc.insert(std::make_pair(i, toFirebreakCells));
     }
 }
 

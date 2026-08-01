@@ -14,7 +14,7 @@
  */
 typedef struct
 {
-    std::string InFolder, OutFolder, WeatherOpt, HarvestPlan, Simulator, WeatherWeightsFile, MoistureMode;
+    std::string InFolder, OutFolder, WeatherOpt, FirebreakPlan, Simulator, WeatherWeightsFile, MoistureMode;
     std::string FchMode = "kitral";  // --fch-mode: kitral|emc|ffmc|isi
     std::string LbMode = "kitral";   // --lb-mode: kitral|sb
     bool FmcShading = false;         // --fmc-shading: acond. espacial humedad (sunny/shade)

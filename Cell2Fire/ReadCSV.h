@@ -67,8 +67,8 @@ class CSVReader
     // Populates ForestDF
     void parseForestDF(forestDF* frt_ptr, std::vector<std::vector<std::string>>& DF);
 
-    // Populate Harvested Cells
-    void parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
+    // Populate Firebreak Cells
+    void parseFirebreakDF(std::unordered_map<int, std::vector<int>>& hc,
                           std::vector<std::vector<std::string>>& DF,
                           int HPeriods);
 
