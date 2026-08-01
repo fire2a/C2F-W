@@ -26,7 +26,7 @@ float flankfire_ros_k(float ros, float bros, float lb);
 float rate_of_spread_k(inputs* data, fuel_coefs* ptr, main_outs* at, weatherDF* wdf_ptr, arguments* args);
 
 // Length-to-Breadth ratio
-float l_to_b(float ws, fuel_coefs*);
+float l_to_b(float ws, fuel_coefs*, const std::string& lb_mode);  // --lb-mode: kitral|sb
 float flame_length_from_ros(inputs* data, float ros);
 float crown_byram_intensity_k(main_outs* at, inputs* data);
 float crown_flame_length_k(float intensity);
