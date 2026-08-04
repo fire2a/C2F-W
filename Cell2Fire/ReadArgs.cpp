@@ -5,7 +5,8 @@
 #include <fstream>
 #include <sys/stat.h>   // stat/S_ISREG: reemplaza dirent d_type (no existe en MinGW)
 
-// S_ISREG no es estandar en MSVC (solo _S_IFMT/_S_IFREG). Sin esta guarda falla msbuild.
+// S_ISREG no es estandar en MSVC (solo define _S_IFMT/_S_IFREG). Sin esta guarda el
+// build con msbuild/vcpkg falla. En POSIX y MinGW ya viene definido y esto no aplica.
 #ifndef S_ISREG
 #define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
 #endif
@@ -89,6 +90,28 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
       if (sf) args_ptr->SpotFactor = std::stod(sf); }
     { char* rv = getCmdOption(argv, argv + argc, "--river-shp");
       if (rv) args_ptr->RiverShp = std::string(rv); }
+    { char* rd = getCmdOption(argv, argv + argc, "--road-shp");
+      if (rd) { args_ptr->RoadShp = std::string(rd); printf("road-shp: %s \n", rd); } }
+    { char* fb = getCmdOption(argv, argv + argc, "--firebreak-shp");
+      if (fb) { args_ptr->FirebreakShp = std::string(fb); printf("firebreak-shp: %s \n", fb); } }
+    // Interruptores para las carpetas de la instancia (Rivers/, Roads/, Firebreaks/).
+    // Explicitos a proposito: si se cargaran solo por existir la carpeta, agregar un
+    // .shp cambiaria los resultados en silencio y los escenarios A/B serian imposibles.
+    args_ptr->UseRivers = cmdOptionExists(argv, argv + argc, "--rivers");
+    args_ptr->UseRoads = cmdOptionExists(argv, argv + argc, "--roads");
+    args_ptr->UseFirebreaks = cmdOptionExists(argv, argv + argc, "--firebreaks");
+    { char* ig = getCmdOption(argv, argv + argc, "--ignition-shp");
+      if (ig)
+      {
+          args_ptr->IgnitionShp = std::string(ig);
+          printf("ignition-shp: %s \n", ig);
+      } }
+    { char* af = getCmdOption(argv, argv + argc, "--active-front-shp");
+      if (af)
+      {
+          args_ptr->ActiveFrontShp = std::string(af);
+          printf("active-front-shp: %s \n", af);
+      } }
     if (input_weather)
     {
         printf("WeatherOpt: %s \n", input_weather);
@@ -694,7 +717,17 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->verbose = verbose_input;
     args_ptr->IgnitionsLog = iplog_input;
     args_ptr->Ignitions = input_ignitions;
+    // --ignition-shp implica igniciones explicitas. Va DESPUES de la linea anterior:
+    // input_ignitions la sobreescribiria si se asignara antes.
+    if (!args_ptr->IgnitionShp.empty()) args_ptr->Ignitions = true;
     args_ptr->ActiveFront = active_front;
+    // idem para --active-front-shp: implica frente activo e igniciones explicitas.
+    // OJO: va DESPUES de la asignacion de arriba, que si no lo sobreescribe.
+    if (!args_ptr->ActiveFrontShp.empty())
+    {
+        args_ptr->ActiveFront = true;
+        args_ptr->Ignitions = true;
+    }
     args_ptr->OutputGrids = out_grids;
     args_ptr->FinalGrid = out_finalgrid;
     args_ptr->PromTuned = prom_tuned;

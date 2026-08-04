@@ -21,6 +21,13 @@ typedef struct
     double BreachFactor = 0.0;       // --breach-factor k: breaching Prometheus (0=off). Cruza barrera si k*FL >= ancho
     double SpotFactor = 0.0;         // --spot-factor k: spotting Albini (0=off). Cruza si k*FL*viento(m/s) >= ancho
     std::string RiverShp = "";       // --river-shp: shapefile del rio (polilinea/poligono, CRS de la instancia)
+    std::string IgnitionShp = "";    // --ignition-shp: shapefile de puntos de ignicion (1 punto = 1 anio)
+    std::string ActiveFrontShp = ""; // --active-front-shp: frente activo como linea o puntos
+    std::string RoadShp = "";        // --road-shp: caminos como barrera (mismo rol que el rio)
+    bool UseRivers = false;          // --rivers: carga instancia/Rivers/*.shp
+    bool UseRoads = false;           // --roads: carga instancia/Roads/*.shp
+    bool UseFirebreaks = false;      // --firebreaks: carga instancia/Firebreaks/*.shp
+    std::string FirebreakShp = "";   // --firebreak-shp: cortafuegos desde un .shp puntual
     float Latitude = 0.0f;       // latitud (grados, +N) para humedad espacial Modo 2 (--latitude)
     bool HasLatitude = false;    // true si --latitude fue provisto (si no, usa data->lat por celda)
     std::string Scenario = "D2L2";  // escenario S&B DkLm (--scenario; reemplaza la columna del Weather)

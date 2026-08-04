@@ -238,40 +238,6 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->yllcorner = frdf.yllcorner;
 
     // ---- Rio: leer shapefile (--river-shp) y rasterizar a celdas-rio ----
-    if (!this->args.RiverShp.empty())
-    {
-        std::vector<ShpPart> parts;
-        if (readShapefileParts(this->args.RiverShp, parts))
-        {
-            double step = this->cellSide * 0.5;  // muestreo denso a lo largo de cada segmento
-            for (auto& part : parts)
-            {
-                for (size_t s = 0; s + 1 < part.size(); ++s)
-                {
-                    double x0 = part[s].x, y0 = part[s].y, x1 = part[s + 1].x, y1 = part[s + 1].y;
-                    double seg = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
-                    int nstep = std::max(1, (int)std::ceil(seg / step));
-                    for (int t = 0; t <= nstep; ++t)
-                    {
-                        double x = x0 + (x1 - x0) * t / nstep;
-                        double y = y0 + (y1 - y0) * t / nstep;
-                        int col = (int)((x - this->xllcorner) / this->cellSide);
-                        int row = this->rows - 1 - (int)((y - this->yllcorner) / this->cellSide);
-                        if (row >= 0 && row < this->rows && col >= 0 && col < this->cols)
-                            this->riverCells.insert(row * this->cols + col + 1);
-                    }
-                }
-            }
-            std::cout << "River: " << this->riverCells.size() << " celdas-rio desde "
-                      << this->args.RiverShp << " (" << parts.size() << " polilineas)" << std::endl;
-        }
-        else
-        {
-            std::cout << "River: no se pudo leer " << this->args.RiverShp
-                      << " (revisa que sea PolyLine/Polygon en la CRS de la instancia)" << std::endl;
-        }
-    }
-
     this->coordCells = frdf.coordCells;
     // this->adjCells = frdf.adjCells;
 
@@ -366,6 +332,117 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         }
     }
 
+    // ---- Barreras vectoriales: rios, caminos y cortafuegos ------------------
+    // Semantica UNIFICADA para las tres: la celda deja de ser combustible
+    // (statusCells=3, sale de availCells) y ademas queda marcada como barrera, de
+    // modo que el breaching pueda saltarla. Sin breaching, detienen el fuego.
+    // El tipo solo distingue la atribucion en RiverCrossings*.csv.
+    //
+    // Regla de rasterizacion segun geometria:
+    //   Polygon  -> la celda cae si su CENTRO esta dentro del poligono. Asi una
+    //               franja mas angosta que la celda no se convierte en un muro del
+    //               ancho de la celda: solo captura las celdas que realmente cubre.
+    //   PolyLine -> una linea no encierra nada, asi que se toman las celdas que
+    //               atraviesa (muestreo denso). Es una sobreestimacion inevitable:
+    //               para anchos sub-celda conviene entregar poligonos.
+    {
+        std::vector<std::pair<std::string, std::string>> vecSrc;  // {ruta, tipo}
+        if (!this->args.RiverShp.empty()) vecSrc.push_back({ this->args.RiverShp, "river" });
+        if (!this->args.RoadShp.empty()) vecSrc.push_back({ this->args.RoadShp, "road" });
+        if (!this->args.FirebreakShp.empty()) vecSrc.push_back({ this->args.FirebreakShp, "firebreak" });
+        if (this->args.UseRivers)
+            for (const auto& p : listShapefiles(this->args.InFolder + "Rivers"))
+                vecSrc.push_back({ p.first, "river" });
+        if (this->args.UseRoads)
+            for (const auto& p : listShapefiles(this->args.InFolder + "Roads"))
+                vecSrc.push_back({ p.first, "road" });
+        if (this->args.UseFirebreaks)
+            for (const auto& p : listShapefiles(this->args.InFolder + "Firebreaks"))
+                vecSrc.push_back({ p.first, "firebreak" });
+
+        int vecTotal = 0;
+        for (const auto& src : vecSrc)
+        {
+            // Aviso temprano si no solapa el raster: casi siempre es CRS equivocada.
+            double bx0, by0, bx1, by1;
+            if (readShapefileBBox(src.first, bx0, by0, bx1, by1))
+            {
+                double rx1 = this->xllcorner + this->cols * this->cellSide;
+                double ry1 = this->yllcorner + this->rows * this->cellSide;
+                if (bx1 < this->xllcorner || bx0 > rx1 || by1 < this->yllcorner || by0 > ry1)
+                    std::cout << "Barrier[" << src.second << "]: AVISO, " << src.first
+                              << " no solapa el raster. Revisa la CRS." << std::endl;
+            }
+
+            std::vector<ShpPart> parts;
+            if (!readShapefileParts(src.first, parts))
+            {
+                std::cout << "Barrier[" << src.second << "]: no se pudo leer " << src.first
+                          << " (debe ser PolyLine o Polygon en la CRS de la instancia)" << std::endl;
+                continue;
+            }
+            const int shpType = readShapefileType(src.first);
+            const bool isPolygon = (shpType == 5 || shpType == 15 || shpType == 25);
+
+            std::set<int> cells;
+            if (isPolygon)
+            {
+                // Solo las celdas cuyo centro cae dentro. Se acota al bbox del
+                // poligono para no recorrer todo el raster.
+                int c0 = std::max(0, (int)((bx0 - this->xllcorner) / this->cellSide));
+                int c1 = std::min(this->cols - 1, (int)((bx1 - this->xllcorner) / this->cellSide));
+                int r0 = std::max(0, this->rows - 1 - (int)((by1 - this->yllcorner) / this->cellSide));
+                int r1 = std::min(this->rows - 1, this->rows - 1 - (int)((by0 - this->yllcorner) / this->cellSide));
+                for (int r = r0; r <= r1; ++r)
+                    for (int c = c0; c <= c1; ++c)
+                    {
+                        double cx = this->xllcorner + (c + 0.5) * this->cellSide;
+                        double cy = this->yllcorner + (this->rows - 1 - r + 0.5) * this->cellSide;
+                        if (pointInPolygon(parts, cx, cy)) cells.insert(r * this->cols + c + 1);
+                    }
+            }
+            else
+            {
+                double step = this->cellSide * 0.5;
+                for (auto& part : parts)
+                    for (size_t k2 = 0; k2 + 1 < part.size(); ++k2)
+                    {
+                        double x0 = part[k2].x, y0 = part[k2].y;
+                        double x1 = part[k2 + 1].x, y1 = part[k2 + 1].y;
+                        double seg = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+                        int nstep = std::max(1, (int)std::ceil(seg / step));
+                        for (int t = 0; t <= nstep; ++t)
+                        {
+                            double x = x0 + (x1 - x0) * t / nstep;
+                            double y = y0 + (y1 - y0) * t / nstep;
+                            int col = (int)((x - this->xllcorner) / this->cellSide);
+                            int row = this->rows - 1 - (int)((y - this->yllcorner) / this->cellSide);
+                            if (row >= 0 && row < this->rows && col >= 0 && col < this->cols)
+                                cells.insert(row * this->cols + col + 1);
+                        }
+                    }
+            }
+
+            for (int cid : cells)
+            {
+                // no combustible: via firebreakPlan, que es lo que re-aplica el reset
+                firebreakPlan[1].push_back(cid);
+                this->fTypeCells[cid - 1] = 0;
+                this->fTypeCells2[cid - 1] = "NonBurnable";
+                this->statusCells[cid - 1] = 3;
+                // y barrera, para que el breaching pueda saltarla (con su tipo)
+                this->barrierCells[cid] = src.second;
+                if (src.second == "river") this->riverCells.insert(cid);
+            }
+            vecTotal += (int)cells.size();
+            std::cout << "Barrier[" << src.second << "]: " << cells.size() << " celda(s) desde "
+                      << src.first << " (" << (isPolygon ? "poligono, centro dentro" : "linea, celdas atravesadas")
+                      << ")" << std::endl;
+        }
+        if (vecTotal > 0)
+            std::cout << "Barriers: " << vecTotal << " celda(s) vectoriales en total" << std::endl;
+    }
+
     /*
     if (this->args.UseWeatherWeights)
     {
@@ -426,6 +503,56 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     {
         // DEBUGstd::cout << "\nWe have specific ignition points:" << std::endl;
 
+        // --- Modalidad B: puntos desde shapefile (--ignition-shp) -------------
+        // Un punto = la ignicion de un anio, en el orden del archivo, igual que
+        // las filas de Ignitions.csv. Requiere que el .shp este en la CRS de la
+        // instancia (misma conversion que --river-shp).
+        bool ignitionsFromShp = false;
+        if (!this->args.IgnitionShp.empty())
+        {
+            std::vector<ShpPoint> pts;
+            if (readShapefilePoints(this->args.IgnitionShp, pts))
+            {
+                std::vector<int> shpCells;
+                int outside = 0;
+                for (auto& q : pts)
+                {
+                    int col = (int)((q.x - this->xllcorner) / this->cellSide);
+                    int row = this->rows - 1 - (int)((q.y - this->yllcorner) / this->cellSide);
+                    if (row >= 0 && row < this->rows && col >= 0 && col < this->cols)
+                        shpCells.push_back(row * this->cols + col + 1);
+                    else
+                        ++outside;
+                }
+                if (outside > 0)
+                    std::cout << "Ignition: " << outside << " punto(s) fuera del raster, descartados"
+                              << std::endl;
+                if (shpCells.empty())
+                {
+                    throw std::runtime_error("Ignition: ningun punto de " + this->args.IgnitionShp
+                                             + " cae dentro del raster. Revisa que el .shp este en la CRS"
+                                               " de la instancia.");
+                }
+                IgnitionYears = (int)shpCells.size();
+                args.TotalYears = std::min(args.TotalYears, IgnitionYears);
+                this->IgnitionPoints = shpCells;
+                ignitionsFromShp = true;
+                std::cout << "Ignition: " << shpCells.size() << " punto(s) desde "
+                          << this->args.IgnitionShp << " (celda(s):";
+                for (size_t k = 0; k < shpCells.size() && k < 10; ++k) std::cout << " " << shpCells[k];
+                if (shpCells.size() > 10) std::cout << " ...";
+                std::cout << ")" << std::endl;
+            }
+            else
+            {
+                throw std::runtime_error("Ignition: no se pudo leer " + this->args.IgnitionShp
+                                         + " (debe ser Point o MultiPoint en la CRS de la instancia)");
+            }
+        }
+
+        // --- Modalidad A: Ignitions.csv (por defecto) -------------------------
+        if (!ignitionsFromShp)
+        {
         /* Ignition points */
         std::string ignitionFile = args.InFolder + "Ignitions.csv";
         std::string sep = ",";
@@ -448,6 +575,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         // Ignition points
         this->IgnitionPoints = std::vector<int>(IgnitionYears, 0);
         CSVIgnitions.parseIgnitionDF(this->IgnitionPoints, IgnitionsDF, IgnitionYears);
+        }
         // this->IgnitionSets =
         // std::vector<unordered_set<int>>(this->IgnitionPoints.size());
         this->IgnitionSets = std::vector<std::vector<int>>(this->args.TotalYears);
@@ -550,15 +678,85 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     /* Active front: read a set of cells to ignite simultaneously (ActiveCells.csv) */
     if (this->args.ActiveFront)
     {
-        std::string sepAF = ",";
-        std::string activeFile = args.InFolder + "ActiveCells.csv";
-        CSVReader CSVActive(activeFile, sepAF);
-        std::vector<std::vector<std::string>> ActiveDF = CSVActive.getData(activeFile);
         this->ActiveFrontCells.clear();
-        for (size_t rr = 1; rr < ActiveDF.size(); ++rr)  // skip header row
+
+        // --- Modalidad B: frente desde shapefile (--active-front-shp) ---------
+        // Acepta PolyLine/Polygon (se rasteriza el trazado con muestreo denso, igual
+        // que --river-shp) o Point/MultiPoint (cada punto es una celda semilla).
+        // Un frente es naturalmente una linea; los puntos existen por comodidad.
+        // OJO con Polygon: se rasteriza el ANILLO, no el interior relleno.
+        bool frontFromShp = false;
+        if (!this->args.ActiveFrontShp.empty())
         {
-            if (ActiveDF[rr].size() >= 2 && !ActiveDF[rr][1].empty())
-                this->ActiveFrontCells.push_back(std::stoi(ActiveDF[rr][1]));
+            std::set<int> cells;  // set: el muestreo denso repite celdas
+            std::vector<ShpPart> parts;
+            std::vector<ShpPoint> pts;
+            const char* kind = nullptr;
+
+            if (readShapefileParts(this->args.ActiveFrontShp, parts))
+            {
+                kind = "linea(s)";
+                double step = this->cellSide * 0.5;
+                for (auto& part : parts)
+                {
+                    for (size_t s = 0; s + 1 < part.size(); ++s)
+                    {
+                        double x0 = part[s].x, y0 = part[s].y, x1 = part[s + 1].x, y1 = part[s + 1].y;
+                        double seg = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+                        int nstep = std::max(1, (int)std::ceil(seg / step));
+                        for (int t = 0; t <= nstep; ++t)
+                        {
+                            double x = x0 + (x1 - x0) * t / nstep;
+                            double y = y0 + (y1 - y0) * t / nstep;
+                            int col = (int)((x - this->xllcorner) / this->cellSide);
+                            int row = this->rows - 1 - (int)((y - this->yllcorner) / this->cellSide);
+                            if (row >= 0 && row < this->rows && col >= 0 && col < this->cols)
+                                cells.insert(row * this->cols + col + 1);
+                        }
+                    }
+                }
+            }
+            else if (readShapefilePoints(this->args.ActiveFrontShp, pts))
+            {
+                kind = "punto(s)";
+                for (auto& q : pts)
+                {
+                    int col = (int)((q.x - this->xllcorner) / this->cellSide);
+                    int row = this->rows - 1 - (int)((q.y - this->yllcorner) / this->cellSide);
+                    if (row >= 0 && row < this->rows && col >= 0 && col < this->cols)
+                        cells.insert(row * this->cols + col + 1);
+                }
+            }
+            else
+            {
+                throw std::runtime_error("Active front: no se pudo leer " + this->args.ActiveFrontShp
+                                         + " (debe ser PolyLine/Polygon o Point/MultiPoint)");
+            }
+
+            if (cells.empty())
+            {
+                throw std::runtime_error("Active front: ninguna celda de " + this->args.ActiveFrontShp
+                                         + " cae dentro del raster. Revisa que el .shp este en la CRS"
+                                           " de la instancia.");
+            }
+            this->ActiveFrontCells.assign(cells.begin(), cells.end());
+            frontFromShp = true;
+            std::cout << "Active front: " << this->ActiveFrontCells.size() << " celda(s) desde "
+                      << this->args.ActiveFrontShp << " (" << kind << ")" << std::endl;
+        }
+
+        // --- Modalidad A: ActiveCells.csv (por defecto) -----------------------
+        if (!frontFromShp)
+        {
+            std::string sepAF = ",";
+            std::string activeFile = args.InFolder + "ActiveCells.csv";
+            CSVReader CSVActive(activeFile, sepAF);
+            std::vector<std::vector<std::string>> ActiveDF = CSVActive.getData(activeFile);
+            for (size_t rr = 1; rr < ActiveDF.size(); ++rr)  // skip header row
+            {
+                if (ActiveDF[rr].size() >= 2 && !ActiveDF[rr][1].empty())
+                    this->ActiveFrontCells.push_back(std::stoi(ActiveDF[rr][1]));
+            }
         }
         if (!this->ActiveFrontCells.empty())
         {
@@ -1449,21 +1647,37 @@ Cell2Fire::SendMessages()
             int c1 = (int)std::round(c0 + dc);
             if (r1 < 0 || r1 >= this->rows || c1 < 0 || c1 >= this->cols) continue;
             int nid = r1 * this->cols + c1 + 1;
+            // Barrera = no quemable, cortafuegos, o cualquier capa vectorial cargada.
+            // OJO: firebreakCells (cortafuegos) NO estaba incluido antes, asi que el
+            // breaching nunca cruzaba un cortafuegos -- justo el caso de uso central
+            // (dimensionar su ancho). Incluirlo cambia resultados cuando se combinan
+            // cortafuegos con --breach-factor/--spot-factor.
             bool barrier = (this->nonBurnableCells.find(nid) != this->nonBurnableCells.end())
-                        || (this->riverCells.find(nid) != this->riverCells.end());
+                        || (this->firebreakCells.find(nid) != this->firebreakCells.end())
+                        || (this->barrierCells.find(nid) != this->barrierCells.end());
             if (!barrier) continue;
-            // caminar la barrera hasta la 1a celda quemable, midiendo W y si cruza rio
+            // caminar la barrera hasta la 1a celda quemable, midiendo W y el tipo cruzado
             int maxSteps = (int)std::ceil(reach / this->cellSide) + 2;
             int target = -1; double W = 0.0; bool crossedRiver = false;
+            std::string crossedType = "barrier";
+            // El vecino inmediato (s=1) se evalua aqui, fuera del bucle de abajo. Sin
+            // esto, una barrera de UNA celda nunca fijaba el tipo y el cruce quedaba
+            // atribuido como "barrier" generico (o no se registraba).
+            {
+                auto b1 = this->barrierCells.find(nid);
+                if (b1 != this->barrierCells.end()) { crossedRiver = true; crossedType = b1->second; }
+            }
             for (int s = 2; s <= maxSteps; ++s)
             {
                 int rr = (int)std::round(r0 + dr * s);
                 int cc = (int)std::round(c0 + dc * s);
                 if (rr < 0 || rr >= this->rows || cc < 0 || cc >= this->cols) break;
                 int cid = rr * this->cols + cc + 1;
-                if (this->riverCells.find(cid) != this->riverCells.end()) crossedRiver = true;
+                auto bIt = this->barrierCells.find(cid);
+                if (bIt != this->barrierCells.end()) { crossedRiver = true; crossedType = bIt->second; }
                 if (this->nonBurnableCells.find(cid) != this->nonBurnableCells.end()
-                    || this->riverCells.find(cid) != this->riverCells.end())
+                    || this->firebreakCells.find(cid) != this->firebreakCells.end()
+                    || bIt != this->barrierCells.end())
                     continue;                                    // sigue en la barrera
                 W = (s - 1) * this->cellSide;                    // ancho cruzado (m)
                 if (this->availCells.find(cid) != this->availCells.end()) target = cid;
@@ -1478,7 +1692,7 @@ Cell2Fire::SendMessages()
                         std::to_string(this->weatherPeriod) + "," + std::to_string(id) + ","
                         + std::to_string(target) + "," + mech + "," + std::to_string(W) + ","
                         + std::to_string(L) + "," + std::to_string(reach) + ","
-                        + (crossedRiver ? "river" : "barrier"));
+                        + crossedType);
             }
         }
         for (auto& cr : crossings)

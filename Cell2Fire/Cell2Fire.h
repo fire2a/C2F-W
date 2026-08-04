@@ -128,6 +128,10 @@ class Cell2Fire
     std::unordered_set<int> availCells;
     std::unordered_set<int> nonBurnableCells;
     std::unordered_set<int> riverCells;              // celdas atravesadas por el rio (--river-shp)
+    // Barreras lineales genericas: union de rios, caminos, cortafuegos vectoriales, etc.
+    // El tipo sale del nombre del archivo (Barriers/roads.shp -> "roads") y solo se usa
+    // para atribuir el cruce en RiverCrossings*.csv; el comportamiento es el mismo.
+    std::unordered_map<int, std::string> barrierCells;
     std::vector<std::string> riverCrossingLog;       // registro de cruces de rio
     std::unordered_set<int> burningCells;
     std::unordered_set<int> burntCells;
