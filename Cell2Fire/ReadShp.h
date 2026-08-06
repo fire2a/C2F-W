@@ -7,6 +7,19 @@
 // Se asume que el .shp ya viene reproyectado a la CRS de la instancia (UTM).
 // ---------------------------------------------------------------------------
 #include <algorithm>
+// OJO: en MSVC el <dirent.h> de vcpkg (port tronkko/dirent) esta implementado sobre
+// Win32 e incluye <windows.h>, que define min y max como MACROS. Eso convierte
+// std::max(...) en std::(...) y rompe la compilacion de cualquier .cpp que incluya
+// este header. NOMINMAX lo evita y tiene que definirse ANTES del include.
+// En MinGW no ocurre: su dirent.h es nativo y no toca windows.h.
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#endif
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
