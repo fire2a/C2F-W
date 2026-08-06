@@ -12,7 +12,10 @@
 /*
  *   Args structure
  */
-typedef struct
+// Se declara como 'struct arguments' y no como 'typedef struct {...} arguments;':
+// con inicializadores por defecto en los miembros, la forma anonima con typedef
+// dispara C5208 en MSVC, que WindowsTests.vcxproj trata como error.
+struct arguments
 {
     std::string InFolder, OutFolder, WeatherOpt, FirebreakPlan, Simulator, WeatherWeightsFile, MoistureMode;
     std::string FchMode = "kitral";  // --fch-mode: kitral|emc|ffmc|isi
@@ -39,7 +42,7 @@ typedef struct
     int MinutesPerWP, MaxFirePeriods, TotalYears, TotalSims, NWeatherFiles, IgnitionRadius, seed, nthreads, FMC,
         scenario;
     std::unordered_set<int> HCells, BCells;
-} arguments;
+};
 
 char* getCmdOption(char** begin, char** end, const std::string& option);
 
