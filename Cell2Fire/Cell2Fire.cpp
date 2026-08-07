@@ -384,22 +384,44 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
             const int shpType = readShapefileType(src.first);
             const bool isPolygon = (shpType == 5 || shpType == 15 || shpType == 25);
 
+            // Celdas que la geometria atraviesa: base para todo lo que sigue.
+            // Solo estas pueden tener cobertura significativa, asi que restringir el
+            // test de area a este conjunto evita recorrer el bbox completo (para el
+            // Rio Claro son 54 km de trazado y el bbox abarca media instancia).
+            std::set<int> tocadas;
+            {
+                const double paso = this->cellSide * 0.25;
+                for (const auto& part : parts)
+                    for (size_t k2 = 0; k2 + 1 < part.size(); ++k2)
+                    {
+                        double x0 = part[k2].x, y0 = part[k2].y;
+                        double x1 = part[k2 + 1].x, y1 = part[k2 + 1].y;
+                        double seg = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+                        int ns = std::max(1, (int)std::ceil(seg / paso));
+                        for (int t = 0; t <= ns; ++t)
+                        {
+                            double x = x0 + (x1 - x0) * t / ns;
+                            double y = y0 + (y1 - y0) * t / ns;
+                            int cc = (int)((x - this->xllcorner) / this->cellSide);
+                            int rr = this->rows - 1 - (int)((y - this->yllcorner) / this->cellSide);
+                            if (rr >= 0 && rr < this->rows && cc >= 0 && cc < this->cols)
+                                tocadas.insert(rr * this->cols + cc + 1);
+                        }
+                    }
+            }
+
             std::set<int> cells;
             if (isPolygon)
             {
-                // Solo las celdas cuyo centro cae dentro. Se acota al bbox del
-                // poligono para no recorrer todo el raster.
-                int c0 = std::max(0, (int)((bx0 - this->xllcorner) / this->cellSide));
-                int c1 = std::min(this->cols - 1, (int)((bx1 - this->xllcorner) / this->cellSide));
-                int r0 = std::max(0, this->rows - 1 - (int)((by1 - this->yllcorner) / this->cellSide));
-                int r1 = std::min(this->rows - 1, this->rows - 1 - (int)((by0 - this->yllcorner) / this->cellSide));
-                for (int r = r0; r <= r1; ++r)
-                    for (int c = c0; c <= c1; ++c)
-                    {
-                        double cx = this->xllcorner + (c + 0.5) * this->cellSide;
-                        double cy = this->yllcorner + (this->rows - 1 - r + 0.5) * this->cellSide;
-                        if (pointInPolygon(parts, cx, cy)) cells.insert(r * this->cols + c + 1);
-                    }
+                // Cobertura de area sobre las celdas atravesadas.
+                for (int cid : tocadas)
+                {
+                    int r = (cid - 1) / this->cols, c = (cid - 1) % this->cols;
+                    double x0 = this->xllcorner + c * this->cellSide;
+                    double y0 = this->yllcorner + (this->rows - 1 - r) * this->cellSide;
+                    if (cellAreaFraction(parts, x0, y0, this->cellSide) >= this->args.BarrierCover)
+                        cells.insert(cid);
+                }
             }
             else
             {
@@ -423,6 +445,59 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
                     }
             }
 
+            // ---- Aristas bloqueadas -------------------------------------------
+            // El bloqueo real va en la TRANSICION: para cada celda vecina de la
+            // barrera se prueban sus 8 salidas, y si el segmento centro-a-centro
+            // cruza la geometria, ese paso queda bloqueado con su ancho cruzado.
+            // Esto hace que un rio de 10 m detenga el fuego igual que uno de 100 y
+            // elimina las fugas diagonales de una barrera de una celda de ancho.
+            {
+                // Candidatas para aristas: las atravesadas mas su vecindad.
+                std::set<int> cand;
+                for (int cid : tocadas)
+                {
+                    int r = (cid - 1) / this->cols, c = (cid - 1) % this->cols;
+                    for (int dr = -2; dr <= 2; ++dr)
+                        for (int dc = -2; dc <= 2; ++dc)
+                        {
+                            int rr = r + dr, cc = c + dc;
+                            if (rr >= 0 && rr < this->rows && cc >= 0 && cc < this->cols)
+                                cand.insert(rr * this->cols + cc + 1);
+                        }
+                }
+                int nArcs = 0;
+                for (int from : cand)
+                {
+                    int r = (from - 1) / this->cols, c = (from - 1) % this->cols;
+                    double ax = this->xllcorner + (c + 0.5) * this->cellSide;
+                    double ay = this->yllcorner + (this->rows - 1 - r + 0.5) * this->cellSide;
+                    for (int dr = -1; dr <= 1; ++dr)
+                        for (int dc = -1; dc <= 1; ++dc)
+                        {
+                            if (dr == 0 && dc == 0) continue;
+                            int rr = r + dr, cc = c + dc;
+                            if (rr < 0 || rr >= this->rows || cc < 0 || cc >= this->cols) continue;
+                            int to = rr * this->cols + cc + 1;
+                            double bx = this->xllcorner + (cc + 0.5) * this->cellSide;
+                            double by = this->yllcorner + (this->rows - 1 - rr + 0.5) * this->cellSide;
+                            double w = crossedWidth(ax, ay, bx, by, parts, this->args.BarrierWidth);
+                            if (w > 0.0)
+                            {
+                                long long k = this->arcKey(from, to);
+                                auto prev = this->blockedArcs.find(k);
+                                if (prev == this->blockedArcs.end() || prev->second < w)
+                                {
+                                    this->blockedArcs[k] = w;
+                                    this->arcBarrierType[k] = src.second;
+                                }
+                                ++nArcs;
+                            }
+                        }
+                }
+                std::cout << "Barrier[" << src.second << "]: " << nArcs
+                          << " transicion(es) bloqueada(s)" << std::endl;
+            }
+
             for (int cid : cells)
             {
                 // no combustible: via firebreakPlan, que es lo que re-aplica el reset
@@ -436,7 +511,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
             }
             vecTotal += (int)cells.size();
             std::cout << "Barrier[" << src.second << "]: " << cells.size() << " celda(s) desde "
-                      << src.first << " (" << (isPolygon ? "poligono, centro dentro" : "linea, celdas atravesadas")
+                      << src.first << " (" << (isPolygon ? "poligono, cobertura >= umbral" : "linea, celdas atravesadas")
                       << ")" << std::endl;
         }
         if (vecTotal > 0)
@@ -1567,6 +1642,39 @@ Cell2Fire::SendMessages()
         // If message and not a true flag
         if (aux_list.size() > 0 && aux_list[0] != -100)
         {
+            // ---- Filtro de aristas bloqueadas por barreras vectoriales ----------
+            // Se descarta el paso a la vecina cuando el segmento centro-a-centro
+            // cruza la geometria de una barrera. Sin modelo de cruce esto detiene el
+            // fuego siempre, sea el rasgo de 5 m o de 100, y sin fugas diagonales.
+            // Con --breach-factor/--spot-factor se permite si el alcance supera el
+            // ancho cruzado, que sale de la geometria y no de contar celdas.
+            if (!this->blockedArcs.empty())
+            {
+                const int fromId = it->second.realId;
+                double L = this->maxFlameLengths[fromId - 1];
+                if (L <= 0.0) L = this->surfaceFlameLengths[fromId - 1];
+                const double U_ms = this->wdf[this->weatherPeriod].ws / 3.6;
+                const double reach = std::max(this->args.BreachFactor * L,
+                                              this->args.SpotFactor * L * U_ms);
+                std::vector<int> keep;
+                keep.reserve(aux_list.size());
+                for (int to : aux_list)
+                {
+                    auto ba = this->blockedArcs.find(this->arcKey(fromId, to));
+                    if (ba == this->blockedArcs.end() || reach >= ba->second)
+                        keep.push_back(to);
+                    else if (this->args.verbose)
+                        std::cout << "  barrera bloquea " << fromId << " -> " << to
+                                  << " (ancho " << ba->second << " m, alcance " << reach
+                                  << " m)" << std::endl;
+                }
+                aux_list.swap(keep);
+                if (aux_list.empty())
+                {
+                    this->burnedOutList.push_back(fromId);
+                    continue;
+                }
+            }
             if (this->args.verbose)
                 std::cout << "\nList is not empty" << std::endl;
             this->messagesSent = true;

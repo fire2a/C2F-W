@@ -30,6 +30,8 @@ struct arguments
     bool UseRivers = false;          // --rivers: carga instancia/Rivers/*.shp
     bool UseRoads = false;           // --roads: carga instancia/Roads/*.shp
     bool UseFirebreaks = false;      // --firebreaks: carga instancia/Firebreaks/*.shp
+    float BarrierWidth = 10.0;       // --barrier-width: ancho declarado (m) de las barreras dadas como polilinea
+    float BarrierCover = 0.8;        // --barrier-cover: fraccion de celda cubierta para declararla no combustible
     std::string FirebreakShp = "";   // --firebreak-shp: cortafuegos desde un .shp puntual
     float Latitude = 0.0f;       // latitud (grados, +N) para humedad espacial Modo 2 (--latitude)
     bool HasLatitude = false;    // true si --latitude fue provisto (si no, usa data->lat por celda)

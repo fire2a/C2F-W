@@ -94,6 +94,16 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
       if (rd) { args_ptr->RoadShp = std::string(rd); printf("road-shp: %s \n", rd); } }
     { char* fb = getCmdOption(argv, argv + argc, "--firebreak-shp");
       if (fb) { args_ptr->FirebreakShp = std::string(fb); printf("firebreak-shp: %s \n", fb); } }
+    // Una polilinea no lleva ancho; el breaching necesita uno para calcular W.
+    // Los poligonos derivan el suyo de la geometria y este valor solo actua de piso.
+    { char* bw = getCmdOption(argv, argv + argc, "--barrier-width");
+      if (bw) { args_ptr->BarrierWidth = std::stof(bw); printf("barrier-width: %s m\n", bw); } }
+    // Fraccion de la celda que el poligono debe cubrir para volverla no combustible.
+    // Con el default 0.8 un rio mas angosto que la celda NO la vuelve no combustible:
+    // queda combustible pero con las transiciones que lo cruzan bloqueadas, que es la
+    // fisica correcta (queda vegetacion en la celda, pero no se puede atravesar).
+    { char* bc = getCmdOption(argv, argv + argc, "--barrier-cover");
+      if (bc) { args_ptr->BarrierCover = std::stof(bc); printf("barrier-cover: %s\n", bc); } }
     // Interruptores para las carpetas de la instancia (Rivers/, Roads/, Firebreaks/).
     // Explicitos a proposito: si se cargaran solo por existir la carpeta, agregar un
     // .shp cambiaria los resultados en silencio y los escenarios A/B serian imposibles.

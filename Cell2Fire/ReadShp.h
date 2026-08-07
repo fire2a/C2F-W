@@ -6,11 +6,11 @@
 // (polilineas) como vectores de puntos (x,y) en la CRS del archivo.
 // Se asume que el .shp ya viene reproyectado a la CRS de la instancia (UTM).
 // ---------------------------------------------------------------------------
-#include <algorithm>
 // OJO: en MSVC el <dirent.h> de vcpkg (port tronkko/dirent) esta implementado sobre
 // Win32 e incluye <windows.h>, que define min y max como MACROS. Eso convierte
 // std::max(...) en std::(...) y rompe la compilacion de cualquier .cpp que incluya
-// este header. NOMINMAX lo evita y tiene que definirse ANTES del include.
+// este header (Cell2Fire.cpp tiene ~10 usos). NOMINMAX lo evita y tiene que definirse
+// ANTES del include. WIN32_LEAN_AND_MEAN ademas recorta el arrastre de cabeceras.
 // En MinGW no ocurre: su dirent.h es nativo y no toca windows.h.
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -20,6 +20,8 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #endif
+
+#include <algorithm>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -243,6 +245,65 @@ pointInPolygon(const std::vector<ShpPart>& rings, double x, double y)
         }
     }
     return inside;
+}
+
+// Interseccion de dos segmentos 2D. Devuelve true y el parametro t sobre AB si se
+// cortan. Se usa para saber si el paso de una celda a su vecina cruza la barrera.
+inline bool
+segmentsIntersect(double ax, double ay, double bx, double by,
+                  double cx, double cy, double dx, double dy, double& t)
+{
+    const double r1 = bx - ax, r2 = by - ay;
+    const double s1 = dx - cx, s2 = dy - cy;
+    const double den = r1 * s2 - r2 * s1;
+    if (std::fabs(den) < 1e-12) return false;   // paralelos o colineales
+    const double u = ((cx - ax) * r2 - (cy - ay) * r1) / den;
+    t = ((cx - ax) * s2 - (cy - ay) * s1) / den;
+    return (t >= 0.0 && t <= 1.0 && u >= 0.0 && u <= 1.0);
+}
+
+// Ancho de barrera cruzado por el segmento AB. Para una polilinea se toman los
+// parametros t de todos los cortes: si hay dos o mas, el ancho es la distancia entre
+// el primero y el ultimo (el fuego atraviesa una franja); si hay uno solo, el rasgo
+// es mas angosto que la resolucion del cruce y se devuelve minWidth, que representa
+// el ancho declarado del rasgo. Devuelve 0 si no hay interseccion.
+inline double
+crossedWidth(double ax, double ay, double bx, double by,
+             const std::vector<ShpPart>& parts, double minWidth)
+{
+    std::vector<double> ts;
+    for (const auto& part : parts)
+        for (size_t i = 0; i + 1 < part.size(); ++i)
+        {
+            double t;
+            if (segmentsIntersect(ax, ay, bx, by, part[i].x, part[i].y, part[i + 1].x,
+                                  part[i + 1].y, t))
+                ts.push_back(t);
+        }
+    if (ts.empty()) return 0.0;
+    const double len = std::sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
+    if (ts.size() == 1) return minWidth;
+    std::sort(ts.begin(), ts.end());
+    const double w = (ts.back() - ts.front()) * len;
+    return std::max(w, minWidth);
+}
+
+// Fraccion del area de una celda cuadrada que cae dentro del poligono, por muestreo
+// de una subrejilla de n x n puntos. Reemplaza la regla del centro: con celdas de 30 m
+// y un rasgo de 20 m, el centro decide todo o nada, mientras que la fraccion permite
+// exigir cobertura mayoritaria antes de declarar la celda no combustible.
+// n=10 da resolucion de 1%, suficiente para un umbral de 0.8.
+inline double
+cellAreaFraction(const std::vector<ShpPart>& rings, double xmin, double ymin, double size,
+                 int n = 10)
+{
+    int dentro = 0;
+    const double paso = size / n;
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            if (pointInPolygon(rings, xmin + (i + 0.5) * paso, ymin + (j + 0.5) * paso))
+                ++dentro;
+    return (double)dentro / (n * n);
 }
 
 #endif  // READSHP_H

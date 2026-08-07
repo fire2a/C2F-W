@@ -132,6 +132,14 @@ class Cell2Fire
     // El tipo sale del nombre del archivo (Barriers/roads.shp -> "roads") y solo se usa
     // para atribuir el cruce en RiverCrossings*.csv; el comportamiento es el mismo.
     std::unordered_map<int, std::string> barrierCells;
+    // Aristas bloqueadas por una barrera vectorial: clave = origen*nCells + destino.
+    // El bloqueo va en la TRANSICION, no en la celda: asi un rio de 10 m detiene el
+    // fuego igual que uno de 100, y no hay fugas diagonales (una barrera de una celda
+    // de ancho no bloquea propagacion de 8 vecinos si solo se eliminan celdas).
+    // El valor es el ancho de barrera cruzado en metros, que usa el breaching como W.
+    std::unordered_map<long long, double> blockedArcs;
+    std::unordered_map<long long, std::string> arcBarrierType;
+    inline long long arcKey(int from, int to) const { return (long long)from * this->nCells + to; }
     std::vector<std::string> riverCrossingLog;       // registro de cruces de rio
     std::unordered_set<int> burningCells;
     std::unordered_set<int> burntCells;
