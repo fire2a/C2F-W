@@ -1,0 +1,102 @@
+grid_value,export_value,descriptive_name,fuel_type, r, g, b, h, s, l
+1,1,Short grass [1],FM1,207,181,110,44,128,158
+2,2,Timber grass and understory [2],FM2,203,176,100,44,127,152
+3,3,Tall grass [3],FM3,200,171,91,44,127,146
+4,4,Chaparral [4],FM4,197,167,82,44,127,140
+5,5,Brush [5],FM5,194,162,73,44,127,133
+6,6,Dormant brush - hardwood slash [6],FM6,191,157,64,44,127,128
+7,7,Southern rough [7],FM7,182,150,61,44,127,122
+8,8,Short needle litter [8],FM8,173,142,58,44,127,116
+9,9,Long needle or hardwood litter [9],FM9,164,135,55,44,127,110
+10,10,Timber litter & understory [10],FM10,155,127,52,44,127,104
+11,11,Light logging slash [11],FM11,155,127,52,44,127,104
+12,12,Medium logging slash [12],FM12,155,127,52,44,127,104
+13,13,Heavy logging slash [13],FM13,155,127,52,44,127,104
+91,91,Urban - developed [91],NB1,120,120,120,0,0,120
+92,92,Snow - ice [92],NB2,225,235,245,210,128,235
+93,93,Agricultural [93],NB3,222,214,160,52,124,191
+94,94,Future standard non-burnable [94],NB4,150,150,150,0,0,150
+95,95,Future standard non-burnable [95],NB5,170,170,170,0,0,170
+98,98,Open water [98],NB8,52,110,190,215,145,121
+99,99,Bare ground [99],NB9,160,158,152,45,10,156
+101,101,Short - sparse - dry climate grass (D),GR1,239,236,128,58,198,184
+102,102,Low load - dry climate grass (D),GR2,238,233,114,58,200,176
+103,103,Low load - very coarse - humid climate grass (D),GR3,236,231,101,58,199,168
+104,104,Moderate load - dry climate grass (D),GR4,234,229,87,58,198,160
+105,105,Low load - humid climate grass (D),GR5,233,227,73,58,200,153
+106,106,Moderate load - humid climate grass (D),GR6,231,225,60,58,199,146
+107,107,High load - dry climate grass (D),GR7,229,223,46,58,199,138
+108,108,High load - very coarse - humid climate grass (D),GR8,228,221,33,58,200,131
+109,109,Very high load - humid climate grass (D),GR9,218,212,27,58,199,122
+110,110,Short Gass - < 0.5 m (Dynamic),V-Hb,101,145,70,95,89,108
+111,111,Tall Grass - > 0.5 m (Dynamic),V-Ha,96,137,66,95,89,102
+121,121,Low load - dry climate grass-shrub (D),GS1,183,209,97,74,140,153
+122,122,Moderate load - dry climate grass-shrub (D),GS2,178,206,85,74,141,146
+123,123,Moderate load - humid climate grass-shrub (D),GS3,172,202,73,74,140,138
+124,124,High load - humid climate grass-shrub (D),GS4,167,199,61,74,141,130
+141,141,Low load - dry climate shrub (D),SH1,120,164,70,88,102,117
+142,142,Moderate load - dry climate shrub (S),SH2,114,155,66,88,103,110
+143,143,Moderate load - humid climate shrub (S),SH3,107,146,62,88,103,104
+144,144,Low load - humid climate timber-shrub (S),SH4,100,136,58,88,103,97
+145,145,High load - dry climate shrub (S),SH5,93,127,54,88,103,90
+146,146,Low load - humid climate shrub (S),SH6,86,118,50,88,103,84
+147,147,Very high load - dry climate shrub (S),SH7,80,109,47,88,101,78
+148,148,High load - humid climate shrub (S),SH8,73,99,43,88,101,71
+149,149,Very high load - humid climate shrub (D),SH9,66,90,39,88,101,64
+150,150,Chamise with Moderate Load Grass - 4 feet (Static),SCAL17,185,128,70,30,115,128
+151,151,Chamise with Low Load Grass - 3 feet (Static),SCAL15,174,120,66,30,115,120
+152,152,North Slope Ceanothus with Moderate Load Grass (Static),SCAL16,163,112,62,30,114,112
+153,153,Manzanita/Scrub Oak with Low Load Grass (Static),SCAL14,152,105,58,30,114,105
+154,154,Coastal Sage/Buckwheat Scrub with Low Load Grass (Static),SCAL18,141,97,53,30,116,97
+155,155,Short Green Shrub < 1 m With Grass - Discontinuous (< 1 m) often discontinuous and with grass (Dynamic),V-MH,53,76,37,95,88,56
+156,156,Short Shrub < 1 m - Low Dead Fraction and/or Thick Foliage (Static),V-MMb,53,76,37,95,88,56
+157,157,Short Shrub < 1 m - High Dead Fraction and/or Thin Fuel (Static),V-MAb,53,76,37,95,88,56
+158,158,Tall Shrub > 1 m - Low Dead Fraction and/or Thick Foliage (Static),V-MMa,53,76,37,95,88,56
+159,159,Tall Shrub > 1 m - High Dead Fraction and/or Thin Fuel (Static),V-MAa,53,76,37,95,88,56
+161,161,Light load - dry climate timber-grass-shrub (D),TU1,62,152,74,128,107,107
+162,162,Moderate load - humid climate timber-shrub (S),TU2,58,141,69,128,106,100
+163,163,Moderate load - humid climate timber-grass-shrub (D),TU3,53,130,64,129,107,92
+164,164,Dwarf conifer understory (S),TU4,49,119,58,128,106,84
+165,165,Very high load - dry climate timber-shrub (S),TU5,44,109,53,128,108,76
+166,166,Discontinuous Litter Eucalyptus Plantation - With or Without Shrub Understory (Static),M-EUCd,82,126,68,106,76,97
+167,167,Deciduous or Conifer Litter - Shrub and Herb Understory,M-H,78,119,64,105,77,92
+168,168,Deciduous or Conifer Litter - Shrub and Fern Understory (Dynamic),M-F,73,111,60,105,76,86
+169,169,Deciduous Litter - Shrub Understory (Static),M-CAD,68,104,56,105,76,80
+170,170,Sclerophyll Broadleaf Litter - Shrub Understory (Static),M-ESC,63,97,52,105,77,74
+171,171,Medium-Long Needle Pine Litter - Shrub Understory (Static),M-PIN,59,90,48,104,78,69
+172,172,Eucalyptus Litter - Shrub Understory (Static),M-EUC,54,82,44,104,77,63
+181,181,Low load - compact conifer litter (S),TL1,152,104,62,28,107,107
+182,182,Low load broadleaf litter (S),TL2,143,98,58,28,108,100
+183,183,Moderate load conifer litter (S),TL3,133,91,54,28,108,94
+184,184,Small downed logs (S),TL4,124,85,51,28,106,88
+185,185,High load conifer litter (S),TL5,114,78,47,28,106,80
+186,186,High load broadleaf litter (S),TL6,105,72,43,28,107,74
+187,187,Large downed logs (S),TL7,96,65,39,27,108,68
+188,188,Long-needle litter (S),TL8,86,59,35,28,107,61
+189,189,Very high load broadleaf litter (S),TL9,77,53,31,29,109,54
+190,190,Very Compact Litter - Short Needle Conifers (Static),F-RAC,120,78,54,22,97,87
+191,191,Compact Litter - Deciduous or Evergreen Foliage (Static),F-FOL,110,72,50,22,96,80
+192,192,Litter from Medium-Long Needle Pine Trees (Static),F-PIN,101,66,46,22,95,74
+193,193,Pure Eucalyptus Litter - No Understory (Static),F-EUC,92,60,41,22,98,66
+201,201,Low load activity fuel (S),SB1,141,71,53,12,116,97
+202,202,Moderate load activity or low load blowdown (S),SB2,129,65,49,12,115,89
+203,203,High load activity fuel or moderate load blowdown (S),SB3,117,59,44,12,116,80
+204,204,High load blowdown (S),SB4,105,53,40,12,114,72
+211,211,Conifers with short leave with 4 to 6 tonha of shrubs,PT211,80,165,108,140,88,122
+212,212,Hardwoods shrubs 2 to 5,PT212,77,159,104,140,89,118
+213,213,Pine trees w shrubs 4 to 7,PT213,74,153,100,140,89,114
+214,214,Eucalypt shrubs 4 to 6 ton,PT214,71,147,96,140,89,109
+221,221,hardwoods with shrubs 8 to 17,PT221,53,109,72,140,88,81
+222,222,holm and cork oak shrubs 7 to 17,PT222,53,109,72,140,88,81
+223,223,Young stands of eucalyptus,PT223,53,109,72,140,88,81
+224,224,Other forest stands with shrubs 6 to 9 ton of shrubs,PT224,53,109,72,140,88,81
+225,225,Pines with shrubs 8 to 18 ton of shrub load,PT225,53,109,72,140,88,81
+226,226,Other forest stands with shrubs 2 to 5 ton of shrubs,PT226,53,109,72,140,88,81
+227,227,Eucalypt shrubs 9 to 18 ton,PT227,53,109,72,140,88,81
+231,231,Low shrubs (<1m) load 4 to 8 ton,PT231,53,109,72,140,88,81
+232,232,High shrubs (>1m) load 10 to 19 ton,PT232,53,109,72,140,88,81
+233,233,Low grass (<0.5m),PT233,53,109,72,140,88,81
+234,234,Tall grass (>0.5m),PT234,53,109,72,140,88,81
+235,235,Young shrubs (max 3 years),PT235,53,109,72,140,88,81
+236,236,Low shrubs (<1m) load 7 to 14 ton,PT236,53,109,72,140,88,81
+237,237,High shrubs (>1m) load 12 to 27 ton,PT237,53,109,72,140,88,81

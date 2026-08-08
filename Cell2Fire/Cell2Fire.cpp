@@ -332,6 +332,114 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         }
     }
 
+    // ---- Factores de ajuste del ROS por tipo de combustible -----------------
+    // Analogo al fuel adjustment factor de FARSITE: multiplica el ROS de las celdas
+    // de ese combustible, igual en todas las direcciones. CSV de dos columnas
+    // (codigo,factor) con encabezado opcional. Los combustibles no listados quedan
+    // en 1.0. La numeracion es la del kernel en uso, por eso el archivo va por
+    // instancia y no hay una tabla comun a los tres.
+    if (!this->args.FuelAdjustmentFile.empty())
+    {
+        // Mapa codigo_string -> codigo_numerico, tomado de la tabla del kernel en uso
+        // (columna fuel_type). Permite escribir "GR3" o "PCH1" en vez del numero, que
+        // es autoexplicativo y ademas impide aplicar por error el archivo de un kernel
+        // a una instancia de otro: los codigos no calzarian.
+        std::unordered_map<std::string, int> codigoAFuel;
+        {
+            std::string tabla;
+            const std::string sep = "/";
+            if (this->args.Simulator == "K") tabla = this->args.InFolder + sep + "kitral_lookup_table.csv";
+            else if (this->args.Simulator == "C") tabla = this->args.InFolder + sep + "fbp_lookup_table.csv";
+            else if (this->args.Simulator == "P") tabla = this->args.InFolder + sep + "portugal_lookup_table.csv";
+            else
+            {
+                tabla = this->args.InFolder + sep + "spain_lookup_table.csv";
+                std::ifstream probe(tabla);
+                if (!probe.good()) tabla = this->args.InFolder + sep + "portugal_lookup_table.csv";
+            }
+            std::ifstream lt(tabla);
+            std::string ln;
+            while (std::getline(lt, ln))
+            {
+                std::vector<std::string> campos;
+                std::stringstream ss(ln);
+                std::string campo;
+                while (std::getline(ss, campo, ',')) campos.push_back(campo);
+                if (campos.size() < 4) continue;
+                try
+                {
+                    int num = std::stoi(campos[0]);
+                    std::string cod = campos[3];
+                    while (!cod.empty() && (cod.back() == '\r' || cod.back() == ' ')) cod.pop_back();
+                    if (!cod.empty()) codigoAFuel[cod] = num;
+                }
+                catch (const std::invalid_argument&) { continue; }
+            }
+        }
+
+        std::ifstream fa(this->args.FuelAdjustmentFile);
+        if (!fa.good())
+            throw std::runtime_error("No se pudo abrir " + this->args.FuelAdjustmentFile);
+        std::string linea;
+        int n = 0;
+        while (std::getline(fa, linea))
+        {
+            if (linea.empty()) continue;
+            size_t coma = linea.find(',');
+            if (coma == std::string::npos) continue;
+            std::string clave = linea.substr(0, coma);
+            while (!clave.empty() && (clave.back() == '\r' || clave.back() == ' ')) clave.pop_back();
+            try
+            {
+                int code;
+                auto ic = codigoAFuel.find(clave);
+                if (ic != codigoAFuel.end())
+                {
+                    code = ic->second;   // codigo string, p.ej. GR3 o PCH1
+                }
+                else
+                {
+                    // No es un codigo de la tabla: se acepta como numerico. Si tampoco
+                    // lo es, stoi lanza invalid_argument y se trata mas abajo: un
+                    // codigo mal escrito no puede pasar en silencio, porque dejaria la
+                    // corrida sin calibrar sin que nadie se entere.
+                    size_t consumidos = 0;
+                    code = std::stoi(clave, &consumidos);
+                    if (consumidos != clave.size()) throw std::invalid_argument(clave);
+                }
+                double f = std::stod(linea.substr(coma + 1));
+                if (f <= 0.0)
+                    throw std::runtime_error("Factor no positivo para el combustible "
+                                             + std::to_string(code));
+                fuelAdjustment[code] = f;
+                ++n;
+            }
+            catch (const std::invalid_argument&)
+            {
+                // El encabezado es la unica linea no numerica que se tolera.
+                if (clave == "fuel" || clave == "Fuel" || clave == "codigo" || clave == "code")
+                    continue;
+                std::string validos;
+                int k2 = 0;
+                for (auto& e : codigoAFuel)
+                {
+                    if (k2++ >= 12) { validos += " ..."; break; }
+                    validos += " " + e.first;
+                }
+                throw std::runtime_error("Combustible '" + clave + "' no existe en la tabla de "
+                                         + this->args.Simulator + ". Codigos validos:" + validos);
+            }
+        }
+        std::cout << "Fuel adjustment: " << n << " combustible(s) con factor";
+        int k = 0;
+        for (auto& e : fuelAdjustment)
+        {
+            if (k++ >= 8) { std::cout << " ..."; break; }
+            std::cout << "  " << e.first << "=" << e.second;
+        }
+        std::cout << std::endl;
+    }
+
     // ---- Barreras vectoriales: rios, caminos y cortafuegos ------------------
     // Semantica UNIFICADA para las tres: la celda deja de ser combustible
     // (statusCells=3, sale de availCells) y ademas queda marcada como barrera, de

@@ -588,7 +588,13 @@ Cells::manageFire(int period,
 
     // If cell cannot send (thresholds), then it will be burned out in the main
     // loop
-    double HROS = (1 + args->ROSCV * ROSRV) * headstruct.ros * args->HFactor;
+    // Factor de ajuste por tipo de combustible (FARSITE fuel adjustment factor):
+    // multiplica el ROS de forma uniforme, sin deformar la elipse. Se aplica tanto al
+    // ROS de cabeza que decide si la celda propaga como a la distribucion angular, de
+    // modo que un factor de 3 triplique la velocidad en todas las direcciones.
+    const double fuelAdj = fuelAdjOf(df_ptr[this->realId - 1].nftype);
+
+    double HROS = (1 + args->ROSCV * ROSRV) * headstruct.ros * args->HFactor * fuelAdj;
 
     // Extra debug step for sanity checks
     if (args->verbose)
@@ -615,7 +621,7 @@ Cells::manageFire(int period,
                      mainstruct.a * args->HFactor,
                      mainstruct.b * args->FFactor,
                      mainstruct.c * args->BFactor,
-                     args->EFactor);
+                     args->EFactor * fuelAdj);
         // std::cout << "Sale de Ros Dist" << std::endl;
 
         // Fire progress using ROS from burning cell, not the neighbors //

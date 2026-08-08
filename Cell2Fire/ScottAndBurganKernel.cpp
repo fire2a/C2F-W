@@ -31,6 +31,23 @@ struct FuelSB { double depth,mx,hD,hL,l1,l10,l100,lh,lw,s1,sh,sw; int dyn; };
 static std::unordered_map<int,FuelSB>& sbTable(){
     static std::unordered_map<int,FuelSB> T;
     if(T.empty()){
+    // Modelos originales de Anderson (1982), NFFL 1-13. Se incluyen porque hay
+    // cartografia historica y de LANDFIRE codificada asi; Scott & Burgan (2005)
+    // los sucede pero no los reemplaza en los datos existentes. Cargas en
+    // toneladas/acre, como el resto de la tabla. Ninguno es dinamico.
+    T[1]=FuelSB{1.0,0.12,8000.0,8000.0,0.7405,0.0,0.0,0.0,0.0,3500.0,1500.0,1500.0,0};   // FM1: Short grass
+    T[2]=FuelSB{1.0,0.15,8000.0,8000.0,2.0038,1.0019,0.5009,0.5009,0.0,3000.0,1500.0,1500.0,0};   // FM2: Timber grass and understory
+    T[3]=FuelSB{2.5,0.25,8000.0,8000.0,3.0056,0.0,0.0,0.0,0.0,1500.0,1500.0,1500.0,0};   // FM3: Tall grass
+    T[4]=FuelSB{6.0,0.2,8000.0,8000.0,5.0094,4.0075,2.0038,0.0,5.0094,2000.0,1500.0,1500.0,0};   // FM4: Chaparral
+    T[5]=FuelSB{2.0,0.2,8000.0,8000.0,1.0019,0.5009,0.0,0.0,2.0038,2000.0,1500.0,1500.0,0};   // FM5: Brush
+    T[6]=FuelSB{2.5,0.25,8000.0,8000.0,1.5028,2.5047,2.0038,0.0,0.0,1750.0,1500.0,1500.0,0};   // FM6: Dormant brush, hardwood slash
+    T[7]=FuelSB{2.5,0.4,8000.0,8000.0,1.1326,1.8731,1.5028,0.0,0.3703,1750.0,1500.0,1500.0,0};   // FM7: Southern rough
+    T[8]=FuelSB{0.2,0.3,8000.0,8000.0,1.5028,1.0019,2.5047,0.0,0.0,2000.0,1500.0,1500.0,0};   // FM8: Short needle litter
+    T[9]=FuelSB{0.2,0.25,8000.0,8000.0,2.9185,0.4138,0.1525,0.0,0.0,2500.0,1500.0,1500.0,0};   // FM9: Long needle or hardwood litter
+    T[10]=FuelSB{1.0,0.25,8000.0,8000.0,3.0056,2.0038,5.0094,0.0,2.0038,2000.0,1500.0,1500.0,0};   // FM10: Timber litter & understory
+    T[11]=FuelSB{1.0,0.15,8000.0,8000.0,1.5028,4.5085,5.5103,0.0,0.0,1500.0,1500.0,1500.0,0};   // FM11: Light logging slash
+    T[12]=FuelSB{2.3,0.2,8000.0,8000.0,4.0075,14.0263,16.531,0.0,0.0,1500.0,1500.0,1500.0,0};   // FM12: Medium logging slash
+    T[13]=FuelSB{3.0,0.25,8000.0,8000.0,7.0132,23.0432,28.0526,0.0,0.0,1500.0,1500.0,1500.0,0};   // FM13: Heavy logging slash
     T[101]=FuelSB{0.4,0.15,8000.0,8000.0,0.1,0.0,0.0,0.3,0.0,2200.0,2000.0,1500.0,1};
     T[102]=FuelSB{1.0,0.15,8000.0,8000.0,0.1,0.0,0.0,1.0,0.0,2000.0,1800.0,1500.0,1};
     T[103]=FuelSB{2.0,0.3,8000.0,8000.0,0.1,0.4,0.0,1.5,0.0,1500.0,1300.0,1500.0,1};

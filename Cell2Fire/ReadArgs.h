@@ -15,6 +15,17 @@
 // Se declara como 'struct arguments' y no como 'typedef struct {...} arguments;':
 // con inicializadores por defecto en los miembros, la forma anonima con typedef
 // dispara C5208 en MSVC, que WindowsTests.vcxproj trata como error.
+// Factores de ajuste del ROS por codigo de combustible (fuel adjustment factors,
+// FARSITE). Global porque Cells::manageFire los necesita y solo recibe 'arguments*';
+// se llena una vez al cargar la instancia y no cambia durante la simulacion.
+extern std::unordered_map<int, double> fuelAdjustment;
+inline double
+fuelAdjOf(int fuelCode)
+{
+    auto it = fuelAdjustment.find(fuelCode);
+    return (it == fuelAdjustment.end()) ? 1.0 : it->second;
+}
+
 struct arguments
 {
     std::string InFolder, OutFolder, WeatherOpt, FirebreakPlan, Simulator, WeatherWeightsFile, MoistureMode;
@@ -32,6 +43,7 @@ struct arguments
     bool UseFirebreaks = false;      // --firebreaks: carga instancia/Firebreaks/*.shp
     float BarrierWidth = 10.0;       // --barrier-width: ancho declarado (m) de las barreras dadas como polilinea
     float BarrierCover = 0.8;        // --barrier-cover: fraccion de celda cubierta para declararla no combustible
+    std::string FuelAdjustmentFile = "";  // --fuel-adjustment: CSV fuel,factor por tipo de combustible
     std::string FirebreakShp = "";   // --firebreak-shp: cortafuegos desde un .shp puntual
     float Latitude = 0.0f;       // latitud (grados, +N) para humedad espacial Modo 2 (--latitude)
     bool HasLatitude = false;    // true si --latitude fue provisto (si no, usa data->lat por celda)

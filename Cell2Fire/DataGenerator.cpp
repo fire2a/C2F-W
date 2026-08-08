@@ -946,7 +946,11 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     }
     else if (Simulator == "S")
     {
-        lookupTable = InFolder + separator() + "spain_lookup_table.csv";
+        // Nombre nuevo, consistente con el renombre del kernel; se prefiere si existe.
+        // spain_lookup_table.csv se mantiene por compatibilidad con instancias previas.
+        lookupTable = InFolder + separator() + "scott_and_burgan_lookup_table.csv";
+        if (!fileExists(lookupTable))
+            lookupTable = InFolder + separator() + "spain_lookup_table.csv";
         // Preset Portugal (o instancias PT antiguas): si no hay spain_lookup pero si portugal_lookup, usarlo.
         if (!fileExists(lookupTable))
         {

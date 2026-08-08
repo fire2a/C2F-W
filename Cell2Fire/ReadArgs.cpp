@@ -1,5 +1,7 @@
 // Inclusions
 #include "ReadArgs.h"
+
+
 #include <algorithm>
 #include <dirent.h>
 #include <fstream>
@@ -15,6 +17,9 @@
 #include <iterator>
 #include <string>
 #include <vector>
+
+// Factores de ajuste del ROS por combustible; se llena al cargar la instancia.
+std::unordered_map<int, double> fuelAdjustment;
 
 #define btoa(x) ((x) ? "true" : "false")
 
@@ -104,6 +109,12 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     // fisica correcta (queda vegetacion en la celda, pero no se puede atravesar).
     { char* bc = getCmdOption(argv, argv + argc, "--barrier-cover");
       if (bc) { args_ptr->BarrierCover = std::stof(bc); printf("barrier-cover: %s\n", bc); } }
+    // Factor de ajuste del ROS por tipo de combustible, en la linea del fuel
+    // adjustment factor de FARSITE: multiplica la velocidad de propagacion de las
+    // celdas de ese combustible, uniforme en todas las direcciones. Cada kernel usa
+    // su propia numeracion, asi que el archivo va por instancia. Default 1.0.
+    { char* fa = getCmdOption(argv, argv + argc, "--fuel-adjustment");
+      if (fa) { args_ptr->FuelAdjustmentFile = std::string(fa); printf("fuel-adjustment: %s\n", fa); } }
     // Interruptores para las carpetas de la instancia (Rivers/, Roads/, Firebreaks/).
     // Explicitos a proposito: si se cargaran solo por existir la carpeta, agregar un
     // .shp cambiaria los resultados en silencio y los escenarios A/B serian imposibles.
