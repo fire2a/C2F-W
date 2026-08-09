@@ -702,14 +702,20 @@ CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
                     m1h  = col(4, 6.0f) / 100.0f;  m10h = col(5, 7.0f) / 100.0f;  m100h = col(6, 8.0f) / 100.0f;
                     mlh  = col(7, 60.0f) / 100.0f; mlw  = col(8, 90.0f) / 100.0f;
                 }
-                else if (ncol >= 5 && !DF[i][4].empty())  // legacy FireScenario 1..4 -> DkLk
+                else if (ncol >= 5 && !DF[i][4].empty())
                 {
-                    int sc = std::stoi(DF[i][4]);
-                    if (sc >= 1 && sc <= 4)
+                    // La columna FireScenario esta obsoleta: la humedad se define con
+                    // --moisture-mode/--moisture-scenario, que es explicito y no depende
+                    // de que el archivo de clima traiga una columna extra. Se ignora su
+                    // contenido, pero se avisa una vez para que nadie descubra el cambio
+                    // por una diferencia inexplicada en los resultados.
+                    static bool avisado = false;
+                    if (!avisado)
                     {
-                        float dead = 3.0f * sc;
-                        m1h = dead / 100.0f; m10h = (dead + 1) / 100.0f; m100h = (dead + 2) / 100.0f;
-                        mlh = (30.0f * sc) / 100.0f; mlw = (30.0f + 30.0f * sc) / 100.0f;
+                        std::cout << "AVISO: la columna FireScenario de Weather.csv se ignora. "
+                                     "Usa --moisture-scenario DkLm para fijar la humedad."
+                                  << std::endl;
+                        avisado = true;
                     }
                 }
             }
