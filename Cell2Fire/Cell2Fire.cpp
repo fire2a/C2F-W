@@ -172,6 +172,46 @@ separator()
  * - Validates and adjusts simulation parameters based on the weather file
  * consistency.
  */
+
+// Codigos de combustible de la tabla del kernel en uso: "GR3" -> 103, "PCH1" -> 1.
+// Lo comparten --fuel-adjustment y --treat-fuel, de modo que en ambos se pueda escribir
+// el codigo del modelo en vez del numero del raster.
+static std::unordered_map<std::string, int>
+_lookupCodes(const arguments& args)
+{
+    std::unordered_map<std::string, int> m;
+    const std::string sep = "/";
+    std::string tabla;
+    if (args.Simulator == "K") tabla = args.InFolder + sep + "kitral_lookup_table.csv";
+    else if (args.Simulator == "C") tabla = args.InFolder + sep + "fbp_lookup_table.csv";
+    else if (args.Simulator == "P") tabla = args.InFolder + sep + "portugal_lookup_table.csv";
+    else
+    {
+        tabla = args.InFolder + sep + "scott_and_burgan_lookup_table.csv";
+        std::ifstream probe(tabla);
+        if (!probe.good()) tabla = args.InFolder + sep + "spain_lookup_table.csv";
+    }
+    std::ifstream lt(tabla);
+    std::string ln;
+    while (std::getline(lt, ln))
+    {
+        std::vector<std::string> campos;
+        std::stringstream ss(ln);
+        std::string campo;
+        while (std::getline(ss, campo, ',')) campos.push_back(campo);
+        if (campos.size() < 4) continue;
+        try
+        {
+            int num = std::stoi(campos[0]);
+            std::string cod = campos[3];
+            while (!cod.empty() && (cod.back() == '\r' || cod.back() == ' ')) cod.pop_back();
+            if (!cod.empty()) m[cod] = num;
+        }
+        catch (const std::invalid_argument&) { continue; }
+    }
+    return m;
+}
+
 Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
 {
     // Aux
@@ -332,6 +372,106 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         }
     }
 
+    // ---- Tratamientos silviculturales sobre una zona ------------------------
+    // Modifican la estructura del rodal sin eliminar la celda, que es lo que distingue
+    // un raleo o una poda de un cortafuegos. Subir la altura de base de copa dificulta
+    // que el fuego de superficie inicie copas; bajar la densidad aparente dificulta que
+    // el fuego de copas se propague. La carga superficial no se toca por separado: en
+    // Scott & Burgan la carga DEFINE el modelo, asi que reducirla es reasignar el
+    // combustible (--treat-fuel), no bajar un numero.
+    if (!this->args.TreatmentShp.empty())
+    {
+        std::vector<ShpPart> parts;
+        if (!readShapefileParts(this->args.TreatmentShp, parts))
+            throw std::runtime_error("No se pudo leer " + this->args.TreatmentShp
+                                     + " (debe ser PolyLine o Polygon en la CRS de la instancia)");
+        const int shpType = readShapefileType(this->args.TreatmentShp);
+        const bool isPolygon = (shpType == 5 || shpType == 15 || shpType == 25);
+
+        // celdas de la zona: las que el poligono cubre por sobre el umbral de cobertura
+        std::set<int> zona;
+        std::set<int> tocadas;
+        {
+            const double paso = this->cellSide * 0.25;
+            for (const auto& part : parts)
+                for (size_t k = 0; k + 1 < part.size(); ++k)
+                {
+                    double x0 = part[k].x, y0 = part[k].y, x1 = part[k + 1].x, y1 = part[k + 1].y;
+                    double seg = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+                    int ns = std::max(1, (int)std::ceil(seg / paso));
+                    for (int t = 0; t <= ns; ++t)
+                    {
+                        double x = x0 + (x1 - x0) * t / ns, y = y0 + (y1 - y0) * t / ns;
+                        int c = (int)((x - this->xllcorner) / this->cellSide);
+                        int r = this->rows - 1 - (int)((y - this->yllcorner) / this->cellSide);
+                        if (r >= 0 && r < this->rows && c >= 0 && c < this->cols)
+                            tocadas.insert(r * this->cols + c + 1);
+                    }
+                }
+        }
+        if (isPolygon)
+        {
+            // el interior completo, no solo el borde: la zona tratada es un area
+            double bx0, by0, bx1, by1;
+            readShapefileBBox(this->args.TreatmentShp, bx0, by0, bx1, by1);
+            int c0 = std::max(0, (int)((bx0 - this->xllcorner) / this->cellSide));
+            int c1 = std::min(this->cols - 1, (int)((bx1 - this->xllcorner) / this->cellSide));
+            int r0 = std::max(0, this->rows - 1 - (int)((by1 - this->yllcorner) / this->cellSide));
+            int r1 = std::min(this->rows - 1, this->rows - 1 - (int)((by0 - this->yllcorner) / this->cellSide));
+            for (int r = r0; r <= r1; ++r)
+                for (int c = c0; c <= c1; ++c)
+                {
+                    double x = this->xllcorner + c * this->cellSide;
+                    double y = this->yllcorner + (this->rows - 1 - r) * this->cellSide;
+                    if (cellAreaFraction(parts, x, y, this->cellSide) >= this->args.BarrierCover)
+                        zona.insert(r * this->cols + c + 1);
+                }
+        }
+        else
+        {
+            zona = tocadas;
+        }
+
+        int nuevoFuel = -1;
+        if (!this->args.TreatFuel.empty())
+        {
+            auto codigos = _lookupCodes(this->args);
+            auto it = codigos.find(this->args.TreatFuel);
+            if (it != codigos.end()) nuevoFuel = it->second;
+            else
+            {
+                try { nuevoFuel = std::stoi(this->args.TreatFuel); }
+                catch (const std::exception&)
+                {
+                    throw std::runtime_error("--treat-fuel: '" + this->args.TreatFuel
+                                             + "' no existe en la tabla de " + this->args.Simulator);
+                }
+            }
+        }
+
+        int nCbh = 0, nCbd = 0, nCcf = 0, nFuel = 0;
+        for (int cid : zona)
+        {
+            inputs& d = df[cid - 1];
+            if (this->args.TreatCBH >= 0.0f) { d.cbh = this->args.TreatCBH; ++nCbh; }
+            if (this->args.TreatCBD >= 0.0f) { d.cbd = this->args.TreatCBD; ++nCbd; }
+            if (this->args.TreatCCF >= 0.0f) { d.ccf = this->args.TreatCCF; ++nCcf; }
+            if (nuevoFuel > 0)
+            {
+                d.nftype = nuevoFuel;
+                this->fTypeCells[cid - 1] = 1;          // sigue siendo quemable
+                ++nFuel;
+            }
+        }
+        std::cout << "Treatment: " << zona.size() << " celda(s) en "
+                  << this->args.TreatmentShp;
+        if (nCbh)  std::cout << " | cbh=" << this->args.TreatCBH;
+        if (nCbd)  std::cout << " | cbd=" << this->args.TreatCBD;
+        if (nCcf)  std::cout << " | ccf=" << this->args.TreatCCF;
+        if (nFuel) std::cout << " | fuel=" << this->args.TreatFuel << "(" << nuevoFuel << ")";
+        std::cout << std::endl;
+    }
+
     // ---- Factores de ajuste del ROS por tipo de combustible -----------------
     // Analogo al fuel adjustment factor de FARSITE: multiplica el ROS de las celdas
     // de ese combustible, igual en todas las direcciones. CSV de dos columnas
@@ -340,42 +480,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     // instancia y no hay una tabla comun a los tres.
     if (!this->args.FuelAdjustmentFile.empty())
     {
-        // Mapa codigo_string -> codigo_numerico, tomado de la tabla del kernel en uso
-        // (columna fuel_type). Permite escribir "GR3" o "PCH1" en vez del numero, que
-        // es autoexplicativo y ademas impide aplicar por error el archivo de un kernel
-        // a una instancia de otro: los codigos no calzarian.
-        std::unordered_map<std::string, int> codigoAFuel;
-        {
-            std::string tabla;
-            const std::string sep = "/";
-            if (this->args.Simulator == "K") tabla = this->args.InFolder + sep + "kitral_lookup_table.csv";
-            else if (this->args.Simulator == "C") tabla = this->args.InFolder + sep + "fbp_lookup_table.csv";
-            else if (this->args.Simulator == "P") tabla = this->args.InFolder + sep + "portugal_lookup_table.csv";
-            else
-            {
-                tabla = this->args.InFolder + sep + "spain_lookup_table.csv";
-                std::ifstream probe(tabla);
-                if (!probe.good()) tabla = this->args.InFolder + sep + "portugal_lookup_table.csv";
-            }
-            std::ifstream lt(tabla);
-            std::string ln;
-            while (std::getline(lt, ln))
-            {
-                std::vector<std::string> campos;
-                std::stringstream ss(ln);
-                std::string campo;
-                while (std::getline(ss, campo, ',')) campos.push_back(campo);
-                if (campos.size() < 4) continue;
-                try
-                {
-                    int num = std::stoi(campos[0]);
-                    std::string cod = campos[3];
-                    while (!cod.empty() && (cod.back() == '\r' || cod.back() == ' ')) cod.pop_back();
-                    if (!cod.empty()) codigoAFuel[cod] = num;
-                }
-                catch (const std::invalid_argument&) { continue; }
-            }
-        }
+        std::unordered_map<std::string,int> codigoAFuel = _lookupCodes(this->args);
 
         std::ifstream fa(this->args.FuelAdjustmentFile);
         if (!fa.good())

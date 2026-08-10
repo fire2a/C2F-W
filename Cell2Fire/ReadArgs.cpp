@@ -113,6 +113,16 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     // adjustment factor de FARSITE: multiplica la velocidad de propagacion de las
     // celdas de ese combustible, uniforme en todas las direcciones. Cada kernel usa
     // su propia numeracion, asi que el archivo va por instancia. Default 1.0.
+    { char* ts = getCmdOption(argv, argv + argc, "--treatment-shp");
+      if (ts) { args_ptr->TreatmentShp = std::string(ts); printf("treatment-shp: %s \n", ts); } }
+    { char* v = getCmdOption(argv, argv + argc, "--treat-cbh");
+      if (v) args_ptr->TreatCBH = std::stof(v); }
+    { char* v = getCmdOption(argv, argv + argc, "--treat-cbd");
+      if (v) args_ptr->TreatCBD = std::stof(v); }
+    { char* v = getCmdOption(argv, argv + argc, "--treat-ccf");
+      if (v) args_ptr->TreatCCF = std::stof(v); }
+    { char* v = getCmdOption(argv, argv + argc, "--treat-fuel");
+      if (v) args_ptr->TreatFuel = std::string(v); }
     { char* fa = getCmdOption(argv, argv + argc, "--fuel-adjustment");
       if (fa) { args_ptr->FuelAdjustmentFile = std::string(fa); printf("fuel-adjustment: %s\n", fa); } }
     // Interruptores para las carpetas de la instancia (Rivers/, Roads/, Firebreaks/).

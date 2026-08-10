@@ -44,6 +44,13 @@ struct arguments
     float BarrierWidth = 10.0;       // --barrier-width: ancho declarado (m) de las barreras dadas como polilinea
     float BarrierCover = 0.8;        // --barrier-cover: fraccion de celda cubierta para declararla no combustible
     std::string FuelAdjustmentFile = "";  // --fuel-adjustment: CSV fuel,factor por tipo de combustible
+    // Tratamientos silviculturales sobre una zona dada por poligono. Modifican la
+    // estructura del dosel o reasignan el combustible superficial, sin eliminar la celda.
+    std::string TreatmentShp = "";   // --treatment-shp: poligono de la zona tratada
+    float TreatCBH = -1.0f;          // --treat-cbh: altura de base de copa (m)
+    float TreatCBD = -1.0f;          // --treat-cbd: densidad aparente de copa (kg/m3)
+    float TreatCCF = -1.0f;          // --treat-ccf: cobertura de copa (fraccion 0-1)
+    std::string TreatFuel = "";      // --treat-fuel: combustible superficial nuevo
     std::string FirebreakShp = "";   // --firebreak-shp: cortafuegos desde un .shp puntual
     float Latitude = 0.0f;       // latitud (grados, +N) para humedad espacial Modo 2 (--latitude)
     bool HasLatitude = false;    // true si --latitude fue provisto (si no, usa data->lat por celda)
