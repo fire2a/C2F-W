@@ -194,7 +194,12 @@ endif
 CXXFLAGS = $(ARCHFLAG) $(PICFLAG) $(COMMON) $(OMPC) $(INCS) -O3
 LDFLAGS  = $(ARCHFLAG) $(PICFLAG) $(COMMON) $(STATICFLAGS) $(OMPL) $(LIBS)
 
-CATCH2_V3_LIBS := $(shell echo "int main(){}" | $(CXX) -x c++ - $(CXXFLAGS) -lCatch2Main -lCatch2 -o /dev/null 2>/dev/null && echo "-lCatch2Main -lCatch2" || echo "")
+# Deteccion de Catch2 v3. Se enlaza a un archivo temporal y no a /dev/null: en MSYS2 el
+# enlazador de Windows no puede escribir ahi y aborta con "final link failed: file
+# truncated", lo que daba un falso negativo y hacia enlazar los tests SIN Catch2 --
+# cientos de referencias no resueltas y un "undefined reference to WinMain" al final.
+CATCH2_PROBE := $(shell mktemp -u).probe
+CATCH2_V3_LIBS := $(shell echo "int main(){}" | $(CXX) -x c++ - $(CXXFLAGS) -lCatch2Main -lCatch2 -o $(CATCH2_PROBE) 2>/dev/null && echo "-lCatch2Main -lCatch2" || echo ""; rm -f $(CATCH2_PROBE) $(CATCH2_PROBE).exe)
 TEST_LDFLAGS = $(LDFLAGS) $(CATCH2_V3_LIBS)
 
 # =============================================================================
