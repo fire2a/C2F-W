@@ -4,6 +4,8 @@
  */
 
 #include "DataGenerator.h"
+// Declarado en ScottAndBurganKernel.cpp: codigos de combustible para lookup identidad
+std::vector<int> sbAllFuelCodes();
 
 #include "tiffio.h"
 #include <algorithm>
@@ -944,7 +946,17 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     }
     else if (Simulator == "S")
     {
-        lookupTable = InFolder + separator() + "spain_lookup_table.csv";
+        // Nombre nuevo, consistente con el renombre del kernel; se prefiere si existe.
+        // spain_lookup_table.csv se mantiene por compatibilidad con instancias previas.
+        lookupTable = InFolder + separator() + "scott_and_burgan_lookup_table.csv";
+        if (!fileExists(lookupTable))
+            lookupTable = InFolder + separator() + "spain_lookup_table.csv";
+        // Preset Portugal (o instancias PT antiguas): si no hay spain_lookup pero si portugal_lookup, usarlo.
+        if (!fileExists(lookupTable))
+        {
+            std::string pt = InFolder + separator() + "portugal_lookup_table.csv";
+            if (fileExists(pt)) lookupTable = pt;
+        }
     }
     else if (Simulator == "C")
     {
@@ -963,12 +975,37 @@ GenDataFile(const std::string& InFolder, const std::string& Simulator)
     // Check if the lookup table exists
     if (!fileExists(lookupTable))
     {
-        std::cerr << "Error: Lookup table '" << lookupTable << "' not found" << std::endl;
-        return;
+        // Fallback identidad (solo S&B/Portugal): sin spain_lookup_table.csv se usa el
+        // valor del raster como codigo de modelo directamente. Todos los codigos de sbTable
+        // (S&B 101-204 + Portugal 211-237) se marcan quemables; el resto queda como no-fuel.
+        if (Simulator == "S")
+        {
+            std::cout << "Aviso: no se encontro '" << lookupTable
+                      << "'. Usando lookup identidad (valor del raster = codigo S&B/Portugal)." << std::endl;
+            std::vector<int> codes = sbAllFuelCodes();
+            int idx = 0;
+            for (int code : codes)
+            {
+                std::string k = std::to_string(code);
+                FBPDict[k] = "FM" + k;
+                // color por defecto determinista (tono verde-oliva variando por indice)
+                float t = static_cast<float>((idx * 47) % 100) / 100.0f;
+                float r = 0.35f + 0.45f * t, g = 0.45f + 0.35f * (1.0f - t), b = 0.20f + 0.25f * t;
+                ColorsDict[k] = std::make_tuple(r, g, b, 1.0f);
+                idx++;
+            }
+        }
+        else
+        {
+            std::cerr << "Error: Lookup table '" << lookupTable << "' not found" << std::endl;
+            return;
+        }
     }
-
-    // Call Dictionary function to read lookup table
-    std::tie(FBPDict, ColorsDict) = Dictionary(lookupTable);
+    else
+    {
+        // Call Dictionary function to read lookup table
+        std::tie(FBPDict, ColorsDict) = Dictionary(lookupTable);
+    }
 
     // Call ForestGrid function
     // If fuels.tif exists, then .tif's are used, otherwise .asc

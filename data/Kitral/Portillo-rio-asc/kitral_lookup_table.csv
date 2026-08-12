@@ -1,0 +1,38 @@
+grid_value,export_value,descriptive_name,fuel_type,r,g,b,h,s,l
+1,1,Pastizales Mesomorficos Densos,PCH1,209,255,115,57,255,185
+2,2,Pastizales Mesoomorficos Ralos,PCH2,34,102,51,95,128,68
+3,3,Pastizales Higromorficos Densos,PCH3,131,199,149,96,96,165
+4,4,Pastizales Higromorficos Ralos,PCH4,112,168,0,57,255,84
+5,5,Chacareria. Vinedos y Frutales,PCH5,223,184,230,206,122,207
+6,6,Matorrales y Arbustos Mesomorficos Densos,MT01,172,102,237,192,201,170
+7,7,Matorrales y Arbustos Mesomorficos Medios y Ralos,MT02,112,12,242,188,231,127
+8,8,Matorrales y Arbustos Higromorficos Densos,MT03,196,189,151,35,70,174
+9,9,Matorrales y Arbustos Higromorificos Medios y Ralos,MT04,137,112,68,27,86,103
+10,10,Formaciones con predominancia de Chuesquea spp,MT05,196,189,151,35,70,174
+11,11,Formaciones con predominancia de Ulex spp,MT06,251,190,185,3,227,218
+12,12,Renovales Nativos diferentes al Tipo Siempreverde,MT07,247,104,161,-272,229,176
+13,13,Renovales Nativos del Tipo Siempreverde,MT08,174,1,126,-285,252,88
+14,14,Formaciones con predominancia de Alerzales,BN01,255,255,190,42,255,223
+15,15,Formaciones con predominancia de Araucaria,BN02,230,230,0,42,255,115
+16,16,Arbolado Nativo Denso,BN03,255,211,127,28,255,191
+17,17,Arbolado Nativo de Densidad Media,BN04,255,170,0,28,255,128
+18,18,Arbolado Nativo de Densidad Baja,BN05,255,211,127,28,255,191
+19,19,Plantaciones Coniferas Nuevas (0-3) sin Manejo,PL01,99,0,0,0,255,50
+20,20,Plantaciones Coniferas Jovenes (4-11) sin Manejo,PL02,99,0,0,0,255,50
+21,21,Plantaciones Coniferas Adultas (12-17) sin Manejo,PL03,99,0,0,0,255,50
+22,22,Plantaciones Coniferas Mayores (>17) sin Manejo,PL04,99,0,0,0,255,50
+23,23,Plantaciones Coniferas Jovenes (4-11) con Manejo,PL05,99,0,0,0,255,50
+24,24,Plantaciones Coniferas Adultas (12-17) con Manejo,PL06,99,0,0,0,255,50
+25,25,Plantaciones Coniferas Mayores (>17) sin Manejo,PL07,99,0,0,0,255,50
+26,26,Plantaciones Eucaliptos Nuevas (0-3),PL08,99,0,0,0,255,50
+27,27,Plantaciones Eucaliptos Jovenes (4-10),PL09,99,0,0,0,255,50
+28,28,Plantaciones Eucalipto Adultas (>10),PL10,99,0,0,0,255,50
+29,29,Plantaciones Latifoliadas y Mixtas,PL11,99,0,0,0,255,50
+30,30,Desechos Explotacion a Tala Rasa de Plantaciones,DX01,255,211,127,28,255,191
+31,31,Desechos Explotacion a Tala Rasa de Bosque Nativo,DX02,255,211,127,28,255,191
+100,100,Not Available,Non-fuel,255,255,255,170,0,255
+101,101,Non-fuel,Non-fuel,130,130,130,170,0,130
+102,102,Water,Non-fuel,115,223,255,138,255,185
+103,103,Unknown,Non-fuel,0,0,0,170,0,0
+104,104,Unclassified,Non-fuel,166,166,166,170,0,166
+105,105,Vegetated Non-Fuel,Non-fuel,204,204,204,170,0,204

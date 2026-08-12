@@ -1,12 +1,25 @@
 // Inclusions
 #include "ReadArgs.h"
+
+
 #include <algorithm>
 #include <dirent.h>
 #include <fstream>
+#include <sys/stat.h>   // stat/S_ISREG: reemplaza dirent d_type (no existe en MinGW)
+
+// S_ISREG no es estandar en MSVC (solo define _S_IFMT/_S_IFREG). Sin esta guarda el
+// build con msbuild/vcpkg falla. En POSIX y MinGW ya viene definido y esto no aplica.
+#ifndef S_ISREG
+#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
+#endif
+#include <sys/types.h>
 #include <iostream>
 #include <iterator>
 #include <string>
 #include <vector>
+
+// Factores de ajuste del ROS por combustible; se llena al cargar la instancia.
+std::unordered_map<int, double> fuelAdjustment;
 
 #define btoa(x) ((x) ? "true" : "false")
 
@@ -71,6 +84,65 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
 
     //--weather
     char* input_weather = getCmdOption(argv, argv + argc, "--weather");
+    { char* fm = getCmdOption(argv, argv + argc, "--fch-mode");
+      if (fm) args_ptr->FchMode = std::string(fm); }
+    { char* lm = getCmdOption(argv, argv + argc, "--lb-mode");
+      if (lm) args_ptr->LbMode = std::string(lm); }
+    args_ptr->FmcShading = cmdOptionExists(argv, argv + argc, "--fmc-shading");
+    { char* bf = getCmdOption(argv, argv + argc, "--breach-factor");
+      if (bf) args_ptr->BreachFactor = std::stod(bf); }
+    { char* sf = getCmdOption(argv, argv + argc, "--spot-factor");
+      if (sf) args_ptr->SpotFactor = std::stod(sf); }
+    { char* rv = getCmdOption(argv, argv + argc, "--river-shp");
+      if (rv) args_ptr->RiverShp = std::string(rv); }
+    { char* rd = getCmdOption(argv, argv + argc, "--road-shp");
+      if (rd) { args_ptr->RoadShp = std::string(rd); printf("road-shp: %s \n", rd); } }
+    { char* fb = getCmdOption(argv, argv + argc, "--firebreak-shp");
+      if (fb) { args_ptr->FirebreakShp = std::string(fb); printf("firebreak-shp: %s \n", fb); } }
+    // Una polilinea no lleva ancho; el breaching necesita uno para calcular W.
+    // Los poligonos derivan el suyo de la geometria y este valor solo actua de piso.
+    { char* bw = getCmdOption(argv, argv + argc, "--barrier-width");
+      if (bw) { args_ptr->BarrierWidth = std::stof(bw); printf("barrier-width: %s m\n", bw); } }
+    // Fraccion de la celda que el poligono debe cubrir para volverla no combustible.
+    // Con el default 0.8 un rio mas angosto que la celda NO la vuelve no combustible:
+    // queda combustible pero con las transiciones que lo cruzan bloqueadas, que es la
+    // fisica correcta (queda vegetacion en la celda, pero no se puede atravesar).
+    { char* bc = getCmdOption(argv, argv + argc, "--barrier-cover");
+      if (bc) { args_ptr->BarrierCover = std::stof(bc); printf("barrier-cover: %s\n", bc); } }
+    // Factor de ajuste del ROS por tipo de combustible, en la linea del fuel
+    // adjustment factor de FARSITE: multiplica la velocidad de propagacion de las
+    // celdas de ese combustible, uniforme en todas las direcciones. Cada kernel usa
+    // su propia numeracion, asi que el archivo va por instancia. Default 1.0.
+    { char* ts = getCmdOption(argv, argv + argc, "--treatment-shp");
+      if (ts) { args_ptr->TreatmentShp = std::string(ts); printf("treatment-shp: %s \n", ts); } }
+    { char* v = getCmdOption(argv, argv + argc, "--treat-cbh");
+      if (v) args_ptr->TreatCBH = std::stof(v); }
+    { char* v = getCmdOption(argv, argv + argc, "--treat-cbd");
+      if (v) args_ptr->TreatCBD = std::stof(v); }
+    { char* v = getCmdOption(argv, argv + argc, "--treat-ccf");
+      if (v) args_ptr->TreatCCF = std::stof(v); }
+    { char* v = getCmdOption(argv, argv + argc, "--treat-fuel");
+      if (v) args_ptr->TreatFuel = std::string(v); }
+    { char* fa = getCmdOption(argv, argv + argc, "--fuel-adjustment");
+      if (fa) { args_ptr->FuelAdjustmentFile = std::string(fa); printf("fuel-adjustment: %s\n", fa); } }
+    // Interruptores para las carpetas de la instancia (Rivers/, Roads/, Firebreaks/).
+    // Explicitos a proposito: si se cargaran solo por existir la carpeta, agregar un
+    // .shp cambiaria los resultados en silencio y los escenarios A/B serian imposibles.
+    args_ptr->UseRivers = cmdOptionExists(argv, argv + argc, "--rivers");
+    args_ptr->UseRoads = cmdOptionExists(argv, argv + argc, "--roads");
+    args_ptr->UseFirebreaks = cmdOptionExists(argv, argv + argc, "--firebreaks");
+    { char* ig = getCmdOption(argv, argv + argc, "--ignition-shp");
+      if (ig)
+      {
+          args_ptr->IgnitionShp = std::string(ig);
+          printf("ignition-shp: %s \n", ig);
+      } }
+    { char* af = getCmdOption(argv, argv + argc, "--active-front-shp");
+      if (af)
+      {
+          args_ptr->ActiveFrontShp = std::string(af);
+          printf("active-front-shp: %s \n", af);
+      } }
     if (input_weather)
     {
         printf("WeatherOpt: %s \n", input_weather);
@@ -110,6 +182,7 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     bool verbose_input = false;
     bool iplog_input = false;
     bool input_ignitions = false;
+    bool active_front = false;
     bool out_grids = false;
     bool out_fl = false;
     bool out_intensity = false;
@@ -199,6 +272,14 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     {
         input_ignitions = true;
         printf("Ignitions: %s \n", btoa(input_ignitions));
+    }
+
+    //--active-front (ignite a set of cells simultaneously, read from ActiveCells.csv)
+    if (cmdOptionExists(argv, argv + argc, "--active-front"))
+    {
+        active_front = true;
+        input_ignitions = true;  // active front uses the ignition-from-file path
+        printf("Active front: %s \n", btoa(active_front));
     }
 
     //--grids
@@ -302,6 +383,15 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
                    simulator_option);
             args_ptr->Simulator = simulator_option;
         }
+        else if (s == "P")
+        {
+            // Portugal: preset sobre el motor S&B (rothermel_s = BehavePlus). Los combustibles
+            // portugueses (211-237) viven en sbTable; la fisica es Rothermel/BehavePlus, no el
+            // antiguo ajuste de regresion. Internamente corre como "S".
+            printf("Simulator: P (preset Portugal sobre motor S&B/rothermel_s)\n");
+            args_ptr->Simulator = "S";
+            args_ptr->PortugalPreset = true;
+        }
         else
         {
             printf("Simulator: %s \n", simulator_option);
@@ -382,15 +472,66 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     else
         args_ptr->FMC = dfmc;
 
-    //--scenario
+    //--scenario  (Portugal: critical|moderate|soft o 1|2|3; tambien entero para otros usos)
     char* input_scenario = getCmdOption(argv, argv + argc, "--scenario");
     if (input_scenario)
     {
         printf("scenario: %s \n", input_scenario);
-        args_ptr->scenario = std::stoi(input_scenario, &sz);
+        std::string sc = input_scenario;
+        for (char& c : sc) c = static_cast<char>(std::tolower((unsigned char)c));
+        if (sc == "critical")      args_ptr->scenario = 1;
+        else if (sc == "moderate") args_ptr->scenario = 2;
+        else if (sc == "soft")     args_ptr->scenario = 3;
+        else                       args_ptr->scenario = std::stoi(input_scenario, &sz);
     }
     else
         args_ptr->scenario = dscen;
+
+    //--moisture-mode  (S&B: direct | scenario | ffmc | conditioning | spatial | portugal)
+    char* input_mmode = getCmdOption(argv, argv + argc, "--moisture-mode");
+    if (input_mmode)
+    {
+        std::string m = input_mmode;
+        if (m != "direct" && m != "scenario" && m != "ffmc" && m != "conditioning" && m != "spatial" && m != "portugal")
+        {
+            printf("moisture-mode '%s' no reconocido; usando 'direct'\n", input_mmode);
+            args_ptr->MoistureMode = "direct";
+        }
+        else
+        {
+            printf("moisture-mode: %s \n", input_mmode);
+            args_ptr->MoistureMode = m;
+        }
+    }
+    else if (args_ptr->PortugalPreset)
+        // preset Portugal sin --moisture-mode explicito: usa los escenarios nombrados (Fernandes)
+        args_ptr->MoistureMode = "portugal";
+    else
+        args_ptr->MoistureMode = "direct";
+
+    //--latitude  (grados, +N) para humedad espacial Modo 2; si no, usa data->lat por celda
+    char* input_lat = getCmdOption(argv, argv + argc, "--latitude");
+    if (input_lat)
+    {
+        args_ptr->Latitude = std::stof(input_lat);
+        args_ptr->HasLatitude = true;
+        printf("latitude: %.4f \n", args_ptr->Latitude);
+    }
+    else
+    {
+        args_ptr->HasLatitude = false;
+    }
+
+    //--moisture-scenario  (S&B DkLm, p.ej. D2L1; o entero 1..4 = diagonal). Reemplaza la columna del Weather.
+    char* input_scn = getCmdOption(argv, argv + argc, "--moisture-scenario");
+    if (input_scn)
+    {
+        args_ptr->Scenario = input_scn;
+        printf("moisture-scenario: %s \n", input_scn);
+        if (!input_mmode) args_ptr->MoistureMode = "scenario";  // activa el modo si no se fijó otro
+    }
+    else
+        args_ptr->Scenario = "D2L2";
 
     //--ROS-Threshold
     char* ROS_Threshold = getCmdOption(argv, argv + argc, "--ROS-Threshold");
@@ -589,10 +730,10 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
 
     if (input_hplan == &empty)
     {
-        args_ptr->HarvestPlan = "";
+        args_ptr->FirebreakPlan = "";
     }
     else
-        args_ptr->HarvestPlan = input_hplan;
+        args_ptr->FirebreakPlan = input_hplan;
 
     // booleans
     args_ptr->OutMessages = out_messages;
@@ -607,6 +748,17 @@ parseArgs(int argc, char* argv[], arguments* args_ptr)
     args_ptr->verbose = verbose_input;
     args_ptr->IgnitionsLog = iplog_input;
     args_ptr->Ignitions = input_ignitions;
+    // --ignition-shp implica igniciones explicitas. Va DESPUES de la linea anterior:
+    // input_ignitions la sobreescribiria si se asignara antes.
+    if (!args_ptr->IgnitionShp.empty()) args_ptr->Ignitions = true;
+    args_ptr->ActiveFront = active_front;
+    // idem para --active-front-shp: implica frente activo e igniciones explicitas.
+    // OJO: va DESPUES de la asignacion de arriba, que si no lo sobreescribe.
+    if (!args_ptr->ActiveFrontShp.empty())
+    {
+        args_ptr->ActiveFront = true;
+        args_ptr->Ignitions = true;
+    }
     args_ptr->OutputGrids = out_grids;
     args_ptr->FinalGrid = out_finalgrid;
     args_ptr->PromTuned = prom_tuned;
@@ -634,7 +786,7 @@ printArgs(arguments args)
     std::cout << "OutCrown: " << args.OutCrown << std::endl;
     std::cout << "OutCrownConsumption: " << args.OutCrownConsumption <<
     std::endl; std::cout << "OutSurfConsumption: " << args.OutSurfConsumption <<
-    std::endl; std::cout << "HarvestPlan: " << args.HarvestPlan << std::endl;
+    std::endl; std::cout << "FirebreakPlan: " << args.FirebreakPlan << std::endl;
     std::cout << "TotalYears: " << args.TotalYears << std::endl;
     std::cout << "TotalSims: " << args.TotalSims << std::endl;
     std::cout << "FirePeriodLen: " << args.FirePeriodLen << std::endl;
@@ -655,7 +807,7 @@ printArgs(arguments args)
     std::cout << "InFolder: " << args.InFolder << std::endl;
     std::cout << "OutFolder: " << args.OutFolder << std::endl;
     std::cout << "WeatherOpt: " << args.WeatherOpt << std::endl;
-    std::cout << "FirebreakCells: " << args.HarvestPlan << std::endl;
+    std::cout << "FirebreakCells: " << args.FirebreakPlan << std::endl;
     std::cout << "NWeatherFiles: " << args.NWeatherFiles << std::endl;
     std::cout << "MinutesPerWP: " << args.MinutesPerWP << std::endl;
     std::cout << "MaxFirePeriods: " << args.MaxFirePeriods << std::endl;
@@ -695,13 +847,22 @@ countWeathers(const std::string directory_path)
     {
         while ((ent = readdir(dir)) != NULL)
         {
-            if (ent->d_type == DT_REG)
+            const std::string filename = ent->d_name;
+            // Length guard FIRST: entries such as "." and ".." are shorter than the
+            // pattern and the substr()/compare() below would throw std::out_of_range.
+            // Previously d_type==DT_REG filtered them out, but d_type is a POSIX
+            // extension that MinGW does not provide, so we cannot rely on it.
+            if (filename.size() < 11)  // "Weather" + ".csv"
+                continue;
+            if (filename.compare(0, 7, "Weather") != 0
+                || filename.compare(filename.size() - 4, 4, ".csv") != 0)
+                continue;
+            // regular-file test: portable across POSIX and MinGW (replaces d_type)
+            struct stat st;
+            const std::string full = directory_path + "/" + filename;
+            if (stat(full.c_str(), &st) == 0 && S_ISREG(st.st_mode))
             {
-                std::string filename = ent->d_name;
-                if (filename.substr(0, 7) == "Weather" && filename.substr(filename.size() - 4) == ".csv")
-                {
-                    file_count++;
-                }
+                file_count++;
             }
         }
         closedir(dir);

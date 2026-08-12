@@ -1,9 +1,8 @@
 // Include classes
 #include "Cells.h"
-#include "FuelModelFBP.h"
-#include "FuelModelKitral.h"
-#include "FuelModelPortugal.h"
-#include "FuelModelSpain.h"
+#include "CanadianFBPKernel.h"
+#include "KitralKernel.h"
+#include "ScottAndBurganKernel.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
 #include "Spotting.h"
@@ -40,7 +39,7 @@ using namespace std;
  * @param _fType2 The secondary fuel type as a descriptive string.
  * @param _perimeter The perimeter of the cell.
  * @param _status The fire status of the cell (0: Available, 1: Burning, 2:
- * Burnt, 3: Harvested, 4: Non Fuel).
+ * Burnt, 3: Firebreak, 4: Non Fuel).
  * @param _realId Alternative identifier of the cell (1 to size of the
  * landscape).
  */
@@ -54,12 +53,12 @@ Cells::Cells(int _id,
              int _realId)
 {
     // Global "dictionaries" (vectors) for status and types
-    // Status: 0: "Available", 1: "Burning", 2: "Burnt", 3: "Harvested", 4:"Non
+    // Status: 0: "Available", 1: "Burning", 2: "Burnt", 3: "Firebreak", 4:"Non
     // Fuel"
     this->StatusD[0] = "Available";
     this->StatusD[1] = "Burning";
     this->StatusD[2] = "Burnt";
-    this->StatusD[3] = "Harvested";
+    this->StatusD[3] = "Firebreak";
     this->StatusD[4] = "Non Fuel";
 
     // FTypeD: 0: "NonBurnable", 1: "Normal", 2: "Burnable
@@ -91,7 +90,7 @@ Cells::Cells(int _id,
     this->hPeriod = 0;
 
     this->fireStarts = 0;
-    this->harvestStarts = 0;
+    this->firebreakStarts = 0;
     this->fireStartsSeason = 0;
     this->tYears = 4;
 
@@ -500,7 +499,7 @@ Cells::manageFire(int period,
 
     else if (args->Simulator == "P")
     {
-        calculate_p(&df_ptr[this->realId - 1],
+        calculate_s(&df_ptr[this->realId - 1],
                     coef,
                     args,
                     &mainstruct,
@@ -559,6 +558,8 @@ Cells::manageFire(int period,
 
     // Adjusting from Spanish forests angle
     cartesianAngle = wdf_ptr->waz;
+    if (args->Simulator == "S" || args->Simulator == "K")
+        cartesianAngle = mainstruct.raz;  // FARSITE/KITRAL: dir. resultante viento+pendiente
     double offset = cartesianAngle + 270;
     cartesianAngle = 360 - (offset >= 360) * (cartesianAngle - 90) - (offset < 360) * offset;
     if (cartesianAngle == 360)
@@ -587,7 +588,13 @@ Cells::manageFire(int period,
 
     // If cell cannot send (thresholds), then it will be burned out in the main
     // loop
-    double HROS = (1 + args->ROSCV * ROSRV) * headstruct.ros * args->HFactor;
+    // Factor de ajuste por tipo de combustible (FARSITE fuel adjustment factor):
+    // multiplica el ROS de forma uniforme, sin deformar la elipse. Se aplica tanto al
+    // ROS de cabeza que decide si la celda propaga como a la distribucion angular, de
+    // modo que un factor de 3 triplique la velocidad en todas las direcciones.
+    const double fuelAdj = fuelAdjOf(df_ptr[this->realId - 1].nftype);
+
+    double HROS = (1 + args->ROSCV * ROSRV) * headstruct.ros * args->HFactor * fuelAdj;
 
     // Extra debug step for sanity checks
     if (args->verbose)
@@ -614,7 +621,7 @@ Cells::manageFire(int period,
                      mainstruct.a * args->HFactor,
                      mainstruct.b * args->FFactor,
                      mainstruct.c * args->BFactor,
-                     args->EFactor);
+                     args->EFactor * fuelAdj);
         // std::cout << "Sale de Ros Dist" << std::endl;
 
         // Fire progress using ROS from burning cell, not the neighbors //
@@ -637,19 +644,18 @@ Cells::manageFire(int period,
             {
                 std::cout << "     (angle, realized ros in m/min): (" << angle << ", " << ros << ")" << std::endl;
             }
-            if (args->Simulator == "S" || args->Simulator == "P")
+            if (args->Simulator == "P")
             {
-                // Slope effect
+                // Portugal: mantiene su efecto de pendiente pareado (lineal entre celdas)
                 float se = slope_effect(df_ptr[this->realId - 1].elev, df_ptr[nb - 1].elev, this->perimeter / 4.);
                 if (args->verbose)
                 {
                     std::cout << "Slope effect: " << se << std::endl;
                 }
-
-                // Workaround PeriodLen in 60 minutes
                 this->fireProgress[nb] += ros * args->FirePeriodLen * se;  // Updates fire progress
             }
             else
+                // S&B (FARSITE): la pendiente ya está en ROS de cabeza + dirección (raz)
                 this->fireProgress[nb] += ros * args->FirePeriodLen;
 
             // If the message arrives to the adjacent cell's center, send a
@@ -675,7 +681,7 @@ Cells::manageFire(int period,
                 }
                 else if (args->Simulator == "P")
                 {
-                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
+                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
@@ -689,7 +695,7 @@ Cells::manageFire(int period,
                 surfFraction[nb] = metrics.sfc;
                 SurfaceFlameLengths[this->realId - 1] = mainstruct.fl;
                 SurfaceFlameLengths[nb - 1] = metrics.fl;
-                if ((args->AllowCROS) && (args->Simulator == "S" || args->Simulator == "P"))
+                if ((args->AllowCROS) && (args->Simulator == "S" || args->Simulator == "P" || args->Simulator == "K"))
                 {
                     float comp_zero = 0;
                     MaxFlameLengths[this->realId - 1]
@@ -850,7 +856,7 @@ Cells::manageFireBBO(int period,
     }
     else if (args->Simulator == "P")
     {
-        calculate_p(&df_ptr[this->realId - 1],
+        calculate_s(&df_ptr[this->realId - 1],
                     coef,
                     args,
                     &mainstruct,
@@ -905,6 +911,8 @@ Cells::manageFireBBO(int period,
 
     // Adjusting from Spanish forests angle
     cartesianAngle = wdf_ptr->waz;
+    if (args->Simulator == "S" || args->Simulator == "K")
+        cartesianAngle = mainstruct.raz;  // FARSITE/KITRAL: dir. resultante viento+pendiente
     double offset = cartesianAngle + 270;
     cartesianAngle = 360 - (offset >= 360) * (cartesianAngle - 90) - (offset < 360) * offset;
     if (cartesianAngle == 360)
@@ -1011,7 +1019,7 @@ Cells::manageFireBBO(int period,
                 }
                 else if (args->Simulator == "P")
                 {
-                    determine_destiny_metrics_p(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
+                    determine_destiny_metrics_s(&df_ptr[int(nb) - 1], coef, args, &metrics, wdf_ptr);
                 }
                 crownState[this->realId - 1] = mainstruct.crown;
                 crownState[nb - 1] = metrics.crown;
@@ -1171,7 +1179,7 @@ Cells::get_burned(int period,
     }
     else if (args->Simulator == "P")
     {
-        calculate_p(&(df[this->id]),
+        calculate_s(&(df[this->id]),
                     coef,
                     args,
                     &mainstruct,
@@ -1218,7 +1226,7 @@ Cells::get_burned(int period,
 
 /**
  * @brief Sets a cell's fire status (0: Available, 1: Burning, 2: Burnt, 3:
- * Harvested, 4: Non Fuel).
+ * Firebreak, 4: Non Fuel).
  * @param status_int Code for new status.
  */
 void
@@ -1347,7 +1355,7 @@ Cells::ignition(int period,
         }
         else if (args->Simulator == "P")
         {
-            calculate_p(&df_ptr[this->realId - 1],
+            calculate_s(&df_ptr[this->realId - 1],
                         coef,
                         args,
                         &mainstruct,
@@ -1394,11 +1402,11 @@ Cells::ignition(int period,
         period       int
 */
 void
-Cells::harvested(int id, int period)
+Cells::firebreak(int id, int period)
 {
     // TODO: unused param
     this->status = 3;
-    this->harvestStarts = period;
+    this->firebreakStarts = period;
 }
 
 /*

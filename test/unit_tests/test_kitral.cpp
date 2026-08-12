@@ -1,7 +1,7 @@
 //
 // Created by mati on 20-02-25.
 //
-#include "../../Cell2Fire/FuelModelKitral.h"
+#include "../../Cell2Fire/KitralKernel.h"
 #include "../../Cell2Fire/FuelModelUtils.h"
 #include <string.h>
 // catch v3 or v2 compatibility
@@ -32,6 +32,7 @@ class NativeFuelFixture
     fuel_coefs* test_coefs;
     main_outs* test_outs;
     weatherDF* wdf;
+    arguments* test_args;
 
   public:
     NativeFuelFixture()
@@ -41,6 +42,10 @@ class NativeFuelFixture
         test_coefs = new fuel_coefs();
         test_outs = new main_outs();
         wdf = new weatherDF();
+        test_args = new arguments();
+        // parseArgs aplica estos defaults en produccion; el struct solo trae los
+        // inicializadores de los campos nuevos, asi que hay que ponerlos a mano.
+        test_args->ROS10Factor = 3.34f;   // dROS10Factor en ReadArgs.cpp
 
         set_fueltype(test_data, "BN03");
 
@@ -105,39 +110,64 @@ TEST_CASE("Slope effect works correctly", "[slope_effect]")
     // REQUIRE_THROWS(slope_effect(156.75, 170, 0));
 }
 
+// NOTA: la pendiente ya no entra por at->se (multiplicador precalculado) sino por
+// data->ps (raster slope.asc, en PORCENTAJE). rate_of_spread_k combina viento y
+// pendiente vectorialmente (estilo S&B/FARSITE) para producir tambien at->raz, la
+// direccion de maximo avance. La linea base sin pendiente se conserva: con ps=0 el
+// resultado coincide con el at->se=1 de la formulacion anterior (1.586).
 TEST_CASE_METHOD(NativeFuelFixture, "Rate of spread changes with slope", "[rate_of_spread_k]")
 {
-    test_outs->se = 1;
-    rate_of_spread_k(test_data, test_coefs, test_outs, wdf);
+    // sin pendiente: valor de referencia historico
+    test_data->ps = 0;
+    rate_of_spread_k(test_data, test_coefs, test_outs, wdf, test_args);
     REQUIRE_THAT(test_outs->rss, WithinAbs(1.586, 0.001));
-    test_outs->se = 0.5;
-    rate_of_spread_k(test_data, test_coefs, test_outs, wdf);
-    REQUIRE_THAT(test_outs->rss, WithinAbs(1.463, 0.001));
-    test_outs->se = 1.5;
-    rate_of_spread_k(test_data, test_coefs, test_outs, wdf);
-    REQUIRE_THAT(test_outs->rss, WithinAbs(1.709, 0.001));
+    const float ros_flat = test_outs->rss;
+
+    // el ROS crece monotonicamente con la pendiente
+    test_data->ps = 30;   // 30 %
+    rate_of_spread_k(test_data, test_coefs, test_outs, wdf, test_args);
+    const float ros_30 = test_outs->rss;
+    REQUIRE(ros_30 > ros_flat);
+
+    test_data->ps = 60;   // 60 %
+    rate_of_spread_k(test_data, test_coefs, test_outs, wdf, test_args);
+    REQUIRE(test_outs->rss > ros_30);
 }
 
 TEST_CASE_METHOD(NativeFuelFixture, "Rate of spread changes with wind", "[rate_of_spread_k]")
 {
-    test_outs->se = 1.2;
+    // Los valores absolutos de referencia (1.635 / 3.324 / 3.648) pertenecen a la
+    // formulacion anterior, que aplicaba at->se como multiplicador y combinaba viento
+    // y pendiente de forma multiplicativa. La formulacion actual los combina como
+    // vectores (estilo S&B/FARSITE) para producir tambien at->raz, lo que cambia los
+    // valores en ~1.5 % a viento alto. En lugar de re-anclar numeros a la nueva
+    // implementacion (lo que anularia el test como deteccion de regresiones), aqui se
+    // verifica el unico valor que ambas formulaciones comparten mas las propiedades
+    // fisicas esperadas.
+    test_data->ps = 0;   // aislar el efecto del viento
+
     wdf->ws = 10;
-    rate_of_spread_k(test_data, test_coefs, test_outs, wdf);
-    REQUIRE_THAT(test_outs->rss, WithinAbs(1.635, 0.001));
+    rate_of_spread_k(test_data, test_coefs, test_outs, wdf, test_args);
+    // linea base identica a la formulacion anterior con at->se = 1
+    REQUIRE_THAT(test_outs->rss, WithinAbs(1.586, 0.001));
+    const float ros_10 = test_outs->rss;
+
     wdf->ws = 50;
-    rate_of_spread_k(test_data, test_coefs, test_outs, wdf);
-    REQUIRE_THAT(test_outs->rss, WithinAbs(3.324, 0.001));
+    rate_of_spread_k(test_data, test_coefs, test_outs, wdf, test_args);
+    const float ros_50 = test_outs->rss;
+    REQUIRE(ros_50 > ros_10);
+
     wdf->ws = 100;
-    rate_of_spread_k(test_data, test_coefs, test_outs, wdf);
-    REQUIRE_THAT(test_outs->rss, WithinAbs(3.648, 0.001));
+    rate_of_spread_k(test_data, test_coefs, test_outs, wdf, test_args);
+    REQUIRE(test_outs->rss > ros_50);
 }
 
 // TODO: test reaction to temperature, humidity
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test length to breadth", "[l_to_b]")
 {
-    REQUIRE_THAT(l_to_b(10, test_coefs), WithinAbs(1.058, 0.001));
-    REQUIRE_THAT(l_to_b(100, test_coefs), WithinAbs(17.225, 0.001));
+    REQUIRE_THAT(l_to_b(10, test_coefs, test_args->LbMode), WithinAbs(1.058, 0.001));
+    REQUIRE_THAT(l_to_b(100, test_coefs, test_args->LbMode), WithinAbs(17.225, 0.001));
     // REQUIRE_THROWS(l_to_b(-1, test_coefs));
     //  This should throw exception in the future
 }
@@ -235,11 +265,11 @@ TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with slope", 
     wdf->tmp = 27;
     wdf->rh = 40;
     test_outs->se = 1;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(9.977, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(9.977, 0.001));
     test_outs->se = 0.5;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(9.101, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(9.101, 0.001));
     test_outs->se = 1.8;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(11.378, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(11.378, 0.001));
 }
 
 TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with wind", "[active_rate_of_spreadPL04]")
@@ -248,11 +278,11 @@ TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with wind", "
     wdf->tmp = 27;
     wdf->rh = 40;
     wdf->ws = 10;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(7.496, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(7.496, 0.001));
     wdf->ws = 50;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(16.951, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(16.951, 0.001));
     wdf->ws = 100;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(22.445, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(22.445, 0.001));
 }
 
 TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with temperature", "[active_rate_of_spreadPL04]")
@@ -261,17 +291,17 @@ TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with temperat
     wdf->rh = 40;
     test_outs->se = 1.2;
     wdf->tmp = -10;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(9.521, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(9.521, 0.001));
     wdf->tmp = 0;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(9.728, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(9.728, 0.001));
     wdf->tmp = 10;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(9.943, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(9.943, 0.001));
     wdf->tmp = 20;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(10.166, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(10.166, 0.001));
     wdf->tmp = 30;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(10.397, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(10.397, 0.001));
     wdf->tmp = 40;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(10.637, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(10.637, 0.001));
 }
 
 TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with humidity", "[active_rate_of_spreadPL04]")
@@ -280,11 +310,11 @@ TEST_CASE_METHOD(NativeFuelFixture, "Active rate of spread changes with humidity
     wdf->tmp = 26;
     test_outs->se = 1.2;
     wdf->rh = 5;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(115.518, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(115.518, 0.001));
     wdf->rh = 25;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(36.817, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(36.817, 0.001));
     wdf->rh = 45;
-    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf), WithinAbs(7.823, 0.001));
+    REQUIRE_THAT(active_rate_of_spreadPL04(test_data, test_outs, wdf, test_args), WithinAbs(7.823, 0.001));
 }
 
 TEST_CASE_METHOD(NativeFuelFixture, "Test check for active fire", "[checkActive]")

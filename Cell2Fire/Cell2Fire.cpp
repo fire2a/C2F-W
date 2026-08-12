@@ -1,4 +1,5 @@
 /* coding: utf-8
+#include <fstream>
 __version__ = "3.0"
 __author__ = "Jaime Carrasco-Barra, Cristobal Pais"
 __maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
@@ -8,13 +9,13 @@ __maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
 #include "Cell2Fire.h"
 #include "Cells.h"
 #include "DataGenerator.h"
-#include "FuelModelKitral.h"
-#include "FuelModelPortugal.h"
-#include "FuelModelSpain.h"
+#include "KitralKernel.h"
+#include "ScottAndBurganKernel.h"
 #include "FuelModelUtils.h"
 #include "Lightning.h"
 #include "ReadArgs.h"
 #include "ReadCSV.h"
+#include "ReadShp.h"
 #include "Spotting.h"
 #include "WriteCSV.h"
 
@@ -47,7 +48,7 @@ inputs* df_ptr;
 inputs* df;
 int currentSim = 0;
 std::unordered_map<int, std::vector<float>> BBOFactors;
-std::unordered_map<int, std::vector<int>> HarvestedCells;
+std::unordered_map<int, std::vector<int>> firebreakPlan;
 std::vector<float> WeatherWeights;
 std::vector<int> WeatherWeightIDs;
 std::vector<int> NFTypesCells;
@@ -67,7 +68,7 @@ printSets(std::unordered_set<int> availCells,
           std::unordered_set<int> nonBurnableCells,
           std::unordered_set<int> burningCells,
           std::unordered_set<int> burntCells,
-          std::unordered_set<int> harvestCells)
+          std::unordered_set<int> firebreakCells)
 {
     std::cout << "\nSet information period" << std::endl;
     std::cout << "Available Cells:";
@@ -99,7 +100,7 @@ printSets(std::unordered_set<int> availCells,
     std::cout << std::endl;
 
     std::cout << "Firebreak Cells:";
-    for (auto& hc : harvestCells)
+    for (auto& hc : firebreakCells)
     {
         std::cout << " " << hc;
     }
@@ -165,12 +166,52 @@ separator()
  * `WeatherDistribution.csv`.
  * - Processes ignition points from `Ignitions.csv` (if provided) and computes
  * adjacent cells based on the ignition radius.
- * - Categorizes cells as burnable, non-burnable, or harvested based on input
+ * - Categorizes cells as burnable, non-burnable, or firebreak based on input
  * data.
  * - If BBO tuning is enabled, initializes tuning factors using `BBOFuels.csv`.
  * - Validates and adjusts simulation parameters based on the weather file
  * consistency.
  */
+
+// Codigos de combustible de la tabla del kernel en uso: "GR3" -> 103, "PCH1" -> 1.
+// Lo comparten --fuel-adjustment y --treat-fuel, de modo que en ambos se pueda escribir
+// el codigo del modelo en vez del numero del raster.
+static std::unordered_map<std::string, int>
+_lookupCodes(const arguments& args)
+{
+    std::unordered_map<std::string, int> m;
+    const std::string sep = "/";
+    std::string tabla;
+    if (args.Simulator == "K") tabla = args.InFolder + sep + "kitral_lookup_table.csv";
+    else if (args.Simulator == "C") tabla = args.InFolder + sep + "fbp_lookup_table.csv";
+    else if (args.Simulator == "P") tabla = args.InFolder + sep + "portugal_lookup_table.csv";
+    else
+    {
+        tabla = args.InFolder + sep + "scott_and_burgan_lookup_table.csv";
+        std::ifstream probe(tabla);
+        if (!probe.good()) tabla = args.InFolder + sep + "spain_lookup_table.csv";
+    }
+    std::ifstream lt(tabla);
+    std::string ln;
+    while (std::getline(lt, ln))
+    {
+        std::vector<std::string> campos;
+        std::stringstream ss(ln);
+        std::string campo;
+        while (std::getline(ss, campo, ',')) campos.push_back(campo);
+        if (campos.size() < 4) continue;
+        try
+        {
+            int num = std::stoi(campos[0]);
+            std::string cod = campos[3];
+            while (!cod.empty() && (cod.back() == '\r' || cod.back() == ' ')) cod.pop_back();
+            if (!cod.empty()) m[cod] = num;
+        }
+        catch (const std::invalid_argument&) { continue; }
+    }
+    return m;
+}
+
 Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
 {
     // Aux
@@ -236,6 +277,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->xllcorner = frdf.xllcorner;
     this->yllcorner = frdf.yllcorner;
 
+    // ---- Rio: leer shapefile (--river-shp) y rasterizar a celdas-rio ----
     this->coordCells = frdf.coordCells;
     // this->adjCells = frdf.adjCells;
 
@@ -303,23 +345,23 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         }
     }
 
-    // Harvested cells
-    if (strcmp(this->args.HarvestPlan.c_str(), EM) != 0)
+    // Firebreak cells
+    if (strcmp(this->args.FirebreakPlan.c_str(), EM) != 0)
     {
         std::string sep = ",";
-        CSVReader CSVHPlan(this->args.HarvestPlan, sep);
+        CSVReader CSVFirebreakPlan(this->args.FirebreakPlan, sep);
 
         // Populate Ignitions vector
-        std::vector<std::vector<std::string>> HarvestedDF = CSVHPlan.getData(this->args.HarvestPlan);
-        // CSVHPlan.printData(HarvestedDF);
+        std::vector<std::vector<std::string>> firebreakDF = CSVFirebreakPlan.getData(this->args.FirebreakPlan);
+        // CSVFirebreakPlan.printData(firebreakDF);
 
         // Cells
-        int HCellsP = HarvestedDF.size() - 1;
-        CSVHPlan.parseHarvestedDF(HarvestedCells, HarvestedDF, HCellsP);
+        int HCellsP = firebreakDF.size() - 1;
+        CSVFirebreakPlan.parseFirebreakDF(firebreakPlan, firebreakDF, HCellsP);
 
         // Print-out
-        std::cout << "Number of Firebreak Cells :" << HarvestedCells.size() << std::endl;
-        for (auto it = HarvestedCells.begin(); it != HarvestedCells.end(); it++)
+        std::cout << "Number of Firebreak Cells :" << firebreakPlan.size() << std::endl;
+        for (auto it = firebreakPlan.begin(); it != firebreakPlan.end(); it++)
         {
             for (auto& it2 : it->second)
             {
@@ -328,6 +370,365 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
                 this->statusCells[it2 - 1] = 3;
             }
         }
+    }
+
+    // ---- Tratamientos silviculturales sobre una zona ------------------------
+    // Modifican la estructura del rodal sin eliminar la celda, que es lo que distingue
+    // un raleo o una poda de un cortafuegos. Subir la altura de base de copa dificulta
+    // que el fuego de superficie inicie copas; bajar la densidad aparente dificulta que
+    // el fuego de copas se propague. La carga superficial no se toca por separado: en
+    // Scott & Burgan la carga DEFINE el modelo, asi que reducirla es reasignar el
+    // combustible (--treat-fuel), no bajar un numero.
+    if (!this->args.TreatmentShp.empty())
+    {
+        std::vector<ShpPart> parts;
+        if (!readShapefileParts(this->args.TreatmentShp, parts))
+            throw std::runtime_error("No se pudo leer " + this->args.TreatmentShp
+                                     + " (debe ser PolyLine o Polygon en la CRS de la instancia)");
+        const int shpType = readShapefileType(this->args.TreatmentShp);
+        const bool isPolygon = (shpType == 5 || shpType == 15 || shpType == 25);
+
+        // celdas de la zona: las que el poligono cubre por sobre el umbral de cobertura
+        std::set<int> zona;
+        std::set<int> tocadas;
+        {
+            const double paso = this->cellSide * 0.25;
+            for (const auto& part : parts)
+                for (size_t k = 0; k + 1 < part.size(); ++k)
+                {
+                    double x0 = part[k].x, y0 = part[k].y, x1 = part[k + 1].x, y1 = part[k + 1].y;
+                    double seg = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+                    int ns = std::max(1, (int)std::ceil(seg / paso));
+                    for (int t = 0; t <= ns; ++t)
+                    {
+                        double x = x0 + (x1 - x0) * t / ns, y = y0 + (y1 - y0) * t / ns;
+                        int c = (int)((x - this->xllcorner) / this->cellSide);
+                        int r = this->rows - 1 - (int)((y - this->yllcorner) / this->cellSide);
+                        if (r >= 0 && r < this->rows && c >= 0 && c < this->cols)
+                            tocadas.insert(r * this->cols + c + 1);
+                    }
+                }
+        }
+        if (isPolygon)
+        {
+            // el interior completo, no solo el borde: la zona tratada es un area
+            double bx0, by0, bx1, by1;
+            readShapefileBBox(this->args.TreatmentShp, bx0, by0, bx1, by1);
+            int c0 = std::max(0, (int)((bx0 - this->xllcorner) / this->cellSide));
+            int c1 = std::min(this->cols - 1, (int)((bx1 - this->xllcorner) / this->cellSide));
+            int r0 = std::max(0, this->rows - 1 - (int)((by1 - this->yllcorner) / this->cellSide));
+            int r1 = std::min(this->rows - 1, this->rows - 1 - (int)((by0 - this->yllcorner) / this->cellSide));
+            for (int r = r0; r <= r1; ++r)
+                for (int c = c0; c <= c1; ++c)
+                {
+                    double x = this->xllcorner + c * this->cellSide;
+                    double y = this->yllcorner + (this->rows - 1 - r) * this->cellSide;
+                    if (cellAreaFraction(parts, x, y, this->cellSide) >= this->args.BarrierCover)
+                        zona.insert(r * this->cols + c + 1);
+                }
+        }
+        else
+        {
+            zona = tocadas;
+        }
+
+        int nuevoFuel = -1;
+        if (!this->args.TreatFuel.empty())
+        {
+            auto codigos = _lookupCodes(this->args);
+            auto it = codigos.find(this->args.TreatFuel);
+            if (it != codigos.end()) nuevoFuel = it->second;
+            else
+            {
+                try { nuevoFuel = std::stoi(this->args.TreatFuel); }
+                catch (const std::exception&)
+                {
+                    throw std::runtime_error("--treat-fuel: '" + this->args.TreatFuel
+                                             + "' no existe en la tabla de " + this->args.Simulator);
+                }
+            }
+        }
+
+        int nCbh = 0, nCbd = 0, nCcf = 0, nFuel = 0;
+        for (int cid : zona)
+        {
+            inputs& d = df[cid - 1];
+            if (this->args.TreatCBH >= 0.0f) { d.cbh = this->args.TreatCBH; ++nCbh; }
+            if (this->args.TreatCBD >= 0.0f) { d.cbd = this->args.TreatCBD; ++nCbd; }
+            if (this->args.TreatCCF >= 0.0f) { d.ccf = this->args.TreatCCF; ++nCcf; }
+            if (nuevoFuel > 0)
+            {
+                d.nftype = nuevoFuel;
+                this->fTypeCells[cid - 1] = 1;          // sigue siendo quemable
+                ++nFuel;
+            }
+        }
+        std::cout << "Treatment: " << zona.size() << " celda(s) en "
+                  << this->args.TreatmentShp;
+        if (nCbh)  std::cout << " | cbh=" << this->args.TreatCBH;
+        if (nCbd)  std::cout << " | cbd=" << this->args.TreatCBD;
+        if (nCcf)  std::cout << " | ccf=" << this->args.TreatCCF;
+        if (nFuel) std::cout << " | fuel=" << this->args.TreatFuel << "(" << nuevoFuel << ")";
+        std::cout << std::endl;
+    }
+
+    // ---- Factores de ajuste del ROS por tipo de combustible -----------------
+    // Analogo al fuel adjustment factor de FARSITE: multiplica el ROS de las celdas
+    // de ese combustible, igual en todas las direcciones. CSV de dos columnas
+    // (codigo,factor) con encabezado opcional. Los combustibles no listados quedan
+    // en 1.0. La numeracion es la del kernel en uso, por eso el archivo va por
+    // instancia y no hay una tabla comun a los tres.
+    if (!this->args.FuelAdjustmentFile.empty())
+    {
+        std::unordered_map<std::string,int> codigoAFuel = _lookupCodes(this->args);
+
+        std::ifstream fa(this->args.FuelAdjustmentFile);
+        if (!fa.good())
+            throw std::runtime_error("No se pudo abrir " + this->args.FuelAdjustmentFile);
+        std::string linea;
+        int n = 0;
+        while (std::getline(fa, linea))
+        {
+            if (linea.empty()) continue;
+            size_t coma = linea.find(',');
+            if (coma == std::string::npos) continue;
+            std::string clave = linea.substr(0, coma);
+            while (!clave.empty() && (clave.back() == '\r' || clave.back() == ' ')) clave.pop_back();
+            try
+            {
+                int code;
+                auto ic = codigoAFuel.find(clave);
+                if (ic != codigoAFuel.end())
+                {
+                    code = ic->second;   // codigo string, p.ej. GR3 o PCH1
+                }
+                else
+                {
+                    // No es un codigo de la tabla: se acepta como numerico. Si tampoco
+                    // lo es, stoi lanza invalid_argument y se trata mas abajo: un
+                    // codigo mal escrito no puede pasar en silencio, porque dejaria la
+                    // corrida sin calibrar sin que nadie se entere.
+                    size_t consumidos = 0;
+                    code = std::stoi(clave, &consumidos);
+                    if (consumidos != clave.size()) throw std::invalid_argument(clave);
+                }
+                double f = std::stod(linea.substr(coma + 1));
+                if (f <= 0.0)
+                    throw std::runtime_error("Factor no positivo para el combustible "
+                                             + std::to_string(code));
+                fuelAdjustment[code] = f;
+                ++n;
+            }
+            catch (const std::invalid_argument&)
+            {
+                // El encabezado es la unica linea no numerica que se tolera.
+                if (clave == "fuel" || clave == "Fuel" || clave == "codigo" || clave == "code")
+                    continue;
+                std::string validos;
+                int k2 = 0;
+                for (auto& e : codigoAFuel)
+                {
+                    if (k2++ >= 12) { validos += " ..."; break; }
+                    validos += " " + e.first;
+                }
+                throw std::runtime_error("Combustible '" + clave + "' no existe en la tabla de "
+                                         + this->args.Simulator + ". Codigos validos:" + validos);
+            }
+        }
+        std::cout << "Fuel adjustment: " << n << " combustible(s) con factor";
+        int k = 0;
+        for (auto& e : fuelAdjustment)
+        {
+            if (k++ >= 8) { std::cout << " ..."; break; }
+            std::cout << "  " << e.first << "=" << e.second;
+        }
+        std::cout << std::endl;
+    }
+
+    // ---- Barreras vectoriales: rios, caminos y cortafuegos ------------------
+    // Semantica UNIFICADA para las tres: la celda deja de ser combustible
+    // (statusCells=3, sale de availCells) y ademas queda marcada como barrera, de
+    // modo que el breaching pueda saltarla. Sin breaching, detienen el fuego.
+    // El tipo solo distingue la atribucion en RiverCrossings*.csv.
+    //
+    // Regla de rasterizacion segun geometria:
+    //   Polygon  -> la celda cae si su CENTRO esta dentro del poligono. Asi una
+    //               franja mas angosta que la celda no se convierte en un muro del
+    //               ancho de la celda: solo captura las celdas que realmente cubre.
+    //   PolyLine -> una linea no encierra nada, asi que se toman las celdas que
+    //               atraviesa (muestreo denso). Es una sobreestimacion inevitable:
+    //               para anchos sub-celda conviene entregar poligonos.
+    {
+        std::vector<std::pair<std::string, std::string>> vecSrc;  // {ruta, tipo}
+        if (!this->args.RiverShp.empty()) vecSrc.push_back({ this->args.RiverShp, "river" });
+        if (!this->args.RoadShp.empty()) vecSrc.push_back({ this->args.RoadShp, "road" });
+        if (!this->args.FirebreakShp.empty()) vecSrc.push_back({ this->args.FirebreakShp, "firebreak" });
+        if (this->args.UseRivers)
+            for (const auto& p : listShapefiles(this->args.InFolder + "Rivers"))
+                vecSrc.push_back({ p.first, "river" });
+        if (this->args.UseRoads)
+            for (const auto& p : listShapefiles(this->args.InFolder + "Roads"))
+                vecSrc.push_back({ p.first, "road" });
+        if (this->args.UseFirebreaks)
+            for (const auto& p : listShapefiles(this->args.InFolder + "Firebreaks"))
+                vecSrc.push_back({ p.first, "firebreak" });
+
+        int vecTotal = 0;
+        for (const auto& src : vecSrc)
+        {
+            // Aviso temprano si no solapa el raster: casi siempre es CRS equivocada.
+            double bx0, by0, bx1, by1;
+            if (readShapefileBBox(src.first, bx0, by0, bx1, by1))
+            {
+                double rx1 = this->xllcorner + this->cols * this->cellSide;
+                double ry1 = this->yllcorner + this->rows * this->cellSide;
+                if (bx1 < this->xllcorner || bx0 > rx1 || by1 < this->yllcorner || by0 > ry1)
+                    std::cout << "Barrier[" << src.second << "]: AVISO, " << src.first
+                              << " no solapa el raster. Revisa la CRS." << std::endl;
+            }
+
+            std::vector<ShpPart> parts;
+            if (!readShapefileParts(src.first, parts))
+            {
+                std::cout << "Barrier[" << src.second << "]: no se pudo leer " << src.first
+                          << " (debe ser PolyLine o Polygon en la CRS de la instancia)" << std::endl;
+                continue;
+            }
+            const int shpType = readShapefileType(src.first);
+            const bool isPolygon = (shpType == 5 || shpType == 15 || shpType == 25);
+
+            // Celdas que la geometria atraviesa: base para todo lo que sigue.
+            // Solo estas pueden tener cobertura significativa, asi que restringir el
+            // test de area a este conjunto evita recorrer el bbox completo (para el
+            // Rio Claro son 54 km de trazado y el bbox abarca media instancia).
+            std::set<int> tocadas;
+            {
+                const double paso = this->cellSide * 0.25;
+                for (const auto& part : parts)
+                    for (size_t k2 = 0; k2 + 1 < part.size(); ++k2)
+                    {
+                        double x0 = part[k2].x, y0 = part[k2].y;
+                        double x1 = part[k2 + 1].x, y1 = part[k2 + 1].y;
+                        double seg = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+                        int ns = std::max(1, (int)std::ceil(seg / paso));
+                        for (int t = 0; t <= ns; ++t)
+                        {
+                            double x = x0 + (x1 - x0) * t / ns;
+                            double y = y0 + (y1 - y0) * t / ns;
+                            int cc = (int)((x - this->xllcorner) / this->cellSide);
+                            int rr = this->rows - 1 - (int)((y - this->yllcorner) / this->cellSide);
+                            if (rr >= 0 && rr < this->rows && cc >= 0 && cc < this->cols)
+                                tocadas.insert(rr * this->cols + cc + 1);
+                        }
+                    }
+            }
+
+            std::set<int> cells;
+            if (isPolygon)
+            {
+                // Cobertura de area sobre las celdas atravesadas.
+                for (int cid : tocadas)
+                {
+                    int r = (cid - 1) / this->cols, c = (cid - 1) % this->cols;
+                    double x0 = this->xllcorner + c * this->cellSide;
+                    double y0 = this->yllcorner + (this->rows - 1 - r) * this->cellSide;
+                    if (cellAreaFraction(parts, x0, y0, this->cellSide) >= this->args.BarrierCover)
+                        cells.insert(cid);
+                }
+            }
+            else
+            {
+                double step = this->cellSide * 0.5;
+                for (auto& part : parts)
+                    for (size_t k2 = 0; k2 + 1 < part.size(); ++k2)
+                    {
+                        double x0 = part[k2].x, y0 = part[k2].y;
+                        double x1 = part[k2 + 1].x, y1 = part[k2 + 1].y;
+                        double seg = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+                        int nstep = std::max(1, (int)std::ceil(seg / step));
+                        for (int t = 0; t <= nstep; ++t)
+                        {
+                            double x = x0 + (x1 - x0) * t / nstep;
+                            double y = y0 + (y1 - y0) * t / nstep;
+                            int col = (int)((x - this->xllcorner) / this->cellSide);
+                            int row = this->rows - 1 - (int)((y - this->yllcorner) / this->cellSide);
+                            if (row >= 0 && row < this->rows && col >= 0 && col < this->cols)
+                                cells.insert(row * this->cols + col + 1);
+                        }
+                    }
+            }
+
+            // ---- Aristas bloqueadas -------------------------------------------
+            // El bloqueo real va en la TRANSICION: para cada celda vecina de la
+            // barrera se prueban sus 8 salidas, y si el segmento centro-a-centro
+            // cruza la geometria, ese paso queda bloqueado con su ancho cruzado.
+            // Esto hace que un rio de 10 m detenga el fuego igual que uno de 100 y
+            // elimina las fugas diagonales de una barrera de una celda de ancho.
+            {
+                // Candidatas para aristas: las atravesadas mas su vecindad.
+                std::set<int> cand;
+                for (int cid : tocadas)
+                {
+                    int r = (cid - 1) / this->cols, c = (cid - 1) % this->cols;
+                    for (int dr = -2; dr <= 2; ++dr)
+                        for (int dc = -2; dc <= 2; ++dc)
+                        {
+                            int rr = r + dr, cc = c + dc;
+                            if (rr >= 0 && rr < this->rows && cc >= 0 && cc < this->cols)
+                                cand.insert(rr * this->cols + cc + 1);
+                        }
+                }
+                int nArcs = 0;
+                for (int from : cand)
+                {
+                    int r = (from - 1) / this->cols, c = (from - 1) % this->cols;
+                    double ax = this->xllcorner + (c + 0.5) * this->cellSide;
+                    double ay = this->yllcorner + (this->rows - 1 - r + 0.5) * this->cellSide;
+                    for (int dr = -1; dr <= 1; ++dr)
+                        for (int dc = -1; dc <= 1; ++dc)
+                        {
+                            if (dr == 0 && dc == 0) continue;
+                            int rr = r + dr, cc = c + dc;
+                            if (rr < 0 || rr >= this->rows || cc < 0 || cc >= this->cols) continue;
+                            int to = rr * this->cols + cc + 1;
+                            double bx = this->xllcorner + (cc + 0.5) * this->cellSide;
+                            double by = this->yllcorner + (this->rows - 1 - rr + 0.5) * this->cellSide;
+                            double w = crossedWidth(ax, ay, bx, by, parts, this->args.BarrierWidth);
+                            if (w > 0.0)
+                            {
+                                long long k = this->arcKey(from, to);
+                                auto prev = this->blockedArcs.find(k);
+                                if (prev == this->blockedArcs.end() || prev->second < w)
+                                {
+                                    this->blockedArcs[k] = w;
+                                    this->arcBarrierType[k] = src.second;
+                                }
+                                ++nArcs;
+                            }
+                        }
+                }
+                std::cout << "Barrier[" << src.second << "]: " << nArcs
+                          << " transicion(es) bloqueada(s)" << std::endl;
+            }
+
+            for (int cid : cells)
+            {
+                // no combustible: via firebreakPlan, que es lo que re-aplica el reset
+                firebreakPlan[1].push_back(cid);
+                this->fTypeCells[cid - 1] = 0;
+                this->fTypeCells2[cid - 1] = "NonBurnable";
+                this->statusCells[cid - 1] = 3;
+                // y barrera, para que el breaching pueda saltarla (con su tipo)
+                this->barrierCells[cid] = src.second;
+                if (src.second == "river") this->riverCells.insert(cid);
+            }
+            vecTotal += (int)cells.size();
+            std::cout << "Barrier[" << src.second << "]: " << cells.size() << " celda(s) desde "
+                      << src.first << " (" << (isPolygon ? "poligono, cobertura >= umbral" : "linea, celdas atravesadas")
+                      << ")" << std::endl;
+        }
+        if (vecTotal > 0)
+            std::cout << "Barriers: " << vecTotal << " celda(s) vectoriales en total" << std::endl;
     }
 
     /*
@@ -349,7 +750,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     this->nonBurnableCells.clear();
     this->burningCells.clear();
     this->burntCells.clear();
-    this->harvestCells.clear();
+    this->firebreakCells.clear();
     for (i = 0; i < this->statusCells.size(); i++)
     {
         if (this->statusCells[i] < 3)
@@ -357,7 +758,46 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         else if (this->statusCells[i] == 4)
             this->nonBurnableCells.insert(i + 1);
         else if (this->statusCells[i] == 3)
-            this->harvestCells.insert(i + 1);
+            this->firebreakCells.insert(i + 1);
+    }
+
+    // Fuga diagonal: dos celdas de barrera que solo se tocan en un vertice no cortan la
+    // propagacion 8-conectada, porque el fuego pasa por la diagonal que las cruza. Una
+    // linea de cortafuegos trazada en diagonal no detiene nada: en un caso de prueba de
+    // 11x11 con la antidiagonal completa marcada, el fuego alcanzaba igual las 25 celdas
+    // del otro lado. Las barreras dadas como geometria ya lo evitan porque bloquean
+    // arcos; las dadas por celda (--FirebreakCells, firebreakPlan) necesitan esto.
+    if (!this->firebreakCells.empty())
+    {
+        int nDiag = 0;
+        for (int cid : this->firebreakCells)
+        {
+            const int r = (cid - 1) / this->cols, c = (cid - 1) % this->cols;
+            // solo las dos diagonales "hacia adelante": la simetrica la aporta la otra celda
+            const int dr[2] = { 1, 1 }, dc[2] = { 1, -1 };
+            for (int k = 0; k < 2; ++k)
+            {
+                const int r2 = r + dr[k], c2 = c + dc[k];
+                if (r2 < 0 || r2 >= this->rows || c2 < 0 || c2 >= this->cols) continue;
+                const int diagId = r2 * this->cols + c2 + 1;
+                if (!this->firebreakCells.count(diagId)) continue;
+                // las dos celdas que comparten ese vertice y no son barrera
+                const int a = r * this->cols + c2 + 1;
+                const int b = r2 * this->cols + c + 1;
+                if (this->firebreakCells.count(a) && this->firebreakCells.count(b)) continue;
+                // Ancho "infinito": no es un hueco que el fuego pueda saltar segun su
+                // longitud de llama, sino un paso que geometricamente no existe. Ningun
+                // --breach-factor ni --spot-factor debe habilitarlo.
+                const double INFRANQUEABLE = 1e9;
+                this->blockedArcs[arcKey(a, b)] = INFRANQUEABLE;
+                this->blockedArcs[arcKey(b, a)] = INFRANQUEABLE;
+                this->arcBarrierType[arcKey(a, b)] = "firebreak";
+                this->arcBarrierType[arcKey(b, a)] = "firebreak";
+                ++nDiag;
+            }
+        }
+        if (nDiag > 0)
+            std::cout << "Firebreak: " << nDiag << " cruce(s) diagonal(es) bloqueado(s)" << std::endl;
     }
 
     // POTENCIALMENTE AQUI ESTA MALO
@@ -390,6 +830,56 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
     {
         // DEBUGstd::cout << "\nWe have specific ignition points:" << std::endl;
 
+        // --- Modalidad B: puntos desde shapefile (--ignition-shp) -------------
+        // Un punto = la ignicion de un anio, en el orden del archivo, igual que
+        // las filas de Ignitions.csv. Requiere que el .shp este en la CRS de la
+        // instancia (misma conversion que --river-shp).
+        bool ignitionsFromShp = false;
+        if (!this->args.IgnitionShp.empty())
+        {
+            std::vector<ShpPoint> pts;
+            if (readShapefilePoints(this->args.IgnitionShp, pts))
+            {
+                std::vector<int> shpCells;
+                int outside = 0;
+                for (auto& q : pts)
+                {
+                    int col = (int)((q.x - this->xllcorner) / this->cellSide);
+                    int row = this->rows - 1 - (int)((q.y - this->yllcorner) / this->cellSide);
+                    if (row >= 0 && row < this->rows && col >= 0 && col < this->cols)
+                        shpCells.push_back(row * this->cols + col + 1);
+                    else
+                        ++outside;
+                }
+                if (outside > 0)
+                    std::cout << "Ignition: " << outside << " punto(s) fuera del raster, descartados"
+                              << std::endl;
+                if (shpCells.empty())
+                {
+                    throw std::runtime_error("Ignition: ningun punto de " + this->args.IgnitionShp
+                                             + " cae dentro del raster. Revisa que el .shp este en la CRS"
+                                               " de la instancia.");
+                }
+                IgnitionYears = (int)shpCells.size();
+                args.TotalYears = std::min(args.TotalYears, IgnitionYears);
+                this->IgnitionPoints = shpCells;
+                ignitionsFromShp = true;
+                std::cout << "Ignition: " << shpCells.size() << " punto(s) desde "
+                          << this->args.IgnitionShp << " (celda(s):";
+                for (size_t k = 0; k < shpCells.size() && k < 10; ++k) std::cout << " " << shpCells[k];
+                if (shpCells.size() > 10) std::cout << " ...";
+                std::cout << ")" << std::endl;
+            }
+            else
+            {
+                throw std::runtime_error("Ignition: no se pudo leer " + this->args.IgnitionShp
+                                         + " (debe ser Point o MultiPoint en la CRS de la instancia)");
+            }
+        }
+
+        // --- Modalidad A: Ignitions.csv (por defecto) -------------------------
+        if (!ignitionsFromShp)
+        {
         /* Ignition points */
         std::string ignitionFile = args.InFolder + "Ignitions.csv";
         std::string sep = ",";
@@ -412,6 +902,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
         // Ignition points
         this->IgnitionPoints = std::vector<int>(IgnitionYears, 0);
         CSVIgnitions.parseIgnitionDF(this->IgnitionPoints, IgnitionsDF, IgnitionYears);
+        }
         // this->IgnitionSets =
         // std::vector<unordered_set<int>>(this->IgnitionPoints.size());
         this->IgnitionSets = std::vector<std::vector<int>>(this->args.TotalYears);
@@ -508,6 +999,99 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
             {
                 std::cout << "Ignition sets[0] example:" << nb << std::endl;
             }
+        }
+    }
+
+    /* Active front: read a set of cells to ignite simultaneously (ActiveCells.csv) */
+    if (this->args.ActiveFront)
+    {
+        this->ActiveFrontCells.clear();
+
+        // --- Modalidad B: frente desde shapefile (--active-front-shp) ---------
+        // Acepta PolyLine/Polygon (se rasteriza el trazado con muestreo denso, igual
+        // que --river-shp) o Point/MultiPoint (cada punto es una celda semilla).
+        // Un frente es naturalmente una linea; los puntos existen por comodidad.
+        // OJO con Polygon: se rasteriza el ANILLO, no el interior relleno.
+        bool frontFromShp = false;
+        if (!this->args.ActiveFrontShp.empty())
+        {
+            std::set<int> cells;  // set: el muestreo denso repite celdas
+            std::vector<ShpPart> parts;
+            std::vector<ShpPoint> pts;
+            const char* kind = nullptr;
+
+            if (readShapefileParts(this->args.ActiveFrontShp, parts))
+            {
+                kind = "linea(s)";
+                double step = this->cellSide * 0.5;
+                for (auto& part : parts)
+                {
+                    for (size_t s = 0; s + 1 < part.size(); ++s)
+                    {
+                        double x0 = part[s].x, y0 = part[s].y, x1 = part[s + 1].x, y1 = part[s + 1].y;
+                        double seg = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+                        int nstep = std::max(1, (int)std::ceil(seg / step));
+                        for (int t = 0; t <= nstep; ++t)
+                        {
+                            double x = x0 + (x1 - x0) * t / nstep;
+                            double y = y0 + (y1 - y0) * t / nstep;
+                            int col = (int)((x - this->xllcorner) / this->cellSide);
+                            int row = this->rows - 1 - (int)((y - this->yllcorner) / this->cellSide);
+                            if (row >= 0 && row < this->rows && col >= 0 && col < this->cols)
+                                cells.insert(row * this->cols + col + 1);
+                        }
+                    }
+                }
+            }
+            else if (readShapefilePoints(this->args.ActiveFrontShp, pts))
+            {
+                kind = "punto(s)";
+                for (auto& q : pts)
+                {
+                    int col = (int)((q.x - this->xllcorner) / this->cellSide);
+                    int row = this->rows - 1 - (int)((q.y - this->yllcorner) / this->cellSide);
+                    if (row >= 0 && row < this->rows && col >= 0 && col < this->cols)
+                        cells.insert(row * this->cols + col + 1);
+                }
+            }
+            else
+            {
+                throw std::runtime_error("Active front: no se pudo leer " + this->args.ActiveFrontShp
+                                         + " (debe ser PolyLine/Polygon o Point/MultiPoint)");
+            }
+
+            if (cells.empty())
+            {
+                throw std::runtime_error("Active front: ninguna celda de " + this->args.ActiveFrontShp
+                                         + " cae dentro del raster. Revisa que el .shp este en la CRS"
+                                           " de la instancia.");
+            }
+            this->ActiveFrontCells.assign(cells.begin(), cells.end());
+            frontFromShp = true;
+            std::cout << "Active front: " << this->ActiveFrontCells.size() << " celda(s) desde "
+                      << this->args.ActiveFrontShp << " (" << kind << ")" << std::endl;
+        }
+
+        // --- Modalidad A: ActiveCells.csv (por defecto) -----------------------
+        if (!frontFromShp)
+        {
+            std::string sepAF = ",";
+            std::string activeFile = args.InFolder + "ActiveCells.csv";
+            CSVReader CSVActive(activeFile, sepAF);
+            std::vector<std::vector<std::string>> ActiveDF = CSVActive.getData(activeFile);
+            for (size_t rr = 1; rr < ActiveDF.size(); ++rr)  // skip header row
+            {
+                if (ActiveDF[rr].size() >= 2 && !ActiveDF[rr][1].empty())
+                    this->ActiveFrontCells.push_back(std::stoi(ActiveDF[rr][1]));
+            }
+        }
+        if (!this->ActiveFrontCells.empty())
+        {
+            this->args.TotalYears = 1;  // the front is a single scenario
+            this->IgnitionPoints = std::vector<int>(1, this->ActiveFrontCells[0]);
+            this->IgnitionSets = std::vector<std::vector<int>>(1);
+            std::cout << "Active front: " << this->ActiveFrontCells.size()
+                      << " seed cells will ignite simultaneously" << std::endl;
         }
     }
 
@@ -693,7 +1277,7 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     }
     // Crown Byram Intensity Folder
     if ((this->args.OutIntensity) && (this->args.AllowCROS)
-        && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+        && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->crownIntensityFolder = Cell2Fire::createOutputFolder("CrownIntensity");
     }
@@ -703,12 +1287,12 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         this->surfaceFlameLengthFolder = Cell2Fire::createOutputFolder("SurfaceFlameLength");
     }
     // Crown Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->crownFlameLengthFolder = Cell2Fire::createOutputFolder("CrownFlameLength");
     }
     // max Flame Length Folder
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->maxFlameLengthFolder = Cell2Fire::createOutputFolder("MaxFlameLength");
     }
@@ -777,10 +1361,10 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
     this->nonBurnableCells.clear();
     this->burningCells.clear();
     this->burntCells.clear();
-    this->harvestCells.clear();
+    this->firebreakCells.clear();
 
-    // Harvest Cells
-    for (auto it = HarvestedCells.begin(); it != HarvestedCells.end(); it++)
+    // Firebreak Cells
+    for (auto it = firebreakPlan.begin(); it != firebreakPlan.end(); it++)
     {
         for (auto& it2 : it->second)
         {
@@ -797,13 +1381,13 @@ Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1)
         else if (this->statusCells[i] == 4)
             this->nonBurnableCells.insert(i + 1);
         else if (this->statusCells[i] == 3)
-            this->harvestCells.insert(i + 1);
+            this->firebreakCells.insert(i + 1);
     }
 
     // Print-out sets information
     if (this->args.verbose)
     {
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
     }
 }
 
@@ -1047,8 +1631,48 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
         if (this->args.verbose)
         {
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
         }
+    }
+
+    // --- Active front: ignite all remaining seed cells simultaneously ---
+    if (this->args.ActiveFront)
+    {
+        bool anyAF = false;
+        for (size_t k = 0; k < this->ActiveFrontCells.size(); ++k)
+        {
+            int fc = this->ActiveFrontCells[k];
+            if (fc < 1 || fc > this->nCells)
+                continue;
+            if (this->burntCells.find(fc) != this->burntCells.end())  // already lit (e.g. first cell)
+            {
+                anyAF = true;
+                continue;
+            }
+            if (this->statusCells[fc - 1] >= 3)  // non-burnable / firebreak / firebreak
+                continue;
+            if (this->Cells_Obj.find(fc) == this->Cells_Obj.end())
+                InitCell(fc);
+            std::unordered_map<int, Cells>::iterator itf = this->Cells_Obj.find(fc);
+            if (itf->second.getStatus() != "Available" || itf->second.fType == 0)
+                continue;
+            std::vector<int> ipf = { fc };
+            if (itf->second.ignition(this->fire_period[this->year - 1],
+                                     this->year, ipf, &df[fc - 1],
+                                     this->coef_ptr, this->args_ptr,
+                                     &(this->wdf[this->weatherPeriod]),
+                                     this->activeCrown, this->perimeterCells))
+            {
+                this->statusCells[fc - 1] = 1;
+                this->nIgnitions++;
+                this->burningCells.insert(fc);
+                this->burntCells.insert(fc);
+                this->availCells.erase(fc);
+                anyAF = true;
+            }
+        }
+        if (anyAF)
+            this->noIgnition = false;
     }
 
     // Plotter placeholder
@@ -1140,7 +1764,7 @@ Cell2Fire::RunIgnition(boost::random::mt19937 generator, int ep)
  * - Prints detailed logs of the fire progress and messages sent by each
  * burning cell.
  * - Outputs the current fire period, sets of cells (available, non-burnable,
- * burning, burnt, harvested), and fire message details.
+ * burning, burnt, firebreak), and fire message details.
  *
  * ### Warning:
  * - A warning is issued if the fire period approaches the maximum allowed
@@ -1175,7 +1799,7 @@ Cell2Fire::SendMessages()
                      "Ignition ----------------------"
                   << std::endl;
         std::cout << "Current Fire Period:" << this->fire_period[this->year - 1] << std::endl;
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
     }
 
     /*
@@ -1270,6 +1894,39 @@ Cell2Fire::SendMessages()
         // If message and not a true flag
         if (aux_list.size() > 0 && aux_list[0] != -100)
         {
+            // ---- Filtro de aristas bloqueadas por barreras vectoriales ----------
+            // Se descarta el paso a la vecina cuando el segmento centro-a-centro
+            // cruza la geometria de una barrera. Sin modelo de cruce esto detiene el
+            // fuego siempre, sea el rasgo de 5 m o de 100, y sin fugas diagonales.
+            // Con --breach-factor/--spot-factor se permite si el alcance supera el
+            // ancho cruzado, que sale de la geometria y no de contar celdas.
+            if (!this->blockedArcs.empty())
+            {
+                const int fromId = it->second.realId;
+                double L = this->maxFlameLengths[fromId - 1];
+                if (L <= 0.0) L = this->surfaceFlameLengths[fromId - 1];
+                const double U_ms = this->wdf[this->weatherPeriod].ws / 3.6;
+                const double reach = std::max(this->args.BreachFactor * L,
+                                              this->args.SpotFactor * L * U_ms);
+                std::vector<int> keep;
+                keep.reserve(aux_list.size());
+                for (int to : aux_list)
+                {
+                    auto ba = this->blockedArcs.find(this->arcKey(fromId, to));
+                    if (ba == this->blockedArcs.end() || reach >= ba->second)
+                        keep.push_back(to);
+                    else if (this->args.verbose)
+                        std::cout << "  barrera bloquea " << fromId << " -> " << to
+                                  << " (ancho " << ba->second << " m, alcance " << reach
+                                  << " m)" << std::endl;
+                }
+                aux_list.swap(keep);
+                if (aux_list.empty())
+                {
+                    this->burnedOutList.push_back(fromId);
+                    continue;
+                }
+            }
             if (this->args.verbose)
                 std::cout << "\nList is not empty" << std::endl;
             this->messagesSent = true;
@@ -1316,8 +1973,99 @@ Cell2Fire::SendMessages()
             this->burningCells.erase(bc);
         }
     }
+    // ============ CRUCE DE BARRERA: BREACHING (Prometheus) + SPOTTING (Albini) ============
+    // Una celda ardiendo puede cruzar una barrera no-quemable a favor del viento por:
+    //   - Breaching (contacto de llama):  R_breach = BreachFactor * FL          (barreras angostas)
+    //   - Spotting  (lofting de pavesas): d_spot   = SpotFactor  * FL * U_ms    (barreras anchas)
+    // Cruza si  max(R_breach, d_spot) >= W (ancho de la barrera).  Determinista.
+    // Si la barrera cruzada incluye celdas-rio (--river-shp), se registra el evento.
+    if (this->args.BreachFactor > 0.0 || this->args.SpotFactor > 0.0)
+    {
+        double waz = this->wdf[this->weatherPeriod].waz;          // rumbo a favor del viento (compass)
+        double U_ms = this->wdf[this->weatherPeriod].ws / 3.6;    // viento en m/s (ws en km/h)
+        double dr = -std::cos(waz * M_PI / 180.0);
+        double dc = std::sin(waz * M_PI / 180.0);
+        std::vector<std::pair<int, int>> crossings;              // (origen, objetivo)
+        std::unordered_set<int> src = this->burningCells;
+        for (auto& b : this->burnedOutList) src.insert(b);
+        for (auto& bc : src)
+        {
+            int id = bc;
+            double L = this->maxFlameLengths[id - 1];                 // llama efectiva = max(copa, superficie) - compartido por todos los kernels
+            if (L <= 0.0) L = this->surfaceFlameLengths[id - 1];
+            if (L <= 0.0 && this->args.Simulator == "K")              // fallback KITRAL (usa arrays de KITRAL): solo --sim K
+                L = flame_length_from_ros(&df[id - 1], this->RateOfSpreads[id - 1]);
+            if (L <= 0.0) continue;
+            double R_breach = this->args.BreachFactor * L;
+            double d_spot = this->args.SpotFactor * L * U_ms;
+            double reach = std::max(R_breach, d_spot);            // alcance total (m)
+            if (reach <= 0.0) continue;
+            int r0 = (id - 1) / this->cols;
+            int c0 = (id - 1) % this->cols;
+            // paso 1: barrera inmediata a favor del viento (no-quemable o rio)
+            int r1 = (int)std::round(r0 + dr);
+            int c1 = (int)std::round(c0 + dc);
+            if (r1 < 0 || r1 >= this->rows || c1 < 0 || c1 >= this->cols) continue;
+            int nid = r1 * this->cols + c1 + 1;
+            // Barrera = no quemable, cortafuegos, o cualquier capa vectorial cargada.
+            // OJO: firebreakCells (cortafuegos) NO estaba incluido antes, asi que el
+            // breaching nunca cruzaba un cortafuegos -- justo el caso de uso central
+            // (dimensionar su ancho). Incluirlo cambia resultados cuando se combinan
+            // cortafuegos con --breach-factor/--spot-factor.
+            bool barrier = (this->nonBurnableCells.find(nid) != this->nonBurnableCells.end())
+                        || (this->firebreakCells.find(nid) != this->firebreakCells.end())
+                        || (this->barrierCells.find(nid) != this->barrierCells.end());
+            if (!barrier) continue;
+            // caminar la barrera hasta la 1a celda quemable, midiendo W y el tipo cruzado
+            int maxSteps = (int)std::ceil(reach / this->cellSide) + 2;
+            int target = -1; double W = 0.0; bool crossedRiver = false;
+            std::string crossedType = "barrier";
+            // El vecino inmediato (s=1) se evalua aqui, fuera del bucle de abajo. Sin
+            // esto, una barrera de UNA celda nunca fijaba el tipo y el cruce quedaba
+            // atribuido como "barrier" generico (o no se registraba).
+            {
+                auto b1 = this->barrierCells.find(nid);
+                if (b1 != this->barrierCells.end()) { crossedRiver = true; crossedType = b1->second; }
+            }
+            for (int s = 2; s <= maxSteps; ++s)
+            {
+                int rr = (int)std::round(r0 + dr * s);
+                int cc = (int)std::round(c0 + dc * s);
+                if (rr < 0 || rr >= this->rows || cc < 0 || cc >= this->cols) break;
+                int cid = rr * this->cols + cc + 1;
+                auto bIt = this->barrierCells.find(cid);
+                if (bIt != this->barrierCells.end()) { crossedRiver = true; crossedType = bIt->second; }
+                if (this->nonBurnableCells.find(cid) != this->nonBurnableCells.end()
+                    || this->firebreakCells.find(cid) != this->firebreakCells.end()
+                    || bIt != this->barrierCells.end())
+                    continue;                                    // sigue en la barrera
+                W = (s - 1) * this->cellSide;                    // ancho cruzado (m)
+                if (this->availCells.find(cid) != this->availCells.end()) target = cid;
+                break;
+            }
+            if (target > 0 && reach >= W)
+            {
+                crossings.push_back(std::make_pair(id, target));
+                const char* mech = (d_spot >= W) ? "spotting" : "breaching";
+                if (crossedRiver || this->args.verbose)
+                    this->riverCrossingLog.push_back(
+                        std::to_string(this->weatherPeriod) + "," + std::to_string(id) + ","
+                        + std::to_string(target) + "," + mech + "," + std::to_string(W) + ","
+                        + std::to_string(L) + "," + std::to_string(reach) + ","
+                        + crossedType);
+            }
+        }
+        for (auto& cr : crossings)
+        {
+            sendMessageList[cr.first].push_back(cr.second);
+            this->messagesSent = true;
+        }
+        if (this->args.verbose && !crossings.empty())
+            std::cout << "Cruce de barrera: " << crossings.size() << " evento(s)" << std::endl;
+    }
+
     if (this->args.verbose)
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
 
     return sendMessageList;
 }
@@ -1356,7 +2104,7 @@ Cell2Fire::SendMessages()
  * - Logs detailed information about fire messages, ignition, and cell state
  * transitions.
  * - Prints the current state of cell sets (available, non-burnable, burning,
- * burnt, harvested).
+ * burnt, firebreak).
  *
  * ### Weather Updates:
  * - Calls `updateWeather` to apply weather conditions for the next fire
@@ -1377,7 +2125,7 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
                      "messages from Ignition ----------------------"
                   << std::endl;
         std::cout << "Current Fire Period: " << this->fire_period[this->year - 1] << std::endl;
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
     }
 
     // Conditions depending on number of messages and repeatFire flag
@@ -1424,7 +2172,7 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
         this->burningCells.clear();
         if (this->args.verbose)
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
     }
 
     // Mesages and no repeat
@@ -1567,7 +2315,7 @@ Cell2Fire::GetMessages(const std::unordered_map<int, std::vector<int>>& sendMess
         if (this->args.verbose)
         {
             printSets(
-                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+                this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
         }
 
         /*
@@ -1695,7 +2443,7 @@ Cell2Fire::Results()
     float ACells = this->availCells.size();
     float BCells = this->burntCells.size();
     float NBCells = this->nonBurnableCells.size();
-    float HCells = this->harvestCells.size();
+    float HCells = this->firebreakCells.size();
 
     std::cout << "\nSimulation " << this->sim << " Results:\n"
               << "\t" << std::left << std::setw(16) << "Cell Status" << std::right << std::setw(12) << "Count"
@@ -1728,6 +2476,18 @@ Cell2Fire::Results()
         // std::string gridName = this->gridFolder + "FinalStatus_" +
         // std::to_string(this->sim) + ".csv";
         outputGrid();
+    }
+
+    // Log de cruces de barrera/rio (breaching + spotting)
+    if (!this->riverCrossingLog.empty() && !this->args.OutFolder.empty())
+    {
+        std::string rcName = this->args.OutFolder + "RiverCrossings" + std::to_string(this->sim) + ".csv";
+        std::ofstream rc(rcName);
+        rc << "weatherPeriod,sourceCell,targetCell,mechanism,widthM,flameLenM,reachM,type\n";
+        for (auto& line : this->riverCrossingLog) rc << line << "\n";
+        rc.close();
+        std::cout << "RiverCrossings: " << this->riverCrossingLog.size()
+                  << " evento(s) -> " << rcName << std::endl;
     }
 
     // Messages
@@ -1786,7 +2546,7 @@ Cell2Fire::Results()
 
     // Crown Intensity
     if ((this->args.OutIntensity) && (this->args.AllowCROS)
-        && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+        && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->crownIntensityFolder = this->args.OutFolder + "CrownIntensity" + separator();
         std::string intensityName;
@@ -1822,7 +2582,7 @@ Cell2Fire::Results()
     }
 
     // Crown Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->crownFlameLengthFolder = this->args.OutFolder + "CrownFlameLength" + separator();
         std::string fileName;
@@ -1840,7 +2600,7 @@ Cell2Fire::Results()
     }
 
     // Max Flame length
-    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P"))
+    if ((this->args.OutFl) && (this->args.AllowCROS) && ((this->args.Simulator == "S") || this->args.Simulator == "P" || this->args.Simulator == "K"))
     {
         this->maxFlameLengthFolder = this->args.OutFolder + "MaxFlameLength" + separator();
         std::string fileName;
@@ -1936,7 +2696,7 @@ Cell2Fire::Results()
  * @brief Outputs the current state of the forest grid to a CSV file.
  *
  * This method generates a binary representation of the forest grid, with cell
- * statuses indicating their condition (burning, burnt, harvested, etc.) during
+ * statuses indicating their condition (burning, burnt, firebreak, etc.) during
  * the simulation. The file is saved with a unique name in the designated
  * output folder.
  *
@@ -1945,7 +2705,7 @@ Cell2Fire::Results()
  *   - Updates a vector (`statusCells2`) to reflect the current statuses of
  * cells:
  *     - `1` for burning or burnt cells.
- *     - `-1` for harvested cells.
+ *     - `-1` for firebreak cells.
  *     - `0` for all other cells.
  * - **File Naming**:
  *   - Constructs a file name based on the simulation's `gridNumber` and saves
@@ -1990,7 +2750,7 @@ Cell2Fire::outputGrid()
     {
         statusCells2[ac - 1] = 1;
     }
-    for (auto& hc : this->harvestCells)
+    for (auto& hc : this->firebreakCells)
     {
         statusCells2[hc - 1] = -1;
     }
@@ -2108,7 +2868,7 @@ Cell2Fire::Step(boost::random::mt19937 generator, int ep)
         std::cout << "Fire Period: " << this->fire_period[this->year - 1] << std::endl;
         std::cout << "WeatherPeriod: " << this->weatherPeriod << std::endl;
         std::cout << "MaxFirePeriods: " << this->totalFirePeriods << std::endl;
-        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
+        printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->firebreakCells);
         std::cout << "********************************************" << std::endl;
     }
     // One step (one fire period, ignition - if needed -, sending messages and
@@ -2348,11 +3108,6 @@ main(int argc, char* argv[])
     }
     else if (args.Simulator == "S")
     {
-        initialize_coeff(args.scenario);
-    }
-    else if (args.Simulator == "P")
-    {
-        initialize_coeff_p(args.scenario);
     }
     if (args.UseWeatherWeights)
     {

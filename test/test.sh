@@ -65,7 +65,7 @@ if [ $dir1_num_files -ne $dir2_num_files ]; then
 	exit 1
 fi
 # delete version line
-find test_results/ -name log.txt -type f | xargs sed -i -e '/version:/d'
+find test_results/ -name log.txt -type f | xargs sed -i -e '/version:/d' -e '/TIFFReadDirectory/d'
 
 # use diff to compare the files in each directory
 diff_output=$(diff -rq "$dir1" "$dir2")

@@ -3,7 +3,8 @@ __version__ = "3.0"
 __author__ = "Jaime Carrasco-Barra"
 __maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
 */
-#include "FuelModelKitral.h"
+#include "KitralKernel.h"
+#include <cstdint>   // int16_t: no llega transitivamente en MinGW/MSVC
 #include "Cells.h"
 #include "FuelModelUtils.h"
 #include "ReadArgs.h"
@@ -12,6 +13,21 @@ __maintainer__ = "Jaime Carrasco-Barra, Matilde Rivas, David Palacios"
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+// ---- Helpers de humedad del combustible (para --fch-mode) ----
+static float emc_simard(float T, float H) {  // EMC Simard (%), T en C, H=RH%
+    if (H < 10.0f)  return 0.03229f + 0.281073f * H - 0.000578f * H * T;
+    if (H <= 50.0f) return 2.22749f + 0.160107f * H - 0.014784f * T;
+    return 21.0606f + 0.005565f * H * H - 0.00035f * H * T - 0.483199f * H;
+}
+static float eta_M(float m) {  // damping de humedad de Rothermel, Mx=30%
+    float r = m / 30.0f; if (r > 1.0f) r = 1.0f;
+    float e = 1.0f - 2.59f * r + 5.11f * r * r - 3.52f * r * r * r;
+    return e > 0.0f ? e : 0.0f;
+}
+static float ff_moist(float m) {  // funcion de humedad fina del FFMC/ISI (FBP)
+    return 91.9f * exp(-0.1386f * m) * (1.0f + pow(m, 5.31f) / 4.93e7f);
+}
 
 using namespace std;
 
@@ -582,7 +598,8 @@ float
 rate_of_spread_k(inputs* data,
                  fuel_coefs* ptr,
                  main_outs* at,
-                 weatherDF* wdf_ptr)  // incluir efecto pendiente aqui y no afuera
+                 weatherDF* wdf_ptr,
+                 arguments* args)  // incluir efecto pendiente aqui y no afuera
 {
     float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps, fp;
     // se = slope_effect(inp) ;
@@ -598,19 +615,86 @@ rate_of_spread_k(inputs* data,
     float sigmoid = 1.0 / (1.0 + exp(-steepness * (rh - midpoint)));
     ch = 4 + 16 * sigmoid - 0.00982 * tmp;
     fmc = fmcs[data->nftype][0] * 60;  // factor de propagacion en m/min
-    fch = min(51.43, 52.3342 * pow(ch, -1.3035));
-    fv = p1 * exp(-p2 * ws) + p3;
-    if (ps == 0)
-    {
-        at->rss = fmc * fch * (fv);
-    }
-    else
-    {
-        at->rss = fmc * fch * (fv + ps);
+    fch = min(51.43, 52.3342 * pow(ch, -1.3035));       // KITRAL (RH/T)
+    fv = p1 * exp(-p2 * ws) + p3;                        // KITRAL wind factor
+
+    // ================= Modo de humedad seleccionable (--fch-mode) =================
+    // Cada modo define (fch, phi_w). La pendiente (phi_s) y la combinacion vectorial B
+    // son comunes. Todo anclado a la referencia KITRAL (T=25, RH=40, ws=30 km/h).
+    // kitral: fch(RH/T), viento fv           | emc : EMC(Simard)->etaM(Rothermel)
+    // ffmc  : FFMC->humedad->ff (memoria)     | isi : ffmc + viento FBP fW (reemplaza fv)
+    // bui   : isi + efecto buildup BE(BUI)   (sequia estacional profunda)
+    const float fch0 = 4.174f;   // fch KITRAL en (T=25, RH=40)
+    const float m0   = 8.0f;     // humedad de combustible de referencia (%)
+    const std::string& mode = args->FchMode;
+    float phi_w = fv;            // por defecto: viento KITRAL
+    if (mode == "emc") {
+        float m = emc_simard(tmp, rh);
+        fch = fch0 * eta_M(m) / eta_M(m0);
+    } else if (mode == "ffmc" || mode == "isi" || mode == "bui") {
+        float F = wdf_ptr->ffmc;
+        float m = (F <= 0.0f) ? emc_simard(tmp, rh) : 147.2f * (101.0f - F) / (59.5f + F);
+        fch = fch0 * ff_moist(m) / ff_moist(m0);        // humedad fina (con memoria FFMC)
+        if (mode == "isi" || mode == "bui") {
+            // viento via funcion FBP fW (exponencial), anclada a fv(30) en ws=30
+            float fv30 = p1 * exp(-p2 * 30.0f) + p3;
+            phi_w = fv30 * exp(0.05039f * (ws - 30.0f));
+        }
+        if (mode == "bui") {                            // efecto buildup: sequia estacional
+            float BUI = wdf_ptr->bui;
+            if (BUI > 0.0f) {
+                const float q = 0.85f, BUI0 = 60.0f;    // buildup effect estilo FBP
+                float BE = exp(50.0f * log(q) * (1.0f / BUI - 1.0f / BUI0));
+                fch *= BE;
+            }
+        }
     }
 
-    // fp = 1.0 + 0.023322 * data->ps + 0.00013585 * pow(data->ps, 2.0);
-    // at->rss = fmc*fch*(fv);
+    // ========== Acondicionamiento espacial de humedad (sunny/shade) ==========
+    // La humedad del combustible fino muerto se condiciona por celda segun la
+    // exposicion solar (pendiente + aspecto) y el sombreado de dosel (ccf).
+    // Umbrias/sombreadas -> mas humedas -> fch menor -> ROS menor. La humedad
+    // "expuesta" base es EMC(T,RH). Solo frena celdas sombreadas (expuesta = base).
+    if (args->FmcShading) {
+        const float dMax = 4.0f;                       // maximo aumento de humedad por sombra (%)
+        // ---- posicion solar DINAMICA (cualquier hemisferio) desde lat + fecha/hora ----
+        float lat_deg = args->HasLatitude ? args->Latitude : data->lat;   // --latitude o lat por celda
+        float lat_r = lat_deg * M_PI / 180.0f;
+        float doy   = (wdf_ptr->doy  > 0.0f) ? wdf_ptr->doy  : 15.0f;
+        float hour  = (wdf_ptr->hour > 0.0f) ? wdf_ptr->hour : 12.0f;
+        float decl  = 23.45f * M_PI / 180.0f * sin(2.0f * M_PI * (284.0f + doy) / 365.0f);
+        float Hang  = (hour - 12.0f) * 15.0f * M_PI / 180.0f;             // angulo horario (hora solar aprox)
+        float sin_alt = sin(lat_r) * sin(decl) + cos(lat_r) * cos(decl) * cos(Hang);
+        sin_alt = (sin_alt < -1.0f) ? -1.0f : (sin_alt > 1.0f ? 1.0f : sin_alt);
+        float sun_alt = asin(sin_alt);
+        float cosAz = (sin(decl) - sin_alt * sin(lat_r)) / (cos(sun_alt) * cos(lat_r) + 1e-6f);
+        cosAz = (cosAz < -1.0f) ? -1.0f : (cosAz > 1.0f ? 1.0f : cosAz);
+        float sun_az = acos(cosAz);                                       // 0..pi medido desde el NORTE
+        if (sin(Hang) > 0.0f) sun_az = 2.0f * M_PI - sun_az;             // tarde -> lado oeste (auto ambos hemisf.)
+        // ---- geometria ladera-sol ----
+        float slope_r = atan(data->ps / 100.0f);
+        float aspect  = fmod(data->saz + 180.0f, 360.0f) * M_PI / 180.0f; // direccion que enfrenta la ladera
+        float cos_i;
+        if (sun_alt <= 0.0f) cos_i = 0.0f;                                // sol bajo el horizonte (noche): sin secado
+        else cos_i = cos(slope_r) * sin(sun_alt) + sin(slope_r) * cos(sun_alt) * cos(sun_az - aspect);
+        float S = cos_i; if (S < 0.0f) S = 0.0f; if (S > 1.0f) S = 1.0f;  // exposicion topografica [0,1]
+        float cc = data->ccf; if (cc < 0.0f) cc = 0.0f; if (cc > 1.0f) cc = 1.0f;
+        float E = S * (1.0f - cc);                     // exposicion efectiva del combustible al sol
+        float m_base = emc_simard(tmp, rh);            // humedad expuesta (base)
+        float m_eff  = m_base + dMax * (1.0f - E);     // sombra/umbria -> mas humedo
+        fch *= eta_M(m_eff) / eta_M(m_base);           // ratio de damping (<=1) frena celdas sombreadas
+    }
+
+    // ================= B (S&B-like): viento y pendiente como vectores =================
+    float slope_deg = atan(data->ps / 100.0f) * 180.0f / M_PI;   // slope.asc % -> grados
+    float se_k = 1.0f + 0.023322f * slope_deg + 0.00013585f * slope_deg * slope_deg;
+    float phi_s = se_k - 1.0f;                          // coef. pendiente
+    float th = (wdf_ptr->waz - data->saz) * M_PI / 180.0f;       // viento relativo al upslope
+    float vx = phi_s + phi_w * cos(th);
+    float vy = phi_w * sin(th);
+    float phi_eff = sqrt(vx * vx + vy * vy);
+    at->raz = fmod(data->saz + atan2(vy, vx) * 180.0f / M_PI + 360.0f, 360.0f);  // resultante
+    at->rss = fmc * fch * (1.0f + phi_eff);
     return at->rss * (at->rss >= 0);
 }
 
@@ -624,9 +708,15 @@ flankfire_ros_k(float ros, float bros, float lb)
 /* ----------------- Length-to-Breadth --------------------------*/
 // TODO: citation needed
 float
-l_to_b(float ws, fuel_coefs* ptr)
+l_to_b(float ws, fuel_coefs* ptr, const std::string& lb_mode)
 {
     float l1, l2, lb;
+    if (lb_mode == "sb") {
+        // length-to-breadth de S&B (Anderson/FARSITE): elipse más alargada
+        float f = 1000.0 / 3600.0;   // km/h -> m/s
+        lb = pow(0.936 * exp(0.2566 * f * ws) + 0.461 * exp(-0.1548 * f * ws) - 0.397, 0.45);
+        return lb;
+    }
     l1 = 2.233;     // 1.411; // ptr->l1 ;
     l2 = -0.01031;  // 0.01745; // ptr->l2 ;
     lb = 1.0 + pow(l1 * exp(-l2 * ws) - l1, 2.0);
@@ -684,6 +774,35 @@ byram_intensity(inputs* data, main_outs* at)
     return ib;  // unidad de medida
 }
 
+// Longitud de llama a partir del ROS real de la celda (bypass del bug de metrics->rss=0).
+// Usa la misma intensidad de Byram: ib = H * wa * ros / 60 ; fl = 0.0775 * ib^0.46.
+float
+flame_length_from_ros(inputs* data, float ros)
+{
+    if (ros <= 0.0f) return 0.0f;
+    float ib = hs[data->nftype][0] * fls_david[data->nftype][0] * ros / 60.0f;
+    return 0.0775f * pow(ib, 0.46f);
+}
+
+// ---- Fuego de copa: intensidad y llama IDÉNTICAS a S&B/FBP (consistencia entre sistemas) ----
+static int16_t HEAT_YIELD_K = 18000;  // kJ/kg (igual que HEAT_YIELD en S&B y Portugal)
+
+float
+crown_byram_intensity_k(main_outs* at, inputs* data)
+{
+    float canopy_height = (data->tree_height == -9999) ? (data->cbh * 2.0f)
+                                                       : (data->tree_height - data->cbh);
+    if (canopy_height < 0) canopy_height = 0;
+    return std::ceil((HEAT_YIELD_K / 60.0f) * data->cbd * canopy_height * at->ros_active * 100.0f) / 100.0f;
+}
+
+float
+crown_flame_length_k(float intensity)
+{
+    float fl = 0.1f * pow(intensity, 0.5f);
+    return (fl < 0.01f) ? 0.0f : std::ceil(fl * 100.0f) / 100.0f;
+}
+
 bool
 fire_type(inputs* data, main_outs* at, int FMC)
 {
@@ -726,7 +845,7 @@ crownfractionburn(inputs* data, main_outs* at, int FMC)
 
 // TODO: citation needed
 float
-active_rate_of_spreadPL04(inputs* data, main_outs* at, weatherDF* wdf_ptr)  // En KITRAL SE USA PL04
+active_rate_of_spreadPL04(inputs* data, main_outs* at, weatherDF* wdf_ptr, arguments* args)  // En KITRAL SE USA PL04
 {
     float p1, p2, p3, ws, tmp, rh, ch, fmc, fch, fv, ps, ros_active, rospl04, fp, ros_final, ros;
 
@@ -753,7 +872,7 @@ active_rate_of_spreadPL04(inputs* data, main_outs* at, weatherDF* wdf_ptr)  // E
     {
         rospl04 = fmc * fch * (fv + ps);
     }
-    ros_active = 3.34 * rospl04;  // if rac*cbd>3.0, aplicar
+    ros_active = args->ROS10Factor * rospl04;  // factor de copa activa (Scott & Reinhardt, def 3.34); checkActive aplica el criterio cbd*rac>=3
     // ros_final=3.34*rospl04
     return ros_active;
 }
@@ -843,11 +962,11 @@ calculate_k(inputs* data,
     float elevation_destiny = head->elev;
     at->se = slope_effect(elevation_origin, elevation_destiny, cellsize);
     // Step 1: Calculate HROS (surface)
-    at->rss = rate_of_spread_k(data, ptr, at, wdf_ptr);
+    at->rss = rate_of_spread_k(data, ptr, at, wdf_ptr, args);
 
     hptr->rss = at->rss;
     // Step 2: Calculate Length-to-breadth
-    sec->lb = l_to_b(wdf_ptr->ws, ptr);
+    sec->lb = l_to_b(wdf_ptr->ws, ptr, args->LbMode);
 
     // Step 3: Calculate BROS (surface)
     bptr->rss = backfire_ros_k(at, sec);
@@ -879,7 +998,7 @@ calculate_k(inputs* data,
         if (activeCrown)
         {
             // si el fuego esta activo en copas chequeamos condiciones
-            at->ros_active = active_rate_of_spreadPL04(data, at, wdf_ptr);
+            at->ros_active = active_rate_of_spreadPL04(data, at, wdf_ptr, args);
             if (!checkActive(data, at, FMC))
             {
                 activeCrown = false;
@@ -902,7 +1021,7 @@ calculate_k(inputs* data,
     // If we have Crown fire, update the ROSs
     if (crownFire)
     {
-        at->ros_active = active_rate_of_spreadPL04(data, at, wdf_ptr);
+        at->ros_active = active_rate_of_spreadPL04(data, at, wdf_ptr, args);
         at->cfb = crownfractionburn(data, at, FMC);
 
         hptr->ros = final_rate_of_spreadPL04(at);
@@ -920,6 +1039,8 @@ calculate_k(inputs* data,
         at->a = (hptr->ros + bptr->ros) / 2.;
         at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
         at->c = (hptr->ros - bptr->rss) / 2;
+        at->crown_intensity = crown_byram_intensity_k(at, data);
+        at->crown_flame_length = crown_flame_length_k(at->crown_intensity);
         at->crown = 1;
         activeCrown = true;
     }
@@ -942,6 +1063,8 @@ calculate_k(inputs* data,
         at->a = (hptr->ros + bptr->ros) / 2.;
         at->b = (hptr->ros + bptr->ros) / (2. * sec->lb);
         at->c = (hptr->ros - bptr->rss) / 2;
+        at->crown_intensity = crown_byram_intensity_k(at, data);
+        at->crown_flame_length = crown_flame_length_k(at->crown_intensity);
         at->crown = 1;
         // std::cout  << "ros_activo: "  <<hptr->ros <<  std::endl;
     }
@@ -950,6 +1073,8 @@ calculate_k(inputs* data,
     else
     {
         at->crown = 0;
+        at->crown_intensity = 0;
+        at->crown_flame_length = 0;
         hptr->ros = hptr->rss;
         bptr->ros = bptr->rss;
         fptr->ros = fptr->rss;

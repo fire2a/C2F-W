@@ -4,8 +4,8 @@
 // Headers
 #include "Cells.h"
 #include "DataGenerator.h"
-#include "FuelModelKitral.h"
-#include "FuelModelSpain.h"
+#include "KitralKernel.h"
+#include "ScottAndBurganKernel.h"
 #include "FuelModelUtils.h"
 #include "Lightning.h"
 #include "ReadArgs.h"
@@ -30,7 +30,12 @@
 #include <vector>
 
 using namespace std;
-string C2FW_VERSION = "v0.0.0";
+// Version: se puede inyectar desde el makefile con -DC2FW_VERSION_STR='"vX.Y.Z"'
+// (el makefile la deriva de `git describe` si hay tags, si no usa el default).
+#ifndef C2FW_VERSION_STR
+#define C2FW_VERSION_STR "v2.0.0"
+#endif
+string C2FW_VERSION = C2FW_VERSION_STR;
 string sim_log_filename = "ignition_and_weather_log.csv";
 
 class Cell2Fire
@@ -103,6 +108,7 @@ class Cell2Fire
     std::vector<string> fTypeCells2;  // (long int&, const char [9]);
     std::vector<std::vector<std::string>> WeatherData;
     std::vector<int> IgnitionPoints;
+    std::vector<int> ActiveFrontCells;  // seed cells of an active front
     vector<int> burnedOutList;
     std::vector<double> FSCell;
     std::vector<float> crownMetrics;
@@ -121,9 +127,23 @@ class Cell2Fire
     // Sets
     std::unordered_set<int> availCells;
     std::unordered_set<int> nonBurnableCells;
+    std::unordered_set<int> riverCells;              // celdas atravesadas por el rio (--river-shp)
+    // Barreras lineales genericas: union de rios, caminos, cortafuegos vectoriales, etc.
+    // El tipo sale del nombre del archivo (Barriers/roads.shp -> "roads") y solo se usa
+    // para atribuir el cruce en RiverCrossings*.csv; el comportamiento es el mismo.
+    std::unordered_map<int, std::string> barrierCells;
+    // Aristas bloqueadas por una barrera vectorial: clave = origen*nCells + destino.
+    // El bloqueo va en la TRANSICION, no en la celda: asi un rio de 10 m detiene el
+    // fuego igual que uno de 100, y no hay fugas diagonales (una barrera de una celda
+    // de ancho no bloquea propagacion de 8 vecinos si solo se eliminan celdas).
+    // El valor es el ancho de barrera cruzado en metros, que usa el breaching como W.
+    std::unordered_map<long long, double> blockedArcs;
+    std::unordered_map<long long, std::string> arcBarrierType;
+    inline long long arcKey(int from, int to) const { return (long long)from * this->nCells + to; }
+    std::vector<std::string> riverCrossingLog;       // registro de cruces de rio
     std::unordered_set<int> burningCells;
     std::unordered_set<int> burntCells;
-    std::unordered_set<int> harvestCells;
+    std::unordered_set<int> firebreakCells;
 
     // Cells Dictionary
     std::unordered_map<int, Cells> Cells_Obj;

@@ -10,6 +10,8 @@
 #include <iterator>
 #include <math.h>
 #include <cstring>
+#include <cstdio>
+#include <cctype>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -546,16 +548,27 @@ CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
 
         ws = DF[i][2].empty() ? 0 : std::stof(DF[i][2], &sz);
 
-        if (args_ptr->Simulator == "K")
+        if (args_ptr->Simulator == "K" || args_ptr->Simulator == "S")
         {
-            tmp = DF[i][4].empty() ? 0 : std::stof(DF[i][4], &sz);
-            rh = DF[i][5].empty() ? 0 : std::stof(DF[i][5], &sz);
+            int nc = static_cast<int>(DF[i].size());
+            // tolerante: en modo scenario col4 puede ser un token "DkLm" (no numérico)
+            try { if (nc > 4 && !DF[i][4].empty()) tmp = std::stof(DF[i][4], &sz); } catch (...) {}
+            try { if (nc > 5 && !DF[i][5].empty()) rh  = std::stof(DF[i][5], &sz); } catch (...) {}
+            // KITRAL extendido: FFMC en col6, ISI en col7 (para --fch-mode ffmc/isi)
+            try { if (nc > 6 && !DF[i][6].empty()) ffmc = std::stof(DF[i][6], &sz); else ffmc = 0; } catch (...) { ffmc = 0; }
+            try { if (nc > 7 && !DF[i][7].empty()) isi  = std::stof(DF[i][7], &sz); else isi  = 0; } catch (...) { isi  = 0; }
+            try { if (nc > 8 && !DF[i][8].empty()) dc   = std::stof(DF[i][8], &sz); else dc   = 0; } catch (...) { dc   = 0; }
+            try { if (nc > 9 && !DF[i][9].empty()) bui  = std::stof(DF[i][9], &sz); else bui  = 0; } catch (...) { bui  = 0; }
         }
         else if (args_ptr->Simulator == "C")
         {
+            // Meteorological standard (Cell2FireW >= v1.0.0): WD is the direction the
+            // wind blows FROM (N=0, clockwise). Convert to the internal azimuth `waz`
+            // (direction the wind blows TOWARD) by adding 180, exactly as the other
+            // simulators do above. The previous code used WD directly, which made the
+            // FBP path propagate 180 degrees opposite to the documented convention.
             waz = DF[i][6].empty() ? 0 : std::stoi(DF[i][6], &sz);
-            if (waz >= 360)
-                waz -= 360;
+            waz = fmod((waz + 180.0), 360.0);
 
             apcp = DF[i][2].empty() ? 0 : std::stof(DF[i][2], &sz);
             tmp = DF[i][3].empty() ? 0 : std::stof(DF[i][3], &sz);
@@ -581,6 +594,133 @@ CSVReader::parseWeatherDF(std::vector<weatherDF>& wdf,
         w.isi = isi;
         w.bui = bui;
         w.fwi = fwi;
+
+        // dia-del-anio y hora desde la columna datetime (tolerante a "-" o "/"),
+        // para la geometria solar dinamica del acondicionamiento espacial (--fmc-shading).
+        {
+            int dd = 15, mo = 6, yy = 0, hh = 12, mi = 0;
+            if (DF[i].size() > 1 && !DF[i][1].empty()) {
+                std::string dt = DF[i][1];
+                for (size_t k = 0; k < dt.size(); ++k) if (dt[k] == '-') dt[k] = '/';
+                std::sscanf(dt.c_str(), "%d/%d/%d %d:%d", &dd, &mo, &yy, &hh, &mi);
+            }
+            static const int cumd[12] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+            int mm = (mo >= 1 && mo <= 12) ? mo : 1;
+            w.doy = static_cast<float>(cumd[mm - 1] + dd);
+            w.hour = hh + mi / 60.0f;
+        }
+
+        // --- Humedad del combustible muerto para S&B: modo seleccionable (--moisture-mode) ---
+        float m1h = 0.06f, m10h = 0.07f, m100h = 0.08f, mlh = 0.60f, mlw = 0.90f;  // default D2L2
+        if (args_ptr->Simulator == "S")
+        {
+            // Modo 2 (spatial): día-del-año y hora desde la columna datetime ("DD/MM/YY HH:MM").
+            {
+                int dd = 15, mo = 6, yy = 0, hh = 12, mi = 0;
+                if (DF[i].size() > 1 && !DF[i][1].empty())
+                    std::sscanf(DF[i][1].c_str(), "%d/%d/%d %d:%d", &dd, &mo, &yy, &hh, &mi);
+                static const int cum[12] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+                int mm = (mo >= 1 && mo <= 12) ? mo : 1;
+                w.doy = static_cast<float>(cum[mm - 1] + dd);
+                w.hour = hh + mi / 60.0f;
+            }
+            const std::string& mode = args_ptr->MoistureMode;
+            int ncol = static_cast<int>(DF[i].size());
+            auto col = [&](int k, float def) { return (k < ncol && !DF[i][k].empty()) ? std::stof(DF[i][k]) : def; };
+
+            if (mode == "scenario")  // S&B 16 combinaciones DkLm desde --scenario (no del Weather)
+            {
+                // dk = nivel humedad MUERTA (1..4), lm = nivel humedad VIVA (1..4)
+                int dk = 2, lm = 2;
+                std::string u = args_ptr->Scenario;
+                for (char& c : u) c = static_cast<char>(std::toupper((unsigned char)c));
+                if (std::sscanf(u.c_str(), "D%dL%d", &dk, &lm) != 2)
+                {
+                    int sc = 0;
+                    if (std::sscanf(u.c_str(), "%d", &sc) == 1 && sc >= 1 && sc <= 4)
+                        dk = lm = sc;                // entero heredado -> diagonal DkLk
+                    else
+                        dk = lm = 2;
+                }
+                if (dk < 1 || dk > 4) dk = 2;
+                if (lm < 1 || lm > 4) lm = 2;
+                float dead = 3.0f * dk;              // D1=3,D2=6,D3=9,D4=12 (+1/+2 para 10h/100h)
+                m1h = dead / 100.0f; m10h = (dead + 1) / 100.0f; m100h = (dead + 2) / 100.0f;
+                mlh = (30.0f * lm) / 100.0f;         // L1=30,L2=60,L3=90,L4=120
+                mlw = (30.0f + 30.0f * lm) / 100.0f; // L1=60,L2=90,L3=120,L4=150
+            }
+            else if (mode == "portugal")  // preset Portugal (Fernandes): escenarios nombrados critical/moderate/soft
+            {
+                // args->scenario: 1=critical, 2=moderate, 3=soft (mapeado en ReadArgs desde el nombre)
+                // Perfiles de humedad (%) tal como se usaron en BehavePlus para ajustar los combustibles PT:
+                //   critical: dead 4/5/7   | moderate: dead 7/8/10 | soft: dead 10/11/13   (live-herb 30, live-woody 75)
+                int sc = args_ptr->scenario;
+                if (sc < 1 || sc > 3) sc = 1;
+                float d1 = (sc == 1) ? 4.0f : (sc == 2) ? 7.0f : 10.0f;   // 1-h muerto
+                m1h   = d1 / 100.0f;
+                m10h  = (d1 + 1.0f) / 100.0f;
+                m100h = (d1 + 3.0f) / 100.0f;   // critical 4->7, moderate 7->10, soft 10->13 (spread 3)
+                mlh   = 0.30f;                  // live herbaceous (solo afecta a 225/226/231/232/235)
+                mlw   = 0.75f;                  // live woody
+            }
+            else if (mode == "ffmc")  // col4 = FFMC -> humedad fina (Van Wagner & Pickett 1985)
+            {
+                float ffmc = col(4, 85.0f);
+                float mf = 147.2f * (101.0f - ffmc) / (59.5f + ffmc);  // %
+                m1h   = mf / 100.0f;
+                m10h  = col(5, mf + 1.0f) / 100.0f;   // usa columnas si existen; si no, +1/+2 %
+                m100h = col(6, mf + 2.0f) / 100.0f;
+                mlh   = col(7, 60.0f) / 100.0f;
+                mlw   = col(8, 90.0f) / 100.0f;
+            }
+            else if (mode == "conditioning")  // EMC (Simard 1968) + relajación por time-lag (uniforme; sol/sombra por celda: pendiente)
+            {
+                float T  = col(4, 20.0f);   // °C
+                float RH = col(5, 40.0f);   // %
+                float Tf = T * 9.0f / 5.0f + 32.0f;  // °F para Simard
+                float emc;
+                if (RH < 10.0f)       emc = 0.03229f + 0.281073f * RH - 0.000578f * RH * Tf;
+                else if (RH <= 50.0f) emc = 2.22749f + 0.160107f * RH - 0.014784f * Tf;
+                else                  emc = 21.0606f + 0.005565f * RH * RH - 0.00035f * RH * Tf - 0.483199f * RH;
+                if (emc < 0) emc = 0;
+                float e = emc / 100.0f;
+                float dt_h = args_ptr->MinutesPerWP / 60.0f;  // paso en horas
+                if (i == 1) { m1h = e; m10h = e; m100h = e; }  // estado inicial = EMC
+                else
+                {
+                    weatherDF& prev = wdf[i - 2];
+                    m1h   = e + (prev.m1h   - e) * std::exp(-dt_h / 1.0f);
+                    m10h  = e + (prev.m10h  - e) * std::exp(-dt_h / 10.0f);
+                    m100h = e + (prev.m100h - e) * std::exp(-dt_h / 100.0f);
+                }
+                mlh = col(6, 60.0f) / 100.0f; mlw = col(7, 90.0f) / 100.0f;
+            }
+            else  // "direct" (por defecto): humedad continua de columnas; retrocompatible
+            {
+                if (ncol >= 9)  // Instance,datetime,WS,WD,m1h,m10h,m100h,mlh,mlw (%)
+                {
+                    m1h  = col(4, 6.0f) / 100.0f;  m10h = col(5, 7.0f) / 100.0f;  m100h = col(6, 8.0f) / 100.0f;
+                    mlh  = col(7, 60.0f) / 100.0f; mlw  = col(8, 90.0f) / 100.0f;
+                }
+                else if (ncol >= 5 && !DF[i][4].empty())
+                {
+                    // La columna FireScenario esta obsoleta: la humedad se define con
+                    // --moisture-mode/--moisture-scenario, que es explicito y no depende
+                    // de que el archivo de clima traiga una columna extra. Se ignora su
+                    // contenido, pero se avisa una vez para que nadie descubra el cambio
+                    // por una diferencia inexplicada en los resultados.
+                    static bool avisado = false;
+                    if (!avisado)
+                    {
+                        std::cout << "AVISO: la columna FireScenario de Weather.csv se ignora. "
+                                     "Usa --moisture-scenario DkLm para fijar la humedad."
+                                  << std::endl;
+                        avisado = true;
+                    }
+                }
+            }
+        }
+        w.m1h = m1h; w.m10h = m10h; w.m100h = m100h; w.mlh = mlh; w.mlw = mlw;
     }
 }
 
@@ -634,23 +774,23 @@ CSVReader::parseWeatherWeights(std::vector<float>& WeatherWeights, std::vector<i
 }
 
 /*
- * Populate HarvestedDF
+ * Populate firebreakDF
  */
 void
-CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
+CSVReader::parseFirebreakDF(std::unordered_map<int, std::vector<int>>& hc,
                             std::vector<std::vector<std::string>>& DF,
                             int HPeriods)
 {
     // Integers
     int i, j, hcell;
-    std::vector<int> toHarvestCells;
+    std::vector<int> toFirebreakCells;
     std::string::size_type sz;  // alias of size_t
 
     // Loop over cells (populating per row)
     for (i = 1; i <= HPeriods; i++)
     {
         // Clean the vector before the new year
-        toHarvestCells.clear();
+        toFirebreakCells.clear();
 
         // Loop over years of the simulation
         for (j = 1; j < DF[i].size(); j++)
@@ -658,11 +798,11 @@ CSVReader::parseHarvestedDF(std::unordered_map<int, std::vector<int>>& hc,
             hcell = std::stoi(DF[i][j], &sz);
 
             // Set values
-            toHarvestCells.push_back(hcell);
+            toFirebreakCells.push_back(hcell);
         }
 
         // Populate unordered set
-        hc.insert(std::make_pair(i, toHarvestCells));
+        hc.insert(std::make_pair(i, toFirebreakCells));
     }
 }
 
