@@ -761,6 +761,45 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVForest(_args.InFolder + "fuels", " ")
             this->firebreakCells.insert(i + 1);
     }
 
+    // Fuga diagonal: dos celdas de barrera que solo se tocan en un vertice no cortan la
+    // propagacion 8-conectada, porque el fuego pasa por la diagonal que las cruza. Una
+    // linea de cortafuegos trazada en diagonal no detiene nada: en un caso de prueba de
+    // 11x11 con la antidiagonal completa marcada, el fuego alcanzaba igual las 25 celdas
+    // del otro lado. Las barreras dadas como geometria ya lo evitan porque bloquean
+    // arcos; las dadas por celda (--FirebreakCells, firebreakPlan) necesitan esto.
+    if (!this->firebreakCells.empty())
+    {
+        int nDiag = 0;
+        for (int cid : this->firebreakCells)
+        {
+            const int r = (cid - 1) / this->cols, c = (cid - 1) % this->cols;
+            // solo las dos diagonales "hacia adelante": la simetrica la aporta la otra celda
+            const int dr[2] = { 1, 1 }, dc[2] = { 1, -1 };
+            for (int k = 0; k < 2; ++k)
+            {
+                const int r2 = r + dr[k], c2 = c + dc[k];
+                if (r2 < 0 || r2 >= this->rows || c2 < 0 || c2 >= this->cols) continue;
+                const int diagId = r2 * this->cols + c2 + 1;
+                if (!this->firebreakCells.count(diagId)) continue;
+                // las dos celdas que comparten ese vertice y no son barrera
+                const int a = r * this->cols + c2 + 1;
+                const int b = r2 * this->cols + c + 1;
+                if (this->firebreakCells.count(a) && this->firebreakCells.count(b)) continue;
+                // Ancho "infinito": no es un hueco que el fuego pueda saltar segun su
+                // longitud de llama, sino un paso que geometricamente no existe. Ningun
+                // --breach-factor ni --spot-factor debe habilitarlo.
+                const double INFRANQUEABLE = 1e9;
+                this->blockedArcs[arcKey(a, b)] = INFRANQUEABLE;
+                this->blockedArcs[arcKey(b, a)] = INFRANQUEABLE;
+                this->arcBarrierType[arcKey(a, b)] = "firebreak";
+                this->arcBarrierType[arcKey(b, a)] = "firebreak";
+                ++nDiag;
+            }
+        }
+        if (nDiag > 0)
+            std::cout << "Firebreak: " << nDiag << " cruce(s) diagonal(es) bloqueado(s)" << std::endl;
+    }
+
     // POTENCIALMENTE AQUI ESTA MALO
     /* Weather DataFrame */
     // this->WeatherData = this->CSVWeather.getData();
